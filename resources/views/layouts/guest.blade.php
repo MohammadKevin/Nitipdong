@@ -16,20 +16,28 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="{{ asset('img/icon.jpg') }}">
 </head>
 <body class="font-sans text-gray-900 antialiased" style="font-family:'Inter',sans-serif;">
     <div class="min-h-screen flex">
         
         <!-- Left Side: Branding / Illustration (Hidden on mobile) -->
         <div class="hidden lg:flex lg:w-1/2 bg-[#14213D] relative overflow-hidden items-center justify-center">
+            
+            <!-- Back Button Desktop -->
+            <a href="/" class="absolute top-8 left-8 z-50 flex items-center gap-2 text-white/70 hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                <span class="text-sm font-medium">Kembali</span>
+            </a>
             <!-- Decorative circles -->
             <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#12A57F] rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
             <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#F2A93B] rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
             
             <div class="relative z-10 px-12 text-center">
-                <div class="w-20 h-20 bg-[#12A57F] rounded-2xl flex items-center justify-center text-white text-3xl font-bold mx-auto mb-8 shadow-lg shadow-[#12A57F]/30" style="font-family:'Poppins',sans-serif;">
-                    BI
-                </div>
+                <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-20 h-20 rounded-2xl mx-auto mb-8 shadow-lg shadow-[#12A57F]/30 object-cover">
                 <h1 class="text-4xl font-bold text-white mb-4" style="font-family:'Poppins',sans-serif;">
                     BelanjaIn
                 </h1>
@@ -42,9 +50,17 @@
         <!-- Right Side: Auth Form -->
         <div class="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 sm:p-12 bg-white relative">
             
+            <!-- Back Button Mobile -->
+            <a href="/" class="lg:hidden absolute top-6 left-6 sm:top-8 sm:left-8 z-50 flex items-center gap-2 text-slate-500 hover:text-[#12A57F] transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                <span class="text-sm font-medium">Kembali</span>
+            </a>
+            
             <!-- Mobile Logo (only visible on mobile) -->
             <div class="lg:hidden flex items-center gap-3 mb-10">
-                <div class="w-10 h-10 bg-[#12A57F] rounded-lg flex items-center justify-center text-white text-lg font-bold" style="font-family:'Poppins',sans-serif;">BI</div>
+                <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-10 h-10 rounded-lg shadow-md object-cover">
                 <span class="text-2xl font-bold text-[#14213D]" style="font-family:'Poppins',sans-serif;">BelanjaIn</span>
             </div>
 

@@ -16,6 +16,16 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => RoleMiddleware::class,
         ]);
+
+        $middleware->redirectUsersTo(function (Request $request) {
+            $user = $request->user();
+            return match ($user?->role) {
+                'super_admin' => route('super_admin.dashboard'),
+                'admin' => route('admin.dashboard'),
+                'seller' => route('seller.dashboard'),
+                default => route('customer.dashboard'),
+            };
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

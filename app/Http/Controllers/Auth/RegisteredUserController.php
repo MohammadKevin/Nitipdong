@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OtpMail;
 
 class RegisteredUserController extends Controller
 {
@@ -36,16 +38,22 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        $otp = sprintf('%06d', mt_rand(100000, 999999));
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'otp_code' => $otp,
+            'otp_expires_at' => now()->addMinutes(15),
         ]);
+
+        Mail::to($user->email)->send(new OtpMail($otp, 'register', $user->name));
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->route('verification.notice');
     }
 }

@@ -1,72 +1,164 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-slate-800 leading-tight">
-            {{ __('Pembayaran Pesanan') }}
-        </h2>
-    </x-slot>
+    <div class="bg-[#f5f5f5] min-h-screen py-6">
+        <div class="max-w-[900px] mx-auto px-4">
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+            {{-- Breadcrumb --}}
+            <nav class="flex text-xs text-slate-400 mb-4 items-center gap-1.5">
+                <a href="{{ route('customer.dashboard') }}" class="hover:text-[#06b6d4] transition-colors">Pesanan Saya</a>
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                <span class="text-slate-600">Detail Pembayaran</span>
+            </nav>
 
-            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
-                <div class="flex items-center gap-4 mb-6">
-                    <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-bold text-slate-800">Selesaikan Pembayaran Anda</h3>
-                        <p class="text-sm text-slate-500">Invoice: <span class="font-medium text-slate-700">{{ $order->invoice_number }}</span></p>
-                    </div>
-                </div>
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
 
-                <div class="bg-slate-50 rounded-2xl p-6 mb-8 border border-slate-100">
-                    <p class="text-sm text-slate-600 mb-2">Total Pembayaran</p>
-                    <p class="text-3xl font-extrabold text-emerald-600 mb-4">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</p>
+                {{-- Left: Bank Transfer Info --}}
+                <div class="lg:col-span-3 space-y-4">
 
-                    <div class="border-t border-slate-200 pt-4 mt-4">
-                        <p class="text-sm font-medium text-slate-800 mb-2">Transfer ke Rekening Berikut:</p>
-                        <div class="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-8 bg-blue-600 text-white flex items-center justify-center font-bold text-xs rounded">BCA</div>
-                                <div>
-                                    <p class="font-bold text-slate-800">123 456 7890</p>
-                                    <p class="text-xs text-slate-500">a.n. PT BelanjaIn Indonesia</p>
-                                </div>
+                    {{-- Countdown / Urgency --}}
+                    <div class="bg-white shadow-sm p-5 flex items-start gap-4">
+                        <div class="w-10 h-10 bg-[#ecfeff] text-[#06b6d4] rounded-full flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-slate-800 text-sm">Selesaikan Pembayaran Sebelum Batas Waktu</p>
+                            <p class="text-xs text-slate-500 mt-0.5">Pesanan #{{ $order->invoice_number }} akan otomatis dibatalkan jika belum dibayar.</p>
+                            <div class="mt-3 inline-flex items-center gap-2 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-sm">
+                                <span class="text-amber-700 font-bold text-sm">23 : 45 : 12</span>
+                                <span class="text-amber-600 text-xs">tersisa</span>
                             </div>
-                            <button type="button" class="text-emerald-600 hover:text-emerald-700 text-sm font-semibold" onclick="navigator.clipboard.writeText('1234567890'); alert('Nomor rekening disalin!')">Salin</button>
+                        </div>
+                    </div>
+
+                    {{-- Transfer To --}}
+                    <div class="bg-white shadow-sm">
+                        <div class="px-5 py-4 border-b border-slate-100">
+                            <h3 class="font-semibold text-slate-800 text-sm">Transfer ke Rekening Berikut</h3>
+                        </div>
+                        <div class="p-5 space-y-3">
+                            {{-- Bank Option 1 --}}
+                            <div class="flex items-center justify-between border border-slate-200 hover:border-[#06b6d4] rounded-sm p-4 transition-colors">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-9 bg-blue-700 text-white flex items-center justify-center font-extrabold text-sm rounded-sm">BCA</div>
+                                    <div>
+                                        <p class="font-bold text-slate-800 text-sm tracking-widest">123 456 7890</p>
+                                        <p class="text-xs text-slate-500 mt-0.5">a.n. PT BelanjaIn Indonesia</p>
+                                    </div>
+                                </div>
+                                <button type="button"
+                                    onclick="navigator.clipboard.writeText('1234567890'); this.innerText='Tersalin!'; setTimeout(() => this.innerText='Salin', 2000)"
+                                    class="text-xs text-[#06b6d4] font-semibold border border-[#06b6d4] px-3 py-1 rounded-sm hover:bg-[#ecfeff] transition-colors">
+                                    Salin
+                                </button>
+                            </div>
+                            {{-- Bank Option 2 --}}
+                            <div class="flex items-center justify-between border border-slate-200 hover:border-[#06b6d4] rounded-sm p-4 transition-colors">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-9 bg-[#f97316] text-white flex items-center justify-center font-extrabold text-sm rounded-sm">BNI</div>
+                                    <div>
+                                        <p class="font-bold text-slate-800 text-sm tracking-widest">098 765 4321</p>
+                                        <p class="text-xs text-slate-500 mt-0.5">a.n. PT BelanjaIn Indonesia</p>
+                                    </div>
+                                </div>
+                                <button type="button"
+                                    onclick="navigator.clipboard.writeText('0987654321'); this.innerText='Tersalin!'; setTimeout(() => this.innerText='Salin', 2000)"
+                                    class="text-xs text-[#06b6d4] font-semibold border border-[#06b6d4] px-3 py-1 rounded-sm hover:bg-[#ecfeff] transition-colors">
+                                    Salin
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- Step by Step Guide --}}
+                        <div class="mx-5 mb-5 bg-[#f9f9f9] border border-slate-100 rounded-sm p-4">
+                            <p class="text-xs font-semibold text-slate-600 mb-3">Cara Pembayaran Transfer Bank:</p>
+                            <ol class="space-y-2 text-xs text-slate-600">
+                                <li class="flex items-start gap-2"><span class="w-4 h-4 bg-[#06b6d4] text-white rounded-full flex items-center justify-center font-bold shrink-0 text-[10px]">1</span>Buka aplikasi m-Banking atau kunjungi ATM terdekat.</li>
+                                <li class="flex items-start gap-2"><span class="w-4 h-4 bg-[#06b6d4] text-white rounded-full flex items-center justify-center font-bold shrink-0 text-[10px]">2</span>Pilih menu <strong>Transfer</strong> dan masukkan nomor rekening tujuan di atas.</li>
+                                <li class="flex items-start gap-2"><span class="w-4 h-4 bg-[#06b6d4] text-white rounded-full flex items-center justify-center font-bold shrink-0 text-[10px]">3</span>Masukkan nominal transfer sesuai total tagihan (termasuk angka unik jika ada).</li>
+                                <li class="flex items-start gap-2"><span class="w-4 h-4 bg-[#06b6d4] text-white rounded-full flex items-center justify-center font-bold shrink-0 text-[10px]">4</span>Ambil screenshot / foto bukti transfer.</li>
+                                <li class="flex items-start gap-2"><span class="w-4 h-4 bg-[#06b6d4] text-white rounded-full flex items-center justify-center font-bold shrink-0 text-[10px]">5</span>Upload bukti transfer di formulir sebelah kanan ini.</li>
+                            </ol>
                         </div>
                     </div>
                 </div>
 
-                <form action="{{ route('customer.order.confirm_payment', $order) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
-                    @csrf
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">Upload Bukti Transfer</label>
-                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-2xl bg-white hover:bg-slate-50 transition-colors">
-                            <div class="space-y-1 text-center">
-                                <svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                                <div class="flex text-sm text-slate-600 justify-center">
-                                    <label for="payment_proof" class="relative cursor-pointer bg-white rounded-md font-medium text-emerald-600 hover:text-emerald-500 focus-within:outline-none">
-                                        <span>Upload file</span>
-                                        <input id="payment_proof" name="payment_proof" type="file" class="sr-only" required accept="image/*">
-                                    </label>
-                                    <p class="pl-1">atau drag and drop</p>
-                                </div>
-                                <p class="text-xs text-slate-500">PNG, JPG, JPEG hingga 2MB</p>
+                {{-- Right: Order Summary + Upload Form --}}
+                <div class="lg:col-span-2 space-y-4">
+
+                    {{-- Order Summary --}}
+                    <div class="bg-white shadow-sm">
+                        <div class="px-5 py-4 border-b border-slate-100">
+                            <h3 class="font-semibold text-slate-800 text-sm">Rincian Pesanan</h3>
+                        </div>
+                        <div class="p-5 space-y-2 text-sm">
+                            <div class="flex justify-between text-slate-600">
+                                <span>No. Invoice</span>
+                                <span class="font-medium text-slate-800">{{ $order->invoice_number }}</span>
+                            </div>
+                            <div class="flex justify-between text-slate-600">
+                                <span>Total Produk</span>
+                                <span class="font-medium text-slate-800">Rp{{ number_format($order->total_amount, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex justify-between text-slate-600">
+                                <span>Ongkos Kirim</span>
+                                <span class="font-medium text-emerald-600">Gratis</span>
+                            </div>
+                            <div class="flex justify-between text-slate-600">
+                                <span>Biaya Layanan</span>
+                                <span class="font-medium text-slate-800">Rp1.000</span>
+                            </div>
+                            <div class="border-t border-slate-100 pt-3 mt-3 flex justify-between items-center">
+                                <span class="font-semibold text-slate-700">Total Bayar</span>
+                                <span class="text-xl font-bold text-[#06b6d4]">Rp{{ number_format($order->total_amount + 1000, 0, ',', '.') }}</span>
                             </div>
                         </div>
-                        @error('payment_proof')
-                            <p class="text-rose-500 text-xs mt-2">{{ $message }}</p>
-                        @enderror
                     </div>
 
-                    <div class="flex justify-end gap-3">
-                        <a href="{{ route('customer.dashboard') }}" class="px-5 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Nanti Saja</a>
-                        <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm shadow-emerald-600/30 rounded-xl transition-all">Konfirmasi Pembayaran</button>
+                    {{-- Upload Proof --}}
+                    <div class="bg-white shadow-sm">
+                        <div class="px-5 py-4 border-b border-slate-100">
+                            <h3 class="font-semibold text-slate-800 text-sm">Upload Bukti Transfer</h3>
+                        </div>
+                        <form action="{{ route('customer.order.confirm_payment', $order) }}" method="POST" enctype="multipart/form-data" class="p-5">
+                            @csrf
+                            <div x-data="{ preview: null }" class="space-y-4">
+                                {{-- Dropzone --}}
+                                <label for="payment_proof"
+                                    class="flex flex-col items-center gap-3 border-2 border-dashed border-slate-300 hover:border-[#06b6d4] rounded-sm p-6 cursor-pointer transition-colors group">
+                                    <template x-if="!preview">
+                                        <div class="text-center">
+                                            <svg class="w-10 h-10 text-slate-300 group-hover:text-[#06b6d4] mx-auto mb-2 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            <p class="text-sm text-slate-500">Klik atau seret file ke sini</p>
+                                            <p class="text-xs text-slate-400 mt-1">PNG, JPG, JPEG — Maks. 2MB</p>
+                                        </div>
+                                    </template>
+                                    <template x-if="preview">
+                                        <div class="text-center">
+                                            <img :src="preview" class="max-h-32 mx-auto rounded-sm object-contain mb-2">
+                                            <p class="text-xs text-emerald-600 font-medium">✓ Gambar dipilih. Klik untuk mengganti.</p>
+                                        </div>
+                                    </template>
+                                    <input id="payment_proof" name="payment_proof" type="file" class="hidden" required accept="image/*"
+                                        @change="const f = $event.target.files[0]; if(f) { const r = new FileReader(); r.onload = e => preview = e.target.result; r.readAsDataURL(f); }">
+                                </label>
+                                @error('payment_proof')
+                                    <p class="text-red-500 text-xs">{{ $message }}</p>
+                                @enderror
+
+                                {{-- Actions --}}
+                                <div class="flex items-center gap-3">
+                                    <a href="{{ route('customer.dashboard') }}"
+                                        class="flex-1 py-2.5 border border-slate-300 text-slate-700 hover:bg-slate-50 text-sm font-medium rounded-sm transition-colors text-center">
+                                        Bayar Nanti
+                                    </a>
+                                    <button type="submit"
+                                        class="flex-1 py-2.5 bg-[#06b6d4] hover:bg-[#0891b2] text-white text-sm font-semibold rounded-sm transition-colors">
+                                        Konfirmasi
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
 
         </div>

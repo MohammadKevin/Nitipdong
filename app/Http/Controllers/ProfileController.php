@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OtpMail;
 
 class ProfileController extends Controller
 {
@@ -26,13 +28,31 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $validated = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $emailChanged = $user->email !== $validated['email'];
+
+        if ($emailChanged) {
+            // Jangan langsung simpan email baru
+            $newEmail = $validated['email'];
+            unset($validated['email']); // Hapus dari array yang akan di fill
+            
+            $otp = sprintf('%06d', mt_rand(100000, 999999));
+            
+            $user->pending_email = $newEmail;
+            $user->otp_code = $otp;
+            $user->otp_expires_at = now()->addMinutes(15);
+            
+            Mail::to($newEmail)->send(new OtpMail($otp, 'change_email', $user->name));
         }
 
-        $request->user()->save();
+        $user->fill($validated);
+        $user->save();
+
+        if ($emailChanged) {
+            return Redirect::route('verification.notice')->with('status', 'Kode OTP telah dikirim ke email baru Anda.');
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

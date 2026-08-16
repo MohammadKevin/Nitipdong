@@ -1,5 +1,5 @@
-<x-dynamic-component :component="auth()->user()->role === 'super_admin' ? 'super-admin-layout' : 'app-layout'">
-    @if(auth()->user()->role === 'super_admin')
+<x-dynamic-component :component="auth()->user()->role === 'super_admin' ? 'super-admin-layout' : (auth()->user()->role === 'admin' ? 'admin-layout' : 'app-layout')">
+    @if(in_array(auth()->user()->role, ['super_admin', 'admin']))
         <x-slot name="title">
             Obrolan dengan {{ $partner->name }} - {{ config('app.name', 'BelanjaIn') }}
         </x-slot>

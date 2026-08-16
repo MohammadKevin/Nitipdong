@@ -1,5 +1,5 @@
-<x-dynamic-component :component="auth()->user()->role === 'super_admin' ? 'super-admin-layout' : 'app-layout'">
-    @if(auth()->user()->role === 'super_admin')
+<x-dynamic-component :component="auth()->user()->role === 'super_admin' ? 'super-admin-layout' : (auth()->user()->role === 'admin' ? 'admin-layout' : 'app-layout')">
+    @if(in_array(auth()->user()->role, ['super_admin', 'admin']))
         <x-slot name="title">
             Pengaturan Akun
         </x-slot>
@@ -15,8 +15,8 @@
         </x-slot>
     @endif
 
-    <div class="{{ auth()->user()->role === 'super_admin' ? '' : 'py-12' }}">
-        <div class="max-w-7xl mx-auto {{ auth()->user()->role === 'super_admin' ? '' : 'sm:px-6 lg:px-8' }} space-y-6">
+    <div class="{{ in_array(auth()->user()->role, ['super_admin', 'admin']) ? '' : 'py-12' }}">
+        <div class="max-w-7xl mx-auto {{ in_array(auth()->user()->role, ['super_admin', 'admin']) ? '' : 'sm:px-6 lg:px-8' }} space-y-6">
             <div class="p-4 sm:p-8 bg-white border border-[#E7E3D8] shadow-sm sm:rounded-2xl">
                 <div class="max-w-xl">
                     @include('profile.partials.update-profile-information-form')

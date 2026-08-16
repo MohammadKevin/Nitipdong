@@ -28,6 +28,9 @@ Route::get('/', function () {
     return view('welcome', compact('products', 'categories'));
 });
 
+// Halaman Detail Produk
+Route::get('/product/{product}', [\App\Http\Controllers\ProductController::class, 'show'])->name('product.show');
+
 // Area yang Memerlukan Login
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -40,11 +43,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/stores/{store}/toggle-ban', [\App\Http\Controllers\SuperAdminController::class, 'toggleBan'])->name('stores.toggle_ban');
     });
 
-    // 2. Admin (Moderasi Pengajuan Toko)
+    // 2. Admin (Moderasi Pengajuan Toko & Produk)
     Route::middleware(['role:admin,super_admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [StoreApprovalController::class, 'index'])->name('dashboard');
         Route::post('/stores/{store}/approve', [StoreApprovalController::class, 'approve'])->name('stores.approve');
         Route::post('/stores/{store}/reject', [StoreApprovalController::class, 'reject'])->name('stores.reject');
+
+        // Moderasi Produk
+        Route::get('/products', [\App\Http\Controllers\Admin\ProductModerationController::class, 'index'])->name('products.index');
+        Route::post('/products/{product}/toggle-status', [\App\Http\Controllers\Admin\ProductModerationController::class, 'toggleStatus'])->name('products.toggle_status');
     });
 
     // 3. Seller (Kelola Toko, Produk & Pesanan Masuk)

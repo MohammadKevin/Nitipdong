@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         User::create([
             'name' => 'Super Admin Platform',
             'email' => 'superadmin@belanjain.test',
+            'email_verified_at' => now(),
             'password' => Hash::make('password'),
             'role' => 'super_admin',
         ]);
@@ -26,6 +27,7 @@ class DatabaseSeeder extends Seeder
         User::create([
             'name' => 'Admin Operasional',
             'email' => 'admin@belanjain.test',
+            'email_verified_at' => now(),
             'password' => Hash::make('password'),
             'role' => 'admin',
         ]);
@@ -34,6 +36,7 @@ class DatabaseSeeder extends Seeder
         $seller = User::create([
             'name' => 'Budi Seller',
             'email' => 'seller@belanjain.test',
+            'email_verified_at' => now(),
             'password' => Hash::make('password'),
             'role' => 'seller',
         ]);
@@ -68,6 +71,7 @@ class DatabaseSeeder extends Seeder
         User::create([
             'name' => 'Siti Customer',
             'email' => 'customer@belanjain.test',
+            'email_verified_at' => now(),
             'password' => Hash::make('password'),
             'role' => 'customer',
         ]);

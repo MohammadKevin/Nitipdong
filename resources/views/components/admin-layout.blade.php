@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'Super Admin Dashboard - ' . config('app.name', 'BelanjaIn') }}</title>
+    <title>{{ $title ?? 'Admin Dashboard - ' . config('app.name', 'BelanjaIn') }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -29,11 +29,11 @@
                 <div>
                     {{-- Brand --}}
                     <div class="flex items-center gap-2.5 px-2 mb-9">
-                        <a href="{{ route('super_admin.dashboard') }}" class="flex items-center gap-2 group">
+                        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 group">
                             <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-9 h-9 rounded-lg shadow-md object-cover">
                             <div>
                                 <p class="font-bold text-white text-[15px] leading-none" style="font-family:'Poppins',sans-serif;">BelanjaIn</p>
-                                <p class="text-[10px] text-slate-400 mt-1">Super Admin Panel</p>
+                                <p class="text-[10px] text-slate-400 mt-1">Admin Panel</p>
                             </div>
                         </a>
                     </div>
@@ -42,27 +42,20 @@
                     <nav class="flex flex-col gap-1">
                         <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold px-3 mb-2">Menu Utama</p>
 
-                        <a href="{{ route('super_admin.dashboard') }}"
-                           class="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('super_admin.dashboard') ? 'bg-[#12A57F] text-white' : 'hover:bg-white/5 hover:text-white' }}">
-                            @if(request()->routeIs('super_admin.dashboard'))
+                        <a href="{{ route('admin.dashboard') }}"
+                           class="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-[#12A57F] text-white' : 'hover:bg-white/5 hover:text-white' }}">
+                            @if(request()->routeIs('admin.dashboard'))
                                 <span class="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r bg-white"></span>
                             @endif
                             <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10.5L12 3l9 7.5M4.5 9.75V21h15V9.75"/></svg>
-                            Dashboard
+                            Persetujuan Toko
                         </a>
-                        <a href="{{ route('super_admin.stores.index') }}" class="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('super_admin.stores.index') ? 'bg-[#12A57F] text-white' : 'hover:bg-white/5 hover:text-white' }}">
-                            @if(request()->routeIs('super_admin.stores.index'))
+                        <a href="{{ route('admin.products.index') }}" class="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('admin.products.*') ? 'bg-[#12A57F] text-white' : 'hover:bg-white/5 hover:text-white' }}">
+                            @if(request()->routeIs('admin.products.*'))
                                 <span class="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r bg-white"></span>
                             @endif
-                            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                            Daftar Toko
-                        </a>
-                        <a href="{{ route('super_admin.users.index') }}" class="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('super_admin.users.index') ? 'bg-[#12A57F] text-white' : 'hover:bg-white/5 hover:text-white' }}">
-                            @if(request()->routeIs('super_admin.users.index'))
-                                <span class="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r bg-white"></span>
-                            @endif
-                            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                            Pengguna
+                            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                            Moderasi Produk
                         </a>
                         <a href="{{ route('chat.index') }}" class="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('chat.*') ? 'bg-[#12A57F] text-white' : 'hover:bg-white/5 hover:text-white' }}">
                             @if(request()->routeIs('chat.*'))
@@ -85,7 +78,7 @@
                     <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=12A57F&color=fff" class="w-8 h-8 rounded-lg" alt="User">
                     <div class="min-w-0">
                         <p class="text-xs font-semibold text-white truncate">{{ auth()->user()->name }}</p>
-                        <p class="text-[10px] text-slate-400 truncate">Super Admin</p>
+                        <p class="text-[10px] text-slate-400 truncate">Admin</p>
                     </div>
                     <form method="POST" action="{{ route('logout') }}" class="ml-auto">
                         @csrf
@@ -97,13 +90,30 @@
             </aside>
 
             {{-- MAIN CONTENT --}}
-            <main class="flex-1 p-6 lg:p-8 flex flex-col gap-6 overflow-y-auto">
+            <main class="flex-1 p-6 lg:p-8 flex flex-col gap-6 overflow-y-auto relative">
+                @if(session('success'))
+                    <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl p-4 flex gap-3 shadow-sm" role="alert">
+                        <svg class="w-5 h-5 shrink-0 text-emerald-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div>
+                            <p class="font-medium">{{ session('success') }}</p>
+                        </div>
+                    </div>
+                @endif
+                @if(session('error'))
+                    <div class="bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-4 flex gap-3 shadow-sm" role="alert">
+                        <svg class="w-5 h-5 shrink-0 text-rose-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div>
+                            <p class="font-medium">{{ session('error') }}</p>
+                        </div>
+                    </div>
+                @endif
+
                 {{ $slot }}
             </main>
         </div>
     </div>
     
-    <!-- Chat Widget Component (Optional for Super Admin) -->
+    <!-- Chat Widget Component -->
     <x-chat-widget />
 </body>
 </html>

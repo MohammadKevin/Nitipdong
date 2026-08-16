@@ -31,10 +31,10 @@ class AuthenticatedSessionController extends Controller
     $user = $request->user();
 
     return match ($user->role) {
-        'super_admin' => redirect()->intended(route('super_admin.dashboard')),
-        'admin'       => redirect()->intended(route('admin.dashboard')),
-        'seller'      => redirect()->intended(route('seller.dashboard')),
-        default       => redirect()->intended(route('customer.dashboard')),
+        'super_admin' => redirect()->route('super_admin.dashboard'),
+        'admin'       => redirect()->route('admin.dashboard'),
+        'seller'      => redirect()->route('seller.dashboard'),
+        default       => redirect()->route('customer.dashboard'),
     };
 }
 
