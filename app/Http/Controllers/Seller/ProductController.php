@@ -17,7 +17,7 @@ class ProductController extends Controller
     public function index(): View
     {
         $store = Auth::user()->store;
-        
+
         $products = Product::with('category')
             ->where('store_id', $store?->id)
             ->latest()
@@ -39,15 +39,28 @@ class ProductController extends Controller
             'name'        => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'price'       => ['required', 'numeric', 'min:0'],
+            'discount_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
             'stock'       => ['required', 'integer', 'min:0'],
+            'badge'       => ['nullable', 'string', 'in:new,sale,hot,bestseller'],
+            'is_featured' => ['nullable', 'boolean'],
             'image'       => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'additional_images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
 
         $store = Auth::user()->store;
 
+        // Upload main image
         $imagePath = null;
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('products', 'public');
+        }
+
+        // Upload additional images
+        $additionalImages = [];
+        if ($request->hasFile('additional_images')) {
+            foreach ($request->file('additional_images') as $image) {
+                $additionalImages[] = $image->store('products', 'public');
+            }
         }
 
         Product::create([
@@ -57,12 +70,16 @@ class ProductController extends Controller
             'slug'        => Str::slug($request->name) . '-' . Str::random(5),
             'description' => $request->description,
             'price'       => $request->price,
+            'discount_percentage' => $request->discount_percentage ?? 0,
             'stock'       => $request->stock,
+            'badge'       => $request->badge,
+            'is_featured' => $request->boolean('is_featured', false),
             'image'       => $imagePath,
+            'images'      => !empty($additionalImages) ? $additionalImages : null,
             'is_active'   => true,
         ]);
 
-        return redirect()->route('seller.products.index')->with('success', 'Produk berhasil ditambahkan!');
+        return redirect()->route('seller.products.index')->with('success', 'Produk berhasil ditambahkan dengan ' . (count($additionalImages) + ($imagePath ? 1 : 0)) . ' foto!');
     }
 
     public function edit(Product $product): View
@@ -87,10 +104,16 @@ class ProductController extends Controller
             'name'        => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'price'       => ['required', 'numeric', 'min:0'],
+            'discount_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
             'stock'       => ['required', 'integer', 'min:0'],
+            'badge'       => ['nullable', 'string', 'in:new,sale,hot,bestseller'],
+            'is_featured' => ['nullable', 'boolean'],
             'image'       => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'additional_images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'remove_images' => ['nullable', 'array'],
         ]);
 
+        // Handle main image
         $imagePath = $product->image;
         if ($request->hasFile('image')) {
             if ($imagePath && Storage::disk('public')->exists($imagePath)) {
@@ -99,13 +122,37 @@ class ProductController extends Controller
             $imagePath = $request->file('image')->store('products', 'public');
         }
 
+        // Handle additional images
+        $existingImages = $product->images ?? [];
+
+        // Remove selected images
+        if ($request->has('remove_images')) {
+            foreach ($request->remove_images as $imageToRemove) {
+                if (in_array($imageToRemove, $existingImages) && Storage::disk('public')->exists($imageToRemove)) {
+                    Storage::disk('public')->delete($imageToRemove);
+                }
+                $existingImages = array_filter($existingImages, fn($img) => $img !== $imageToRemove);
+            }
+        }
+
+        // Add new additional images
+        if ($request->hasFile('additional_images')) {
+            foreach ($request->file('additional_images') as $image) {
+                $existingImages[] = $image->store('products', 'public');
+            }
+        }
+
         $product->update([
             'category_id' => $request->category_id,
             'name'        => $request->name,
             'description' => $request->description,
             'price'       => $request->price,
+            'discount_percentage' => $request->discount_percentage ?? 0,
             'stock'       => $request->stock,
+            'badge'       => $request->badge,
+            'is_featured' => $request->boolean('is_featured', false),
             'image'       => $imagePath,
+            'images'      => !empty($existingImages) ? array_values($existingImages) : null,
             'is_active'   => $request->boolean('is_active', true),
         ]);
 
@@ -118,8 +165,18 @@ class ProductController extends Controller
             abort(403);
         }
 
+        // Delete main image
         if ($product->image && Storage::disk('public')->exists($product->image)) {
             Storage::disk('public')->delete($product->image);
+        }
+
+        // Delete additional images
+        if ($product->images && is_array($product->images)) {
+            foreach ($product->images as $image) {
+                if (Storage::disk('public')->exists($image)) {
+                    Storage::disk('public')->delete($image);
+                }
+            }
         }
 
         $product->delete();

@@ -1,58 +1,295 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🛍️ BelanjaIn - Platform E-Commerce Modern
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+<div align="center">
 
-## About Laravel
+![BelanjaIn Logo](public/img/icon.jpg)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**Platform jual beli online yang mudah, aman, dan terpercaya**
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+[![Laravel](https://img.shields.io/badge/Laravel-11.x-red.svg)](https://laravel.com)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.x-blue.svg)](https://tailwindcss.com)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+</div>
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## ✨ Fitur Utama
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 🎯 **Multi-Role System**
+- **Customer** - Belanja produk, kelola keranjang, tracking pesanan
+- **Seller** - Kelola toko, produk, dan pesanan
+- **Admin** - Moderasi produk dan persetujuan toko
+- **Super Admin** - Kontrol penuh sistem
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### 🛒 **Fitur Customer**
+- 📱 Katalog produk dengan filter & pencarian
+- 🛍️ Keranjang belanja & wishlist
+- 💳 Multiple payment methods
+- 📦 Order tracking real-time
+- ⭐ Rating & review produk
+- 💬 Live chat dengan seller
+- 🔔 Notifikasi pesanan
 
-## Agentic Development
+### 🏪 **Fitur Seller**
+- 🎨 Dashboard toko yang intuitif
+- 📸 Upload multi-foto produk
+- 📊 Statistik penjualan
+- 📦 Manajemen stok & inventory
+- 💰 Laporan keuangan
+- 📮 Kelola pesanan masuk
+- 💬 Chat dengan pembeli
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### 🔧 **Fitur Admin**
+- ✅ Persetujuan toko baru
+- 🛡️ Moderasi produk
+- 👥 Manajemen user
+- 📈 Analytics & reporting
+- 🏷️ Kelola kategori
+
+---
+
+## 🎨 Design Highlights
+
+### 🌟 **Modern UI/UX**
+- **Gradient Design** - Colorful gradients untuk visual menarik
+- **Glass Morphism** - Efek kaca modern dengan backdrop blur
+- **Micro Interactions** - Animasi smooth untuk pengalaman yang engaging
+- **Responsive Layout** - Sempurna di semua device (mobile, tablet, desktop)
+- **Dark Mode Ready** - Siap untuk implementasi dark mode
+
+### 📸 **Professional Product Gallery**
+- Multi-image support dengan thumbnail navigation
+- Zoom on hover effect
+- Image lazy loading untuk performa optimal
+- Placeholder state yang elegan
+
+### 🎯 **Performance Optimized**
+- Tailwind CSS dengan purging untuk file size minimal
+- Image optimization
+- Lazy loading components
+- Efficient database queries
+
+---
+
+## 🚀 Instalasi
+
+### Prerequisites
+- PHP >= 8.2
+- Composer
+- Node.js & NPM
+- MySQL/PostgreSQL
+
+### Step-by-Step Installation
 
 ```bash
-composer require laravel/boost --dev
+# 1. Clone repository
+git clone https://github.com/yourusername/belanjain.git
+cd belanjain
 
-php artisan boost:install
+# 2. Install dependencies
+composer install
+npm install
+
+# 3. Setup environment
+cp .env.example .env
+php artisan key:generate
+
+# 4. Konfigurasi database di .env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=belanjain
+DB_USERNAME=root
+DB_PASSWORD=
+
+# 5. Jalankan migration
+php artisan migrate
+
+# 6. (Optional) Seed data demo
+php artisan db:seed --class=ProductSeeder
+
+# 7. Build assets
+npm run build
+
+# 8. Jalankan server
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Akses aplikasi di: `http://localhost:8000`
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 📸 Upload Foto Produk
 
-## Code of Conduct
+### Format yang Disupport
+- **Format**: JPG, JPEG, PNG, WebP
+- **Ukuran**: Max 2MB per file
+- **Resolusi**: Minimum 800x800px (Recommended: 1200x1200px)
+- **Ratio**: Square (1:1) untuk hasil terbaik
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Cara Upload Foto
 
-## Security Vulnerabilities
+1. **Login sebagai Seller**
+2. Buka **Dashboard Toko**
+3. Pilih **Kelola Produk**
+4. Klik **Tambah/Edit Produk**
+5. Upload **Foto Utama** dan **Foto Tambahan** (maks 5 foto)
+6. Simpan
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 💡 Tips Foto Produk Berkualitas
 
-## License
+✅ **DO's:**
+- Gunakan pencahayaan yang baik
+- Background bersih dan minimalis
+- Foto dari berbagai sudut
+- Tampilkan detail produk
+- Gunakan resolusi tinggi
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+❌ **DON'TS:**
+- Foto blur atau gelap
+- Watermark berlebihan
+- Background yang terlalu ramai
+- Foto yang distorsi
+
+---
+
+## 🎨 Struktur Database Produk
+
+### Field Produk Baru
+
+```php
+// Migration telah menambahkan field berikut:
+- images (JSON)              // Array foto tambahan
+- is_featured (boolean)      // Produk unggulan
+- badge (string)             // Badge: new, sale, hot, bestseller
+- discount_percentage (int)  // Persentase diskon
+- rating (decimal)           // Rating produk
+- sold_count (int)          // Jumlah terjual
+```
+
+### Helper Methods di Model Product
+
+```php
+$product->getAllImages()        // Dapatkan semua foto (utama + tambahan)
+$product->getDiscountedPrice()  // Harga setelah diskon
+$product->getOriginalPrice()    // Harga asli
+```
+
+---
+
+## 🎯 Customization Guide
+
+### 🎨 **Mengubah Warna Brand**
+
+Edit file `resources/css/app.css`:
+
+```css
+/* Ganti dari cyan/blue ke warna brand Anda */
+.from-cyan-500  → .from-purple-500
+.to-blue-600    → .to-pink-600
+```
+
+### 🖼️ **Mengubah Logo**
+
+1. Replace file `public/img/icon.jpg` dengan logo Anda
+2. Update di `welcome.blade.php` dan `app.blade.php`
+
+### 📱 **Menambah Payment Gateway**
+
+1. Tambah konfigurasi di `config/services.php`
+2. Implementasi di `app/Services/PaymentService.php`
+3. Update view checkout
+
+---
+
+## 🔒 Security Features
+
+- ✅ CSRF Protection
+- ✅ SQL Injection Prevention
+- ✅ XSS Protection
+- ✅ Authentication & Authorization
+- ✅ Password Hashing (Bcrypt)
+- ✅ Rate Limiting
+- ✅ Secure File Upload
+
+---
+
+## 📊 Tech Stack
+
+### Backend
+- **Framework**: Laravel 11.x
+- **Database**: MySQL/PostgreSQL
+- **Authentication**: Laravel Breeze
+- **Storage**: Local/S3
+
+### Frontend
+- **CSS Framework**: Tailwind CSS 3.x
+- **Icons**: Heroicons
+- **Fonts**: Plus Jakarta Sans, Inter
+- **JS**: Alpine.js
+
+### Tools
+- **Version Control**: Git
+- **Package Manager**: Composer, NPM
+- **Build Tool**: Vite
+
+---
+
+## 📝 Todo List
+
+- [ ] Implementasi payment gateway (Midtrans/Xendit)
+- [ ] Export laporan PDF
+- [ ] Email notifications
+- [ ] Push notifications
+- [ ] Advanced search filters
+- [ ] Wishlist functionality
+- [ ] Product comparison
+- [ ] Voucher & discount system
+- [ ] Loyalty points
+- [ ] Social media integration
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👨‍💻 Developer
+
+**Your Name**
+- Website: [yourwebsite.com](https://yourwebsite.com)
+- Email: your.email@example.com
+- GitHub: [@yourusername](https://github.com/yourusername)
+
+---
+
+## 🙏 Acknowledgments
+
+- Laravel Team for the amazing framework
+- Tailwind Labs for Tailwind CSS
+- All open-source contributors
+
+---
+
+<div align="center">
+
+**⭐ Star this repo if you like it! ⭐**
+
+Made with ❤️ in Indonesia 🇮🇩
+
+</div>
