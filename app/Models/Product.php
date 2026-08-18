@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasObfuscatedId;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, HasObfuscatedId;
 
     protected $fillable = [
         'store_id',
@@ -25,18 +26,41 @@ class Product extends Model
     ];
 
     protected $casts = [
-        'price'               => 'float',
         'discount_percentage' => 'integer',
         'stock'               => 'integer',
         'is_active'           => 'boolean',
     ];
 
     protected $appends = [
+        'seller_price',
+        'platform_fee',
+        'customer_base_price',
         'final_price',
         'has_discount',
         'discount_savings',
         'is_in_flash_sale',
+        'obfuscated_id',
     ];
+
+    public function getSellerPriceAttribute(): float
+    {
+        return (float) ($this->attributes['price'] ?? 0);
+    }
+
+    public function getPlatformFeeAttribute(): float
+    {
+        return round($this->seller_price * 0.05);
+    }
+
+    public function getCustomerBasePriceAttribute(): float
+    {
+        return round($this->seller_price * 1.05);
+    }
+
+    public function getPriceAttribute(): float
+    {
+        return (float) $this->customer_base_price;
+    }
 
     public function getCurrentFlashSaleItemAttribute(): ?FlashSaleItem
     {
@@ -62,10 +86,10 @@ class Product extends Model
         }
 
         if ($this->discount_percentage > 0) {
-            return round($this->price * (1 - ($this->discount_percentage / 100)));
+            return round($this->customer_base_price * (1 - ($this->discount_percentage / 100)));
         }
 
-        return (float) $this->price;
+        return (float) $this->customer_base_price;
     }
 
     public function getHasDiscountAttribute(): bool
@@ -84,7 +108,7 @@ class Product extends Model
 
     public function getDiscountSavingsAttribute(): float
     {
-        return max(0, $this->price - $this->final_price);
+        return max(0, $this->customer_base_price - $this->final_price);
     }
 
     public function store(): BelongsTo

@@ -1,35 +1,36 @@
 <x-guest-layout>
     <div class="mb-6 text-center">
-        <h2 class="text-2xl font-bold text-[#14213D] mb-2" style="font-family:'Poppins',sans-serif;">Verifikasi Keamanan</h2>
-        <p class="text-sm text-[#8A93A6]">
-            Kami telah mengirimkan 6 digit kode rahasia (OTP) ke email <strong>{{ auth()->user()->pending_email ?: auth()->user()->email }}</strong>.
+        <div class="w-12 h-12 rounded-full bg-cyan-50 border border-cyan-200 text-cyan-700 flex items-center justify-center mx-auto mb-3 text-lg">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h1 class="text-xl font-bold text-slate-900 tracking-tight">Verifikasi Kode OTP</h1>
+        <p class="text-xs text-slate-500 mt-1">
+            Masukkan 6 digit kode yang telah dikirimkan ke <strong class="text-slate-800">{{ auth()->user()->pending_email ?: auth()->user()->email }}</strong>
         </p>
     </div>
 
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form method="POST" action="{{ route('verification.verify.otp') }}">
+    <form method="POST" action="{{ route('verification.verify.otp') }}" class="space-y-4">
         @csrf
 
         <div>
-            <x-input-label for="otp" value="Kode OTP (6 Digit)" />
-            <x-text-input id="otp" class="block mt-1 w-full text-center text-xl tracking-[0.5em] font-mono" type="text" name="otp" required autofocus autocomplete="off" maxlength="6" pattern="[0-9]{6}" />
-            <x-input-error :messages="$errors->get('otp')" class="mt-2" />
+            <label for="otp" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider text-center mb-2">Kode OTP (6 Digit)</label>
+            <input id="otp" class="input text-center text-xl tracking-[0.5em] font-mono h-12 rounded-md font-bold text-slate-900" type="text" name="otp" required autofocus autocomplete="off" maxlength="6" pattern="[0-9]{6}" placeholder="------" />
+            <x-input-error :messages="$errors->get('otp')" class="mt-1.5 text-xs text-rose-500 text-center" />
         </div>
 
-        <div class="flex items-center justify-between mt-6">
-            <button type="submit" class="w-full justify-center px-4 py-3 bg-[#12A57F] text-white rounded-xl font-bold hover:bg-[#0F8E6D] transition-colors shadow-md shadow-[#12A57F]/20">
-                Verifikasi OTP
-            </button>
-        </div>
+        <button type="submit" class="w-full btn-primary h-10 text-xs bg-cyan-700 hover:bg-cyan-800">
+            Verifikasi Kode Sekarang
+        </button>
     </form>
 
-    <div class="mt-6 text-center border-t border-[#E7E3D8] pt-4">
-        <p class="text-sm text-[#8A93A6] mb-3">Tidak menerima email?</p>
+    <div class="mt-6 text-center border-t border-slate-100 pt-4">
+        <p class="text-xs text-slate-500 mb-2">Tidak menerima email kode?</p>
         
         <form method="POST" action="{{ route('verification.send.otp') }}">
             @csrf
-            <button type="submit" class="text-sm font-semibold text-[#12A57F] hover:text-[#0F8E6D] hover:underline underline-offset-4">
+            <button type="submit" class="text-xs font-bold text-cyan-700 hover:underline">
                 Kirim Ulang Kode OTP
             </button>
         </form>

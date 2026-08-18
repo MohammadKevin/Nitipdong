@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasObfuscatedId;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Voucher extends Model
 {
-    use HasFactory;
+    use HasFactory, HasObfuscatedId;
 
     protected $fillable = [
         'store_id',
@@ -38,6 +39,7 @@ class Voucher extends Model
     protected $appends = [
         'is_platform_voucher',
         'is_store_voucher',
+        'obfuscated_id',
     ];
 
     public function getIsPlatformVoucherAttribute(): bool

@@ -69,7 +69,11 @@ class FlashSaleController extends Controller
         if ($request->has('items') && is_array($request->items)) {
             foreach ($request->items as $itemData) {
                 if (!empty($itemData['product_id']) && !empty($itemData['flash_sale_price'])) {
-                    $product = Product::find($itemData['product_id']);
+                    $productId = $itemData['product_id'];
+                    $product = is_numeric($productId) 
+                        ? Product::find((int) $productId) 
+                        : Product::findByObfuscatedId($productId);
+
                     if ($product) {
                         $price = (float) $itemData['flash_sale_price'];
                         $stock = (int) ($itemData['stock_allocated'] ?? 10);
@@ -154,12 +158,15 @@ class FlashSaleController extends Controller
     public function addItem(Request $request, FlashSale $flashSale): RedirectResponse
     {
         $request->validate([
-            'product_id'          => ['required', 'exists:products,id'],
+            'product_id'          => ['required'],
             'flash_sale_price'    => ['required', 'numeric', 'min:1'],
             'stock_allocated'     => ['required', 'integer', 'min:1'],
         ]);
 
-        $product = Product::findOrFail($request->product_id);
+        $productId = $request->product_id;
+        $product = is_numeric($productId)
+            ? Product::findOrFail((int) $productId)
+            : Product::findByObfuscatedIdOrFail($productId);
 
         if ($request->flash_sale_price >= $product->price) {
             return back()->with('error', 'Harga Flash Sale harus lebih rendah dari harga normal produk (Rp ' . number_format($product->price, 0, ',', '.') . ').');

@@ -22,19 +22,19 @@
     </head>
     <body class="antialiased bg-slate-50 text-slate-900 min-h-screen flex flex-col">
 
-        <div class="bg-slate-900 text-slate-300 text-[11px] py-1.5 border-b border-slate-800 hidden sm:block">
+        <div class="bg-slate-950 text-slate-300 text-[11px] py-1.5 border-b border-slate-800 hidden sm:block">
             <div class="page-container flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <span class="flex items-center gap-1.5 text-emerald-400 font-medium">
-                        <i class="fa-solid fa-shield-halved text-[10px]"></i> 100% Transaksi Aman & Terpercaya
+                    <span class="flex items-center gap-1.5 text-cyan-400 font-medium">
+                        <i class="fa-solid fa-shield-halved text-[10px]"></i> 100% Transaksi Aman & Terverifikasi
                     </span>
-                    <span class="text-slate-600">|</span>
+                    <span class="text-slate-700">|</span>
                     <span class="text-slate-400">Gratis Ongkir ke Seluruh Indonesia</span>
                 </div>
                 <div class="flex items-center gap-4 text-slate-400">
-                    <a href="{{ route('store.register') }}" class="hover:text-white transition-colors">Mulai Jualan di BelanjaIn</a>
-                    <span class="text-slate-600">|</span>
-                    <a href="#" class="hover:text-white transition-colors">Pusat Bantuan</a>
+                    <a href="{{ route('store.register') }}" class="hover:text-cyan-300 transition-colors">Mulai Jualan di BelanjaIn</a>
+                    <span class="text-slate-700">|</span>
+                    <a href="#" class="hover:text-cyan-300 transition-colors">Pusat Bantuan</a>
                 </div>
             </div>
         </div>
@@ -50,25 +50,25 @@
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-8 pb-10 border-b border-slate-100">
                     <div class="md:col-span-2 space-y-4">
                         <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-lg overflow-hidden bg-emerald-50 border border-slate-200 flex items-center justify-center">
+                            <div class="w-8 h-8 rounded-lg overflow-hidden bg-cyan-50 border border-cyan-200 flex items-center justify-center">
                                 <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-full h-full object-cover">
                             </div>
-                            <span class="font-bold text-lg text-slate-900 tracking-tight">Belanja<span class="text-emerald-600">In</span></span>
+                            <span class="font-bold text-lg text-slate-900 tracking-tight">Belanja<span class="text-cyan-600 font-extrabold">In</span></span>
                         </div>
                         <p class="text-xs text-slate-500 leading-relaxed max-w-sm">
-                            Platform marketplace modern untuk jual beli produk terpercaya, diskon flash sale harian, dan voucher belanja resmi dari berbagai merchant di Indonesia.
+                            Platform curated e-commerce modern untuk jual beli produk terpercaya, diskon flash sale harian, dan voucher belanja resmi dari berbagai merchant di Indonesia.
                         </p>
                         <div class="flex items-center gap-3 pt-2">
-                            <a href="#" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-600 flex items-center justify-center text-slate-500 transition-colors">
+                            <a href="#" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-cyan-50 hover:text-cyan-700 flex items-center justify-center text-slate-500 transition-colors">
                                 <i class="fa-brands fa-instagram text-xs"></i>
                             </a>
-                            <a href="#" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-600 flex items-center justify-center text-slate-500 transition-colors">
+                            <a href="#" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-cyan-50 hover:text-cyan-700 flex items-center justify-center text-slate-500 transition-colors">
                                 <i class="fa-brands fa-facebook text-xs"></i>
                             </a>
-                            <a href="#" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-600 flex items-center justify-center text-slate-500 transition-colors">
+                            <a href="#" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-cyan-50 hover:text-cyan-700 flex items-center justify-center text-slate-500 transition-colors">
                                 <i class="fa-brands fa-x-twitter text-xs"></i>
                             </a>
-                            <a href="#" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-600 flex items-center justify-center text-slate-500 transition-colors">
+                            <a href="#" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-cyan-50 hover:text-cyan-700 flex items-center justify-center text-slate-500 transition-colors">
                                 <i class="fa-brands fa-whatsapp text-xs"></i>
                             </a>
                         </div>
@@ -77,20 +77,20 @@
                     <div>
                         <h4 class="font-bold text-slate-900 mb-3 text-xs uppercase tracking-wider">Jelajahi</h4>
                         <ul class="space-y-2">
-                            <li><a href="{{ url('/products') }}" class="hover:text-emerald-600 transition-colors">Semua Produk</a></li>
-                            <li><a href="{{ url('/products') }}?flash_sale=1" class="hover:text-emerald-600 transition-colors">Flash Sale</a></li>
-                            <li><a href="{{ route('store.register') }}" class="hover:text-emerald-600 transition-colors">Buka Toko Gratis</a></li>
-                            <li><a href="#" class="hover:text-emerald-600 transition-colors">Voucher Promo</a></li>
+                            <li><a href="{{ url('/products') }}" class="hover:text-cyan-700 transition-colors">Semua Produk</a></li>
+                            <li><a href="{{ url('/products') }}?flash_sale=1" class="hover:text-cyan-700 transition-colors">Flash Sale</a></li>
+                            <li><a href="{{ route('store.register') }}" class="hover:text-cyan-700 transition-colors">Buka Toko Gratis</a></li>
+                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Voucher Promo</a></li>
                         </ul>
                     </div>
 
                     <div>
                         <h4 class="font-bold text-slate-900 mb-3 text-xs uppercase tracking-wider">Layanan</h4>
                         <ul class="space-y-2">
-                            <li><a href="#" class="hover:text-emerald-600 transition-colors">Pusat Bantuan</a></li>
-                            <li><a href="#" class="hover:text-emerald-600 transition-colors">Cara Belanja</a></li>
-                            <li><a href="#" class="hover:text-emerald-600 transition-colors">Status Pengiriman</a></li>
-                            <li><a href="#" class="hover:text-emerald-600 transition-colors">Garansi & Retur</a></li>
+                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Pusat Bantuan</a></li>
+                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Cara Belanja</a></li>
+                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Status Pengiriman</a></li>
+                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Garansi & Retur</a></li>
                         </ul>
                     </div>
 

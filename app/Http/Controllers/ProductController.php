@@ -21,8 +21,18 @@ class ProductController extends Controller
             });
         }
 
-        if ($categoryId = $request->get('category')) {
-            $query->where('category_id', $categoryId);
+        $activeCategory = null;
+        if ($catParam = $request->get('category')) {
+            if (is_numeric($catParam)) {
+                $activeCategory = Category::find((int) $catParam);
+            } else {
+                $activeCategory = Category::where('slug', $catParam)->first() 
+                    ?: Category::findByObfuscatedId($catParam);
+            }
+
+            if ($activeCategory) {
+                $query->where('category_id', $activeCategory->id);
+            }
         }
 
         if ($min = $request->get('min_price')) {
@@ -41,10 +51,6 @@ class ProductController extends Controller
 
         $products   = $query->paginate(24)->withQueryString();
         $categories = Category::all();
-
-        $activeCategory = $categoryId
-            ? Category::find($categoryId)
-            : null;
 
         return view('product.index', compact('products', 'categories', 'activeCategory'));
     }

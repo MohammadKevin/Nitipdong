@@ -12,7 +12,9 @@ class SuperAdminController extends Controller
 {
     public function index()
     {
-        $totalPendapatan = Order::where('status', 'completed')->sum('total_amount');
+        $grossVolume = (float) Order::where('status', 'completed')->sum('total_amount');
+        $totalKeuntunganPlatform = round($grossVolume * 0.05);
+
         $activeOrders = Order::whereIn('status', ['pending', 'processing', 'shipped'])->count();
         $pesananBaru = Order::whereMonth('created_at', now()->month)
                             ->whereYear('created_at', now()->year)
@@ -26,7 +28,8 @@ class SuperAdminController extends Controller
                             ->get();
 
         return view('super_admin.dashboard', compact(
-            'totalPendapatan',
+            'grossVolume',
+            'totalKeuntunganPlatform',
             'activeOrders',
             'pesananBaru',
             'totalPengguna',
@@ -106,7 +109,7 @@ class SuperAdminController extends Controller
             ->groupBy('tanggal')
             ->pluck('total', 'tanggal');
 
-        $data = $days->map(fn ($d) => (float) ($totals[$d->format('Y-m-d')] ?? 0))->toArray();
+        $data = $days->map(fn ($d) => round(((float) ($totals[$d->format('Y-m-d')] ?? 0)) * 0.05))->toArray();
 
         return [$labels, $data];
     }
@@ -121,9 +124,10 @@ class SuperAdminController extends Controller
         while ($weekStart->lte(now())) {
             $weekEnd = $weekStart->copy()->endOfWeek()->min(now());
             $labels[] = 'M' . $i;
-            $data[] = (float) Order::where('status', 'completed')
+            $volume = (float) Order::where('status', 'completed')
                 ->whereBetween('created_at', [$weekStart, $weekEnd])
                 ->sum('total_amount');
+            $data[] = round($volume * 0.05);
             $weekStart = $weekStart->copy()->addWeek();
             $i++;
         }
@@ -138,10 +142,11 @@ class SuperAdminController extends Controller
 
         for ($m = 1; $m <= now()->month; $m++) {
             $labels[] = Carbon::create(now()->year, $m, 1)->translatedFormat('M');
-            $data[] = (float) Order::where('status', 'completed')
+            $volume = (float) Order::where('status', 'completed')
                 ->whereYear('created_at', now()->year)
                 ->whereMonth('created_at', $m)
                 ->sum('total_amount');
+            $data[] = round($volume * 0.05);
         }
 
         return [$labels, $data];
@@ -152,7 +157,7 @@ class SuperAdminController extends Controller
         $years = range(now()->year - 4, now()->year);
         $labels = array_map('strval', $years);
         $data = array_map(
-            fn ($y) => (float) Order::where('status', 'completed')->whereYear('created_at', $y)->sum('total_amount'),
+            fn ($y) => round(((float) Order::where('status', 'completed')->whereYear('created_at', $y)->sum('total_amount')) * 0.05),
             $years
         );
 

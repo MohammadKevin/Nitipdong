@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\HasObfuscatedId;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class FlashSaleItem extends Model
 {
-    use HasFactory;
+    use HasFactory, HasObfuscatedId;
 
     protected $fillable = [
         'flash_sale_id',
@@ -18,6 +19,10 @@ class FlashSaleItem extends Model
         'stock_allocated',
         'stock_sold',
         'is_active',
+    ];
+
+    protected $appends = [
+        'obfuscated_id',
     ];
 
     protected function casts(): array

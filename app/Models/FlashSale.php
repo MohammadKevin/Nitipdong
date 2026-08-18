@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasObfuscatedId;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FlashSale extends Model
 {
-    use HasFactory;
+    use HasFactory, HasObfuscatedId;
 
     protected $fillable = [
         'title',
@@ -17,6 +18,10 @@ class FlashSale extends Model
         'end_time',
         'is_active',
         'banner',
+    ];
+
+    protected $appends = [
+        'obfuscated_id',
     ];
 
     protected function casts(): array

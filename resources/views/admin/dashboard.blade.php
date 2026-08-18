@@ -1,119 +1,109 @@
 <x-admin-layout>
     <x-slot name="title">
-        Admin Dashboard - {{ config('app.name', 'BelanjaIn') }}
+        Persetujuan Toko - {{ config('app.name', 'BelanjaIn') }}
     </x-slot>
 
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-2">
         <div>
-            <h1 class="text-xl font-bold text-[#14213D] flex items-center gap-1.5" style="font-family:'Poppins',sans-serif;">
-                Selamat datang kembali, {{ explode(' ', auth()->user()->name)[0] }}
-                <i class="fa-solid fa-hand text-amber-500 text-lg"></i>
+            <h1 class="text-xl font-bold text-slate-900 tracking-tight">
+                Persetujuan Toko & Moderasi Merchant
             </h1>
-            <p class="text-xs text-[#8A93A6] mt-0.5">Kelola dan tinjau pengajuan toko baru dari pengguna.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Tinjau dan verifikasi permohonan pembukaan toko baru dari pengguna BelanjaIn.</p>
         </div>
         
         <div class="flex items-center gap-3">
-            <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=12A57F&color=fff" class="w-10 h-10 rounded-xl border border-[#E7E3D8] object-cover shrink-0" alt="User">
+            <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0891b2&color=fff&size=80" class="w-9 h-9 rounded-md border border-slate-200 object-cover shrink-0" alt="User">
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden">
-            <div class="absolute right-0 bottom-0 opacity-5 transform translate-x-1/4 translate-y-1/4">
-                <svg class="w-32 h-32 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-card flex items-center gap-4">
+            <div class="w-11 h-11 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-lg border border-amber-200 shrink-0">
+                <i class="fa-solid fa-clock"></i>
             </div>
-            <div class="flex items-center gap-4 mb-2">
-                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-slate-500">Menunggu Review</p>
-                    <h4 class="text-2xl font-bold text-slate-800">{{ number_format($pendingCount, 0, ',', '.') }}</h4>
-                </div>
+            <div>
+                <p class="text-xs font-medium text-slate-500">Menunggu Review</p>
+                <h4 class="text-xl font-extrabold text-slate-900 mt-0.5">{{ number_format($pendingCount, 0, ',', '.') }} Toko</h4>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden">
-            <div class="absolute right-0 bottom-0 opacity-5 transform translate-x-1/4 translate-y-1/4">
-                <svg class="w-32 h-32 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+        <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-card flex items-center gap-4">
+            <div class="w-11 h-11 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center text-lg border border-cyan-200 shrink-0">
+                <i class="fa-solid fa-circle-check"></i>
             </div>
-            <div class="flex items-center gap-4 mb-2">
-                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-slate-500">Toko Disetujui</p>
-                    <h4 class="text-2xl font-bold text-slate-800">{{ number_format($approvedCount, 0, ',', '.') }}</h4>
-                </div>
+            <div>
+                <p class="text-xs font-medium text-slate-500">Toko Disetujui</p>
+                <h4 class="text-xl font-extrabold text-slate-900 mt-0.5">{{ number_format($approvedCount, 0, ',', '.') }} Toko</h4>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden">
-            <div class="absolute right-0 bottom-0 opacity-5 transform translate-x-1/4 translate-y-1/4">
-                <svg class="w-32 h-32 text-rose-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+        <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-card flex items-center gap-4">
+            <div class="w-11 h-11 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-lg border border-rose-200 shrink-0">
+                <i class="fa-solid fa-circle-xmark"></i>
             </div>
-            <div class="flex items-center gap-4 mb-2">
-                <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-slate-500">Pengajuan Ditolak</p>
-                    <h4 class="text-2xl font-bold text-slate-800">{{ number_format($rejectedCount, 0, ',', '.') }}</h4>
-                </div>
+            <div>
+                <p class="text-xs font-medium text-slate-500">Pengajuan Ditolak</p>
+                <h4 class="text-xl font-extrabold text-slate-900 mt-0.5">{{ number_format($rejectedCount, 0, ',', '.') }} Toko</h4>
             </div>
         </div>
     </div>
 
-    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-            <h3 class="font-bold text-slate-800">Daftar Pengajuan Toko (Pending)</h3>
+    <div class="bg-white rounded-xl border border-slate-200/80 shadow-card overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
+            <div>
+                <h3 class="font-bold text-xs sm:text-sm text-slate-900 uppercase tracking-wider">Daftar Pengajuan Toko (Pending)</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Toko yang membutuhkan verifikasi dokumen dan nama resmi</p>
+            </div>
             <form action="{{ route('admin.dashboard') }}" method="GET" class="relative">
-                <input type="text" name="search" value="{{ $search }}" class="bg-white border border-slate-200 rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-emerald-500 focus:border-emerald-500 shadow-sm w-64" placeholder="Cari nama toko...">
-                <button type="submit" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-500">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </button>
+                <input type="text" name="search" value="{{ $search }}" class="input text-xs pl-8 pr-4 h-8.5 rounded-md w-60" placeholder="Cari nama toko...">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 text-xs"></i>
             </form>
         </div>
         
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm text-slate-600">
-                <thead class="bg-slate-50 text-slate-500 font-medium border-b border-slate-100">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
                     <tr>
-                        <th class="px-6 py-4">Tanggal</th>
-                        <th class="px-6 py-4">Nama Toko</th>
-                        <th class="px-6 py-4">Pengaju (User)</th>
-                        <th class="px-6 py-4">Deskripsi</th>
-                        <th class="px-6 py-4 text-center">Aksi Cepat</th>
+                        <th class="px-5 py-3.5 font-semibold">Tanggal</th>
+                        <th class="px-5 py-3.5 font-semibold">Nama Toko</th>
+                        <th class="px-5 py-3.5 font-semibold">Pengaju Akun</th>
+                        <th class="px-5 py-3.5 font-semibold">Deskripsi Toko</th>
+                        <th class="px-5 py-3.5 font-semibold text-center">Aksi Moderasi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($pendingStores as $store)
                     <tr class="hover:bg-slate-50/80 transition-colors">
-                        <td class="px-6 py-4 text-slate-500">{{ $store->created_at->translatedFormat('d M Y') }}<br><span class="text-xs">{{ $store->created_at->format('H:i') }} WIB</span></td>
-                        <td class="px-6 py-4 font-medium text-slate-800">{{ $store->name }}</td>
-                        <td class="px-6 py-4">
+                        <td class="px-5 py-3.5 text-slate-500">
+                            {{ $store->created_at->translatedFormat('d M Y') }}<br>
+                            <span class="text-[10px] text-slate-400 font-mono">{{ $store->created_at->format('H:i') }} WIB</span>
+                        </td>
+                        <td class="px-5 py-3.5 font-semibold text-slate-900">
+                            {{ $store->name }}
+                        </td>
+                        <td class="px-5 py-3.5">
                             <div class="flex items-center gap-2">
-                                <div class="w-6 h-6 rounded-full bg-slate-200 shrink-0">
-                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($store->user->name) }}&background=random" class="rounded-full" alt="User">
-                                </div>
-                                {{ $store->user->name }}
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode($store->user->name) }}&background=0891b2&color=fff&size=50" class="w-6 h-6 rounded-full object-cover shrink-0 border border-slate-200" alt="User">
+                                <span class="text-slate-700 font-medium">{{ $store->user->name }}</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-xs text-slate-500 truncate max-w-xs" title="{{ $store->description }}">
-                            {{ Str::limit($store->description, 50) }}
+                        <td class="px-5 py-3.5 text-slate-500 max-w-xs">
+                            <p class="truncate">{{ $store->description ?? 'Tidak ada deskripsi' }}</p>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-5 py-3.5 text-center">
                             <div class="flex items-center justify-center gap-2">
                                 <form action="{{ route('admin.stores.approve', $store) }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="p-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-lg transition-colors shadow-sm" title="Setujui" onclick="return confirm('Apakah Anda yakin ingin menyetujui toko ini?')">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <button type="submit" class="px-3 py-1.5 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold text-xs transition-colors border border-emerald-200 inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-check text-[10px]"></i>
+                                        Setujui
                                     </button>
                                 </form>
                                 <form action="{{ route('admin.stores.reject', $store) }}" method="POST">
                                     @csrf
-                                    <button type="submit" class="p-2 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-lg transition-colors shadow-sm" title="Tolak" onclick="return confirm('Apakah Anda yakin ingin menolak toko ini?')">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                    <button type="submit" class="px-3 py-1.5 rounded-md bg-rose-50 text-rose-700 hover:bg-rose-100 font-semibold text-xs transition-colors border border-rose-200 inline-flex items-center gap-1">
+                                        <i class="fa-solid fa-xmark text-[10px]"></i>
+                                        Tolak
                                     </button>
                                 </form>
                             </div>
@@ -121,8 +111,10 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-8 text-center text-slate-500">
-                            Tidak ada pengajuan toko yang menunggu review.
+                        <td colspan="5" class="py-12 text-center text-slate-400">
+                            <i class="fa-solid fa-circle-check text-2xl text-cyan-600 mb-2 block"></i>
+                            <span class="text-xs font-semibold text-slate-700">Semua pengajuan toko telah ditinjau</span>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Tidak ada antrean persetujuan toko baru saat ini.</p>
                         </td>
                     </tr>
                     @endforelse
@@ -130,9 +122,10 @@
             </table>
         </div>
         
-        <div class="p-4 border-t border-slate-100">
-            {{ $pendingStores->links('pagination::tailwind') }}
+        @if($pendingStores->hasPages())
+        <div class="p-4 border-t border-slate-100 bg-white">
+            {{ $pendingStores->links() }}
         </div>
+        @endif
     </div>
-
 </x-admin-layout>

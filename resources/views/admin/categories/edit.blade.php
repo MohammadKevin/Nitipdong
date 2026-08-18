@@ -3,24 +3,24 @@
         Edit Kategori: {{ $category->name }} - {{ config('app.name', 'BelanjaIn') }}
     </x-slot>
 
-    <div class="mb-4">
-        <a href="{{ route('admin.categories.index') }}" class="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-[#12A57F] transition-colors font-medium">
-            <i class="fa-solid fa-arrow-left"></i>
+    <div class="mb-3">
+        <a href="{{ route('admin.categories.index') }}" class="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-cyan-700 transition-colors font-medium">
+            <i class="fa-solid fa-arrow-left text-[10px]"></i>
             Kembali ke Daftar Kategori
         </a>
     </div>
 
-    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-5">
         <div>
-            <h1 class="text-xl font-bold text-[#14213D] flex items-center gap-2" style="font-family:'Poppins',sans-serif;">
-                <i class="fa-solid fa-pen-to-square text-[#12A57F]"></i>
+            <h1 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                <i class="fa-solid fa-pen-to-square text-cyan-700"></i>
                 Edit Kategori: {{ $category->name }}
             </h1>
-            <p class="text-xs text-[#8A93A6] mt-0.5">Perbarui nama, slug URL, atau icon untuk kategori ini.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Perbarui nama, slug URL, atau ikon untuk kategori ini.</p>
         </div>
     </div>
 
-    <div class="max-w-2xl bg-white rounded-2xl shadow-sm border border-[#EFEBDF] overflow-hidden" x-data="{ 
+    <div class="max-w-2xl bg-white rounded-xl shadow-card border border-slate-200/80 overflow-hidden" x-data="{ 
         name: '{{ old('name', $category->name) }}', 
         slug: '{{ old('slug', $category->slug) }}', 
         icon: '{{ old('icon', $category->icon ?: 'fa-solid fa-tags') }}',
@@ -31,69 +31,69 @@
                 .replace(/\-\-+/g, '-');
         }
     }">
-        <form action="{{ route('admin.categories.update', $category) }}" method="POST" class="p-6 sm:p-8 space-y-6">
+        <form action="{{ route('admin.categories.update', $category) }}" method="POST" class="p-6 space-y-4">
             @csrf
             @method('PUT')
 
             <div>
-                <label for="name" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                <label for="name" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                     Nama Kategori <span class="text-rose-500">*</span>
                 </label>
                 <input type="text" id="name" name="name" x-model="name" required placeholder="Contoh: Gadget & Elektronik" value="{{ old('name', $category->name) }}"
-                    class="w-full px-4 py-3 rounded-xl border border-[#E7E3D8] text-sm text-[#14213D] focus:ring-2 focus:ring-[#12A57F]/20 focus:border-[#12A57F] transition-all">
+                    class="input text-xs rounded-md">
                 @error('name')
-                    <p class="text-rose-500 text-xs mt-1.5">{{ $message }}</p>
+                    <p class="text-rose-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <div>
-                <label for="slug" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+                <label for="slug" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                     Slug URL (Opsional)
                 </label>
                 <input type="text" id="slug" name="slug" x-model="slug" placeholder="contoh: gadget-elektronik" value="{{ old('slug', $category->slug) }}"
-                    class="w-full px-4 py-3 rounded-xl border border-[#E7E3D8] text-sm font-mono text-slate-600 bg-slate-50/50 focus:ring-2 focus:ring-[#12A57F]/20 focus:border-[#12A57F] transition-all">
-                <p class="text-[11px] text-slate-400 mt-1.5">Digunakan sebagai parameter tautan URL halaman produk.</p>
+                    class="input text-xs font-mono rounded-md bg-slate-50">
+                <p class="text-[11px] text-slate-400 mt-1">Digunakan sebagai parameter tautan URL halaman produk.</p>
                 @error('slug')
-                    <p class="text-rose-500 text-xs mt-1.5">{{ $message }}</p>
+                    <p class="text-rose-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             <div>
-                <label for="icon" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                    Icon Font Awesome Class (Opsional)
+                <label for="icon" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Ikon Font Awesome (Opsional)
                 </label>
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-[#12A57F] border border-emerald-100 flex items-center justify-center text-xl shrink-0 shadow-sm">
+                <div class="flex items-center gap-2.5 mb-2.5">
+                    <div class="w-10 h-10 rounded-md bg-cyan-50 text-cyan-700 border border-cyan-200 flex items-center justify-center text-base shrink-0 shadow-xs">
                         <i :class="icon || 'fa-solid fa-tags'"></i>
                     </div>
                     <input type="text" id="icon" name="icon" x-model="icon" placeholder="Contoh: fa-solid fa-laptop" value="{{ old('icon', $category->icon ?: 'fa-solid fa-tags') }}"
-                        class="flex-1 px-4 py-3 rounded-xl border border-[#E7E3D8] text-sm text-[#14213D] focus:ring-2 focus:ring-[#12A57F]/20 focus:border-[#12A57F] transition-all">
+                        class="input text-xs rounded-md">
                 </div>
                 @error('icon')
-                    <p class="text-rose-500 text-xs mt-1.5">{{ $message }}</p>
+                    <p class="text-rose-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
 
-                <div class="bg-slate-50/70 p-3.5 rounded-xl border border-slate-100">
-                    <p class="text-[11px] text-slate-500 font-medium mb-2">Pilihan Icon Cepat:</p>
-                    <div class="flex flex-wrap gap-2">
+                <div class="bg-slate-50 p-3 rounded-md border border-slate-200">
+                    <p class="text-[11px] text-slate-500 font-semibold mb-2">Preset Ikon Cepat:</p>
+                    <div class="flex flex-wrap gap-1.5">
                         @php
                         $presetIcons = [
-                            ['label' => 'Gadget/Laptop', 'class' => 'fa-solid fa-laptop'],
-                            ['label' => 'Pakaian/Fashion', 'class' => 'fa-solid fa-shirt'],
-                            ['label' => 'Makanan/Kuliner', 'class' => 'fa-solid fa-burger'],
+                            ['label' => 'Gadget', 'class' => 'fa-solid fa-laptop'],
+                            ['label' => 'Fashion', 'class' => 'fa-solid fa-shirt'],
+                            ['label' => 'Kuliner', 'class' => 'fa-solid fa-burger'],
                             ['label' => 'Kecantikan', 'class' => 'fa-solid fa-wand-magic-sparkles'],
                             ['label' => 'Olahraga', 'class' => 'fa-solid fa-futbol'],
                             ['label' => 'Rumah Tangga', 'class' => 'fa-solid fa-house'],
                             ['label' => 'Otomotif', 'class' => 'fa-solid fa-car'],
-                            ['label' => 'Buku & Alat Tulis', 'class' => 'fa-solid fa-book'],
+                            ['label' => 'Buku', 'class' => 'fa-solid fa-book'],
                             ['label' => 'Kesehatan', 'class' => 'fa-solid fa-heart-pulse'],
-                            ['label' => 'Game & Hobi', 'class' => 'fa-solid fa-gamepad'],
+                            ['label' => 'Gaming', 'class' => 'fa-solid fa-gamepad'],
                         ];
                         @endphp
                         @foreach($presetIcons as $pi)
                             <button type="button" @click="icon = '{{ $pi['class'] }}'"
-                                class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-[11px] text-slate-600 hover:border-[#12A57F] hover:text-[#12A57F] transition-colors">
-                                <i class="{{ $pi['class'] }}"></i>
+                                class="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-slate-200 rounded text-[11px] text-slate-600 hover:border-cyan-600 hover:text-cyan-700 transition-colors">
+                                <i class="{{ $pi['class'] }} text-[10px]"></i>
                                 {{ $pi['label'] }}
                             </button>
                         @endforeach
@@ -101,11 +101,11 @@
                 </div>
             </div>
 
-            <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
-                <a href="{{ route('admin.categories.index') }}" class="px-5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                <a href="{{ route('admin.categories.index') }}" class="btn-secondary text-xs h-9 px-4 rounded-md">
                     Batal
                 </a>
-                <button type="submit" class="px-6 py-2.5 rounded-xl bg-[#12A57F] hover:bg-[#0f8b6a] text-white text-xs font-semibold shadow-md shadow-[#12A57F]/20 transition-all">
+                <button type="submit" class="btn-primary text-xs h-9 px-5 rounded-md bg-cyan-700 hover:bg-cyan-800">
                     Simpan Perubahan
                 </button>
             </div>
