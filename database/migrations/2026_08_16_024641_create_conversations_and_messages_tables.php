@@ -8,7 +8,6 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Drop tabel jika sebelumnya sudah ada dengan struktur lama
         Schema::dropIfExists('messages');
         Schema::dropIfExists('conversations');
 

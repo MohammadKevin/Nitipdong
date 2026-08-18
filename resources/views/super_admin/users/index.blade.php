@@ -5,64 +5,73 @@
 
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
         <div>
-            <h1 class="text-xl font-bold text-[#14213D]" style="font-family:'Poppins',sans-serif;">Daftar Pengguna</h1>
-            <p class="text-xs text-[#8A93A6] mt-0.5">Kelola seluruh pengguna yang terdaftar di platform BelanjaIn.</p>
+            <h1 class="text-xl font-bold text-slate-900 tracking-tight">Manajemen Pengguna Platform</h1>
+            <p class="text-xs text-slate-500 mt-0.5">Daftar seluruh akun terdaftar dan hak akses di BelanjaIn.</p>
         </div>
 
-        <form action="{{ route('super_admin.users.index') }}" method="GET" class="flex items-center gap-3 w-full sm:w-auto">
+        <form action="{{ route('super_admin.users.index') }}" method="GET" class="flex items-center gap-2 w-full sm:w-auto">
             <div class="relative flex-1 sm:w-72">
-                <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama atau email..." class="w-full bg-white border border-[#E7E3D8] rounded-xl pl-10 pr-4 py-2.5 text-xs focus:ring-2 focus:ring-[#12A57F]/20 focus:border-[#12A57F] transition-all">
-                <svg class="w-4 h-4 text-[#B3ACA0] absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama atau email..."
+                       class="input text-xs pl-8 h-9 rounded-md">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 text-xs"></i>
             </div>
-            <button type="submit" class="h-10 px-4 rounded-xl bg-[#12A57F] text-white text-xs font-semibold hover:bg-[#0F8E6D] transition-colors shadow-sm whitespace-nowrap">Cari</button>
+            <button type="submit" class="btn-primary text-xs h-9 px-4 rounded-md bg-cyan-700 hover:bg-cyan-800">Cari</button>
             @if($search)
-                <a href="{{ route('super_admin.users.index') }}" class="h-10 px-4 rounded-xl bg-white border border-[#E7E3D8] text-[#4B5566] text-xs font-semibold hover:bg-[#F0EEE6] transition-colors flex items-center justify-center whitespace-nowrap">Reset</a>
+                <a href="{{ route('super_admin.users.index') }}" class="btn-secondary text-xs h-9 px-3 rounded-md">Reset</a>
             @endif
         </form>
     </div>
 
-    <div class="bg-white rounded-2xl border border-[#EFEBDF] overflow-hidden">
+    <div class="bg-white rounded-xl border border-slate-200/80 shadow-card overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-                <thead>
-                    <tr class="text-[#B3ACA0] border-b border-[#F0EEE6] font-medium bg-[#FAF9F5]">
-                        <th class="py-4 px-6 font-medium">ID</th>
-                        <th class="py-4 px-6 font-medium">Pengguna</th>
-                        <th class="py-4 px-6 font-medium">Email</th>
-                        <th class="py-4 px-6 font-medium">Role</th>
-                        <th class="py-4 px-6 font-medium">Bergabung</th>
+                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
+                    <tr>
+                        <th class="py-3.5 px-5 font-semibold">ID</th>
+                        <th class="py-3.5 px-5 font-semibold">Nama Pengguna</th>
+                        <th class="py-3.5 px-5 font-semibold">Alamat Email</th>
+                        <th class="py-3.5 px-5 font-semibold">Peran Akun</th>
+                        <th class="py-3.5 px-5 font-semibold">Tanggal Registrasi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-[#F5F3EE]">
+                <tbody class="divide-y divide-slate-100">
                     @forelse($users as $user)
-                    <tr class="hover:bg-[#FAF9F5] transition-colors">
-                        <td class="py-3 px-6 font-mono text-[#B3ACA0]">{{ $user->id }}</td>
-                        <td class="py-3 px-6">
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="py-3.5 px-5 font-mono text-slate-400">#{{ $user->id }}</td>
+                        <td class="py-3.5 px-5">
                             <div class="flex items-center gap-3">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=random" class="w-8 h-8 rounded-full object-cover shrink-0" alt="Avatar">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=0891b2&color=fff&size=50" class="w-7 h-7 rounded-full object-cover shrink-0 border border-slate-200" alt="Avatar">
                                 <div>
-                                    <h4 class="font-semibold text-[#14213D]">{{ $user->name }}</h4>
-                                    <p class="text-[10px] text-[#8A93A6] truncate max-w-[120px]">{{ $user->phone ?? '-' }}</p>
+                                    <h4 class="font-semibold text-slate-900">{{ $user->name }}</h4>
+                                    <p class="text-[11px] text-slate-400 truncate max-w-[150px]">{{ $user->phone ?? 'No. telp belum ada' }}</p>
                                 </div>
                             </div>
                         </td>
-                        <td class="py-3 px-6 text-[#4B5566]">{{ $user->email }}</td>
-                        <td class="py-3 px-6">
+                        <td class="py-3.5 px-5 text-slate-600 font-mono">{{ $user->email }}</td>
+                        <td class="py-3.5 px-5">
                             @if($user->role === 'super_admin')
-                                <span class="px-2.5 py-1 rounded-full bg-[#EAF1FF] text-[#3E6FE0] font-semibold text-[10px]">Super Admin</span>
+                                <span class="px-2.5 py-0.5 rounded-full bg-cyan-900 text-cyan-200 font-semibold text-[10px] border border-cyan-700 inline-flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> Super Admin
+                                </span>
                             @elseif($user->role === 'admin')
-                                <span class="px-2.5 py-1 rounded-full bg-[#F3EEFC] text-[#8B5CF6] font-semibold text-[10px]">Admin</span>
+                                <span class="px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 font-semibold text-[10px] border border-purple-200 inline-flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-purple-600"></span> Admin
+                                </span>
                             @elseif($user->role === 'seller')
-                                <span class="px-2.5 py-1 rounded-full bg-[#FFF6E7] text-[#C7860B] font-semibold text-[10px]">Seller</span>
+                                <span class="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 font-semibold text-[10px] border border-amber-200 inline-flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Seller
+                                </span>
                             @else
-                                <span class="px-2.5 py-1 rounded-full bg-[#E9F8F2] text-[#12A57F] font-semibold text-[10px]">Customer</span>
+                                <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold text-[10px] border border-slate-200 inline-flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Customer
+                                </span>
                             @endif
                         </td>
-                        <td class="py-3 px-6 text-[#8A93A6]">{{ $user->created_at->format('d M Y') }}</td>
+                        <td class="py-3.5 px-5 text-slate-400">{{ $user->created_at->translatedFormat('d M Y') }}</td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="py-12 text-center text-[#B3ACA0]">Tidak ada pengguna ditemukan.</td>
+                        <td colspan="5" class="py-12 text-center text-slate-400">Tidak ada pengguna ditemukan.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -70,7 +79,7 @@
         </div>
         
         @if($users->hasPages())
-        <div class="p-4 border-t border-[#F0EEE6] bg-white">
+        <div class="p-4 border-t border-slate-100 bg-white">
             {{ $users->links() }}
         </div>
         @endif

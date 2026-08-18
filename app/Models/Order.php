@@ -2,45 +2,48 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Attributes\Fillable;
+use App\Traits\HasObfuscatedId;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable([
-    'invoice_number',
-    'user_id',
-    'store_id',
-    'total_amount',
-    'status',
-    'payment_proof',
-    'shipping_address',
-    'tracking_number',
-])]
 class Order extends Model
 {
-    use HasFactory;
+    use HasFactory, HasObfuscatedId;
 
-    /**
-     * Relasi ke Customer pembuat pesanan
-     */
+    protected $fillable = [
+        'invoice_number',
+        'user_id',
+        'store_id',
+        'total_amount',
+        'voucher_code',
+        'discount_amount',
+        'status',
+        'payment_proof',
+        'shipping_address',
+        'tracking_number',
+    ];
+
+    protected $casts = [
+        'total_amount'    => 'float',
+        'discount_amount' => 'float',
+    ];
+
+    protected $appends = [
+        'obfuscated_id',
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Relasi ke Toko / Seller tempat barang dibeli
-     */
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
     }
 
-    /**
-     * Relasi ke rincian item barang dalam pesanan
-     */
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);

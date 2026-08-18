@@ -16,7 +16,6 @@ class StoreRegistrationController extends Controller
     {
         $user = Auth::user();
 
-        // Jika sudah pernah mengajukan / sudah punya toko
         if ($user->store) {
             return redirect()->route('customer.dashboard')->with('info', 'Anda sudah memiliki pengajuan toko.');
         }

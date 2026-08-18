@@ -5,69 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'BelanjaIn') }}</title>
+    <title>{{ config('app.name', 'BelanjaIn') }} — Autentikasi Akun</title>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Scripts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <!-- Favicon -->
     <link rel="icon" type="image/jpeg" href="{{ asset('img/icon.jpg') }}">
 </head>
-<body class="font-sans text-gray-900 antialiased" style="font-family:'Inter',sans-serif;">
+<body class="font-sans text-slate-900 antialiased bg-slate-50 min-h-screen">
     <div class="min-h-screen flex">
         
-        <!-- Left Side: Branding / Illustration (Hidden on mobile) -->
-        <div class="hidden lg:flex lg:w-1/2 bg-[#14213D] relative overflow-hidden items-center justify-center">
-            
-            <!-- Back Button Desktop -->
-            <a href="/" class="absolute top-8 left-8 z-50 flex items-center gap-2 text-white/70 hover:text-white transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-                </svg>
-                <span class="text-sm font-medium">Kembali</span>
-            </a>
-            <!-- Decorative circles -->
-            <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#12A57F] rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-            <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#F2A93B] rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-            
-            <div class="relative z-10 px-12 text-center">
-                <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-20 h-20 rounded-2xl mx-auto mb-8 shadow-lg shadow-[#12A57F]/30 object-cover">
-                <h1 class="text-4xl font-bold text-white mb-4" style="font-family:'Poppins',sans-serif;">
-                    BelanjaIn
-                </h1>
-                <p class="text-slate-300 text-lg max-w-md mx-auto leading-relaxed">
-                    Platform e-commerce masa depan. Kelola tokomu dengan mudah, cepat, dan aman.
+        <div class="hidden lg:flex lg:w-1/2 bg-slate-950 relative overflow-hidden flex-col justify-between p-12 text-white border-r border-slate-800">
+            <div class="relative z-10 flex items-center justify-between">
+                <a href="/" class="flex items-center gap-2.5 group">
+                    <div class="w-8 h-8 rounded-lg overflow-hidden border border-cyan-400/40 bg-cyan-950 flex items-center justify-center">
+                        <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-full h-full object-cover">
+                    </div>
+                    <span class="font-bold text-lg tracking-tight text-white leading-tight">
+                        Belanja<span class="text-cyan-400 font-extrabold">In</span>
+                    </span>
+                </a>
+                <a href="/" class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-arrow-left text-[10px]"></i>
+                    <span>Kembali ke Beranda</span>
+                </a>
+            </div>
+
+            <div class="relative z-10 max-w-md my-auto py-12">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-300 border border-cyan-400/20 mb-4">
+                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                    Marketplace Terpercaya
+                </span>
+                <h2 class="text-3xl font-extrabold text-white leading-tight tracking-tight">
+                    Pusat Belanja & Toko Online Masa Depan
+                </h2>
+                <p class="text-sm text-slate-300 mt-3 leading-relaxed">
+                    Akses jutaan produk pilihan, kelola pesanan real-time, atau mulai bisnis digital toko resmi Anda bersama ekosistem BelanjaIn.
                 </p>
+
+                <div class="grid grid-cols-2 gap-3.5 mt-8 pt-8 border-t border-slate-800 text-xs">
+                    <div class="flex items-center gap-2.5 text-slate-300">
+                        <i class="fa-solid fa-circle-check text-cyan-400"></i>
+                        <span>Keamanan 100% Terverifikasi</span>
+                    </div>
+                    <div class="flex items-center gap-2.5 text-slate-300">
+                        <i class="fa-solid fa-circle-check text-cyan-400"></i>
+                        <span>Bebas Biaya Admin Awal</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative z-10 text-[11px] text-slate-500">
+                &copy; {{ date('Y') }} BelanjaIn Platform. Hak Cipta Dilindungi.
             </div>
         </div>
 
-        <!-- Right Side: Auth Form -->
-        <div class="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 sm:p-12 bg-white relative">
-            
-            <!-- Back Button Mobile -->
-            <a href="/" class="lg:hidden absolute top-6 left-6 sm:top-8 sm:left-8 z-50 flex items-center gap-2 text-slate-500 hover:text-[#12A57F] transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
-                </svg>
-                <span class="text-sm font-medium">Kembali</span>
+        <div class="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 sm:p-12 bg-white relative">
+            <a href="/" class="lg:hidden absolute top-6 left-6 flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-cyan-700 transition-colors">
+                <i class="fa-solid fa-arrow-left text-[10px]"></i>
+                <span>Kembali</span>
             </a>
-            
-            <!-- Mobile Logo (only visible on mobile) -->
-            <div class="lg:hidden flex items-center gap-3 mb-10">
-                <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-10 h-10 rounded-lg shadow-md object-cover">
-                <span class="text-2xl font-bold text-[#14213D]" style="font-family:'Poppins',sans-serif;">BelanjaIn</span>
+
+            <div class="lg:hidden flex items-center gap-2.5 mb-8">
+                <div class="w-8 h-8 rounded-lg overflow-hidden border border-cyan-200 bg-cyan-50 flex items-center justify-center">
+                    <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-full h-full object-cover">
+                </div>
+                <span class="text-xl font-bold text-slate-900 tracking-tight">Belanja<span class="text-cyan-600 font-extrabold">In</span></span>
             </div>
 
-            <div class="w-full max-w-md">
+            <div class="w-full max-w-sm">
                 {{ $slot }}
             </div>
-            
         </div>
     </div>
 </body>

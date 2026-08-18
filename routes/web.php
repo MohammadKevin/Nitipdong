@@ -8,12 +8,12 @@ use App\Http\Controllers\Customer\StoreRegistrationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Seller\OrderManagementController;
 use App\Http\Controllers\Seller\ProductController;
+use App\Http\Controllers\Seller\VoucherController as SellerVoucherController;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-// Halaman Katalog Utama (Publik)
 Route::get('/', function () {
     $products = Product::with(['store', 'category'])
         ->where('is_active', true)
@@ -21,20 +21,24 @@ Route::get('/', function () {
             $q->where('status', 'approved');
         })
         ->latest()
-        ->take(8)
+        ->take(10)
         ->get();
         
     $categories = Category::all();
-    return view('welcome', compact('products', 'categories'));
+    $activeFlashSale = \App\Models\FlashSale::active()->with(['items.product'])->first();
+    $vouchers = \App\Models\Voucher::where('is_active', true)->latest()->take(4)->get();
+
+    return view('welcome', compact('products', 'categories', 'activeFlashSale', 'vouchers'));
 });
 
-// Halaman Detail Produk
+Route::get('/products', [\App\Http\Controllers\ProductController::class, 'index'])->name('products.index');
 Route::get('/product/{product}', [\App\Http\Controllers\ProductController::class, 'show'])->name('product.show');
 
-// Area yang Memerlukan Login
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // 1. Super Admin
+    Route::get('/store/register', [StoreRegistrationController::class, 'create'])->name('store.register');
+    Route::post('/store/register', [StoreRegistrationController::class, 'store'])->name('store.store');
+
     Route::middleware(['role:super_admin'])->prefix('super-admin')->name('super_admin.')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\SuperAdminController::class, 'index'])->name('dashboard');
         Route::get('/dashboard/chart-data', [\App\Http\Controllers\SuperAdminController::class, 'chartData'])->name('dashboard.chart-data');
@@ -43,35 +47,41 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/stores/{store}/toggle-ban', [\App\Http\Controllers\SuperAdminController::class, 'toggleBan'])->name('stores.toggle_ban');
     });
 
-    // 2. Admin (Moderasi Pengajuan Toko & Produk)
     Route::middleware(['role:admin,super_admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [StoreApprovalController::class, 'index'])->name('dashboard');
         Route::post('/stores/{store}/approve', [StoreApprovalController::class, 'approve'])->name('stores.approve');
         Route::post('/stores/{store}/reject', [StoreApprovalController::class, 'reject'])->name('stores.reject');
 
-        // Moderasi Produk
         Route::get('/products', [\App\Http\Controllers\Admin\ProductModerationController::class, 'index'])->name('products.index');
         Route::post('/products/{product}/toggle-status', [\App\Http\Controllers\Admin\ProductModerationController::class, 'toggleStatus'])->name('products.toggle_status');
+
+        Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class);
+
+        Route::resource('flash-sales', \App\Http\Controllers\Admin\FlashSaleController::class)->names('flash_sales');
+        Route::patch('/flash-sales/{flashSale}/toggle', [\App\Http\Controllers\Admin\FlashSaleController::class, 'toggle'])->name('flash_sales.toggle');
+        Route::post('/flash-sales/{flashSale}/items', [\App\Http\Controllers\Admin\FlashSaleController::class, 'addItem'])->name('flash_sales.items.add');
+        Route::patch('/flash-sales/{flashSale}/items/{item}', [\App\Http\Controllers\Admin\FlashSaleController::class, 'updateItem'])->name('flash_sales.items.update');
+        Route::delete('/flash-sales/{flashSale}/items/{item}', [\App\Http\Controllers\Admin\FlashSaleController::class, 'removeItem'])->name('flash_sales.items.remove');
     });
 
-    // 3. Seller (Kelola Toko, Produk & Pesanan Masuk)
     Route::middleware(['role:seller'])->prefix('seller')->name('seller.')->group(function () {
         Route::get('/dashboard', function () {
             $store = Auth::user()->store;
             $products = Product::where('store_id', $store?->id)->latest()->get();
             $categories = Category::all();
-            return view('seller.dashboard', compact('store', 'products', 'categories'));
+            $orders = \App\Models\Order::where('store_id', $store?->id)->with(['user', 'orderItems.product'])->latest()->get();
+            return view('seller.dashboard', compact('store', 'products', 'categories', 'orders'));
         })->name('dashboard');
 
-        // CRUD Produk
         Route::resource('products', ProductController::class);
 
-        // Manajemen Pesanan
+        Route::resource('vouchers', SellerVoucherController::class);
+        Route::patch('/vouchers/{voucher}/toggle', [SellerVoucherController::class, 'toggle'])->name('vouchers.toggle');
+
         Route::get('/orders', [OrderManagementController::class, 'index'])->name('orders.index');
         Route::patch('/orders/{order}/status', [OrderManagementController::class, 'updateStatus'])->name('orders.update_status');
     });
 
-    // 4. Customer (Belanja, Cart, Checkout, Payment & Pengajuan Toko)
     Route::middleware(['role:customer'])->prefix('customer')->name('customer.')->group(function () {
         Route::get('/dashboard', function () {
             $userStore = Auth::user()->store;
@@ -79,38 +89,33 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return view('customer.dashboard', compact('userStore', 'orders'));
         })->name('dashboard');
 
-        // Keranjang Belanja (Cart)
         Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
         Route::post('/cart/add/{product}', [CartController::class, 'store'])->name('cart.store');
         Route::patch('/cart/{cart}', [CartController::class, 'update'])->name('cart.update');
         Route::delete('/cart/{cart}', [CartController::class, 'destroy'])->name('cart.destroy');
+        Route::post('/cart/voucher/apply', [CartController::class, 'applyVoucher'])->name('cart.voucher.apply');
+        Route::delete('/cart/voucher/remove', [CartController::class, 'removeVoucher'])->name('cart.voucher.remove');
 
-        // Checkout & Pembuatan Pesanan
         Route::get('/checkout', [OrderController::class, 'checkout'])->name('order.checkout');
         Route::post('/checkout', [OrderController::class, 'store'])->name('order.store');
 
-        // Pembayaran & Upload Bukti Transfer
         Route::get('/orders/{order}/payment', [OrderController::class, 'payment'])->name('order.payment');
         Route::post('/orders/{order}/payment', [OrderController::class, 'confirmPayment'])->name('order.confirm_payment');
 
-        // Pengajuan Buka Toko Baru
         Route::get('/store/register', [StoreRegistrationController::class, 'create'])->name('store.register');
         Route::post('/store/register', [StoreRegistrationController::class, 'store'])->name('store.store');
     });
 
-    // Modul Chat (Bisa Diakses Semua Role yang Login)
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::post('/chat/start/{receiver}', [ChatController::class, 'startConversation'])->name('chat.start');
     Route::get('/chat/{conversation}', [ChatController::class, 'show'])->name('chat.show');
     Route::post('/chat/{conversation}/send', [ChatController::class, 'sendMessage'])->name('chat.send');
 
-    // Asisten AI
     Route::post('/ai/chat', [\App\Http\Controllers\AiAssistantController::class, 'chat'])->name('ai.chat');
 
-    // Profil Pengguna
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';    
+require __DIR__.'/auth.php';

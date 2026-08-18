@@ -14,14 +14,26 @@ use Illuminate\View\View;
 
 class ProductController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $store = Auth::user()->store;
+        
+        $query = Product::with('category')
+            ->where('store_id', $store?->id);
 
-        $products = Product::with('category')
-            ->where('store_id', $store?->id)
-            ->latest()
-            ->paginate(10);
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->category);
+        }
+
+        $products = $query->latest()->paginate(10)->withQueryString();
 
         return view('seller.products.index', compact('products'));
     }
@@ -35,56 +47,43 @@ class ProductController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'category_id' => ['required', 'exists:categories,id'],
-            'name'        => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'price'       => ['required', 'numeric', 'min:0'],
-            'discount_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
-            'stock'       => ['required', 'integer', 'min:0'],
-            'badge'       => ['nullable', 'string', 'in:new,sale,hot,bestseller'],
-            'is_featured' => ['nullable', 'boolean'],
-            'image'       => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-            'additional_images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'category_id'         => ['required', 'exists:categories,id'],
+            'name'                => ['required', 'string', 'max:255'],
+            'description'         => ['required', 'string'],
+            'price'               => ['required', 'numeric', 'min:0'],
+            'discount_percentage' => ['nullable', 'integer', 'min:0', 'max:99'],
+            'stock'               => ['required', 'integer', 'min:0'],
+            'image'               => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
 
         $store = Auth::user()->store;
+        if (!$store) {
+            return redirect()->route('seller.dashboard')->with('error', 'Toko belum terdaftar.');
+        }
 
-        // Upload main image
         $imagePath = null;
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('products', 'public');
         }
 
-        // Upload additional images
-        $additionalImages = [];
-        if ($request->hasFile('additional_images')) {
-            foreach ($request->file('additional_images') as $image) {
-                $additionalImages[] = $image->store('products', 'public');
-            }
-        }
-
         Product::create([
-            'store_id'    => $store->id,
-            'category_id' => $request->category_id,
-            'name'        => $request->name,
-            'slug'        => Str::slug($request->name) . '-' . Str::random(5),
-            'description' => $request->description,
-            'price'       => $request->price,
-            'discount_percentage' => $request->discount_percentage ?? 0,
-            'stock'       => $request->stock,
-            'badge'       => $request->badge,
-            'is_featured' => $request->boolean('is_featured', false),
-            'image'       => $imagePath,
-            'images'      => !empty($additionalImages) ? $additionalImages : null,
-            'is_active'   => true,
+            'store_id'            => $store->id,
+            'category_id'         => $request->category_id,
+            'name'                => $request->name,
+            'slug'                => Str::slug($request->name) . '-' . Str::random(5),
+            'description'         => $request->description,
+            'price'               => $request->price,
+            'discount_percentage' => (int) $request->input('discount_percentage', 0),
+            'stock'               => $request->stock,
+            'image'               => $imagePath,
+            'is_active'           => true,
         ]);
 
-        return redirect()->route('seller.products.index')->with('success', 'Produk berhasil ditambahkan dengan ' . (count($additionalImages) + ($imagePath ? 1 : 0)) . ' foto!');
+        return redirect()->route('seller.products.index')->with('success', 'Produk berhasil ditambahkan!');
     }
 
     public function edit(Product $product): View
     {
-        // Pastikan hanya pemilik produk yang bisa edit
         if ($product->store_id !== Auth::user()->store?->id) {
             abort(403);
         }
@@ -100,20 +99,15 @@ class ProductController extends Controller
         }
 
         $request->validate([
-            'category_id' => ['required', 'exists:categories,id'],
-            'name'        => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'price'       => ['required', 'numeric', 'min:0'],
-            'discount_percentage' => ['nullable', 'integer', 'min:0', 'max:100'],
-            'stock'       => ['required', 'integer', 'min:0'],
-            'badge'       => ['nullable', 'string', 'in:new,sale,hot,bestseller'],
-            'is_featured' => ['nullable', 'boolean'],
-            'image'       => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-            'additional_images.*' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
-            'remove_images' => ['nullable', 'array'],
+            'category_id'         => ['required', 'exists:categories,id'],
+            'name'                => ['required', 'string', 'max:255'],
+            'description'         => ['required', 'string'],
+            'price'               => ['required', 'numeric', 'min:0'],
+            'discount_percentage' => ['nullable', 'integer', 'min:0', 'max:99'],
+            'stock'               => ['required', 'integer', 'min:0'],
+            'image'               => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
 
-        // Handle main image
         $imagePath = $product->image;
         if ($request->hasFile('image')) {
             if ($imagePath && Storage::disk('public')->exists($imagePath)) {
@@ -122,41 +116,23 @@ class ProductController extends Controller
             $imagePath = $request->file('image')->store('products', 'public');
         }
 
-        // Handle additional images
-        $existingImages = $product->images ?? [];
-
-        // Remove selected images
-        if ($request->has('remove_images')) {
-            foreach ($request->remove_images as $imageToRemove) {
-                if (in_array($imageToRemove, $existingImages) && Storage::disk('public')->exists($imageToRemove)) {
-                    Storage::disk('public')->delete($imageToRemove);
-                }
-                $existingImages = array_filter($existingImages, fn($img) => $img !== $imageToRemove);
-            }
-        }
-
-        // Add new additional images
-        if ($request->hasFile('additional_images')) {
-            foreach ($request->file('additional_images') as $image) {
-                $existingImages[] = $image->store('products', 'public');
-            }
-        }
-
         $product->update([
-            'category_id' => $request->category_id,
-            'name'        => $request->name,
-            'description' => $request->description,
-            'price'       => $request->price,
-            'discount_percentage' => $request->discount_percentage ?? 0,
-            'stock'       => $request->stock,
-            'badge'       => $request->badge,
-            'is_featured' => $request->boolean('is_featured', false),
-            'image'       => $imagePath,
-            'images'      => !empty($existingImages) ? array_values($existingImages) : null,
-            'is_active'   => $request->boolean('is_active', true),
+            'category_id'         => $request->category_id,
+            'name'                => $request->name,
+            'description'         => $request->description,
+            'price'               => $request->price,
+            'discount_percentage' => (int) $request->input('discount_percentage', 0),
+            'stock'               => $request->stock,
+            'image'               => $imagePath,
+            'is_active'           => $request->boolean('is_active', true),
         ]);
 
         return redirect()->route('seller.products.index')->with('success', 'Produk berhasil diperbarui!');
+    }
+
+    public function show(Product $product): RedirectResponse
+    {
+        return redirect()->route('product.show', $product);
     }
 
     public function destroy(Product $product): RedirectResponse
@@ -165,18 +141,8 @@ class ProductController extends Controller
             abort(403);
         }
 
-        // Delete main image
         if ($product->image && Storage::disk('public')->exists($product->image)) {
             Storage::disk('public')->delete($product->image);
-        }
-
-        // Delete additional images
-        if ($product->images && is_array($product->images)) {
-            foreach ($product->images as $image) {
-                if (Storage::disk('public')->exists($image)) {
-                    Storage::disk('public')->delete($image);
-                }
-            }
         }
 
         $product->delete();

@@ -11,7 +11,6 @@ use Illuminate\View\View;
 
 class OrderManagementController extends Controller
 {
-    // Menampilkan daftar pesanan masuk toko seller
     public function index(): View
     {
         $store = Auth::user()->store;
@@ -24,7 +23,6 @@ class OrderManagementController extends Controller
         return view('seller.orders.index', compact('orders'));
     }
 
-    // Update status pesanan & input no resi
     public function updateStatus(Request $request, Order $order): RedirectResponse
     {
         if ($order->store_id !== Auth::user()->store?->id) {

@@ -28,7 +28,6 @@ class ProductModerationController extends Controller
 
     public function toggleStatus(Product $product)
     {
-        // Toggle the is_active status
         $product->update([
             'is_active' => !$product->is_active
         ]);

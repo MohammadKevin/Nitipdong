@@ -12,30 +12,24 @@ class SuperAdminController extends Controller
 {
     public function index()
     {
-        // 1. Total Pendapatan (Pesanan yang sudah completed)
-        $totalPendapatan = Order::where('status', 'completed')->sum('total_amount');
-        
-        // 2. Transaksi Aktif (Pesanan yang pending, processing, shipped)
-        $activeOrders = Order::whereIn('status', ['pending', 'processing', 'shipped'])->count();
+        $grossVolume = (float) Order::where('status', 'completed')->sum('total_amount');
+        $totalKeuntunganPlatform = round($grossVolume * 0.05);
 
-        // 3. Pesanan Baru bulan ini
+        $activeOrders = Order::whereIn('status', ['pending', 'processing', 'shipped'])->count();
         $pesananBaru = Order::whereMonth('created_at', now()->month)
                             ->whereYear('created_at', now()->year)
                             ->count();
-
-        // 4. Total Pengguna & Toko
         $totalPengguna = User::count();
         $totalToko = Store::count();
         $totalPesanan = Order::count();
-
-        // 5. Pesanan Terbaru
         $recentOrders = Order::with(['user', 'store'])
                             ->latest()
                             ->take(5)
                             ->get();
 
         return view('super_admin.dashboard', compact(
-            'totalPendapatan',
+            'grossVolume',
+            'totalKeuntunganPlatform',
             'activeOrders',
             'pesananBaru',
             'totalPengguna',
@@ -89,11 +83,6 @@ class SuperAdminController extends Controller
         return back()->with('success', $message);
     }
 
-    /**
-     * Endpoint JSON untuk grafik transaksi di dashboard.
-     * Dipanggil via fetch() dari Blade, mendukung filter periode
-     * dan dipanggil ulang berkala (auto-refresh) dari sisi frontend.
-     */
     public function chartData(Request $request)
     {
         $period = $request->query('period', 'week');
@@ -120,7 +109,7 @@ class SuperAdminController extends Controller
             ->groupBy('tanggal')
             ->pluck('total', 'tanggal');
 
-        $data = $days->map(fn ($d) => (float) ($totals[$d->format('Y-m-d')] ?? 0))->toArray();
+        $data = $days->map(fn ($d) => round(((float) ($totals[$d->format('Y-m-d')] ?? 0)) * 0.05))->toArray();
 
         return [$labels, $data];
     }
@@ -135,9 +124,10 @@ class SuperAdminController extends Controller
         while ($weekStart->lte(now())) {
             $weekEnd = $weekStart->copy()->endOfWeek()->min(now());
             $labels[] = 'M' . $i;
-            $data[] = (float) Order::where('status', 'completed')
+            $volume = (float) Order::where('status', 'completed')
                 ->whereBetween('created_at', [$weekStart, $weekEnd])
                 ->sum('total_amount');
+            $data[] = round($volume * 0.05);
             $weekStart = $weekStart->copy()->addWeek();
             $i++;
         }
@@ -152,10 +142,11 @@ class SuperAdminController extends Controller
 
         for ($m = 1; $m <= now()->month; $m++) {
             $labels[] = Carbon::create(now()->year, $m, 1)->translatedFormat('M');
-            $data[] = (float) Order::where('status', 'completed')
+            $volume = (float) Order::where('status', 'completed')
                 ->whereYear('created_at', now()->year)
                 ->whereMonth('created_at', $m)
                 ->sum('total_amount');
+            $data[] = round($volume * 0.05);
         }
 
         return [$labels, $data];
@@ -166,7 +157,7 @@ class SuperAdminController extends Controller
         $years = range(now()->year - 4, now()->year);
         $labels = array_map('strval', $years);
         $data = array_map(
-            fn ($y) => (float) Order::where('status', 'completed')->whereYear('created_at', $y)->sum('total_amount'),
+            fn ($y) => round(((float) Order::where('status', 'completed')->whereYear('created_at', $y)->sum('total_amount')) * 0.05),
             $years
         );
 

@@ -14,12 +14,9 @@ class OtpMail extends Mailable
     use Queueable, SerializesModels;
 
     public $otpCode;
-    public $type; // 'register' or 'change_email'
+    public $type;
     public $name;
 
-    /**
-     * Create a new message instance.
-     */
     public function __construct($otpCode, $type, $name)
     {
         $this->otpCode = $otpCode;
@@ -27,9 +24,6 @@ class OtpMail extends Mailable
         $this->name = $name;
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
         $subject = $this->type === 'register' ? 'Verifikasi Pendaftaran Akun' : 'Verifikasi Perubahan Email';
@@ -39,9 +33,6 @@ class OtpMail extends Mailable
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
         return new Content(
@@ -49,11 +40,6 @@ class OtpMail extends Mailable
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
     public function attachments(): array
     {
         return [];

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasObfuscatedId;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,59 +10,105 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, HasObfuscatedId;
 
     protected $fillable = [
-        'store_id', 'category_id', 'name', 'slug', 'description', 'price',
-        'discount_percentage', 'rating', 'sold_count', 'stock', 'image',
-        'images', 'is_active', 'is_featured', 'badge'
+        'store_id',
+        'category_id',
+        'name',
+        'slug',
+        'description',
+        'price',
+        'discount_percentage',
+        'stock',
+        'image',
+        'is_active',
     ];
 
     protected $casts = [
-        'images' => 'array',
-        'is_active' => 'boolean',
-        'is_featured' => 'boolean',
-        'rating' => 'decimal:2',
-        'price' => 'decimal:2',
+        'discount_percentage' => 'integer',
+        'stock'               => 'integer',
+        'is_active'           => 'boolean',
     ];
 
-    /**
-     * Get all product images (main + additional)
-     */
-    public function getAllImages(): array
+    protected $appends = [
+        'seller_price',
+        'platform_fee',
+        'customer_base_price',
+        'final_price',
+        'has_discount',
+        'discount_savings',
+        'is_in_flash_sale',
+        'obfuscated_id',
+    ];
+
+    public function getSellerPriceAttribute(): float
     {
-        $allImages = [];
-
-        // Tambahkan main image
-        if ($this->image) {
-            $allImages[] = $this->image;
-        }
-
-        // Tambahkan additional images
-        if ($this->images && is_array($this->images)) {
-            $allImages = array_merge($allImages, $this->images);
-        }
-
-        return $allImages;
+        return (float) ($this->attributes['price'] ?? 0);
     }
 
-    /**
-     * Get discounted price
-     */
-    public function getDiscountedPrice(): float
+    public function getPlatformFeeAttribute(): float
     {
+        return round($this->seller_price * 0.05);
+    }
+
+    public function getCustomerBasePriceAttribute(): float
+    {
+        return round($this->seller_price * 1.05);
+    }
+
+    public function getPriceAttribute(): float
+    {
+        return (float) $this->customer_base_price;
+    }
+
+    public function getCurrentFlashSaleItemAttribute(): ?FlashSaleItem
+    {
+        return $this->flashSaleItems()
+            ->where('is_active', true)
+            ->whereHas('flashSale', function ($q) {
+                $q->where('is_active', true)
+                  ->where('start_time', '<=', now())
+                  ->where('end_time', '>=', now());
+            })
+            ->first();
+    }
+
+    public function getIsInFlashSaleAttribute(): bool
+    {
+        return $this->current_flash_sale_item !== null;
+    }
+
+    public function getFinalPriceAttribute(): float
+    {
+        if ($fsi = $this->current_flash_sale_item) {
+            return (float) $fsi->flash_sale_price;
+        }
+
         if ($this->discount_percentage > 0) {
-            return $this->price * (1 - $this->discount_percentage / 100);
+            return round($this->customer_base_price * (1 - ($this->discount_percentage / 100)));
         }
-        return $this->price;
+
+        return (float) $this->customer_base_price;
     }
 
-    /**
-     * Get original price (before discount)
-     */
-    public function getOriginalPrice(): float
+    public function getHasDiscountAttribute(): bool
     {
-        return $this->price;
+        return $this->is_in_flash_sale || $this->discount_percentage > 0;
+    }
+
+    public function getDiscountPercentageEffectiveAttribute(): int
+    {
+        if ($fsi = $this->current_flash_sale_item) {
+            return $fsi->discount_percentage;
+        }
+
+        return $this->discount_percentage;
+    }
+
+    public function getDiscountSavingsAttribute(): float
+    {
+        return max(0, $this->customer_base_price - $this->final_price);
     }
 
     public function store(): BelongsTo
@@ -77,5 +124,10 @@ class Product extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function flashSaleItems(): HasMany
+    {
+        return $this->hasMany(FlashSaleItem::class, 'product_id');
     }
 }

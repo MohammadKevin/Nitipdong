@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+  <defs>
+    <linearGradient id="roofHGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+  </defs>
+  <!-- Roof -->
+  <polygon points="24,5 4,21 9,21 9,41 39,41 39,21 44,21" fill="url(#roofHGrad)"/>
+  <!-- Chimney -->
+  <rect x="32" y="8" width="5" height="10" fill="#047857"/>
+  <!-- House Body -->
+  <rect x="9" y="21" width="30" height="20" rx="1" fill="#ecfdf5"/>
+  <!-- Door -->
+  <rect x="20" y="29" width="8" height="12" rx="1" fill="#059669"/>
+  <circle cx="26" cy="35" r="1" fill="#ffffff"/>
+  <!-- Window -->
+  <rect x="13" y="25" width="5" height="5" rx="1" fill="#a7f3d0"/>
+  <rect x="30" y="25" width="5" height="5" rx="1" fill="#a7f3d0"/>
+</svg>

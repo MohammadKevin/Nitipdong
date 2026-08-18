@@ -7,104 +7,101 @@
 
     <title>{{ $title ?? 'Admin Dashboard - ' . config('app.name', 'BelanjaIn') }}</title>
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
-    </style>
-    <!-- Favicon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" type="image/jpeg" href="{{ asset('img/icon.jpg') }}">
 </head>
-<body class="font-sans antialiased">
-    <div class="h-screen bg-[#F6F4EF] text-[#3E4658] overflow-hidden" style="font-family:'Inter',sans-serif;">
+<body class="font-sans antialiased bg-slate-50 text-slate-900">
+    <div class="h-screen bg-slate-50 text-slate-800 overflow-hidden">
         <div class="flex h-screen w-full">
 
-            {{-- SIDEBAR --}}
-            <aside class="w-64 h-full shrink-0 bg-[#152238] text-slate-300 flex flex-col justify-between py-6 px-4 overflow-y-auto">
+            <aside class="w-64 h-full shrink-0 bg-slate-900 text-slate-300 flex flex-col justify-between py-5 px-3.5 overflow-y-auto border-r border-slate-800">
                 <div>
-                    {{-- Brand --}}
-                    <div class="flex items-center gap-2.5 px-2 mb-9">
-                        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 group">
-                            <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-9 h-9 rounded-lg shadow-md object-cover">
-                            <div>
-                                <p class="font-bold text-white text-[15px] leading-none" style="font-family:'Poppins',sans-serif;">BelanjaIn</p>
-                                <p class="text-[10px] text-slate-400 mt-1">Admin Panel</p>
+                    <div class="flex items-center gap-2.5 px-3 py-1 mb-6">
+                        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 group">
+                            <div class="w-8 h-8 rounded-lg overflow-hidden border border-cyan-400/30 bg-slate-950 flex items-center justify-center shrink-0">
+                                <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-full h-full object-cover">
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <p class="font-bold text-white text-sm leading-tight tracking-tight">Belanja<span class="text-cyan-400 font-extrabold">In</span></p>
+                                    <span class="text-[10px] font-semibold text-cyan-400 bg-cyan-950/60 border border-cyan-800/50 px-1.5 py-0.5 rounded tracking-normal">Admin Panel</span>
+                                </div>
                             </div>
                         </a>
                     </div>
 
-                    {{-- Nav --}}
                     <nav class="flex flex-col gap-1">
-                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold px-3 mb-2">Menu Utama</p>
+                        <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-3 mt-2 mb-2">Moderasi & Kontrol</p>
 
                         <a href="{{ route('admin.dashboard') }}"
-                           class="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-[#12A57F] text-white' : 'hover:bg-white/5 hover:text-white' }}">
-                            @if(request()->routeIs('admin.dashboard'))
-                                <span class="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r bg-white"></span>
-                            @endif
-                            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10.5L12 3l9 7.5M4.5 9.75V21h15V9.75"/></svg>
+                           class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('admin.dashboard') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-store w-4 h-4 text-xs flex items-center justify-center {{ request()->routeIs('admin.dashboard') ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
                             Persetujuan Toko
                         </a>
-                        <a href="{{ route('admin.products.index') }}" class="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('admin.products.*') ? 'bg-[#12A57F] text-white' : 'hover:bg-white/5 hover:text-white' }}">
-                            @if(request()->routeIs('admin.products.*'))
-                                <span class="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r bg-white"></span>
-                            @endif
-                            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+
+                        <a href="{{ route('admin.products.index') }}"
+                           class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('admin.products.*') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-boxes-stacked w-4 h-4 text-xs flex items-center justify-center {{ request()->routeIs('admin.products.*') ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
                             Moderasi Produk
                         </a>
-                        <a href="{{ route('chat.index') }}" class="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('chat.*') ? 'bg-[#12A57F] text-white' : 'hover:bg-white/5 hover:text-white' }}">
-                            @if(request()->routeIs('chat.*'))
-                                <span class="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r bg-white"></span>
-                            @endif
-                            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                            Pesan
+
+                        <a href="{{ route('admin.categories.index') }}"
+                           class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('admin.categories.*') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-tags w-4 h-4 text-xs flex items-center justify-center {{ request()->routeIs('admin.categories.*') ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
+                            Kategori Produk
                         </a>
 
-                        <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold px-3 mt-6 mb-2">Lainnya</p>
-                        <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-white/5 hover:text-white transition-colors">
-                            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            Pengaturan
+                        <a href="{{ route('admin.flash_sales.index') }}"
+                           class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('admin.flash_sales.*') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-bolt w-4 h-4 text-xs flex items-center justify-center {{ request()->routeIs('admin.flash_sales.*') ? 'text-cyan-400' : 'text-amber-400' }}"></i>
+                            Flash Sale Platform
+                        </a>
+
+                        <a href="{{ route('chat.index') }}"
+                           class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('chat.*') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
+                            <i class="fa-regular fa-comment-dots w-4 h-4 text-xs flex items-center justify-center {{ request()->routeIs('chat.*') ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
+                            Pesan Chat
+                        </a>
+
+                        <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-3 mt-5 mb-2">Akun</p>
+                        <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-colors group">
+                            <i class="fa-solid fa-user-gear w-4 h-4 text-xs flex items-center justify-center text-slate-400 group-hover:text-slate-200"></i>
+                            Pengaturan Profil
                         </a>
                     </nav>
                 </div>
 
-                {{-- User mini card --}}
-                <div class="flex items-center gap-2.5 px-2 py-2.5 rounded-xl bg-white/5">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=12A57F&color=fff" class="w-8 h-8 rounded-lg" alt="User">
-                    <div class="min-w-0">
-                        <p class="text-xs font-semibold text-white truncate">{{ auth()->user()->name }}</p>
-                        <p class="text-[10px] text-slate-400 truncate">Admin</p>
+                <div class="flex items-center gap-2.5 p-2.5 rounded-lg bg-slate-800/50 border border-slate-800">
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0891b2&color=fff&size=50" class="w-7 h-7 rounded-md object-cover shrink-0" alt="User">
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-medium text-slate-200 truncate">{{ auth()->user()->name }}</p>
+                        <p class="text-[10px] text-slate-400 truncate">Admin Operasional</p>
                     </div>
-                    <form method="POST" action="{{ route('logout') }}" class="ml-auto">
+                    <form method="POST" action="{{ route('logout') }}" class="shrink-0">
                         @csrf
-                        <button type="submit" class="text-slate-400 hover:text-white" title="Keluar">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        <button type="submit" class="text-slate-400 hover:text-rose-400 hover:bg-slate-800 p-1.5 rounded-md transition-colors" title="Keluar">
+                            <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
                         </button>
                     </form>
                 </div>
             </aside>
 
-            {{-- MAIN CONTENT --}}
             <main class="flex-1 p-6 lg:p-8 flex flex-col gap-6 overflow-y-auto relative">
                 @if(session('success'))
-                    <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl p-4 flex gap-3 shadow-sm" role="alert">
-                        <svg class="w-5 h-5 shrink-0 text-emerald-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <div>
-                            <p class="font-medium">{{ session('success') }}</p>
-                        </div>
+                    <div class="bg-cyan-50 border border-cyan-200 text-cyan-900 rounded-lg p-3.5 flex gap-2.5 shadow-xs text-xs font-semibold" role="alert">
+                        <i class="fa-solid fa-circle-check text-cyan-600 text-sm mt-0.5"></i>
+                        <p>{{ session('success') }}</p>
                     </div>
                 @endif
                 @if(session('error'))
-                    <div class="bg-rose-50 border border-rose-200 text-rose-800 rounded-xl p-4 flex gap-3 shadow-sm" role="alert">
-                        <svg class="w-5 h-5 shrink-0 text-rose-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        <div>
-                            <p class="font-medium">{{ session('error') }}</p>
-                        </div>
+                    <div class="bg-rose-50 border border-rose-200 text-rose-800 rounded-lg p-3.5 flex gap-2.5 shadow-xs text-xs font-semibold" role="alert">
+                        <i class="fa-solid fa-circle-exclamation text-rose-600 text-sm mt-0.5"></i>
+                        <p>{{ session('error') }}</p>
                     </div>
                 @endif
 
@@ -113,7 +110,6 @@
         </div>
     </div>
     
-    <!-- Chat Widget Component -->
     <x-chat-widget />
 </body>
 </html>
