@@ -6,13 +6,11 @@
         </p>
     </div>
 
-    <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
     <form method="POST" action="{{ route('verification.verify.otp') }}">
         @csrf
 
-        <!-- OTP Code -->
         <div>
             <x-input-label for="otp" value="Kode OTP (6 Digit)" />
             <x-text-input id="otp" class="block mt-1 w-full text-center text-xl tracking-[0.5em] font-mono" type="text" name="otp" required autofocus autocomplete="off" maxlength="6" pattern="[0-9]{6}" />

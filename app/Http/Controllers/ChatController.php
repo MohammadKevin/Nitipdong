@@ -31,7 +31,6 @@ class ChatController extends Controller
         return view('chat.index', compact('conversations', 'admins'));
     }
 
-    // Memulai chat dengan pengguna baru (misal: Customer chat Seller toko)
     public function startConversation(User $receiver): RedirectResponse
     {
         $senderId = Auth::id();
@@ -40,7 +39,6 @@ class ChatController extends Controller
             return back()->with('error', 'Anda tidak dapat mengirim pesan ke diri sendiri.');
         }
 
-        // Cari atau buat percakapan yang sudah ada
         $conversation = Conversation::where(function ($q) use ($senderId, $receiver) {
             $q->where('user_one_id', $senderId)->where('user_two_id', $receiver->id);
         })->orWhere(function ($q) use ($senderId, $receiver) {
@@ -57,7 +55,6 @@ class ChatController extends Controller
         return redirect()->route('chat.show', $conversation);
     }
 
-    // Menampilkan detail room obrolan
     public function show(Conversation $conversation): View
     {
         $userId = Auth::id();
@@ -68,7 +65,6 @@ class ChatController extends Controller
 
         $partner = $conversation->user_one_id === $userId ? $conversation->userTwo : $conversation->userOne;
 
-        // Tandai pesan sudah dibaca
         Message::where('conversation_id', $conversation->id)
             ->where('sender_id', '!=', $userId)
             ->where('is_read', false)
@@ -79,7 +75,6 @@ class ChatController extends Controller
         return view('chat.show', compact('conversation', 'partner', 'messages'));
     }
 
-    // Kirim balasan pesan
     public function sendMessage(Request $request, Conversation $conversation): RedirectResponse
     {
         $request->validate([
@@ -99,7 +94,7 @@ class ChatController extends Controller
             'is_read'         => false,
         ]);
 
-        $conversation->touch(); // Update timestamp percakapan
+        $conversation->touch();
 
         return redirect()->route('chat.show', $conversation);
     }

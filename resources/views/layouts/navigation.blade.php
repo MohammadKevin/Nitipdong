@@ -1,160 +1,208 @@
-{{-- BelanjaIn Navigation — Modern Minimalist --}}
-<nav x-data="{ mobileOpen: false, userOpen: false }" class="bg-white border-b border-slate-100 sticky top-0 z-50"
-    style="box-shadow: 0 1px 8px rgba(0,0,0,0.06);">
-    <div class="max-w-[1280px] mx-auto px-4 md:px-6">
-        <div class="flex items-center h-16 gap-4">
+<nav x-data="{
+        mobileSearch: false,
+        userOpen: false,
+        notifOpen: false
+    }"
+    class="bg-white/95 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80">
 
-            {{-- Logo --}}
-            <a href="/" class="flex items-center gap-2.5 shrink-0 group">
-                <div class="w-9 h-9 rounded-xl overflow-hidden border border-cyan-100 shadow-sm">
-                    <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn" class="w-full h-full object-cover">
+    <div class="page-container">
+        <div class="flex items-center justify-between h-16 gap-4 sm:gap-6">
+
+            <a href="/" class="flex items-center gap-2.5 shrink-0 group" aria-label="BelanjaIn Home">
+                <div class="w-9 h-9 rounded-xl overflow-hidden shadow-xs border border-slate-200/60 bg-emerald-50 flex items-center justify-center">
+                    <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-full h-full object-cover">
                 </div>
-                <span class="font-bold text-xl text-slate-900 tracking-tight" style="font-family:'Outfit',sans-serif;">
-                    Belanja<span style="color:var(--brand);">In</span>
-                </span>
+                <div class="flex flex-col">
+                    <span class="font-bold text-lg tracking-tight text-slate-900 leading-tight">
+                        Belanja<span class="text-emerald-600">In</span>
+                    </span>
+                </div>
             </a>
 
-            {{-- Search Bar --}}
-            <div class="flex-1 max-w-xl hidden md:flex">
-                <div class="relative w-full">
-                    <input type="text"
-                        placeholder="Cari produk, toko, atau merek..."
-                        class="w-full pl-10 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 outline-none transition-all placeholder-slate-400">
-                    <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
+            <form action="{{ url('/products') }}" method="GET" class="flex-1 max-w-2xl hidden md:flex items-center relative">
+                <div class="relative w-full flex items-center">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </div>
+                    <input id="nav-search" type="text" name="q" value="{{ request('q') }}"
+                           placeholder="Cari jutaan produk, toko resmi, atau merek..."
+                           class="w-full pl-9 pr-24 py-2 text-xs sm:text-sm bg-slate-50 border border-slate-300 rounded-xl focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all placeholder:text-slate-400">
+                    <button type="submit"
+                            class="absolute right-1.5 top-1/2 -translate-y-1/2 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 shadow-xs">
+                        <span>Cari</span>
+                    </button>
                 </div>
-            </div>
+            </form>
 
-            {{-- Right Side Actions --}}
-            <div class="flex items-center gap-1 ml-auto">
+            <div class="flex items-center gap-1 sm:gap-2">
 
-                {{-- Cart --}}
+                <button @click="mobileSearch = !mobileSearch" aria-label="Search" class="btn-icon md:hidden">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </button>
+
                 @auth
                     @php $cartCount = auth()->user()->role === 'customer' ? auth()->user()->carts()->count() : 0; @endphp
-                    <a href="{{ route('customer.cart.index') }}"
-                        class="relative flex items-center justify-center w-10 h-10 rounded-xl text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                        </svg>
+                    <a href="{{ route('customer.cart.index') }}" aria-label="Keranjang Belanja" class="btn-icon relative" title="Keranjang Belanja">
+                        <i class="fa-solid fa-cart-shopping text-sm text-slate-600"></i>
                         @if($cartCount > 0)
-                            <span class="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-white text-[10px] font-bold flex items-center justify-center"
-                                style="background:var(--brand); font-family:'Outfit',sans-serif;">{{ $cartCount }}</span>
+                            <span class="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-emerald-600 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
+                                {{ $cartCount > 99 ? '99+' : $cartCount }}
+                            </span>
                         @endif
                     </a>
+
+                    <a href="{{ route('chat.index') }}" aria-label="Pesan Chat" class="btn-icon relative" title="Pesan & Chat">
+                        <i class="fa-regular fa-comment-dots text-sm text-slate-600"></i>
+                    </a>
+
+                    <div class="relative" @click.outside="notifOpen = false">
+                        <button @click="notifOpen = !notifOpen" aria-label="Notifikasi" class="btn-icon relative" title="Notifikasi">
+                            <i class="fa-regular fa-bell text-sm text-slate-600"></i>
+                        </button>
+
+                        <div x-show="notifOpen" x-cloak
+                             x-transition:enter="transition ease-out duration-150"
+                             x-transition:enter-start="opacity-0 translate-y-1 scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             class="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-50 overflow-hidden">
+                            <div class="px-4 py-2.5 border-b border-slate-100 flex items-center justify-between">
+                                <span class="font-semibold text-xs text-slate-800">Notifikasi</span>
+                                <span class="text-[10px] text-emerald-600 font-medium">Semua Terbaca</span>
+                            </div>
+                            <div class="py-6 text-center text-slate-400 text-xs">
+                                <i class="fa-regular fa-bell-slash text-xl mb-1 text-slate-300 block"></i>
+                                Belum ada notifikasi baru
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="h-5 w-px bg-slate-200 mx-1 hidden sm:block"></div>
+
+                    <div class="relative" @click.outside="userOpen = false">
+                        <button @click="userOpen = !userOpen" class="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-slate-100 transition-colors">
+                            <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=059669&color=fff&size=80"
+                                 class="w-7 h-7 rounded-full border border-emerald-200 object-cover" alt="{{ Auth::user()->name }}">
+                            <div class="hidden sm:block text-left max-w-[120px]">
+                                <p class="text-xs font-semibold text-slate-800 leading-tight truncate">
+                                    {{ Auth::user()->name }}
+                                </p>
+                                <p class="text-[10px] text-slate-400 capitalize truncate leading-none mt-0.5">
+                                    {{ str_replace('_', ' ', Auth::user()->role) }}
+                                </p>
+                            </div>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 hidden sm:block transition-transform" :class="userOpen ? 'rotate-180' : ''"></i>
+                        </button>
+
+                        <div x-show="userOpen" x-cloak
+                             x-transition:enter="transition ease-out duration-150"
+                             x-transition:enter-start="opacity-0 translate-y-1 scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 z-50 overflow-hidden">
+
+                            <div class="px-4 py-2.5 border-b border-slate-100">
+                                <p class="font-semibold text-slate-900 text-xs truncate">{{ Auth::user()->name }}</p>
+                                <p class="text-[11px] text-slate-400 truncate mt-0.5">{{ Auth::user()->email }}</p>
+                            </div>
+
+                            <div class="py-1">
+                                @if(Auth::user()->role === 'super_admin')
+                                    <a href="{{ route('super_admin.dashboard') }}" class="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">
+                                        <i class="fa-solid fa-shield-halved w-4 text-emerald-600"></i>
+                                        Super Admin Panel
+                                    </a>
+                                @elseif(Auth::user()->role === 'admin')
+                                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">
+                                        <i class="fa-solid fa-gauge w-4 text-emerald-600"></i>
+                                        Admin Panel
+                                    </a>
+                                @elseif(Auth::user()->role === 'seller')
+                                    <a href="{{ route('seller.dashboard') }}" class="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">
+                                        <i class="fa-solid fa-store w-4 text-emerald-600"></i>
+                                        Seller Center
+                                    </a>
+                                    <a href="{{ route('seller.products.index') }}" class="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">
+                                        <i class="fa-solid fa-boxes-stacked w-4 text-slate-400"></i>
+                                        Katalog Toko
+                                    </a>
+                                    <a href="{{ route('seller.orders.index') }}" class="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">
+                                        <i class="fa-solid fa-clipboard-list w-4 text-slate-400"></i>
+                                        Pesanan Masuk
+                                    </a>
+                                @else
+                                    <a href="{{ route('customer.dashboard') }}" class="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">
+                                        <i class="fa-solid fa-bag-shopping w-4 text-emerald-600"></i>
+                                        Pesanan Saya
+                                    </a>
+                                    <a href="{{ route('store.register') }}" class="flex items-center gap-2.5 px-4 py-2 text-xs text-emerald-600 font-semibold hover:bg-emerald-50 transition-colors">
+                                        <i class="fa-solid fa-store w-4 text-emerald-600"></i>
+                                        Buka Toko Gratis
+                                    </a>
+                                @endif
+
+                                <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">
+                                    <i class="fa-solid fa-user-gear w-4 text-slate-400"></i>
+                                    Pengaturan Akun
+                                </a>
+                            </div>
+
+                            <div class="pt-1 border-t border-slate-100">
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 transition-colors text-left font-medium">
+                                        <i class="fa-solid fa-arrow-right-from-bracket w-4"></i>
+                                        Keluar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 @else
-                    <a href="{{ route('login') }}"
-                        class="flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 hover:bg-cyan-50 hover:text-cyan-600 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                        </svg>
+                    <a href="{{ route('login') }}" class="btn-outline text-xs px-3.5 py-1.5">
+                        Masuk
+                    </a>
+                    <a href="{{ route('register') }}" class="btn-primary text-xs px-3.5 py-1.5">
+                        Daftar
                     </a>
                 @endauth
 
-                {{-- Notif Bell --}}
-                <button class="flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 hover:bg-cyan-50 hover:text-cyan-600 transition-colors relative">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                    </svg>
-                </button>
-
-                @if(Route::has('login'))
-                    @auth
-                        {{-- User Avatar Dropdown --}}
-                        <div class="relative" @click.outside="userOpen = false">
-                            <button @click="userOpen = !userOpen"
-                                class="flex items-center gap-2.5 ml-1 px-3 py-1.5 rounded-xl hover:bg-slate-50 transition-colors">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=06b6d4&color=fff&size=80"
-                                    class="w-8 h-8 rounded-full ring-2 ring-cyan-100" alt="Avatar">
-                                <div class="hidden md:block text-left">
-                                    <p class="text-sm font-semibold text-slate-800 leading-none" style="font-family:'Outfit',sans-serif;">
-                                        {{ Str::words(Auth::user()->name, 1, '') }}
-                                    </p>
-                                    <p class="text-xs text-slate-400 mt-0.5 capitalize">{{ Auth::user()->role }}</p>
-                                </div>
-                                <svg class="w-3.5 h-3.5 text-slate-400 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
-                                </svg>
-                            </button>
-
-                            {{-- Dropdown Menu --}}
-                            <div x-show="userOpen" x-cloak x-transition:enter="transition ease-out duration-150"
-                                x-transition:enter-start="opacity-0 translate-y-1 scale-95"
-                                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                                class="absolute right-0 mt-2 w-60 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 overflow-hidden">
-
-                                {{-- User Info Header --}}
-                                <div class="px-4 py-3 border-b border-slate-50">
-                                    <p class="font-semibold text-slate-800 text-sm truncate" style="font-family:'Outfit',sans-serif;">{{ Auth::user()->name }}</p>
-                                    <p class="text-xs text-slate-400 truncate mt-0.5">{{ Auth::user()->email }}</p>
-                                </div>
-
-                                <div class="py-1.5">
-                                    @if(Auth::user()->role === 'super_admin')
-                                        <a href="{{ route('super_admin.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-cyan-50 hover:text-cyan-600">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                                            Super Admin Panel
-                                        </a>
-                                    @elseif(Auth::user()->role === 'admin')
-                                        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-cyan-50 hover:text-cyan-600">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                                            Admin Panel
-                                        </a>
-                                    @elseif(Auth::user()->role === 'seller')
-                                        <a href="{{ route('seller.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-cyan-50 hover:text-cyan-600">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                                            Toko Saya
-                                        </a>
-                                    @else
-                                        <a href="{{ route('customer.dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-cyan-50 hover:text-cyan-600">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                                            Pesanan Saya
-                                        </a>
-                                        <a href="{{ route('customer.cart.index') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-cyan-50 hover:text-cyan-600">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                            Keranjang
-                                        </a>
-                                    @endif
-
-                                    <a href="{{ route('profile.edit') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-cyan-50 hover:text-cyan-600">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                        Edit Profil
-                                    </a>
-                                </div>
-
-                                <div class="border-t border-slate-50 py-1.5">
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <button type="submit" class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-rose-500 hover:bg-rose-50">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                                            Keluar
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    @else
-                        <div class="flex items-center gap-2 ml-2">
-                            <a href="{{ route('login') }}" class="px-4 py-2 text-sm font-semibold text-cyan-600 hover:text-cyan-700 transition-colors" style="font-family:'Outfit',sans-serif;">
-                                Masuk
-                            </a>
-                            <a href="{{ route('register') }}" class="btn-primary text-sm py-2 px-5">
-                                Daftar
-                            </a>
-                        </div>
-                    @endauth
-                @endif
             </div>
         </div>
 
-        {{-- Mobile Search --}}
-        <div class="md:hidden pb-3">
-            <div class="relative">
-                <input type="text" placeholder="Cari produk..."
-                    class="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 outline-none transition-all">
-                <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
+        <div x-show="mobileSearch" x-cloak class="pb-3 md:hidden">
+            <form action="{{ url('/products') }}" method="GET" class="relative">
+                <input type="text" name="q" value="{{ request('q') }}"
+                       placeholder="Cari produk, kategori, toko..."
+                       class="input text-xs pl-9 pr-16 py-2">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 text-xs"></i>
+                <button type="submit" class="absolute right-1.5 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-emerald-600 text-white text-xs font-semibold rounded-md">
+                    Cari
+                </button>
+            </form>
+        </div>
+    </div>
+
+    @php
+        $navCategories = \App\Models\Category::take(8)->get();
+    @endphp
+    <div class="border-t border-slate-100 bg-white hidden sm:block">
+        <div class="page-container">
+            <div class="flex items-center gap-6 h-10 overflow-x-auto text-xs text-slate-600 scrollbar-none">
+                <a href="{{ url('/products') }}" class="font-semibold text-slate-900 hover:text-emerald-600 shrink-0 flex items-center gap-1.5">
+                    <i class="fa-solid fa-list text-slate-400"></i>
+                    Semua Kategori
+                </a>
+                @foreach($navCategories as $cat)
+                    <a href="{{ route('products.index', ['category' => $cat->slug]) }}" class="hover:text-emerald-600 shrink-0 transition-colors flex items-center gap-1.5">
+                        @if($cat->icon)
+                            <i class="{{ $cat->icon }} text-slate-400 text-[11px]"></i>
+                        @endif
+                        {{ $cat->name }}
+                    </a>
+                @endforeach
+                <a href="{{ url('/products') }}?flash_sale=1" class="ml-auto font-bold text-rose-600 hover:text-rose-700 shrink-0 flex items-center gap-1.5">
+                    <i class="fa-solid fa-bolt text-rose-500"></i>
+                    Flash Sale
+                </a>
             </div>
         </div>
     </div>

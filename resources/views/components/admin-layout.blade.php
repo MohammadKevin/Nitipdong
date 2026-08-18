@@ -7,27 +7,24 @@
 
     <title>{{ $title ?? 'Admin Dashboard - ' . config('app.name', 'BelanjaIn') }}</title>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
     </style>
-    <!-- Favicon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <link rel="icon" type="image/jpeg" href="{{ asset('img/icon.jpg') }}">
 </head>
 <body class="font-sans antialiased">
     <div class="h-screen bg-[#F6F4EF] text-[#3E4658] overflow-hidden" style="font-family:'Inter',sans-serif;">
         <div class="flex h-screen w-full">
 
-            {{-- SIDEBAR --}}
             <aside class="w-64 h-full shrink-0 bg-[#152238] text-slate-300 flex flex-col justify-between py-6 px-4 overflow-y-auto">
                 <div>
-                    {{-- Brand --}}
                     <div class="flex items-center gap-2.5 px-2 mb-9">
                         <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2 group">
                             <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-9 h-9 rounded-lg shadow-md object-cover">
@@ -38,7 +35,6 @@
                         </a>
                     </div>
 
-                    {{-- Nav --}}
                     <nav class="flex flex-col gap-1">
                         <p class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold px-3 mb-2">Menu Utama</p>
 
@@ -57,6 +53,20 @@
                             <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                             Moderasi Produk
                         </a>
+                        <a href="{{ route('admin.categories.index') }}" class="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('admin.categories.*') ? 'bg-[#12A57F] text-white' : 'hover:bg-white/5 hover:text-white' }}">
+                            @if(request()->routeIs('admin.categories.*'))
+                                <span class="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r bg-white"></span>
+                            @endif
+                            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+                            Kategori Produk
+                        </a>
+                        <a href="{{ route('admin.flash_sales.index') }}" class="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('admin.flash_sales.*') ? 'bg-[#12A57F] text-white' : 'hover:bg-white/5 hover:text-white' }}">
+                            @if(request()->routeIs('admin.flash_sales.*'))
+                                <span class="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r bg-white"></span>
+                            @endif
+                            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            Flash Sale
+                        </a>
                         <a href="{{ route('chat.index') }}" class="relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('chat.*') ? 'bg-[#12A57F] text-white' : 'hover:bg-white/5 hover:text-white' }}">
                             @if(request()->routeIs('chat.*'))
                                 <span class="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r bg-white"></span>
@@ -73,7 +83,6 @@
                     </nav>
                 </div>
 
-                {{-- User mini card --}}
                 <div class="flex items-center gap-2.5 px-2 py-2.5 rounded-xl bg-white/5">
                     <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=12A57F&color=fff" class="w-8 h-8 rounded-lg" alt="User">
                     <div class="min-w-0">
@@ -89,7 +98,6 @@
                 </div>
             </aside>
 
-            {{-- MAIN CONTENT --}}
             <main class="flex-1 p-6 lg:p-8 flex flex-col gap-6 overflow-y-auto relative">
                 @if(session('success'))
                     <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl p-4 flex gap-3 shadow-sm" role="alert">
@@ -113,7 +121,6 @@
         </div>
     </div>
     
-    <!-- Chat Widget Component -->
     <x-chat-widget />
 </body>
 </html>

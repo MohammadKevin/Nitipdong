@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+  <!-- Bottom Book (Blue) -->
+  <rect x="8" y="32" width="32" height="8" rx="2" fill="#3b82f6"/>
+  <rect x="12" y="34" width="28" height="4" fill="#ffffff"/>
+  <rect x="8" y="32" width="5" height="8" rx="1" fill="#1d4ed8"/>
+  <!-- Middle Book (Green) -->
+  <rect x="10" y="22" width="29" height="8" rx="2" fill="#10b981"/>
+  <rect x="14" y="24" width="25" height="4" fill="#ffffff"/>
+  <rect x="10" y="22" width="5" height="8" rx="1" fill="#047857"/>
+  <!-- Top Book (Amber) -->
+  <rect x="12" y="12" width="26" height="8" rx="2" fill="#f59e0b"/>
+  <rect x="16" y="14" width="22" height="4" fill="#ffffff"/>
+  <rect x="12" y="12" width="5" height="8" rx="1" fill="#b45309"/>
+</svg>

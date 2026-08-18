@@ -36,7 +36,6 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    // OTP Verification Routes
     Route::get('verify-email', [\App\Http\Controllers\Auth\OtpVerificationController::class, 'show'])
         ->name('verification.notice');
 
@@ -47,8 +46,6 @@ Route::middleware('auth')->group(function () {
     Route::post('verify-email/resend', [\App\Http\Controllers\Auth\OtpVerificationController::class, 'resend'])
         ->middleware('throttle:6,1')
         ->name('verification.send.otp');
-
-
 
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
         ->name('password.confirm');

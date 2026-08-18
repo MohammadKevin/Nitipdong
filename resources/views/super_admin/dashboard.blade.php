@@ -3,10 +3,12 @@
         Super Admin Dashboard - {{ config('app.name', 'BelanjaIn') }}
     </x-slot>
 
-    {{-- Top bar --}}
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
-            <h1 class="text-xl font-bold text-[#14213D]" style="font-family:'Poppins',sans-serif;">Selamat datang kembali, {{ explode(' ', auth()->user()->name)[0] }} 👋</h1>
+            <h1 class="text-xl font-bold text-[#14213D] flex items-center gap-1.5" style="font-family:'Poppins',sans-serif;">
+                Selamat datang kembali, {{ explode(' ', auth()->user()->name)[0] }}
+                <i class="fa-solid fa-hand text-amber-500 text-lg"></i>
+            </h1>
             <p class="text-xs text-[#8A93A6] mt-0.5">Ini ringkasan performa platform BelanjaIn bulan ini.</p>
         </div>
 
@@ -23,7 +25,6 @@
         </div>
     </div>
 
-    {{-- 3. METRIC CARDS --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
         <div class="bg-white p-5 rounded-2xl border border-[#EFEBDF]">
@@ -67,7 +68,6 @@
         </div>
     </div>
 
-    {{-- 4. MIDDLE: RECENT ORDERS + CHART + REPORT --}}
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
         <div class="lg:col-span-8 bg-white p-6 rounded-2xl border border-[#EFEBDF] flex flex-col gap-5">
@@ -116,7 +116,6 @@
                     </table>
                 </div>
 
-                {{-- GRAFIK TRANSAKSI — dinamis, narik data asli, auto-refresh --}}
                 <div class="md:col-span-5 flex flex-col bg-[#FAF9F5] p-4 rounded-xl border border-[#F0EEE6]">
 
                     <div class="flex items-center justify-between mb-3">
@@ -125,7 +124,6 @@
                             <span id="chartUpdatedAt" class="text-[10px] text-[#B3ACA0]">Memuat...</span>
                         </div>
 
-                        {{-- Filter periode --}}
                         <div class="flex items-center gap-1 bg-white border border-[#F0EEE6] rounded-lg p-0.5">
                             <button type="button" data-period="day"   class="chart-period-btn px-2 py-1 rounded-md text-[10px] font-semibold text-[#8A93A6] transition-colors">Hari</button>
                             <button type="button" data-period="week"  class="chart-period-btn px-2 py-1 rounded-md text-[10px] font-semibold bg-[#12A57F] text-white transition-colors">Minggu</button>
@@ -135,7 +133,6 @@
                     </div>
 
                     <div class="relative flex-1 min-h-[128px]">
-                        {{-- Skeleton loading --}}
                         <div id="chartLoading" class="absolute inset-0 flex items-end justify-between gap-3 px-1 pb-1">
                             <div class="w-full h-1/3 bg-[#EFEBDF] rounded-md animate-pulse"></div>
                             <div class="w-full h-1/2 bg-[#EFEBDF] rounded-md animate-pulse"></div>
@@ -175,7 +172,6 @@
         </div>
     </div>
 
-    {{-- 5. RECENT TRANSACTIONS --}}
     <div class="bg-white p-6 rounded-2xl border border-[#EFEBDF]">
         <div class="flex justify-between items-center mb-4">
             <h4 class="font-semibold text-sm text-[#14213D]" style="font-family:'Poppins',sans-serif;">Transaksi Terbaru</h4>
@@ -241,7 +237,7 @@
         const periodBtns   = document.querySelectorAll('.chart-period-btn');
 
         const chartDataUrl = "{{ route('super_admin.dashboard.chart-data') }}";
-        const REFRESH_MS   = 30000; // auto-refresh tiap 30 detik
+        const REFRESH_MS   = 30000;
 
         let chart = null;
         let currentPeriod = 'week';
@@ -368,7 +364,6 @@
         loadChart(currentPeriod);
         scheduleAutoRefresh();
 
-        // Pause auto-refresh saat tab tidak aktif, biar hemat request
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 clearInterval(refreshTimer);

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+  <defs>
+    <linearGradient id="boxTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="boxLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="boxRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b45309"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </linearGradient>
+  </defs>
+  <!-- Top Face -->
+  <polygon points="24,6 42,15 24,24 6,15" fill="url(#boxTop)"/>
+  <!-- Left Face -->
+  <polygon points="6,15 24,24 24,42 6,33" fill="url(#boxLeft)"/>
+  <!-- Right Face -->
+  <polygon points="24,24 42,15 42,33 24,42" fill="url(#boxRight)"/>
+  <!-- Tape across top -->
+  <polygon points="24,6 20,8 15,19.5 19,21.5 24,11 29,21.5 33,19.5 28,8" fill="#e2e8f0" opacity="0.8"/>
+  <!-- Tape down center -->
+  <polygon points="22,23 26,25 26,42 22,41" fill="#e2e8f0" opacity="0.8"/>
+</svg>

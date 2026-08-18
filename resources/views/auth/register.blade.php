@@ -1,13 +1,15 @@
 <x-guest-layout>
     <div class="mb-8">
-        <h2 class="text-3xl font-bold text-[#14213D] mb-2" style="font-family:'Poppins',sans-serif;">Buat Akun Baru ✨</h2>
+        <h2 class="text-3xl font-bold text-[#14213D] mb-2 flex items-center gap-2" style="font-family:'Poppins',sans-serif;">
+            Buat Akun Baru
+            <i class="fa-solid fa-wand-magic-sparkles text-amber-500 text-2xl"></i>
+        </h2>
         <p class="text-[#8A93A6]">Bergabunglah dan mulai perjalanan bisnis Anda.</p>
     </div>
 
     <form method="POST" action="{{ route('register') }}" class="space-y-4">
         @csrf
 
-        <!-- Name -->
         <div>
             <label for="name" class="block text-sm font-medium text-[#3E4658] mb-1.5">Nama Lengkap</label>
             <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus autocomplete="name" 
@@ -16,7 +18,6 @@
             <x-input-error :messages="$errors->get('name')" class="mt-2 text-red-500" />
         </div>
 
-        <!-- Email Address -->
         <div>
             <label for="email" class="block text-sm font-medium text-[#3E4658] mb-1.5">Alamat Email</label>
             <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="username" 
@@ -25,7 +26,6 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2 text-red-500" />
         </div>
 
-        <!-- Password -->
         <div>
             <label for="password" class="block text-sm font-medium text-[#3E4658] mb-1.5">Kata Sandi</label>
             <input id="password" type="password" name="password" required autocomplete="new-password" 
@@ -34,7 +34,6 @@
             <x-input-error :messages="$errors->get('password')" class="mt-2 text-red-500" />
         </div>
 
-        <!-- Confirm Password -->
         <div>
             <label for="password_confirmation" class="block text-sm font-medium text-[#3E4658] mb-1.5">Ulangi Kata Sandi</label>
             <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" 

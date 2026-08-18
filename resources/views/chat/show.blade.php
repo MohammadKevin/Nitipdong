@@ -15,7 +15,6 @@
         <div class="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col h-full">
             <div class="bg-white rounded-2xl shadow-sm border border-[#EFEBDF] flex flex-col flex-1 overflow-hidden">
                 
-                <!-- Chat Header -->
                 <div class="px-6 py-4 border-b border-[#F0EEE6] flex items-center justify-between bg-white shrink-0">
                     <div class="flex items-center gap-4">
                         <a href="{{ route('chat.index') }}" class="w-8 h-8 rounded-full bg-[#FAF9F5] flex items-center justify-center text-[#8A93A6] hover:bg-[#F0EEE6] hover:text-[#14213D] transition-colors">
@@ -29,7 +28,6 @@
                     </div>
                 </div>
 
-                <!-- Message Box -->
                 <div class="flex-1 p-6 overflow-y-auto space-y-4 bg-[#FAF9F5]" id="chat-messages">
                     @foreach ($messages as $msg)
                         @php $isMe = $msg->sender_id === auth()->id(); @endphp
@@ -42,7 +40,6 @@
                     @endforeach
                 </div>
 
-                <!-- Form Kirim Pesan -->
                 <form action="{{ route('chat.send', $conversation) }}" method="POST" class="p-4 sm:p-5 bg-white border-t border-[#F0EEE6] shrink-0">
                     @csrf
                     <div class="flex items-center gap-3 relative">
@@ -58,14 +55,12 @@
     </div>
     
     <script>
-        // Auto-scroll ke bawah saat halaman dimuat
         document.addEventListener("DOMContentLoaded", function() {
             const chatContainer = document.getElementById('chat-messages');
             if(chatContainer) {
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
             
-            // Fokus input
             const messageInput = document.getElementById('message-input');
             if(messageInput) {
                 messageInput.focus();

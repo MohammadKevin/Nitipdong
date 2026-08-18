@@ -16,17 +16,11 @@ class Cart extends Model
 {
     use HasFactory;
 
-    /**
-     * Relasi ke User / Customer pemilik item keranjang
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Relasi ke Produk yang dimasukkan ke keranjang
-     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

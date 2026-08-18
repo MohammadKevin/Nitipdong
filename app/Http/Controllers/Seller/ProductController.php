@@ -14,14 +14,26 @@ use Illuminate\View\View;
 
 class ProductController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $store = Auth::user()->store;
         
-        $products = Product::with('category')
-            ->where('store_id', $store?->id)
-            ->latest()
-            ->paginate(10);
+        $query = Product::with('category')
+            ->where('store_id', $store?->id);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->category);
+        }
+
+        $products = $query->latest()->paginate(10)->withQueryString();
 
         return view('seller.products.index', compact('products'));
     }
@@ -35,15 +47,19 @@ class ProductController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'category_id' => ['required', 'exists:categories,id'],
-            'name'        => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'price'       => ['required', 'numeric', 'min:0'],
-            'stock'       => ['required', 'integer', 'min:0'],
-            'image'       => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'category_id'         => ['required', 'exists:categories,id'],
+            'name'                => ['required', 'string', 'max:255'],
+            'description'         => ['required', 'string'],
+            'price'               => ['required', 'numeric', 'min:0'],
+            'discount_percentage' => ['nullable', 'integer', 'min:0', 'max:99'],
+            'stock'               => ['required', 'integer', 'min:0'],
+            'image'               => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
 
         $store = Auth::user()->store;
+        if (!$store) {
+            return redirect()->route('seller.dashboard')->with('error', 'Toko belum terdaftar.');
+        }
 
         $imagePath = null;
         if ($request->hasFile('image')) {
@@ -51,15 +67,16 @@ class ProductController extends Controller
         }
 
         Product::create([
-            'store_id'    => $store->id,
-            'category_id' => $request->category_id,
-            'name'        => $request->name,
-            'slug'        => Str::slug($request->name) . '-' . Str::random(5),
-            'description' => $request->description,
-            'price'       => $request->price,
-            'stock'       => $request->stock,
-            'image'       => $imagePath,
-            'is_active'   => true,
+            'store_id'            => $store->id,
+            'category_id'         => $request->category_id,
+            'name'                => $request->name,
+            'slug'                => Str::slug($request->name) . '-' . Str::random(5),
+            'description'         => $request->description,
+            'price'               => $request->price,
+            'discount_percentage' => (int) $request->input('discount_percentage', 0),
+            'stock'               => $request->stock,
+            'image'               => $imagePath,
+            'is_active'           => true,
         ]);
 
         return redirect()->route('seller.products.index')->with('success', 'Produk berhasil ditambahkan!');
@@ -67,7 +84,6 @@ class ProductController extends Controller
 
     public function edit(Product $product): View
     {
-        // Pastikan hanya pemilik produk yang bisa edit
         if ($product->store_id !== Auth::user()->store?->id) {
             abort(403);
         }
@@ -83,12 +99,13 @@ class ProductController extends Controller
         }
 
         $request->validate([
-            'category_id' => ['required', 'exists:categories,id'],
-            'name'        => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'price'       => ['required', 'numeric', 'min:0'],
-            'stock'       => ['required', 'integer', 'min:0'],
-            'image'       => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'category_id'         => ['required', 'exists:categories,id'],
+            'name'                => ['required', 'string', 'max:255'],
+            'description'         => ['required', 'string'],
+            'price'               => ['required', 'numeric', 'min:0'],
+            'discount_percentage' => ['nullable', 'integer', 'min:0', 'max:99'],
+            'stock'               => ['required', 'integer', 'min:0'],
+            'image'               => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
 
         $imagePath = $product->image;
@@ -100,16 +117,22 @@ class ProductController extends Controller
         }
 
         $product->update([
-            'category_id' => $request->category_id,
-            'name'        => $request->name,
-            'description' => $request->description,
-            'price'       => $request->price,
-            'stock'       => $request->stock,
-            'image'       => $imagePath,
-            'is_active'   => $request->boolean('is_active', true),
+            'category_id'         => $request->category_id,
+            'name'                => $request->name,
+            'description'         => $request->description,
+            'price'               => $request->price,
+            'discount_percentage' => (int) $request->input('discount_percentage', 0),
+            'stock'               => $request->stock,
+            'image'               => $imagePath,
+            'is_active'           => $request->boolean('is_active', true),
         ]);
 
         return redirect()->route('seller.products.index')->with('success', 'Produk berhasil diperbarui!');
+    }
+
+    public function show(Product $product): RedirectResponse
+    {
+        return redirect()->route('product.show', $product);
     }
 
     public function destroy(Product $product): RedirectResponse

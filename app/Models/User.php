@@ -16,14 +16,8 @@ use Illuminate\Notifications\Notifiable;
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -32,16 +26,10 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    /**
-     * Override the default email verification notification.
-     * We use a custom OTP system, so we don't need the default signed URL.
-     */
     public function sendEmailVerificationNotification()
     {
-        // Do nothing. We send the custom OtpMail in the Controllers.
     }
 
-    // Role Helper Methods
     public function isSuperAdmin(): bool
     {
         return $this->role === 'super_admin';
@@ -62,25 +50,21 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === 'customer';
     }
 
-    // Relasi Toko (Seller)
     public function store(): HasOne
     {
         return $this->hasOne(Store::class);
     }
 
-    // Relasi Pesanan Belanja (Customer)
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
 
-    // Relasi Keranjang Belanja (Customer)
     public function carts(): HasMany
     {
         return $this->hasMany(Cart::class);
     }
 
-    // Relasi Percakapan / Chat
     public function conversationsAsUserOne(): HasMany
     {
         return $this->hasMany(Conversation::class, 'user_one_id');

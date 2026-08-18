@@ -3,7 +3,6 @@
         Moderasi Produk - {{ config('app.name', 'BelanjaIn') }}
     </x-slot>
 
-    {{-- Top bar --}}
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-2">
         <div>
             <h1 class="text-xl font-bold text-[#14213D]" style="font-family:'Poppins',sans-serif;">Moderasi Produk</h1>
@@ -11,7 +10,6 @@
         </div>
     </div>
 
-    <!-- Product Table -->
     <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
         <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-slate-50/50">
             <h3 class="font-bold text-slate-800">Daftar Semua Produk</h3>
