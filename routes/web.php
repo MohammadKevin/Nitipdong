@@ -86,6 +86,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return view('seller.dashboard', compact('store', 'products', 'categories', 'orders'));
         })->name('dashboard');
 
+        Route::post('/products/bulk-action', [ProductController::class, 'bulkAction'])->name('products.bulk_action');
         Route::resource('products', ProductController::class);
 
         Route::resource('vouchers', SellerVoucherController::class);

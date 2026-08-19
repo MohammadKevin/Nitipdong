@@ -188,4 +188,66 @@ class ProductController extends Controller
 
         return redirect()->route('seller.products.index')->with('success', 'Produk berhasil dihapus!');
     }
+
+    public function bulkAction(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'action'        => ['required', 'string', 'in:delete,activate,deactivate,set_discount'],
+            'product_ids'   => ['required', 'array', 'min:1'],
+            'product_ids.*' => ['required', 'exists:products,id'],
+            'discount'      => ['nullable', 'integer', 'min:0', 'max:99'],
+        ]);
+
+        $store = Auth::user()->store;
+        if (!$store) {
+            return redirect()->route('seller.products.index')->with('error', 'Toko tidak ditemukan.');
+        }
+
+        $products = Product::where('store_id', $store->id)
+            ->whereIn('id', $request->product_ids)
+            ->get();
+
+        $count = $products->count();
+        if ($count === 0) {
+            return redirect()->route('seller.products.index')->with('error', 'Tidak ada produk yang valid dipilih.');
+        }
+
+        switch ($request->action) {
+            case 'delete':
+                foreach ($products as $product) {
+                    if ($product->image && Storage::disk('public')->exists($product->image)) {
+                        Storage::disk('public')->delete($product->image);
+                    }
+                    foreach ($product->images ?? [] as $extraImage) {
+                        if (Storage::disk('public')->exists($extraImage)) {
+                            Storage::disk('public')->delete($extraImage);
+                        }
+                    }
+                    $product->delete();
+                }
+                return redirect()->route('seller.products.index')->with('success', "Berhasil menghapus {$count} produk terpilih secara masal.");
+
+            case 'activate':
+                Product::where('store_id', $store->id)
+                    ->whereIn('id', $products->pluck('id'))
+                    ->update(['is_active' => true]);
+                return redirect()->route('seller.products.index')->with('success', "Berhasil mengaktifkan {$count} produk terpilih.");
+
+            case 'deactivate':
+                Product::where('store_id', $store->id)
+                    ->whereIn('id', $products->pluck('id'))
+                    ->update(['is_active' => false]);
+                return redirect()->route('seller.products.index')->with('success', "Berhasil menonaktifkan {$count} produk terpilih.");
+
+            case 'set_discount':
+                $discount = (int) $request->input('discount', 0);
+                Product::where('store_id', $store->id)
+                    ->whereIn('id', $products->pluck('id'))
+                    ->update(['discount_percentage' => $discount]);
+                return redirect()->route('seller.products.index')->with('success', "Berhasil menerapkan diskon {$discount}% pada {$count} produk terpilih.");
+
+            default:
+                return redirect()->route('seller.products.index')->with('error', 'Aksi masal tidak dikenali.');
+        }
+    }
 }
