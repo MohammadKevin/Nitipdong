@@ -19,7 +19,7 @@
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <i class="fa-solid fa-lock text-xs"></i>
                 </div>
-                <input id="update_password_current_password" name="current_password" type="password" class="input text-xs rounded-xl pl-9.5 h-10 w-full" autocomplete="current-password" placeholder="Masukkan kata sandi lama" />
+                <input id="update_password_current_password" name="current_password" type="password" class="input text-xs rounded-xl !pl-11 h-10 w-full" autocomplete="current-password" placeholder="Masukkan kata sandi lama" />
             </div>
             <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-1.5 text-xs text-rose-500" />
         </div>
@@ -30,7 +30,7 @@
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <i class="fa-solid fa-key text-xs"></i>
                 </div>
-                <input id="update_password_password" name="password" type="password" class="input text-xs rounded-xl pl-9.5 h-10 w-full" autocomplete="new-password" placeholder="Minimal 8 karakter" />
+                <input id="update_password_password" name="password" type="password" class="input text-xs rounded-xl !pl-11 h-10 w-full" autocomplete="new-password" placeholder="Minimal 8 karakter" />
             </div>
             <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-1.5 text-xs text-rose-500" />
         </div>
@@ -41,7 +41,7 @@
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <i class="fa-solid fa-check-double text-xs"></i>
                 </div>
-                <input id="update_password_password_confirmation" name="password_confirmation" type="password" class="input text-xs rounded-xl pl-9.5 h-10 w-full" autocomplete="new-password" placeholder="Ulangi kata sandi baru" />
+                <input id="update_password_password_confirmation" name="password_confirmation" type="password" class="input text-xs rounded-xl !pl-11 h-10 w-full" autocomplete="new-password" placeholder="Ulangi kata sandi baru" />
             </div>
             <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-1.5 text-xs text-rose-500" />
         </div>

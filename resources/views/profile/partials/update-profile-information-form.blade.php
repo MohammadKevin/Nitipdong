@@ -47,7 +47,7 @@
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <i class="fa-regular fa-user text-xs"></i>
                 </div>
-                <input id="name" name="name" type="text" class="input text-xs rounded-xl pl-9.5 h-10 w-full" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name" />
+                <input id="name" name="name" type="text" class="input text-xs rounded-xl !pl-11 h-10 w-full" value="{{ old('name', $user->name) }}" required autofocus autocomplete="name" />
             </div>
             <x-input-error class="mt-1.5 text-xs text-rose-500" :messages="$errors->get('name')" />
         </div>
@@ -59,7 +59,7 @@
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <i class="fa-regular fa-envelope text-xs"></i>
                 </div>
-                <input id="email" name="email" type="email" class="input text-xs rounded-xl pl-9.5 h-10 w-full" value="{{ old('email', $user->email) }}" required autocomplete="username" />
+                <input id="email" name="email" type="email" class="input text-xs rounded-xl !pl-11 h-10 w-full" value="{{ old('email', $user->email) }}" required autocomplete="username" />
             </div>
             <x-input-error class="mt-1.5 text-xs text-rose-500" :messages="$errors->get('email')" />
 
@@ -92,7 +92,7 @@
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                     <i class="fa-solid fa-phone text-xs"></i>
                 </div>
-                <input id="phone" name="phone" type="text" placeholder="08xxxxxxxxxx" class="input text-xs rounded-xl pl-9.5 h-10 w-full" value="{{ old('phone', $user->phone) }}" autocomplete="tel" />
+                <input id="phone" name="phone" type="text" placeholder="08xxxxxxxxxx" class="input text-xs rounded-xl !pl-11 h-10 w-full" value="{{ old('phone', $user->phone) }}" autocomplete="tel" />
             </div>
             <x-input-error class="mt-1.5 text-xs text-rose-500" :messages="$errors->get('phone')" />
         </div>

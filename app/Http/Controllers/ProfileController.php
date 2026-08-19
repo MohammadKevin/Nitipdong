@@ -33,6 +33,7 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $validated = $request->validated();
+        unset($validated['avatar']);
 
         // Handle Avatar upload
         if ($request->hasFile('avatar')) {
