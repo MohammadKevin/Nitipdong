@@ -42,7 +42,22 @@
                 </button>
 
                 @auth
-                    @php $cartCount = auth()->user()->role === 'customer' ? auth()->user()->carts()->count() : 0; @endphp
+                    @php 
+                        $cartCount = auth()->user()->role === 'customer' ? auth()->user()->carts()->count() : 0;
+                        $wishlistCount = auth()->user()->role === 'customer' ? auth()->user()->wishlists()->count() : 0;
+                    @endphp
+
+                    @if(auth()->user()->role === 'customer')
+                    <a href="{{ route('customer.wishlist.index') }}" aria-label="Wishlist" class="btn-icon relative" title="Wishlist & Produk Favorit">
+                        <i class="fa-regular fa-heart text-sm text-slate-600"></i>
+                        @if($wishlistCount > 0)
+                            <span class="absolute top-1 right-1 min-w-[15px] h-3.5 px-0.5 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
+                                {{ $wishlistCount > 99 ? '99+' : $wishlistCount }}
+                            </span>
+                        @endif
+                    </a>
+                    @endif
+
                     <a href="{{ route('customer.cart.index') }}" aria-label="Keranjang Belanja" class="btn-icon relative" title="Keranjang Belanja">
                         <i class="fa-solid fa-cart-shopping text-sm text-slate-600"></i>
                         @if($cartCount > 0)
@@ -126,10 +141,22 @@
                                         <i class="fa-solid fa-clipboard-list w-4 text-slate-400"></i>
                                         Pesanan Masuk
                                     </a>
+                                    <a href="{{ route('seller.reviews.index') }}" class="flex items-center gap-2.5 px-3.5 py-1.5 text-slate-700 hover:bg-slate-50 hover:text-cyan-600 transition-colors">
+                                        <i class="fa-solid fa-star w-4 text-amber-500"></i>
+                                        Ulasan Pembeli
+                                    </a>
                                 @else
                                     <a href="{{ route('customer.dashboard') }}" class="flex items-center gap-2.5 px-3.5 py-1.5 text-slate-700 hover:bg-slate-50 hover:text-cyan-600 transition-colors">
                                         <i class="fa-solid fa-bag-shopping w-4 text-cyan-600"></i>
                                         Pesanan Saya
+                                    </a>
+                                    <a href="{{ route('customer.wishlist.index') }}" class="flex items-center gap-2.5 px-3.5 py-1.5 text-slate-700 hover:bg-slate-50 hover:text-cyan-600 transition-colors">
+                                        <i class="fa-regular fa-heart w-4 text-rose-500"></i>
+                                        Wishlist Saya
+                                    </a>
+                                    <a href="{{ route('customer.addresses.index') }}" class="flex items-center gap-2.5 px-3.5 py-1.5 text-slate-700 hover:bg-slate-50 hover:text-cyan-600 transition-colors">
+                                        <i class="fa-solid fa-location-dot w-4 text-cyan-600"></i>
+                                        Buku Alamat
                                     </a>
                                     <a href="{{ route('store.register') }}" class="flex items-center gap-2.5 px-3.5 py-1.5 text-cyan-700 font-semibold hover:bg-cyan-50 transition-colors">
                                         <i class="fa-solid fa-store w-4 text-cyan-600"></i>

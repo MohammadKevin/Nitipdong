@@ -81,6 +81,12 @@
                     'active' => request()->routeIs('seller.vouchers.*'),
                     'badge'  => $voucherCount > 0 ? $voucherCount : null,
                 ],
+                [
+                    'route'  => 'seller.reviews.index',
+                    'label'  => 'Ulasan Pembeli',
+                    'icon'   => 'fa-solid fa-star',
+                    'active' => request()->routeIs('seller.reviews.*'),
+                ],
             ];
             @endphp
 

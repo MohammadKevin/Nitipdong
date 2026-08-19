@@ -8,32 +8,96 @@
         <form action="{{ route('customer.order.store') }}" method="POST" class="max-w-4xl mx-auto space-y-4">
             @csrf
 
-            <div class="bg-white rounded-xl border border-slate-200/80 p-5 sm:p-6 shadow-card space-y-4">
-                <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
-                    <i class="fa-solid fa-location-dot text-cyan-700 text-xs"></i>
-                    <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">1. Alamat Pengiriman</h2>
+            <div class="bg-white rounded-xl border border-slate-200/80 p-5 sm:p-6 shadow-card space-y-4"
+                 x-data="{
+                    useSaved: {{ count($addresses) > 0 ? 'true' : 'false' }},
+                    selectedAddressId: {{ $defaultAddress ? $defaultAddress->id : 'null' }}
+                 }">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-location-dot text-cyan-700 text-xs"></i>
+                        <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">1. Alamat Pengiriman</h2>
+                    </div>
+                    @if(count($addresses) > 0)
+                        <a href="{{ route('customer.addresses.index') }}" target="_blank" class="text-[11px] font-semibold text-cyan-700 hover:underline flex items-center gap-1">
+                            <i class="fa-solid fa-gear text-[10px]"></i> Kelola Buku Alamat
+                        </a>
+                    @endif
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <div class="font-medium text-slate-800">
-                        <p class="font-bold text-slate-900 text-sm">{{ auth()->user()->name }}</p>
-                        <p class="text-slate-500 mt-0.5">{{ auth()->user()->email }}</p>
-                        <span class="inline-block mt-2 px-2 py-0.5 bg-cyan-50 text-cyan-800 font-semibold rounded text-[10px] border border-cyan-200">
-                            Penerima Pesanan
-                        </span>
+                @if(count($addresses) > 0)
+                    <div x-show="useSaved" class="space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            @foreach($addresses as $addr)
+                                <label class="border rounded-xl p-3.5 cursor-pointer flex items-start gap-3 transition-all relative"
+                                       :class="selectedAddressId == {{ $addr->id }} ? 'border-cyan-600 bg-cyan-50/40 ring-1 ring-cyan-600' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                                    <input type="radio" name="address_id" value="{{ $addr->id }}"
+                                           x-model="selectedAddressId" class="mt-0.5 text-cyan-600 focus:ring-cyan-500">
+                                    <div class="text-xs min-w-0">
+                                        <div class="flex items-center gap-1.5 mb-1">
+                                            <span class="font-bold text-slate-900">{{ $addr->label }}</span>
+                                            @if($addr->is_default)
+                                                <span class="px-1.5 py-0.2 bg-cyan-100 text-cyan-800 text-[9px] font-bold rounded">Utama</span>
+                                            @endif
+                                        </div>
+                                        <p class="font-semibold text-slate-800">{{ $addr->recipient_name }} <span class="font-normal text-slate-500 font-mono">({{ $addr->phone }})</span></p>
+                                        <p class="text-slate-600 text-[11px] mt-1 line-clamp-2">{{ $addr->full_address }}</p>
+                                        @if($addr->city || $addr->province)
+                                            <p class="text-[10px] text-slate-400 mt-0.5">{{ implode(', ', array_filter([$addr->city, $addr->province, $addr->postal_code])) }}</p>
+                                        @endif
+                                    </div>
+                                </label>
+                            @endforeach
+                        </div>
+
+                        <button type="button" @click="useSaved = false; selectedAddressId = null"
+                                class="text-xs font-semibold text-slate-600 hover:text-cyan-700 flex items-center gap-1.5 pt-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i> Tulis Alamat Baru Lainnya
+                        </button>
                     </div>
-                    <div class="md:col-span-2">
-                        <label for="shipping_address" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Alamat Lengkap Tujuan <span class="text-rose-500">*</span>
-                        </label>
-                        <textarea name="shipping_address" id="shipping_address" rows="3" required
-                                  class="input text-xs rounded-md"
-                                  placeholder="Contoh: Jl. Kebon Sirih No. 45, Menteng, Jakarta Pusat 10340">{{ old('shipping_address', auth()->user()->address) }}</textarea>
-                        @error('shipping_address')
-                            <p class="text-rose-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
+
+                    <div x-show="!useSaved" x-cloak class="space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs bg-slate-50 p-4 rounded-lg border border-slate-200">
+                            <div class="font-medium text-slate-800">
+                                <p class="font-bold text-slate-900 text-sm">{{ auth()->user()->name }}</p>
+                                <p class="text-slate-500 mt-0.5">{{ auth()->user()->email }}</p>
+                                <button type="button" @click="useSaved = true; selectedAddressId = {{ $defaultAddress ? $defaultAddress->id : 'null' }}"
+                                        class="mt-3 text-[11px] font-semibold text-cyan-700 hover:underline block">
+                                    ← Pilih Dari Alamat Tersimpan
+                                </button>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label for="shipping_address" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                    Alamat Pengiriman Baru <span class="text-rose-500">*</span>
+                                </label>
+                                <textarea name="shipping_address" id="shipping_address" rows="3"
+                                          class="input text-xs rounded-md"
+                                          placeholder="Nama penerima, no. HP, dan alamat lengkap tujuan..."></textarea>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                @else
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs bg-slate-50 p-4 rounded-lg border border-slate-200">
+                        <div class="font-medium text-slate-800">
+                            <p class="font-bold text-slate-900 text-sm">{{ auth()->user()->name }}</p>
+                            <p class="text-slate-500 mt-0.5">{{ auth()->user()->email }}</p>
+                            <span class="inline-block mt-2 px-2 py-0.5 bg-cyan-50 text-cyan-800 font-semibold rounded text-[10px] border border-cyan-200">
+                                Penerima Pesanan
+                            </span>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="shipping_address" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Alamat Lengkap Tujuan <span class="text-rose-500">*</span>
+                            </label>
+                            <textarea name="shipping_address" id="shipping_address" rows="3" required
+                                      class="input text-xs rounded-md"
+                                      placeholder="Contoh: Jl. Kebon Sirih No. 45, Menteng, Jakarta Pusat 10340">{{ old('shipping_address', auth()->user()->address) }}</textarea>
+                            @error('shipping_address')
+                                <p class="text-rose-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                @endif
             </div>
 
             @php

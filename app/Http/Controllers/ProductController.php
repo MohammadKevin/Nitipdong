@@ -61,7 +61,11 @@ class ProductController extends Controller
             abort(404);
         }
 
-        $product->load(['store', 'category']);
+        $product->load([
+            'store',
+            'category',
+            'reviews' => fn ($q) => $q->with('user')->latest(),
+        ]);
 
         $storeProducts = Product::where('store_id', $product->store_id)
             ->where('id', '!=', $product->id)
