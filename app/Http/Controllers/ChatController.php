@@ -12,9 +12,13 @@ use Illuminate\View\View;
 
 class ChatController extends Controller
 {
-    public function index(): View
+    public function index(): View|RedirectResponse
     {
         $user = Auth::user();
+        if ($user->role === 'seller') {
+            return redirect()->route('seller.chat.cus');
+        }
+
         $userId = $user->id;
 
         $conversations = Conversation::where('user_one_id', $userId)
@@ -31,9 +35,53 @@ class ChatController extends Controller
         return view('chat.index', compact('conversations', 'admins'));
     }
 
+    public function sellerCustomerChat(): View
+    {
+        $userId = Auth::id();
+
+        $allConversations = Conversation::where('user_one_id', $userId)
+            ->orWhere('user_two_id', $userId)
+            ->with(['userOne', 'userTwo', 'messages' => fn ($q) => $q->latest()])
+            ->latest('updated_at')
+            ->get();
+
+        // Filter only customer partners
+        $conversations = $allConversations->filter(function ($conv) use ($userId) {
+            $partner = $conv->user_one_id === $userId ? $conv->userTwo : $conv->userOne;
+            return $partner && $partner->role === 'customer';
+        });
+
+        $activeTab = 'cus';
+
+        return view('chat.index', compact('conversations', 'activeTab'));
+    }
+
+    public function sellerAdminChat(): View
+    {
+        $userId = Auth::id();
+
+        $allConversations = Conversation::where('user_one_id', $userId)
+            ->orWhere('user_two_id', $userId)
+            ->with(['userOne', 'userTwo', 'messages' => fn ($q) => $q->latest()])
+            ->latest('updated_at')
+            ->get();
+
+        // Filter only admin or super_admin partners
+        $conversations = $allConversations->filter(function ($conv) use ($userId) {
+            $partner = $conv->user_one_id === $userId ? $conv->userTwo : $conv->userOne;
+            return $partner && in_array($partner->role, ['admin', 'super_admin']);
+        });
+
+        $admins = User::whereIn('role', ['admin', 'super_admin'])->where('id', '!=', $userId)->get();
+        $activeTab = 'admin';
+
+        return view('chat.index', compact('conversations', 'admins', 'activeTab'));
+    }
+
     public function startConversation(User $receiver): RedirectResponse
     {
-        $senderId = Auth::id();
+        $sender = Auth::user();
+        $senderId = $sender->id;
 
         if ($senderId === $receiver->id) {
             return back()->with('error', 'Anda tidak dapat mengirim pesan ke diri sendiri.');
@@ -50,6 +98,13 @@ class ChatController extends Controller
                 'user_one_id' => $senderId,
                 'user_two_id' => $receiver->id,
             ]);
+        }
+
+        if ($sender->role === 'seller') {
+            if (in_array($receiver->role, ['admin', 'super_admin'])) {
+                return redirect()->route('seller.chat.admin.show', $conversation);
+            }
+            return redirect()->route('seller.chat.cus.show', $conversation);
         }
 
         return redirect()->route('chat.show', $conversation);

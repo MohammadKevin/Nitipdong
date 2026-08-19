@@ -97,6 +97,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/reviews', [SellerReviewController::class, 'index'])->name('reviews.index');
         Route::post('/reviews/{review}/reply', [SellerReviewController::class, 'reply'])->name('reviews.reply');
+
+        // Seller Chat Routes (Customer & Admin)
+        Route::get('/chat/cus', [ChatController::class, 'sellerCustomerChat'])->name('chat.cus');
+        Route::get('/chat/cus/{conversation}', [ChatController::class, 'show'])->name('chat.cus.show');
+        Route::get('/chat/admin', [ChatController::class, 'sellerAdminChat'])->name('chat.admin');
+        Route::get('/chat/admin/{conversation}', [ChatController::class, 'show'])->name('chat.admin.show');
     });
 
     Route::middleware(['role:customer'])->prefix('customer')->name('customer.')->group(function () {

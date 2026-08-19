@@ -96,10 +96,16 @@
                             @endif
                         </a>
 
-                        <a href="{{ route('chat.index') }}"
-                           class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('chat.*') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
-                            <i class="fa-regular fa-comment-dots w-4 h-4 text-xs flex items-center justify-center {{ request()->routeIs('chat.*') ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
+                        <a href="{{ route('seller.chat.cus') }}"
+                           class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('seller.chat.cus*') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
+                            <i class="fa-regular fa-comment-dots w-4 h-4 text-xs flex items-center justify-center {{ request()->routeIs('seller.chat.cus*') ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
                             Pesan Chat Pembeli
+                        </a>
+
+                        <a href="{{ route('seller.chat.admin') }}"
+                           class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('seller.chat.admin*') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-headset w-4 h-4 text-xs flex items-center justify-center {{ request()->routeIs('seller.chat.admin*') ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
+                            Pesan Chat Admin
                         </a>
 
                         <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-3 mt-5 mb-2">Pintasan</p>

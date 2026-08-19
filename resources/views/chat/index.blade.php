@@ -21,10 +21,16 @@
                     <i class="fa-solid fa-comments text-cyan-700"></i>
                     Pesan & Percakapan
                 </h1>
-                <p class="text-xs text-slate-500 mt-0.5">Kelola obrolan langsung Anda dengan pembeli, pelanggan toko, atau pengelola marketplace.</p>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    @if(auth()->user()->role === 'seller')
+                        {{ ($activeTab ?? '') === 'admin' ? 'Obrolan langsung dan konsultasi bantuan dengan tim Admin Resmi.' : 'Kelola obrolan langsung Anda dengan pembeli dan calon pelanggan toko.' }}
+                    @else
+                        Kelola obrolan langsung Anda dengan pembeli, pelanggan toko, atau pengelola marketplace.
+                    @endif
+                </p>
             </div>
 
-            @if(auth()->user()->role === 'super_admin' && isset($admins) && $admins->isNotEmpty())
+            @if(in_array(auth()->user()->role, ['super_admin', 'seller']) && isset($admins) && $admins->isNotEmpty())
                 <form id="startAdminChatForm" method="POST" class="flex gap-2 w-full sm:w-auto" onsubmit="
                     const select = document.getElementById('admin_select');
                     if(!select.value) { alert('Pilih admin terlebih dahulu!'); return false; }
@@ -32,21 +38,42 @@
                     return true;
                 ">
                     @csrf
-                    <select id="admin_select" class="input text-xs rounded-xl bg-white flex-1 sm:w-48 h-9.5 border border-slate-200">
-                        <option value="">-- Chat dengan Admin --</option>
+                    <select id="admin_select" class="input text-xs rounded-xl bg-white flex-1 sm:w-52 h-9.5 border border-slate-200">
+                        <option value="">-- Hubungi Admin Official --</option>
                         @foreach($admins as $admin)
-                            <option value="{{ $admin->getRouteKey() }}">{{ $admin->name }}</option>
+                            <option value="{{ $admin->getRouteKey() }}">{{ $admin->name }} ({{ ucfirst($admin->role) }})</option>
                         @endforeach
                     </select>
-                    <button type="submit" class="btn-primary text-xs h-9.5 px-4 rounded-xl bg-cyan-700 hover:bg-cyan-800 font-semibold shadow-xs whitespace-nowrap">Mulai Chat</button>
+                    <button type="submit" class="btn-primary text-xs h-9.5 px-4 rounded-xl bg-cyan-700 hover:bg-cyan-800 font-semibold shadow-xs whitespace-nowrap flex items-center gap-1.5">
+                        <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                        Mulai Chat
+                    </button>
                 </form>
             @endif
         </div>
 
+        @if(auth()->user()->role === 'seller')
+            {{-- Seller Chat Navigation Tabs --}}
+            <div class="flex items-center gap-2 border-b border-slate-200/80 pb-1">
+                <a href="{{ route('seller.chat.cus') }}"
+                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 {{ ($activeTab ?? 'cus') === 'cus' ? 'bg-cyan-700 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+                    <i class="fa-regular fa-comment-dots text-xs"></i>
+                    Chat Pembeli (Customer)
+                </a>
+                <a href="{{ route('seller.chat.admin') }}"
+                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 {{ ($activeTab ?? '') === 'admin' ? 'bg-cyan-700 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
+                    <i class="fa-solid fa-headset text-xs"></i>
+                    Chat Bantuan Admin
+                </a>
+            </div>
+        @endif
+
         {{-- Conversations Card Container --}}
-        <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 overflow-hidden flex flex-col min-h-[480px] max-h-[calc(100vh-220px)]">
+        <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 overflow-hidden flex flex-col min-h-[480px] max-h-[calc(100vh-250px)]">
             <div class="p-4 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
-                <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Kotak Masuk Pesan</span>
+                <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    {{ (isset($activeTab) && $activeTab === 'admin') ? 'Daftar Chat dengan Admin Official' : 'Kotak Masuk Chat Pembeli' }}
+                </span>
                 <span class="text-xs text-slate-500 font-medium">Total <strong class="text-slate-900">{{ count($conversations) }}</strong> Obrolan</span>
             </div>
 
