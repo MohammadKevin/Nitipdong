@@ -97,8 +97,30 @@
                 </div>
             </aside>
 
-            <main class="flex-1 overflow-y-auto h-full p-6 lg:p-8">
+            <main x-data="{
+                    showScrollTop: false,
+                    scrollToTop() {
+                        $el.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                  }"
+                  @scroll.passive="showScrollTop = $el.scrollTop > 80"
+                  class="flex-1 overflow-y-auto h-full p-5 sm:p-6 lg:p-8 pb-28 sm:pb-36 scroll-smooth relative">
                 {{ $slot }}
+
+                {{-- Floating Scroll to Top Button --}}
+                <div class="fixed bottom-6 right-24 z-40" x-show="showScrollTop" x-cloak
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 translate-y-2 scale-90"
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave-end="opacity-0 translate-y-2 scale-90">
+                    <button @click="scrollToTop()"
+                            class="w-10 h-10 rounded-xl bg-slate-900/90 hover:bg-cyan-700 text-white shadow-lg backdrop-blur-sm border border-slate-700/50 flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
+                            title="Scroll ke Atas">
+                        <i class="fa-solid fa-chevron-up text-xs"></i>
+                    </button>
+                </div>
             </main>
         </div>
     </div>

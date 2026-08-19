@@ -40,21 +40,22 @@
     }
 
     ::-webkit-scrollbar {
-        width: 5px;
-        height: 5px;
+        width: 8px;
+        height: 8px;
     }
 
     ::-webkit-scrollbar-track {
-        background: transparent;
+        background: #f1f5f9;
     }
 
     ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
+        background: #94a3b8;
         border-radius: 9999px;
+        border: 1px solid #f1f5f9;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
+        background: #64748b;
     }
 
     ::selection {
