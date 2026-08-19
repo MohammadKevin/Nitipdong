@@ -45,8 +45,8 @@
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5"
-                         x-data="{ 
-                            price: {{ old('price', $product->seller_price) }}, 
+                         x-data="{
+                            price: {{ old('price', $product->seller_price) }},
                             discount: {{ old('discount_percentage', $product->discount_percentage ?? 0) }},
                             get markupPrice() {
                                 return Math.round(this.price * 1.05);
@@ -168,30 +168,98 @@
                     <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Foto Produk</h3>
                 </div>
 
-                <div x-data="{ preview: null }">
-                    <p class="text-xs text-slate-400 mb-3">Format didukung: JPG, PNG, WEBP (Maks. 2MB). Pilih foto baru untuk mengganti foto lama.</p>
-                    
-                    <div class="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-md bg-slate-50 border border-slate-200">
-                        <div class="w-20 h-20 rounded-md border border-slate-200 bg-white overflow-hidden flex items-center justify-center shrink-0 shadow-xs">
-                            <template x-if="preview">
-                                <img :src="preview" class="w-full h-full object-cover" alt="Preview">
-                            </template>
-                            <template x-if="!preview">
-                                @if($product->image)
-                                    <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover" alt="{{ $product->name }}">
-                                @else
-                                    <div class="text-center text-slate-300">
-                                        <i class="fa-solid fa-image text-xl"></i>
-                                        <p class="text-[9px] mt-0.5 text-slate-400">Belum ada foto</p>
-                                    </div>
-                                @endif
+                <div x-data="{
+                    mainPreview: null,
+                    extraPreviews: [],
+                    deletedImages: [],
+                    handleExtra(event) {
+                        const files = Array.from(event.target.files);
+                        files.forEach(file => {
+                            const r = new FileReader();
+                            r.onload = e => this.extraPreviews.push(e.target.result);
+                            r.readAsDataURL(file);
+                        });
+                    },
+                    markDelete(path) {
+                        this.deletedImages.push(path);
+                    }
+                }">
+                    <p class="text-xs text-slate-400 mb-3">Format didukung: JPG, PNG, WEBP (Maks. 2MB). Pilih foto baru untuk mengganti foto utama.</p>
+
+                    {{-- Foto Utama --}}
+                    <div class="mb-4">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Foto Utama</label>
+                        <div class="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-md bg-slate-50 border border-slate-200">
+                            <div class="w-20 h-20 rounded-md border border-slate-200 bg-white overflow-hidden flex items-center justify-center shrink-0 shadow-xs">
+                                <template x-if="mainPreview">
+                                    <img :src="mainPreview" class="w-full h-full object-cover" alt="Preview Baru">
+                                </template>
+                                <template x-if="!mainPreview">
+                                    @if($product->image)
+                                        <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover" alt="{{ $product->name }}">
+                                    @else
+                                        <div class="text-center text-slate-300">
+                                            <i class="fa-solid fa-image text-xl"></i>
+                                            <p class="text-[9px] mt-0.5 text-slate-400">Belum ada foto</p>
+                                        </div>
+                                    @endif
+                                </template>
+                            </div>
+                            <div class="flex-1 w-full">
+                                <input type="file" id="image" name="image" accept="image/*"
+                                    @change="const file = $event.target.files[0]; if(file) { const r = new FileReader(); r.onload = e => mainPreview = e.target.result; r.readAsDataURL(file); }"
+                                    class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-50 file:text-cyan-800 hover:file:bg-cyan-100 cursor-pointer">
+                                @error('image')
+                                    <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Foto Tambahan yang sudah ada --}}
+                    @if($product->images && count($product->images))
+                    <div class="mb-4">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Foto Tambahan Saat Ini</label>
+                        <div class="flex flex-wrap gap-2 p-3 rounded-md bg-slate-50 border border-slate-200">
+                            @foreach($product->images as $imgPath)
+                            <div class="relative w-16 h-16 rounded-md border border-slate-200 overflow-hidden bg-white group"
+                                 x-data="{ deleted: false }" x-show="!deleted">
+                                <img src="{{ asset('storage/' . $imgPath) }}" class="w-full h-full object-cover" alt="Foto produk">
+                                <button type="button"
+                                    @click="deleted = true; markDelete('{{ $imgPath }}')"
+                                    class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                    <i class="fa-solid fa-trash text-white text-xs"></i>
+                                </button>
+                            </div>
+                            @endforeach
+                            {{-- Hidden inputs untuk foto yang dihapus --}}
+                            <template x-for="path in deletedImages" :key="path">
+                                <input type="hidden" name="delete_images[]" :value="path">
                             </template>
                         </div>
-                        <div class="flex-1 w-full">
-                            <input type="file" id="image" name="image" accept="image/*"
-                                @change="const file = $event.target.files[0]; if(file) { const r = new FileReader(); r.onload = e => preview = e.target.result; r.readAsDataURL(file); }"
-                                class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-50 file:text-cyan-800 hover:file:bg-cyan-100 cursor-pointer">
-                            @error('image')
+                        <p class="text-[11px] text-slate-400 mt-1">Hover foto dan klik ikon sampah untuk menghapus.</p>
+                    </div>
+                    @endif
+
+                    {{-- Upload Foto Tambahan Baru --}}
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Tambah Foto Baru <span class="text-slate-400 font-normal">(opsional)</span></label>
+                        <div class="p-4 rounded-md bg-slate-50 border border-slate-200 space-y-3">
+                            <div class="flex flex-wrap gap-2" x-show="extraPreviews.length > 0">
+                                <template x-for="(src, i) in extraPreviews" :key="i">
+                                    <div class="relative w-16 h-16 rounded-md border border-slate-200 overflow-hidden bg-white group">
+                                        <img :src="src" class="w-full h-full object-cover">
+                                        <button type="button" @click="extraPreviews.splice(i, 1)"
+                                            class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                            <i class="fa-solid fa-trash text-white text-xs"></i>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                            <input type="file" name="images[]" accept="image/*" multiple
+                                @change="handleExtra($event)"
+                                class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer">
+                            @error('images.*')
                                 <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                             @enderror
                         </div>

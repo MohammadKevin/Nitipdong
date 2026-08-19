@@ -29,7 +29,7 @@
                         <i class="fa-solid fa-shield-halved text-[10px]"></i> 100% Transaksi Aman & Terverifikasi
                     </span>
                     <span class="text-slate-700">|</span>
-                    <span class="text-slate-400">Gratis Ongkir ke Seluruh Indonesia</span>
+                   
                 </div>
                 <div class="flex items-center gap-4 text-slate-400">
                     <a href="{{ route('store.register') }}" class="hover:text-cyan-300 transition-colors">Mulai Jualan di BelanjaIn</a>

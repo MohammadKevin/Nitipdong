@@ -41,7 +41,7 @@
                             <div class="flex items-center gap-3.5 min-w-0 flex-1">
                                 <div class="w-16 h-16 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
                                     @if($item->product->image)
-                                        <img src="{{ asset('storage/' . $item->product->image) }}" class="w-full h-full object-cover" alt="{{ $item->product->name }}">
+                                        <img src="{{ $item->product->image_url }}" class="w-full h-full object-cover" alt="{{ $item->product->name }}">
                                     @else
                                         <div class="w-full h-full flex items-center justify-center text-slate-300 text-xl">
                                             <i class="fa-solid fa-box"></i>

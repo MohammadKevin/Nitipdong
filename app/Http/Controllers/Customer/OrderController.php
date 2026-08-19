@@ -174,7 +174,7 @@ class OrderController extends Controller
             session()->forget('applied_voucher');
         });
 
-        return redirect()->route('customer.dashboard')->with('success', 'Pesanan berhasil dibuat! Seller akan segera memproses barang Anda.');
+        return redirect()->route('customer.cart.index')->with('success', 'Pesanan berhasil dibuat! Lanjutkan ke pembayaran dari halaman keranjang.');
     }
 
     public function payment(Order $order): View|RedirectResponse
@@ -184,7 +184,7 @@ class OrderController extends Controller
         }
 
         if ($order->status !== 'pending' || $order->payment_proof) {
-            return redirect()->route('customer.dashboard')->with('info', 'Pesanan ini sudah dibayar atau tidak dalam status pending.');
+            return redirect()->back()->with('info', 'Pesanan ini sudah dibayar atau tidak dalam status pending.');
         }
 
         return view('customer.order.payment', compact('order'));
@@ -197,7 +197,7 @@ class OrderController extends Controller
         }
 
         if ($order->status !== 'pending' || $order->payment_proof) {
-            return redirect()->route('customer.dashboard')->with('info', 'Pesanan ini sudah dibayar.');
+            return redirect()->back()->with('info', 'Pesanan ini sudah dibayar.');
         }
 
         $request->validate([
@@ -211,6 +211,6 @@ class OrderController extends Controller
             'status'        => 'processing',
         ]);
 
-        return redirect()->route('customer.dashboard')->with('success', 'Bukti pembayaran berhasil diunggah! Penjual akan segera memproses pesanan Anda.');
+        return redirect()->route('customer.cart.index')->with('success', 'Bukti pembayaran berhasil diunggah! Penjual akan segera memproses pesanan Anda.');
     }
 }

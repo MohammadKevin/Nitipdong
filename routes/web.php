@@ -23,7 +23,7 @@ Route::get('/', function () {
         ->latest()
         ->take(10)
         ->get();
-        
+
     $categories = Category::all();
     $activeFlashSale = \App\Models\FlashSale::active()->with(['items.product'])->first();
     $vouchers = \App\Models\Voucher::where('is_active', true)->latest()->take(4)->get();
@@ -89,6 +89,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             return view('customer.dashboard', compact('userStore', 'orders'));
         })->name('dashboard');
 
+        Route::get('/store/register', [StoreRegistrationController::class, 'create'])->name('store.register');
+        Route::post('/store/register', [StoreRegistrationController::class, 'store'])->name('store.store');
+    });
+
+    // Cart, Checkout & Orders accessible by all authenticated users
+    Route::prefix('customer')->name('customer.')->group(function () {
         Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
         Route::post('/cart/add/{product}', [CartController::class, 'store'])->name('cart.store');
         Route::patch('/cart/{cart}', [CartController::class, 'update'])->name('cart.update');
@@ -101,9 +107,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/orders/{order}/payment', [OrderController::class, 'payment'])->name('order.payment');
         Route::post('/orders/{order}/payment', [OrderController::class, 'confirmPayment'])->name('order.confirm_payment');
-
-        Route::get('/store/register', [StoreRegistrationController::class, 'create'])->name('store.register');
-        Route::post('/store/register', [StoreRegistrationController::class, 'store'])->name('store.store');
     });
 
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');

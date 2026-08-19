@@ -18,7 +18,7 @@ class StoreRegistrationController extends Controller
 
         if ($user->store) {
             return redirect()->route('customer.dashboard')->with('info', 'Anda sudah memiliki pengajuan toko.');
-        }
+        }   
 
         return view('customer.store.create');
     }

@@ -9,8 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('voucher_code')->nullable()->after('total_amount');
-            $table->decimal('discount_amount', 12, 2)->default(0)->after('voucher_code');
+            if (!Schema::hasColumn('orders', 'voucher_code')) {
+                $table->string('voucher_code')->nullable()->after('total_amount');
+            }
+            if (!Schema::hasColumn('orders', 'discount_amount')) {
+                $table->decimal('discount_amount', 12, 2)->default(0)->after('voucher_code');
+            }
         });
     }
 

@@ -9,7 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->unsignedTinyInteger('discount_percentage')->default(0)->after('price');
+            if (!Schema::hasColumn('products', 'discount_percentage')) {
+                $table->unsignedTinyInteger('discount_percentage')->default(0)->after('price');
+            }
         });
     }
 

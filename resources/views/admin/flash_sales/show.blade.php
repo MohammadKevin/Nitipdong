@@ -160,7 +160,7 @@
                         </label>
                         <input type="number" id="flash_sale_price" name="flash_sale_price" x-model="flashPrice" @input="calcDiscount()" required placeholder="Contoh: 199000" min="1"
                             class="input text-xs rounded-md">
-                        
+
                         <template x-if="discountPct > 0">
                             <div class="mt-1.5 p-2 bg-emerald-50 rounded border border-emerald-200 flex items-center justify-between text-xs">
                                 <span class="text-emerald-800 font-semibold flex items-center gap-1">
@@ -224,7 +224,7 @@
                                     <div class="flex items-center gap-2.5">
                                         <div class="w-9 h-9 rounded-md bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
                                             @if($item->product->image)
-                                                <img src="{{ asset('storage/' . $item->product->image) }}" alt="{{ $item->product->name }}" class="w-full h-full object-cover">
+                                                <img src="{{ $item->product->image_url }}" alt="{{ $item->product->name }}" class="w-full h-full object-cover">
                                             @else
                                                 <div class="w-full h-full flex items-center justify-center text-slate-400 text-sm">
                                                     <i class="fa-solid fa-box"></i>

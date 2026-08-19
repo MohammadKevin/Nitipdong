@@ -22,6 +22,7 @@ class Product extends Model
         'discount_percentage',
         'stock',
         'image',
+        'images',
         'is_active',
     ];
 
@@ -29,6 +30,7 @@ class Product extends Model
         'discount_percentage' => 'integer',
         'stock'               => 'integer',
         'is_active'           => 'boolean',
+        'images'              => 'array',
     ];
 
     protected $appends = [
@@ -40,7 +42,38 @@ class Product extends Model
         'discount_savings',
         'is_in_flash_sale',
         'obfuscated_id',
+        'image_url',
+        'images_urls',
     ];
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        // Jika path dimulai dengan 'img/', langsung dari public
+        if (str_starts_with($this->image, 'img/')) {
+            return asset($this->image);
+        }
+
+        // Jika tidak, asumsi dari storage
+        return asset('storage/' . $this->image);
+    }
+
+    public function getImagesUrlsAttribute(): array
+    {
+        if (!$this->images || !is_array($this->images)) {
+            return [];
+        }
+
+        return array_map(function($img) {
+            if (str_starts_with($img, 'img/')) {
+                return asset($img);
+            }
+            return asset('storage/' . $img);
+        }, $this->images);
+    }
 
     public function getSellerPriceAttribute(): float
     {

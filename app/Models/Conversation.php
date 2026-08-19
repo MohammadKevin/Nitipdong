@@ -14,6 +14,11 @@ class Conversation extends Model
 {
     use HasFactory, HasObfuscatedId;
 
+    protected $fillable = [
+        'user_one_id',
+        'user_two_id',
+    ];
+
     protected $appends = [
         'obfuscated_id',
     ];

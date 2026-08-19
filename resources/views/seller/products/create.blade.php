@@ -44,8 +44,8 @@
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5"
-                         x-data="{ 
-                            price: {{ old('price', 0) }}, 
+                         x-data="{
+                            price: {{ old('price', 0) }},
                             discount: {{ old('discount_percentage', 0) }},
                             get markupPrice() {
                                 return Math.round(this.price * 1.05);
@@ -157,26 +157,68 @@
                     <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Foto Produk</h3>
                 </div>
 
-                <div x-data="{ preview: null }">
-                    <p class="text-xs text-slate-400 mb-3">Format didukung: JPG, PNG, WEBP (Maks. 2MB). Disarankan rasio 1:1.</p>
-                    
-                    <div class="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-md bg-slate-50 border border-slate-200">
-                        <div class="w-20 h-20 rounded-md border border-slate-200 bg-white overflow-hidden flex items-center justify-center shrink-0 shadow-xs">
-                            <template x-if="preview">
-                                <img :src="preview" class="w-full h-full object-cover" alt="Preview">
-                            </template>
-                            <template x-if="!preview">
-                                <div class="text-center text-slate-300">
-                                    <i class="fa-solid fa-image text-xl"></i>
-                                    <p class="text-[9px] mt-0.5 text-slate-400">Preview Foto</p>
-                                </div>
-                            </template>
+                <div x-data="{
+                    mainPreview: null,
+                    extraPreviews: [],
+                    handleExtra(event) {
+                        const files = Array.from(event.target.files);
+                        files.forEach(file => {
+                            const r = new FileReader();
+                            r.onload = e => this.extraPreviews.push(e.target.result);
+                            r.readAsDataURL(file);
+                        });
+                    },
+                    removeExtra(index) {
+                        this.extraPreviews.splice(index, 1);
+                    }
+                }">
+                    <p class="text-xs text-slate-400 mb-3">Format didukung: JPG, PNG, WEBP (Maks. 2MB per foto). Foto pertama akan jadi foto utama.</p>
+
+                    {{-- Foto Utama --}}
+                    <div class="mb-4">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Foto Utama <span class="text-rose-500">*</span></label>
+                        <div class="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-md bg-slate-50 border border-slate-200">
+                            <div class="w-20 h-20 rounded-md border border-slate-200 bg-white overflow-hidden flex items-center justify-center shrink-0 shadow-xs">
+                                <template x-if="mainPreview">
+                                    <img :src="mainPreview" class="w-full h-full object-cover" alt="Preview Utama">
+                                </template>
+                                <template x-if="!mainPreview">
+                                    <div class="text-center text-slate-300">
+                                        <i class="fa-solid fa-image text-xl"></i>
+                                        <p class="text-[9px] mt-0.5 text-slate-400">Foto Utama</p>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="flex-1 w-full">
+                                <input type="file" id="image" name="image" accept="image/*"
+                                    @change="const file = $event.target.files[0]; if(file) { const r = new FileReader(); r.onload = e => mainPreview = e.target.result; r.readAsDataURL(file); }"
+                                    class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-50 file:text-cyan-800 hover:file:bg-cyan-100 cursor-pointer">
+                                @error('image')
+                                    <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
-                        <div class="flex-1 w-full">
-                            <input type="file" id="image" name="image" accept="image/*"
-                                @change="const file = $event.target.files[0]; if(file) { const r = new FileReader(); r.onload = e => preview = e.target.result; r.readAsDataURL(file); }"
-                                class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-50 file:text-cyan-800 hover:file:bg-cyan-100 cursor-pointer">
-                            @error('image')
+                    </div>
+
+                    {{-- Foto Tambahan --}}
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Foto Tambahan <span class="text-slate-400 font-normal">(opsional, maks. 5 foto)</span></label>
+                        <div class="p-4 rounded-md bg-slate-50 border border-slate-200 space-y-3">
+                            <div class="flex flex-wrap gap-2" x-show="extraPreviews.length > 0">
+                                <template x-for="(src, i) in extraPreviews" :key="i">
+                                    <div class="relative w-16 h-16 rounded-md border border-slate-200 overflow-hidden bg-white group">
+                                        <img :src="src" class="w-full h-full object-cover">
+                                        <button type="button" @click="removeExtra(i)"
+                                            class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                            <i class="fa-solid fa-trash text-white text-xs"></i>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                            <input type="file" id="images" name="images[]" accept="image/*" multiple
+                                @change="handleExtra($event)"
+                                class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer">
+                            @error('images.*')
                                 <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                             @enderror
                         </div>

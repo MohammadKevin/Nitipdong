@@ -15,8 +15,23 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-7 bg-white p-6 sm:p-7 rounded-xl border border-slate-200/80 shadow-card mb-6 items-start">
             <div class="lg:col-span-5 space-y-4 lg:sticky lg:top-20">
                 <div class="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-50 border border-slate-200">
-                    @if($product->image)
-                        <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover" alt="{{ $product->name }}" id="main-pdp-img">
+                    @php
+                        $allImages = array_filter(array_merge(
+                            $product->image ? [$product->image] : [],
+                            $product->images ?? []
+                        ));
+                    @endphp
+
+                    @if(count($allImages))
+                        @php
+                            $firstImageUrl = str_starts_with($allImages[0], 'img/')
+                                ? asset($allImages[0])
+                                : asset('storage/' . $allImages[0]);
+                        @endphp
+                        <img src="{{ $firstImageUrl }}"
+                             class="w-full h-full object-cover"
+                             alt="{{ $product->name }}"
+                             id="main-pdp-img">
                     @else
                         <div class="w-full h-full flex items-center justify-center text-slate-300 text-4xl">
                             <i class="fa-solid fa-box"></i>
@@ -33,6 +48,24 @@
                         </span>
                     @endif
                 </div>
+
+                {{-- Thumbnail strip --}}
+                @if(count($allImages) > 1)
+                <div class="flex gap-2 overflow-x-auto pb-1">
+                    @foreach($allImages as $i => $imgPath)
+                    @php
+                        $thumbUrl = str_starts_with($imgPath, 'img/')
+                            ? asset($imgPath)
+                            : asset('storage/' . $imgPath);
+                    @endphp
+                    <button type="button"
+                        onclick="document.getElementById('main-pdp-img').src='{{ $thumbUrl }}'; document.querySelectorAll('.pdp-thumb').forEach(el => el.classList.remove('ring-2','ring-cyan-600')); this.classList.add('ring-2','ring-cyan-600');"
+                        class="pdp-thumb shrink-0 w-14 h-14 rounded-md overflow-hidden border border-slate-200 bg-white {{ $i === 0 ? 'ring-2 ring-cyan-600' : '' }}">
+                        <img src="{{ $thumbUrl }}" class="w-full h-full object-cover" alt="Foto {{ $i+1 }}">
+                    </button>
+                    @endforeach
+                </div>
+                @endif
 
                 <div class="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between gap-3">
                     <div class="flex items-center gap-3 min-w-0">

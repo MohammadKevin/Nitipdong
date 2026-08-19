@@ -13,6 +13,13 @@ class Message extends Model
 {
     use HasFactory, HasObfuscatedId;
 
+    protected $fillable = [
+        'conversation_id',
+        'sender_id',
+        'message',
+        'is_read',
+    ];
+
     protected $appends = [
         'obfuscated_id',
     ];

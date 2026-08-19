@@ -126,7 +126,7 @@
                         <a href="{{ route('product.show', $prod) }}" class="block">
                             <div class="product-img-frame">
                                 @if($prod->image)
-                                    <img src="{{ asset('storage/' . $prod->image) }}" class="w-full h-full object-cover" alt="{{ $prod->name }}" loading="lazy">
+                                    <img src="{{ $prod->image_url }}" class="w-full h-full object-cover" alt="{{ $prod->name }}" loading="lazy">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center text-slate-300 text-2xl">
                                         <i class="fa-solid fa-box"></i>

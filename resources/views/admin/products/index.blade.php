@@ -21,7 +21,7 @@
                 <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 text-xs"></i>
             </form>
         </div>
-        
+
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
                 <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
@@ -41,7 +41,7 @@
                             <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-md bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
                                     @if($product->image)
-                                        <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover" alt="{{ $product->name }}">
+                                        <img src="{{ $product->image_url }}" class="w-full h-full object-cover" alt="{{ $product->name }}">
                                     @else
                                         <div class="w-full h-full flex items-center justify-center text-slate-300 text-base">
                                             <i class="fa-solid fa-box"></i>
@@ -109,7 +109,7 @@
                 </tbody>
             </table>
         </div>
-        
+
         <div class="p-4 border-t border-slate-100 bg-white">
             {{ $products->links('pagination::tailwind') }}
         </div>

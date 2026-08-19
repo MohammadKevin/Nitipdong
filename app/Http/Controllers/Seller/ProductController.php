@@ -17,7 +17,7 @@ class ProductController extends Controller
     public function index(Request $request): View
     {
         $store = Auth::user()->store;
-        
+
         $query = Product::with('category')
             ->where('store_id', $store?->id);
 
@@ -54,6 +54,7 @@ class ProductController extends Controller
             'discount_percentage' => ['nullable', 'integer', 'min:0', 'max:99'],
             'stock'               => ['required', 'integer', 'min:0'],
             'image'               => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'images.*'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
 
         $store = Auth::user()->store;
@@ -66,6 +67,13 @@ class ProductController extends Controller
             $imagePath = $request->file('image')->store('products', 'public');
         }
 
+        $extraImages = [];
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $img) {
+                $extraImages[] = $img->store('products', 'public');
+            }
+        }
+
         Product::create([
             'store_id'            => $store->id,
             'category_id'         => $request->category_id,
@@ -76,6 +84,7 @@ class ProductController extends Controller
             'discount_percentage' => (int) $request->input('discount_percentage', 0),
             'stock'               => $request->stock,
             'image'               => $imagePath,
+            'images'              => $extraImages ?: null,
             'is_active'           => true,
         ]);
 
@@ -106,6 +115,9 @@ class ProductController extends Controller
             'discount_percentage' => ['nullable', 'integer', 'min:0', 'max:99'],
             'stock'               => ['required', 'integer', 'min:0'],
             'image'               => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'images.*'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'delete_images'       => ['nullable', 'array'],
+            'delete_images.*'     => ['nullable', 'string'],
         ]);
 
         $imagePath = $product->image;
@@ -116,6 +128,26 @@ class ProductController extends Controller
             $imagePath = $request->file('image')->store('products', 'public');
         }
 
+        // Handle extra images: delete removed ones, keep existing, add new
+        $existingImages = $product->images ?? [];
+
+        // Delete images that were marked for removal
+        if ($request->has('delete_images')) {
+            foreach ($request->delete_images as $pathToDelete) {
+                if (Storage::disk('public')->exists($pathToDelete)) {
+                    Storage::disk('public')->delete($pathToDelete);
+                }
+                $existingImages = array_values(array_filter($existingImages, fn($p) => $p !== $pathToDelete));
+            }
+        }
+
+        // Add newly uploaded images
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $img) {
+                $existingImages[] = $img->store('products', 'public');
+            }
+        }
+
         $product->update([
             'category_id'         => $request->category_id,
             'name'                => $request->name,
@@ -124,6 +156,7 @@ class ProductController extends Controller
             'discount_percentage' => (int) $request->input('discount_percentage', 0),
             'stock'               => $request->stock,
             'image'               => $imagePath,
+            'images'              => count($existingImages) ? array_values($existingImages) : null,
             'is_active'           => $request->boolean('is_active', true),
         ]);
 
@@ -143,6 +176,12 @@ class ProductController extends Controller
 
         if ($product->image && Storage::disk('public')->exists($product->image)) {
             Storage::disk('public')->delete($product->image);
+        }
+
+        foreach ($product->images ?? [] as $extraImage) {
+            if (Storage::disk('public')->exists($extraImage)) {
+                Storage::disk('public')->delete($extraImage);
+            }
         }
 
         $product->delete();

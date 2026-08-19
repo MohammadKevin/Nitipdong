@@ -17,6 +17,12 @@ class Cart extends Model
 {
     use HasFactory, HasObfuscatedId;
 
+    protected $fillable = [
+        'user_id',
+        'product_id',
+        'quantity',
+    ];
+
     protected $appends = [
         'obfuscated_id',
     ];
