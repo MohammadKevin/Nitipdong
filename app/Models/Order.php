@@ -20,6 +20,7 @@ class Order extends Model
         'voucher_code',
         'discount_amount',
         'status',
+        'completed_at',
         'payment_proof',
         'shipping_address',
         'tracking_number',
@@ -28,6 +29,7 @@ class Order extends Model
     protected $casts = [
         'total_amount'    => 'float',
         'discount_amount' => 'float',
+        'completed_at'    => 'datetime',
     ];
 
     protected $appends = [
@@ -47,5 +49,10 @@ class Order extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
     }
 }

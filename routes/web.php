@@ -2,12 +2,16 @@
 
 use App\Http\Controllers\Admin\StoreApprovalController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\Customer\AddressController;
 use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Customer\OrderController;
+use App\Http\Controllers\Customer\ReviewController as CustomerReviewController;
 use App\Http\Controllers\Customer\StoreRegistrationController;
+use App\Http\Controllers\Customer\WishlistController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Seller\OrderManagementController;
 use App\Http\Controllers\Seller\ProductController;
+use App\Http\Controllers\Seller\ReviewController as SellerReviewController;
 use App\Http\Controllers\Seller\VoucherController as SellerVoucherController;
 use App\Models\Category;
 use App\Models\Product;
@@ -80,12 +84,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/orders', [OrderManagementController::class, 'index'])->name('orders.index');
         Route::patch('/orders/{order}/status', [OrderManagementController::class, 'updateStatus'])->name('orders.update_status');
+
+        Route::get('/reviews', [SellerReviewController::class, 'index'])->name('reviews.index');
+        Route::post('/reviews/{review}/reply', [SellerReviewController::class, 'reply'])->name('reviews.reply');
     });
 
     Route::middleware(['role:customer'])->prefix('customer')->name('customer.')->group(function () {
         Route::get('/dashboard', function () {
             $userStore = Auth::user()->store;
-            $orders = Auth::user()->orders()->with(['store', 'orderItems.product'])->latest()->get();
+            $orders = Auth::user()->orders()->with(['store', 'orderItems.product.reviews', 'reviews'])->latest()->get();
             return view('customer.dashboard', compact('userStore', 'orders'));
         })->name('dashboard');
 
@@ -93,7 +100,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/store/register', [StoreRegistrationController::class, 'store'])->name('store.store');
     });
 
-    // Cart, Checkout & Orders accessible by all authenticated users
+    // Cart, Checkout, Orders, Reviews, Wishlist & Addresses accessible by all authenticated customers
     Route::prefix('customer')->name('customer.')->group(function () {
         Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
         Route::post('/cart/add/{product}', [CartController::class, 'store'])->name('cart.store');
@@ -107,6 +114,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/orders/{order}/payment', [OrderController::class, 'payment'])->name('order.payment');
         Route::post('/orders/{order}/payment', [OrderController::class, 'confirmPayment'])->name('order.confirm_payment');
+        Route::post('/orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('order.confirm_received');
+
+        // Review Routes
+        Route::post('/orders/{order}/reviews', [CustomerReviewController::class, 'store'])->name('reviews.store');
+
+        // Wishlist Routes
+        Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+        Route::post('/wishlist/toggle/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+        Route::delete('/wishlist/{wishlist}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
+
+        // Address Routes
+        Route::get('/addresses', [AddressController::class, 'index'])->name('addresses.index');
+        Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
+        Route::put('/addresses/{address}', [AddressController::class, 'update'])->name('addresses.update');
+        Route::delete('/addresses/{address}', [AddressController::class, 'destroy'])->name('addresses.destroy');
+        Route::patch('/addresses/{address}/set-default', [AddressController::class, 'setDefault'])->name('addresses.set_default');
     });
 
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');

@@ -23,6 +23,10 @@ class Product extends Model
         'stock',
         'image',
         'images',
+        'is_featured',
+        'badge',
+        'rating',
+        'sold_count',
         'is_active',
     ];
 
@@ -30,7 +34,10 @@ class Product extends Model
         'discount_percentage' => 'integer',
         'stock'               => 'integer',
         'is_active'           => 'boolean',
+        'is_featured'         => 'boolean',
         'images'              => 'array',
+        'rating'              => 'float',
+        'sold_count'          => 'integer',
     ];
 
     protected $appends = [
@@ -48,7 +55,7 @@ class Product extends Model
 
     public function getImageUrlAttribute(): ?string
     {
-        if (!$this->image) {
+        if (! $this->image) {
             return null;
         }
 
@@ -63,11 +70,11 @@ class Product extends Model
 
     public function getImagesUrlsAttribute(): array
     {
-        if (!$this->images || !is_array($this->images)) {
+        if (! $this->images || ! is_array($this->images)) {
             return [];
         }
 
-        return array_map(function($img) {
+        return array_map(function ($img) {
             if (str_starts_with($img, 'img/')) {
                 return asset($img);
             }
@@ -162,5 +169,30 @@ class Product extends Model
     public function flashSaleItems(): HasMany
     {
         return $this->hasMany(FlashSaleItem::class, 'product_id');
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function wishlists(): HasMany
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function recalculateRating(): void
+    {
+        $avg = $this->reviews()->avg('rating') ?: 0;
+        $this->update(['rating' => round($avg, 2)]);
+    }
+
+    public function isWishlistedBy(?User $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        return $this->wishlists()->where('user_id', $user->id)->exists();
     }
 }

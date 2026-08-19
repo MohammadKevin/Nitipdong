@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\UserAddress;
 use App\Models\Voucher;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -61,6 +62,13 @@ class OrderController extends Controller
 
         $finalTotal = max(0, $subtotal - $voucherDiscount);
 
+        $addresses = UserAddress::where('user_id', Auth::id())
+            ->orderByDesc('is_default')
+            ->latest()
+            ->get();
+
+        $defaultAddress = $addresses->firstWhere('is_default', true) ?? $addresses->first();
+
         return view('customer.order.checkout', compact(
             'carts',
             'itemsTotal',
@@ -68,15 +76,37 @@ class OrderController extends Controller
             'productSavings',
             'voucherDiscount',
             'appliedVoucher',
-            'finalTotal'
+            'finalTotal',
+            'addresses',
+            'defaultAddress'
         ));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'shipping_address' => ['required', 'string', 'min:15'],
+            'address_id'       => ['nullable', 'exists:user_addresses,id'],
+            'shipping_address' => ['required_without:address_id', 'nullable', 'string', 'min:10'],
         ]);
+
+        $shippingAddress = $request->shipping_address;
+
+        if ($request->filled('address_id')) {
+            $userAddress = UserAddress::where('id', $request->address_id)
+                ->where('user_id', Auth::id())
+                ->first();
+
+            if ($userAddress) {
+                $shippingAddress = "{$userAddress->recipient_name} ({$userAddress->phone})\n{$userAddress->full_address}";
+                if ($userAddress->city || $userAddress->province) {
+                    $shippingAddress .= "\n" . implode(', ', array_filter([$userAddress->city, $userAddress->province, $userAddress->postal_code]));
+                }
+            }
+        }
+
+        if (empty($shippingAddress)) {
+            return back()->with('error', 'Alamat pengiriman wajib diisi.');
+        }
 
         $carts = Cart::with('product')->where('user_id', Auth::id())->get();
 
@@ -109,7 +139,7 @@ class OrderController extends Controller
         $groupedByStore = $carts->groupBy(fn ($item) => $item->product->store_id);
         $storeCount = $groupedByStore->count();
 
-        DB::transaction(function () use ($groupedByStore, $request, $totalSubtotal, $appliedVoucher, $totalVoucherDiscount, $storeCount) {
+        DB::transaction(function () use ($groupedByStore, $shippingAddress, $totalSubtotal, $appliedVoucher, $totalVoucherDiscount, $storeCount) {
             $remainingVoucherDiscount = $totalVoucherDiscount;
             $processedStores = 0;
 
@@ -147,7 +177,7 @@ class OrderController extends Controller
                     'voucher_code'     => $orderVoucherCode,
                     'discount_amount'  => $storeDiscount,
                     'status'           => 'pending',
-                    'shipping_address' => $request->shipping_address,
+                    'shipping_address' => $shippingAddress,
                 ]);
 
                 foreach ($items as $item) {
@@ -212,5 +242,23 @@ class OrderController extends Controller
         ]);
 
         return redirect()->route('customer.cart.index')->with('success', 'Bukti pembayaran berhasil diunggah! Penjual akan segera memproses pesanan Anda.');
+    }
+
+    public function confirmReceived(Order $order): RedirectResponse
+    {
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'Akses tidak sah.');
+        }
+
+        if ($order->status !== 'shipped') {
+            return redirect()->route('customer.dashboard')->with('error', 'Hanya pesanan yang sedang dalam pengiriman yang dapat diselesaikan.');
+        }
+
+        $order->update([
+            'status'       => 'completed',
+            'completed_at' => now(),
+        ]);
+
+        return redirect()->route('customer.dashboard')->with('success', 'Pesanan berhasil diselesaikan! Silakan berikan ulasan untuk produk yang telah Anda terima.');
     }
 }
