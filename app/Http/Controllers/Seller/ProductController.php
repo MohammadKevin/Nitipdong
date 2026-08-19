@@ -33,7 +33,7 @@ class ProductController extends Controller
             $query->where('category_id', $request->category);
         }
 
-        $products = $query->latest()->paginate(10)->withQueryString();
+        $products = $query->latest()->get();
 
         return view('seller.products.index', compact('products'));
     }

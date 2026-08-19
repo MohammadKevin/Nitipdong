@@ -137,9 +137,5 @@
                 </tbody>
             </table>
         </div>
-
-        <div class="p-4 border-t border-slate-100 bg-white">
-            {{ $products->links('pagination::tailwind') }}
-        </div>
     </div>
 </x-seller-layout>
