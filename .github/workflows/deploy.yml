@@ -1,0 +1,67 @@
+name: Deploy BelanjaIn to DomaiNesia
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, bcmath, fileinfo, sodium
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install PHP Dependencies
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+
+      - name: Install Frontend Dependencies & Build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy Files via SSH / Rsync
+        uses: easingthemes/ssh-deploy@v5.0.3
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.CPANEL_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.CPANEL_HOST }}
+          REMOTE_USER: ${{ secrets.CPANEL_USER }}
+          SSH_PORT: ${{ secrets.CPANEL_PORT }}
+          SOURCE: "/"
+          TARGET: "/home/${{ secrets.CPANEL_USER }}/laravel_app"
+          EXCLUDE: "/.git/, /.github/, /node_modules/, /.env"
+
+      - name: Execute Remote Post-Deploy Script
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.CPANEL_HOST }}
+          username: ${{ secrets.CPANEL_USER }}
+          key: ${{ secrets.CPANEL_SSH_KEY }}
+          port: ${{ secrets.CPANEL_PORT }}
+          script: |
+            cd /home/${{ secrets.CPANEL_USER }}/laravel_app
+            
+            # Salin asset frontend terbaru ke public_html
+            cp -r public/* /home/${{ secrets.CPANEL_USER }}/public_html/
+            
+            # Buat symlink storage
+            php artisan storage:link || true
+            
+            # Jalankan migrasi database
+            php artisan migrate --force
+            
+            # Bersihkan dan cache konfigurasi/rute/view
+            php artisan optimize:clear
+            php artisan optimize
