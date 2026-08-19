@@ -38,7 +38,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.CPANEL_SSH_KEY }}
           REMOTE_HOST: ${{ secrets.CPANEL_HOST }}
           REMOTE_USER: ${{ secrets.CPANEL_USER }}
-          SSH_PORT: ${{ secrets.CPANEL_PORT }}
+          REMOTE_PORT: ${{ secrets.CPANEL_PORT }}
           SOURCE: "/"
           TARGET: "/home/${{ secrets.CPANEL_USER }}/laravel_app"
           EXCLUDE: "/.git/, /.github/, /node_modules/, /.env"
