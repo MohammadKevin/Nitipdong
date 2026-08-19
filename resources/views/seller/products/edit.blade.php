@@ -195,8 +195,8 @@
                                     <img :src="mainPreview" class="w-full h-full object-cover" alt="Preview Baru">
                                 </template>
                                 <template x-if="!mainPreview">
-                                    @if($product->image)
-                                        <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover" alt="{{ $product->name }}">
+                                    @if($product->image_url)
+                                        <img src="{{ $product->image_url }}" class="w-full h-full object-cover" alt="{{ $product->name }}">
                                     @else
                                         <div class="text-center text-slate-300">
                                             <i class="fa-solid fa-image text-xl"></i>
@@ -222,9 +222,14 @@
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Foto Tambahan Saat Ini</label>
                         <div class="flex flex-wrap gap-2 p-3 rounded-md bg-slate-50 border border-slate-200">
                             @foreach($product->images as $imgPath)
+                            @php
+                                $extraUrl = str_starts_with($imgPath, 'http')
+                                    ? $imgPath
+                                    : (str_starts_with($imgPath, 'img/') ? asset($imgPath) : asset('storage/' . $imgPath));
+                            @endphp
                             <div class="relative w-16 h-16 rounded-md border border-slate-200 overflow-hidden bg-white group"
                                  x-data="{ deleted: false }" x-show="!deleted">
-                                <img src="{{ asset('storage/' . $imgPath) }}" class="w-full h-full object-cover" alt="Foto produk">
+                                <img src="{{ $extraUrl }}" class="w-full h-full object-cover" alt="Foto produk">
                                 <button type="button"
                                     @click="deleted = true; markDelete('{{ $imgPath }}')"
                                     class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
