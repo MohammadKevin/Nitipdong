@@ -150,9 +150,9 @@
                         <label for="description" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                             Deskripsi Produk <span class="text-rose-500">*</span>
                         </label>
-                        <textarea id="description" name="description" rows="5" required
+                        <textarea id="description" name="description" rows="8" required
                             placeholder="Tuliskan spesifikasi lengkap, keunggulan, garansi, dan kelengkapan produk..."
-                            class="input text-xs rounded-md">{{ old('description') }}</textarea>
+                            class="input text-xs rounded-lg min-h-[160px] leading-relaxed">{{ old('description') }}</textarea>
                         @error('description')
                             <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                         @enderror
@@ -166,70 +166,33 @@
                     <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Foto Produk</h3>
                 </div>
 
-                <div x-data="{
-                    mainPreview: null,
-                    extraPreviews: [],
-                    handleExtra(event) {
-                        const files = Array.from(event.target.files);
-                        files.forEach(file => {
-                            const r = new FileReader();
-                            r.onload = e => this.extraPreviews.push(e.target.result);
-                            r.readAsDataURL(file);
-                        });
-                    },
-                    removeExtra(index) {
-                        this.extraPreviews.splice(index, 1);
-                    }
-                }">
-                    <p class="text-xs text-slate-400 mb-3">Format didukung: JPG, PNG, WEBP (Maks. 2MB per foto). Foto pertama akan jadi foto utama.</p>
+                <div x-data="{ mainPreview: null }">
+                    <p class="text-xs text-slate-400 mb-3">Format didukung: JPG, PNG, WEBP (Maks. 2MB). Pilih foto utama untuk listing produk toko.</p>
 
                     {{-- Foto Utama --}}
-                    <div class="mb-4">
+                    <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Foto Utama <span class="text-rose-500">*</span></label>
-                        <div class="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-md bg-slate-50 border border-slate-200">
-                            <div class="w-20 h-20 rounded-md border border-slate-200 bg-white overflow-hidden flex items-center justify-center shrink-0 shadow-xs">
+                        <div class="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+                            <div class="w-24 h-24 rounded-xl border border-slate-200 bg-white overflow-hidden flex items-center justify-center shrink-0 shadow-xs">
                                 <template x-if="mainPreview">
                                     <img :src="mainPreview" class="w-full h-full object-cover" alt="Preview Utama">
                                 </template>
                                 <template x-if="!mainPreview">
                                     <div class="text-center text-slate-300">
-                                        <i class="fa-solid fa-image text-xl"></i>
-                                        <p class="text-[9px] mt-0.5 text-slate-400">Foto Utama</p>
+                                        <i class="fa-solid fa-image text-2xl"></i>
+                                        <p class="text-[10px] mt-1 text-slate-400">Foto Utama</p>
                                     </div>
                                 </template>
                             </div>
                             <div class="flex-1 w-full">
                                 <input type="file" id="image" name="image" accept="image/*"
                                     @change="const file = $event.target.files[0]; if(file) { const r = new FileReader(); r.onload = e => mainPreview = e.target.result; r.readAsDataURL(file); }"
-                                    class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-cyan-50 file:text-cyan-800 hover:file:bg-cyan-100 cursor-pointer">
+                                    class="block w-full text-xs text-slate-500 file:mr-3 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-50 file:text-cyan-800 hover:file:bg-cyan-100 cursor-pointer">
+                                <p class="text-[11px] text-slate-400 mt-1.5">Rekomendasi ukuran foto minimal 800 x 800 piksel dengan latar belakang bersih.</p>
                                 @error('image')
                                     <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
-                        </div>
-                    </div>
-
-                    {{-- Foto Tambahan --}}
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Foto Tambahan <span class="text-slate-400 font-normal">(opsional, maks. 5 foto)</span></label>
-                        <div class="p-4 rounded-md bg-slate-50 border border-slate-200 space-y-3">
-                            <div class="flex flex-wrap gap-2" x-show="extraPreviews.length > 0">
-                                <template x-for="(src, i) in extraPreviews" :key="i">
-                                    <div class="relative w-16 h-16 rounded-md border border-slate-200 overflow-hidden bg-white group">
-                                        <img :src="src" class="w-full h-full object-cover">
-                                        <button type="button" @click="removeExtra(i)"
-                                            class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                                            <i class="fa-solid fa-trash text-white text-xs"></i>
-                                        </button>
-                                    </div>
-                                </template>
-                            </div>
-                            <input type="file" id="images" name="images[]" accept="image/*" multiple
-                                @change="handleExtra($event)"
-                                class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer">
-                            @error('images.*')
-                                <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
-                            @enderror
                         </div>
                     </div>
                 </div>
