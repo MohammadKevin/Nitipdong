@@ -18,10 +18,19 @@
             </h1>
             <p class="text-xs text-slate-500 mt-0.5">Lengkapi formulir untuk menambahkan listing barang dagangan ke etalase toko Anda.</p>
         </div>
+        <div class="flex items-center gap-2.5 shrink-0">
+            <a href="{{ route('seller.products.index') }}" class="btn-secondary text-xs h-9 px-4 rounded-xl border border-slate-300 font-medium">
+                Batal
+            </a>
+            <button type="submit" form="product-create-form" class="btn-primary text-xs h-9 px-5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold flex items-center gap-1.5 shadow-xs">
+                <i class="fa-solid fa-plus text-[11px]"></i>
+                <span>Terbitkan Produk</span>
+            </button>
+        </div>
     </div>
 
     <div class="bg-white rounded-xl shadow-card border border-slate-200/80 overflow-hidden">
-        <form action="{{ route('seller.products.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-5">
+        <form id="product-create-form" action="{{ route('seller.products.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-5">
             @csrf
 
             <div>
@@ -226,14 +235,17 @@
                 </div>
             </div>
 
-            <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
-                <a href="{{ route('seller.products.index') }}" class="btn-secondary text-xs h-9 px-4 rounded-md">
-                    Batal
-                </a>
-                <button type="submit" class="btn-primary text-xs h-9 px-5 rounded-md bg-cyan-700 hover:bg-cyan-800 flex items-center gap-1.5">
-                    <i class="fa-solid fa-plus text-[10px]"></i>
-                    Simpan & Terbitkan Produk
-                </button>
+            <div class="sticky bottom-0 -mx-6 -mb-6 p-4 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-md flex items-center justify-between z-30 rounded-b-xl">
+                <span class="text-xs text-slate-500 hidden sm:inline-block">Pastikan data dan harga produk sudah sesuai sebelum menerbitkan.</span>
+                <div class="flex items-center gap-2.5 ml-auto">
+                    <a href="{{ route('seller.products.index') }}" class="btn-secondary text-xs h-9 px-4 rounded-xl border border-slate-300 font-medium">
+                        Batal
+                    </a>
+                    <button type="submit" class="btn-primary text-xs h-9 px-5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold flex items-center gap-1.5 shadow-xs">
+                        <i class="fa-solid fa-plus text-[11px]"></i>
+                        <span>Simpan & Terbitkan Produk</span>
+                    </button>
+                </div>
             </div>
         </form>
     </div>
