@@ -41,9 +41,9 @@
                         </a>
                     </div>
 
-                    <div class="px-3 py-2 mb-4 rounded-lg bg-slate-800/50 border border-slate-800">
+                    <div class="px-3 py-2 mb-4 rounded-xl bg-slate-800/50 border border-slate-800">
                         <div class="flex items-center gap-2.5">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode($sellerStore->name ?? auth()->user()->name) }}&background=0891b2&color=fff&size=50" class="w-7 h-7 rounded-md object-cover shrink-0" alt="Store">
+                            <img src="{{ auth()->user()->avatar_url }}" class="w-8 h-8 rounded-lg object-cover shrink-0 border border-slate-700 shadow-2xs" alt="Store">
                             <div class="min-w-0 flex-1">
                                 <p class="text-xs font-semibold text-slate-200 truncate">{{ $sellerStore->name ?? 'Toko Saya' }}</p>
                                 <span class="inline-flex items-center gap-1 text-[9px] text-cyan-400 font-medium">

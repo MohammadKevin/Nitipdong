@@ -13,8 +13,11 @@
     <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-slate-200/80 relative overflow-hidden">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
             <div class="flex items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl bg-cyan-50 border border-cyan-200/80 text-cyan-800 flex items-center justify-center text-2xl font-black shrink-0 shadow-2xs">
-                    {{ strtoupper(substr($store->name ?? 'B', 0, 2)) }}
+                <div class="relative shrink-0">
+                    <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" class="w-14 h-14 rounded-2xl object-cover border-2 border-cyan-200 shadow-2xs">
+                    <span class="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-[9px] text-white shadow-2xs" title="Toko Aktif">
+                        <i class="fa-solid fa-check"></i>
+                    </span>
                 </div>
                 <div>
                     <div class="flex items-center gap-2 flex-wrap">
