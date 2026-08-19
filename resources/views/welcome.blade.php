@@ -200,25 +200,31 @@
             </div>
         </div>
 
-        <!-- Features with Auto Scroll -->
+        <!-- Features with Auto Scroll - 6 Cards -->
         <div class="mt-4 relative" x-data="{
             autoScroll: null,
+            scrollSpeed: 1,
             init() {
+                this.startAutoScroll();
+            },
+            startAutoScroll() {
                 const container = this.$refs.scrollContainer;
-                const cardWidth = 280 + 14;
+                const cardWidth = 294; // 280px + 14px gap
                 const totalCards = 6;
 
                 this.autoScroll = setInterval(() => {
-                    container.scrollLeft += 1;
+                    container.scrollLeft += this.scrollSpeed;
 
+                    // Reset ke awal setelah card ke-6 untuk infinite loop
                     if (container.scrollLeft >= cardWidth * totalCards) {
-                        container.classList.remove('scroll-smooth');
                         container.scrollLeft = 0;
-                        setTimeout(() => {
-                            container.classList.add('scroll-smooth');
-                        }, 50);
                     }
                 }, 30);
+            },
+            destroy() {
+                if (this.autoScroll) {
+                    clearInterval(this.autoScroll);
+                }
             },
             pauseScroll() {
                 if (this.autoScroll) {
@@ -228,7 +234,7 @@
             },
             resumeScroll() {
                 if (!this.autoScroll) {
-                    this.init();
+                    this.startAutoScroll();
                 }
             }
         }">
@@ -446,7 +452,7 @@
                        class="product-card group text-slate-900 p-2.5">
                         <div class="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-100 mb-2.5 border border-slate-100">
                             @if($product->image)
-                                <img src="{{ asset('storage/' . $product->image) }}" class="w-full h-full object-cover" alt="{{ $product->name }}">
+                                <img src="{{ $product->image_url }}" class="w-full h-full object-cover" alt="{{ $product->name }}">
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-slate-300 text-xl">
                                     <i class="fa-solid fa-box"></i>
@@ -505,7 +511,7 @@
                 <a href="{{ route('product.show', $prod) }}" class="block">
                     <div class="product-img-frame">
                         @if($prod->image)
-                            <img src="{{ asset('storage/' . $prod->image) }}" class="w-full h-full object-cover" alt="{{ $prod->name }}" loading="lazy">
+                            <img src="{{ $prod->image_url }}" class="w-full h-full object-cover" alt="{{ $prod->name }}" loading="lazy">
                         @else
                             <div class="w-full h-full flex items-center justify-center text-slate-300 text-2xl">
                                 <i class="fa-solid fa-box"></i>
