@@ -3,16 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Mail\OtpMail;
+use App\Services\CloudinaryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\OtpMail;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
+    protected CloudinaryService $cloudinary;
+
+    public function __construct(CloudinaryService $cloudinary)
+    {
+        $this->cloudinary = $cloudinary;
+    }
+
     public function edit(Request $request): View
     {
         return view('profile.edit', [
@@ -24,6 +33,30 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $validated = $request->validated();
+
+        // Handle Avatar upload
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($user->avatar) {
+                if (str_starts_with($user->avatar, 'http://') || str_starts_with($user->avatar, 'https://')) {
+                    if (str_contains($user->avatar, 'cloudinary.com')) {
+                        $this->cloudinary->delete($user->avatar);
+                    }
+                } elseif (Storage::disk('public')->exists($user->avatar)) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
+            }
+
+            // Upload new avatar
+            $avatarUrl = null;
+            if ($this->cloudinary->isConfigured()) {
+                $avatarUrl = $this->cloudinary->upload($request->file('avatar'), 'belanjain_avatars');
+            }
+            if (!$avatarUrl) {
+                $avatarUrl = $request->file('avatar')->store('avatars', 'public');
+            }
+            $user->avatar = $avatarUrl;
+        }
 
         $emailChanged = $user->email !== $validated['email'];
 

@@ -109,7 +109,7 @@
 
                     <div class="relative" @click.outside="userOpen = false">
                         <button @click="userOpen = !userOpen" class="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-slate-100 transition-colors">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=0891b2&color=fff&size=60"
+                            <img src="{{ Auth::user()->avatar_url }}"
                                  class="w-6 h-6 rounded-full border border-cyan-200 object-cover" alt="{{ Auth::user()->name }}">
                             <div class="hidden sm:block text-left max-w-[110px]">
                                 <p class="text-xs font-semibold text-slate-800 leading-tight truncate">

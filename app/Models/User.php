@@ -44,6 +44,21 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->avatar) {
+            if (str_starts_with($this->avatar, 'http://') || str_starts_with($this->avatar, 'https://')) {
+                return $this->avatar;
+            }
+            if (str_starts_with($this->avatar, 'img/')) {
+                return asset($this->avatar);
+            }
+            return asset('storage/' . $this->avatar);
+        }
+
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=0891b2&color=fff&size=200&bold=true';
+    }
+
     public function sendEmailVerificationNotification()
     {
     }

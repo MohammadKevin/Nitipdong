@@ -50,8 +50,8 @@
             <aside class="w-full lg:w-64 shrink-0 space-y-4">
                 <div class="bg-white rounded-xl border border-slate-200/80 p-5 shadow-card text-center">
                     <div class="relative w-16 h-16 mx-auto mb-3">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0891b2&color=fff&size=100"
-                             class="w-full h-full rounded-full border-2 border-cyan-200 object-cover" alt="User">
+                        <img src="{{ auth()->user()->avatar_url }}"
+                             class="w-full h-full rounded-2xl border-2 border-cyan-200 object-cover" alt="User">
                     </div>
                     <h3 class="font-bold text-sm text-slate-900 leading-tight">{{ auth()->user()->name }}</h3>
                     <p class="text-[11px] text-slate-400 mt-0.5 truncate">{{ auth()->user()->email }}</p>

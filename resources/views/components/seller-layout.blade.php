@@ -121,7 +121,7 @@
                 </div>
 
                 <div class="flex items-center gap-2.5 p-2.5 rounded-lg bg-slate-800/50 border border-slate-800">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0891b2&color=fff&size=50" class="w-7 h-7 rounded-md object-cover shrink-0" alt="User">
+                    <img src="{{ auth()->user()->avatar_url }}" class="w-7 h-7 rounded-md object-cover shrink-0" alt="User">
                     <div class="min-w-0 flex-1">
                         <p class="text-xs font-medium text-slate-200 truncate">{{ auth()->user()->name }}</p>
                         <p class="text-[10px] text-slate-400 truncate">Seller Toko</p>
