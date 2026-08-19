@@ -29,7 +29,7 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 overflow-hidden mb-12">
+    <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 overflow-hidden mb-12 max-h-[calc(100vh-230px)] min-h-[500px] overflow-y-auto">
         <form id="product-create-form" action="{{ route('seller.products.store') }}" method="POST" enctype="multipart/form-data" class="p-6 sm:p-8 space-y-6">
             @csrf
 
