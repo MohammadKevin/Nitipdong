@@ -36,8 +36,11 @@ class Product extends Model
         'is_active'           => 'boolean',
         'is_featured'         => 'boolean',
         'images'              => 'array',
+        'specifications'      => 'array',
+        'variants'            => 'array',
         'rating'              => 'float',
         'sold_count'          => 'integer',
+        'weight'              => 'float',
     ];
 
     protected $appends = [

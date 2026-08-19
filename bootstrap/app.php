@@ -23,7 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 'super_admin' => route('super_admin.dashboard'),
                 'admin' => route('admin.dashboard'),
                 'seller' => route('seller.dashboard'),
-                default => route('customer.dashboard'),
+                default => url('/?is_from_login=true'),
             };
         });
     })

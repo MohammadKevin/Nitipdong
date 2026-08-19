@@ -157,6 +157,153 @@
                             <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
+
+                    {{-- Detail Produk --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                        <div>
+                            <label for="weight" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Berat (kg)
+                            </label>
+                            <input type="number" step="0.01" id="weight" name="weight" value="{{ old('weight') }}" min="0"
+                                placeholder="1.5"
+                                class="input text-xs rounded-md">
+                            @error('weight')
+                                <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="condition" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Kondisi Barang
+                            </label>
+                            <select id="condition" name="condition" class="input text-xs rounded-md">
+                                <option value="new" {{ old('condition', 'new') == 'new' ? 'selected' : '' }}>Baru</option>
+                                <option value="used" {{ old('condition') == 'used' ? 'selected' : '' }}>Bekas</option>
+                            </select>
+                            @error('condition')
+                                <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="min_purchase" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Min. Pembelian
+                            </label>
+                            <input type="number" id="min_purchase" name="min_purchase" value="{{ old('min_purchase', 1) }}" min="1"
+                                placeholder="1"
+                                class="input text-xs rounded-md">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- SECTION BARU: Spesifikasi & Varian --}}
+            <div x-data="{
+                specs: {{ json_encode(old('specifications', [])) }},
+                variants: {{ json_encode(old('variants', [])) }},
+                addSpec() {
+                    this.specs.push({key: '', value: ''});
+                },
+                removeSpec(index) {
+                    this.specs.splice(index, 1);
+                },
+                addVariant() {
+                    this.variants.push({name: '', options: ['']});
+                },
+                removeVariant(index) {
+                    this.variants.splice(index, 1);
+                },
+                addOption(variantIndex) {
+                    this.variants[variantIndex].options.push('');
+                },
+                removeOption(variantIndex, optionIndex) {
+                    this.variants[variantIndex].options.splice(optionIndex, 1);
+                }
+            }">
+                {{-- Spesifikasi Detail --}}
+                <div>
+                    <div class="flex items-center justify-between gap-2 pb-2.5 mb-4 border-b border-slate-100">
+                        <div class="flex items-center gap-2">
+                            <span class="w-1 h-4 rounded-full bg-emerald-600 inline-block"></span>
+                            <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Spesifikasi Detail Produk</h3>
+                        </div>
+                        <button type="button" @click="addSpec()" class="text-xs text-cyan-700 hover:text-cyan-800 font-semibold flex items-center gap-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i> Tambah Spesifikasi
+                        </button>
+                    </div>
+
+                    <p class="text-xs text-slate-500 mb-3">Contoh: Kondisi: Baru, Min. Beli: 1 Buah, Etalase: Elektronik</p>
+
+                    <div class="space-y-2">
+                        <template x-for="(spec, index) in specs" :key="index">
+                            <div class="flex gap-2">
+                                <input type="text" :name="`spec_keys[]`" x-model="spec.key" placeholder="Kondisi"
+                                    class="input text-xs rounded-md flex-1">
+                                <input type="text" :name="`spec_values[]`" x-model="spec.value" placeholder="Baru"
+                                    class="input text-xs rounded-md flex-1">
+                                <button type="button" @click="removeSpec(index)" class="px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-md transition-colors">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </template>
+
+                        <template x-if="specs.length === 0">
+                            <p class="text-xs text-slate-400 italic py-3 text-center bg-slate-50 rounded-lg">
+                                Belum ada spesifikasi. Klik "Tambah Spesifikasi" untuk menambahkan.
+                            </p>
+                        </template>
+                    </div>
+                </div>
+
+                {{-- Varian Produk --}}
+                <div>
+                    <div class="flex items-center justify-between gap-2 pb-2.5 mb-4 border-b border-slate-100">
+                        <div class="flex items-center gap-2">
+                            <span class="w-1 h-4 rounded-full bg-purple-600 inline-block"></span>
+                            <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider">Varian Produk (Warna, Ukuran, dll)</h3>
+                        </div>
+                        <button type="button" @click="addVariant()" class="text-xs text-cyan-700 hover:text-cyan-800 font-semibold flex items-center gap-1">
+                            <i class="fa-solid fa-plus text-[10px]"></i> Tambah Varian
+                        </button>
+                    </div>
+
+                    <p class="text-xs text-slate-500 mb-3">Contoh varian: Warna (Hitam, Putih, Merah), Ukuran (S, M, L, XL)</p>
+
+                    <div class="space-y-4">
+                        <template x-for="(variant, vIndex) in variants" :key="vIndex">
+                            <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <input type="text" :name="`variant_names[]`" x-model="variant.name" placeholder="Nama Varian (contoh: Warna)"
+                                        class="input text-xs rounded-md flex-1 font-semibold">
+                                    <button type="button" @click="removeVariant(vIndex)" class="px-3 py-2 text-rose-600 hover:bg-rose-100 rounded-md transition-colors">
+                                        <i class="fa-solid fa-trash text-xs"></i>
+                                    </button>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <template x-for="(option, oIndex) in variant.options" :key="oIndex">
+                                        <div class="flex gap-2">
+                                            <input type="text" :name="`variant_${vIndex}_options[]`" x-model="variant.options[oIndex]" placeholder="Pilihan (contoh: Hitam)"
+                                                class="input text-xs rounded-md flex-1">
+                                            <button type="button" @click="removeOption(vIndex, oIndex)" class="px-3 py-2 text-slate-500 hover:bg-slate-200 rounded-md transition-colors" x-show="variant.options.length > 1">
+                                                <i class="fa-solid fa-minus text-xs"></i>
+                                            </button>
+                                        </div>
+                                    </template>
+
+                                    <button type="button" @click="addOption(vIndex)" class="w-full text-xs text-cyan-700 hover:text-cyan-800 font-medium py-2 border border-dashed border-cyan-300 hover:border-cyan-400 rounded-md transition-colors">
+                                        + Tambah Pilihan
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template x-if="variants.length === 0">
+                            <p class="text-xs text-slate-400 italic py-4 text-center bg-slate-50 rounded-lg">
+                                Belum ada varian. Klik "Tambah Varian" jika produk memiliki pilihan warna, ukuran, dll.
+                            </p>
+                        </template>
+                    </div>
                 </div>
             </div>
 

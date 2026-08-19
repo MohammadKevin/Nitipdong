@@ -68,7 +68,7 @@ class OtpVerificationController extends Controller
             'super_admin' => 'super_admin.dashboard',
             'admin' => 'admin.dashboard',
             'seller' => 'seller.dashboard',
-            default => 'customer.dashboard',
+            default => 'home',
         };
     }
 

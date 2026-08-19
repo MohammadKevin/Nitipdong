@@ -61,6 +61,8 @@ class ProductController extends Controller
             'price'               => ['required', 'numeric', 'min:0'],
             'discount_percentage' => ['nullable', 'integer', 'min:0', 'max:99'],
             'stock'               => ['required', 'integer', 'min:0'],
+            'weight'              => ['nullable', 'numeric', 'min:0'],
+            'condition'           => ['nullable', 'in:new,used'],
             'image'               => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'images.*'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
@@ -85,6 +87,38 @@ class ProductController extends Controller
             }
         }
 
+        // Build specifications array
+        $specifications = [];
+        if ($request->has('spec_keys') && $request->has('spec_values')) {
+            $keys = $request->input('spec_keys', []);
+            $values = $request->input('spec_values', []);
+            foreach ($keys as $index => $key) {
+                if (!empty($key) && !empty($values[$index])) {
+                    $specifications[$key] = $values[$index];
+                }
+            }
+        }
+
+        // Build variants array
+        $variants = [];
+        if ($request->has('variant_names')) {
+            $variantNames = $request->input('variant_names', []);
+            foreach ($variantNames as $vIndex => $variantName) {
+                if (!empty($variantName)) {
+                    $optionsKey = "variant_{$vIndex}_options";
+                    $options = $request->input($optionsKey, []);
+                    $filteredOptions = array_filter($options, fn($opt) => !empty($opt));
+
+                    if (count($filteredOptions) > 0) {
+                        $variants[] = [
+                            'name' => $variantName,
+                            'options' => array_values($filteredOptions)
+                        ];
+                    }
+                }
+            }
+        }
+
         Product::create([
             'store_id'            => $store->id,
             'category_id'         => $request->category_id,
@@ -94,6 +128,10 @@ class ProductController extends Controller
             'price'               => $request->price,
             'discount_percentage' => (int) $request->input('discount_percentage', 0),
             'stock'               => $request->stock,
+            'weight'              => $request->weight,
+            'condition'           => $request->input('condition', 'new'),
+            'specifications'      => count($specifications) > 0 ? $specifications : null,
+            'variants'            => count($variants) > 0 ? $variants : null,
             'image'               => $imagePath,
             'images'              => $extraImages ?: null,
             'is_active'           => true,
