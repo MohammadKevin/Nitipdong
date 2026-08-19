@@ -4,6 +4,7 @@
     $totalOrderCount = $store ? \App\Models\Order::where('store_id', $store->id)->count() : 0;
     $pendingOrderCount = $store ? \App\Models\Order::where('store_id', $store->id)->where('status', 'pending')->count() : 0;
     $voucherCount = $store ? \App\Models\Voucher::where('store_id', $store->id)->count() : 0;
+    $complaintCount = $store ? \App\Models\OrderComplaint::where('store_id', $store->id)->where('status', 'pending')->count() : 0;
 @endphp
 
 <aside class="w-full lg:w-64 xl:w-72 shrink-0 space-y-4">
@@ -11,33 +12,40 @@
     <div class="card p-5">
         <div class="flex items-center gap-4 mb-5">
             <div class="relative shrink-0">
-                <img src="https://ui-avatars.com/api/?name={{ urlencode($store->name ?? Auth::user()->name) }}&background=0284c7&color=fff&size=100"
-                     class="w-14 h-14 rounded-2xl ring-2 ring-brand-100 object-cover" alt="{{ $store->name ?? 'Toko' }}">
-                <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white animate-pulse-dot"></span>
+                <img src="{{ $store->logo_url ?? Auth::user()->avatar_url }}"
+                     class="w-14 h-14 rounded-2xl ring-2 ring-cyan-200 object-cover" alt="{{ $store->name ?? 'Toko' }}">
+                <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white"></span>
             </div>
             <div class="min-w-0">
                 <h3 class="font-bold text-slate-900 truncate font-display">{{ $store->name ?? 'Toko Saya' }}</h3>
                 <p class="text-xs text-slate-400 truncate mt-0.5">{{ Auth::user()->name }}</p>
-                <span class="badge-brand mt-1.5 inline-flex items-center gap-1">
-                    <i class="fa-solid fa-shield-check text-brand-500 text-xs"></i> Official Seller
-                </span>
+                <div class="flex items-center gap-2 mt-1.5">
+                    <span class="badge-brand inline-flex items-center gap-1 text-[10px]">
+                        <i class="fa-solid fa-shield-check text-cyan-600 text-xs"></i> Official Seller
+                    </span>
+                    @if($store && $store->slug)
+                        <a href="{{ route('store.show', $store) }}" target="_blank" class="text-[10px] text-cyan-700 hover:underline font-semibold flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i> Lihat Toko
+                        </a>
+                    @endif
+                </div>
             </div>
         </div>
 
         <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-50">
             <div class="text-center py-2.5 rounded-xl bg-slate-50">
-                <p class="font-bold text-slate-900 text-lg font-display">{{ $totalProductCount }}</p>
+                <p class="font-bold text-slate-900 text-base font-display">{{ $totalProductCount }}</p>
                 <p class="text-[10px] text-slate-400 mt-0.5">Produk</p>
             </div>
             <div class="text-center py-2.5 rounded-xl bg-slate-50">
-                <p class="font-bold text-slate-900 text-lg font-display">{{ $totalOrderCount }}</p>
+                <p class="font-bold text-slate-900 text-base font-display">{{ $totalOrderCount }}</p>
                 <p class="text-[10px] text-slate-400 mt-0.5">Pesanan</p>
             </div>
             <div class="text-center py-2.5 rounded-xl bg-slate-50">
-                <p class="font-bold text-amber-500 text-lg font-display flex items-center justify-center gap-1">
-                    <i class="fa-solid fa-star text-xs"></i> 5.0
+                <p class="font-bold text-emerald-600 text-xs font-display flex items-center justify-center gap-0.5 mt-1">
+                    Rp {{ number_format($store->balance ?? 0, 0, ',', '.') }}
                 </p>
-                <p class="text-[10px] text-slate-400 mt-0.5">Rating</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Saldo Toko</p>
             </div>
         </div>
     </div>
@@ -54,6 +62,12 @@
                     'label'  => 'Dashboard Toko',
                     'icon'   => 'fa-solid fa-chart-pie',
                     'active' => request()->routeIs('seller.dashboard'),
+                ],
+                [
+                    'route'  => 'seller.wallet.index',
+                    'label'  => 'Dompet & Payout',
+                    'icon'   => 'fa-solid fa-wallet',
+                    'active' => request()->routeIs('seller.wallet.*'),
                 ],
                 [
                     'route'  => 'seller.products.index',
@@ -75,6 +89,13 @@
                     'badge'  => $pendingOrderCount > 0 ? $pendingOrderCount : null,
                 ],
                 [
+                    'route'  => 'seller.complaints.index',
+                    'label'  => 'Pusat Komplain',
+                    'icon'   => 'fa-solid fa-triangle-exclamation',
+                    'active' => request()->routeIs('seller.complaints.*'),
+                    'badge'  => $complaintCount > 0 ? $complaintCount : null,
+                ],
+                [
                     'route'  => 'seller.vouchers.index',
                     'label'  => 'Voucher Toko',
                     'icon'   => 'fa-solid fa-ticket',
@@ -92,31 +113,36 @@
 
             @foreach($sellerNav as $item)
                 <a href="{{ route($item['route']) }}"
-                   class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium mx-2 rounded-xl transition-all
-                          {{ $item['active'] ? 'bg-brand-50 text-brand-600 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-brand-600' }}">
-                    <i class="{{ $item['icon'] }} w-4 text-center text-sm {{ $item['active'] ? 'text-brand-600' : 'text-slate-400' }}"></i>
+                   class="flex items-center gap-3 px-4 py-2.5 text-xs font-medium mx-2 rounded-xl transition-all
+                          {{ $item['active'] ? 'bg-cyan-50 text-cyan-700 font-semibold border border-cyan-200' : 'text-slate-600 hover:bg-slate-50 hover:text-cyan-700' }}">
+                    <i class="{{ $item['icon'] }} w-4 text-center text-xs {{ $item['active'] ? 'text-cyan-700' : 'text-slate-400' }}"></i>
                     <span>{{ $item['label'] }}</span>
                     @if(!empty($item['badge']))
-                        <span class="ml-auto badge-brand text-[10px]">{{ $item['badge'] }}</span>
+                        <span class="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white">{{ $item['badge'] }}</span>
                     @endif
                 </a>
             @endforeach
         </nav>
 
         <div class="px-4 pt-3 pb-2 border-t border-slate-50">
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Komunikasi & Akun</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Laporan & Pengaturan</p>
         </div>
-        <nav class="pb-2 space-y-1">
+        <nav class="pb-2 space-y-1 text-xs">
+            <a href="{{ route('seller.reports.sales.export') }}"
+               class="flex items-center gap-3 px-4 py-2.5 font-medium mx-2 rounded-xl transition-all text-slate-600 hover:bg-slate-50 hover:text-emerald-700">
+                <i class="fa-solid fa-file-excel w-4 text-center text-xs text-emerald-600"></i>
+                <span>Unduh Laporan Penjualan</span>
+            </a>
             <a href="{{ route('chat.index') }}"
-               class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium mx-2 rounded-xl transition-all
-                      {{ request()->routeIs('chat.*') ? 'bg-brand-50 text-brand-600 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-brand-600' }}">
-                <i class="fa-solid fa-comments w-4 text-center text-sm {{ request()->routeIs('chat.*') ? 'text-brand-600' : 'text-slate-400' }}"></i>
+               class="flex items-center gap-3 px-4 py-2.5 font-medium mx-2 rounded-xl transition-all
+                      {{ request()->routeIs('chat.*') ? 'bg-cyan-50 text-cyan-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-cyan-700' }}">
+                <i class="fa-solid fa-comments w-4 text-center text-xs {{ request()->routeIs('chat.*') ? 'text-cyan-700' : 'text-slate-400' }}"></i>
                 <span>Chat & Pesan</span>
             </a>
             <a href="{{ route('profile.edit') }}"
-               class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium mx-2 rounded-xl transition-all
-                      {{ request()->routeIs('profile.edit') ? 'bg-brand-50 text-brand-600 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-brand-600' }}">
-                <i class="fa-solid fa-user-gear w-4 text-center text-sm {{ request()->routeIs('profile.edit') ? 'text-brand-600' : 'text-slate-400' }}"></i>
+               class="flex items-center gap-3 px-4 py-2.5 font-medium mx-2 rounded-xl transition-all
+                      {{ request()->routeIs('profile.edit') ? 'bg-cyan-50 text-cyan-700 font-semibold' : 'text-slate-600 hover:bg-slate-50 hover:text-cyan-700' }}">
+                <i class="fa-solid fa-user-gear w-4 text-center text-xs {{ request()->routeIs('profile.edit') ? 'text-cyan-700' : 'text-slate-400' }}"></i>
                 <span>Pengaturan Profil</span>
             </a>
         </nav>
@@ -125,8 +151,8 @@
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit"
-                        class="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-rose-500 hover:bg-rose-50 hover:text-rose-600 rounded-xl transition-colors">
-                    <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center text-sm"></i>
+                        class="flex items-center gap-3 w-full px-4 py-2.5 text-xs text-rose-500 hover:bg-rose-50 hover:text-rose-600 rounded-xl transition-colors cursor-pointer">
+                    <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center text-xs"></i>
                     <span>Keluar</span>
                 </button>
             </form>
@@ -138,7 +164,7 @@
         <div class="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-white text-lg mb-3">
             <i class="fa-solid fa-bag-shopping"></i>
         </div>
-        <h4 class="font-bold text-white mb-1 font-display">Mode Pembeli</h4>
+        <h4 class="font-bold text-white mb-1 font-display text-sm">Mode Pembeli</h4>
         <p class="text-slate-300 text-xs mb-3 leading-relaxed">Jelajahi marketplace dan cari produk pilihan terbaik.</p>
         <a href="{{ url('/products') }}"
            class="block text-center bg-white/10 hover:bg-white/20 text-white text-xs font-semibold py-2 rounded-xl transition-colors">

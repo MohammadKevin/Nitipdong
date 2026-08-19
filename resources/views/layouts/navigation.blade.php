@@ -84,26 +84,7 @@
                         <i class="fa-regular fa-comment-dots text-sm text-slate-600"></i>
                     </a>
 
-                    <div class="relative" @click.outside="notifOpen = false">
-                        <button @click="notifOpen = !notifOpen" aria-label="Notifikasi" class="btn-icon relative" title="Notifikasi">
-                            <i class="fa-regular fa-bell text-sm text-slate-600"></i>
-                        </button>
-
-                        <div x-show="notifOpen" x-cloak
-                             x-transition:enter="transition ease-out duration-100"
-                             x-transition:enter-start="opacity-0 translate-y-1 scale-98"
-                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                             class="absolute right-0 mt-1.5 w-72 bg-white rounded-lg shadow-dropdown border border-slate-200 py-1 z-50 overflow-hidden">
-                            <div class="px-3.5 py-2 border-b border-slate-100 flex items-center justify-between">
-                                <span class="font-semibold text-xs text-slate-800">Notifikasi</span>
-                                <span class="text-[10px] text-cyan-600 font-medium cursor-pointer hover:underline">Tandai Dibaca</span>
-                            </div>
-                            <div class="py-6 text-center text-slate-400 text-xs">
-                                <i class="fa-regular fa-bell-slash text-lg mb-1 text-slate-300 block"></i>
-                                Belum ada notifikasi baru
-                            </div>
-                        </div>
-                    </div>
+                    <x-notification-dropdown />
 
                     <div class="h-4 w-px bg-slate-200 mx-1 hidden sm:block"></div>
 

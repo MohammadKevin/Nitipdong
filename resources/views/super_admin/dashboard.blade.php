@@ -11,12 +11,15 @@
             <p class="text-xs text-slate-500 mt-0.5">Monitoring perputaran transaksi dan pendapatan komisi 5% marketplace.</p>
         </div>
 
-        <div class="flex items-center gap-3">
-            <div class="inline-flex items-center p-0.5 bg-slate-200/80 rounded-lg text-xs font-semibold text-slate-600">
-                <button type="button" class="px-3 py-1 rounded-md bg-white text-slate-900 shadow-xs">Bulan Ini</button>
-                <button type="button" class="px-3 py-1 rounded-md text-slate-600 hover:text-slate-900">Kuartal</button>
-                <button type="button" class="px-3 py-1 rounded-md text-slate-600 hover:text-slate-900">Tahun Ini</button>
-            </div>
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <a href="{{ route('super_admin.withdrawals.index') }}" class="btn-secondary text-xs h-9 px-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 font-semibold flex items-center gap-1.5 text-slate-700 transition-colors">
+                <i class="fa-solid fa-money-bill-transfer text-emerald-600"></i>
+                <span>Kelola Payout</span>
+            </a>
+            <a href="{{ route('super_admin.reports.revenue.export') }}" class="btn-primary text-xs h-9 px-3.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold flex items-center gap-1.5 shadow-xs transition-colors">
+                <i class="fa-solid fa-file-excel text-xs"></i>
+                <span>Ekspor Laporan</span>
+            </a>
         </div>
     </div>
 

@@ -50,6 +50,12 @@
                             Manajemen Toko
                         </a>
 
+                        <a href="{{ route('super_admin.withdrawals.index') }}"
+                           class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('super_admin.withdrawals.*') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-money-bill-transfer w-4 h-4 text-xs flex items-center justify-center {{ request()->routeIs('super_admin.withdrawals.*') ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
+                            Payout & Penarikan Toko
+                        </a>
+
                         <a href="{{ route('super_admin.users.index') }}"
                            class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('super_admin.users.index') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
                             <i class="fa-solid fa-users w-4 h-4 text-xs flex items-center justify-center {{ request()->routeIs('super_admin.users.index') ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200' }}"></i>

@@ -3,13 +3,57 @@
         Pesanan Masuk Toko - {{ config('app.name', 'BelanjaIn') }}
     </x-slot>
 
-    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-2">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4" x-data="{
+        showResiModal: false,
+        selectedOrder: null,
+        trackingNumber: '',
+        orderActionUrl: '',
+        openResi(order, url) {
+            this.selectedOrder = order;
+            this.trackingNumber = order.tracking_number || '';
+            this.orderActionUrl = url;
+            this.showResiModal = true;
+        }
+    }">
         <div>
             <h1 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                 <i class="fa-solid fa-receipt text-cyan-700"></i>
                 Pesanan Masuk Toko
             </h1>
-            <p class="text-xs text-slate-500 mt-0.5">Pantau pesanan pembeli, periksa bukti pembayaran, dan perbarui status pengiriman.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Pantau pesanan pembeli, cetak label pengiriman, periksa bukti pembayaran, dan perbarui status resi.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <a href="{{ route('seller.reports.sales.export') }}" class="btn-secondary text-xs h-9 px-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 font-semibold flex items-center gap-1.5 text-slate-700 transition-colors">
+                <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                <span>Unduh Laporan Penjualan</span>
+            </a>
+        </div>
+
+        {{-- Modal Input No Resi --}}
+        <div x-show="showResiModal" x-cloak
+             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div @click.outside="showResiModal = false"
+                 class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-200 text-xs">
+                <h3 class="font-bold text-sm text-slate-900 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-truck-fast text-cyan-600"></i> Input No. Resi Pengiriman
+                </h3>
+                <form :action="orderActionUrl" method="POST" class="space-y-3">
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" name="status" value="shipped">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Nomor Resi (Kurir)</label>
+                        <input type="text" name="tracking_number" x-model="trackingNumber" required
+                               placeholder="Contoh: JNE8291028192"
+                               class="w-full py-2 px-3 rounded-xl border border-slate-300 font-mono text-xs focus:border-cyan-600">
+                    </div>
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" @click="showResiModal = false" class="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-600">Batal</button>
+                        <button type="submit" class="px-4 py-1.5 rounded-lg bg-cyan-700 text-white font-semibold hover:bg-cyan-800">Simpan & Kirim</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -31,7 +75,7 @@
             @endphp
             @foreach($tabs as $tab)
                 <a href="{{ route('seller.orders.index', $tab['value'] ? ['status' => $tab['value']] : []) }}"
-                   class="px-3 py-1.5 rounded-md text-xs font-semibold transition-colors shrink-0 {{ $currentStatus === $tab['value'] ? 'bg-cyan-700 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200' }}">
+                   class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 {{ $currentStatus === $tab['value'] ? 'bg-cyan-700 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200' }}">
                     {{ $tab['label'] }}
                 </a>
             @endforeach
@@ -46,6 +90,7 @@
                         <th class="px-5 py-3.5 font-semibold">Item Produk</th>
                         <th class="px-5 py-3.5 font-semibold text-right">Total Tagihan</th>
                         <th class="px-5 py-3.5 font-semibold text-center">Status</th>
+                        <th class="px-5 py-3.5 font-semibold text-center">Dokumen & Resi</th>
                         <th class="px-5 py-3.5 font-semibold text-center">Update Status</th>
                     </tr>
                 </thead>
@@ -55,6 +100,11 @@
                         <td class="px-5 py-3.5">
                             <span class="font-mono font-bold text-slate-900 text-xs block">#{{ $order->invoice_number }}</span>
                             <span class="text-[10px] text-slate-400 mt-0.5 block">{{ $order->created_at->translatedFormat('d M Y, H:i') }}</span>
+                            @if($order->complaint)
+                                <a href="{{ route('seller.complaints.index') }}" class="inline-flex items-center gap-1 text-[9px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200 mt-1">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> Ada Komplain
+                                </a>
+                            @endif
                         </td>
                         <td class="px-5 py-3.5">
                             <span class="font-bold text-slate-900 text-xs block">{{ $order->user->name ?? 'Pembeli' }}</span>
@@ -92,10 +142,33 @@
                                 {{ ucfirst($order->status) }}
                             </span>
                             @if($order->payment_proof)
-                                <span class="block text-[10px] text-cyan-700 mt-0.5 font-medium">
-                                    <i class="fa-solid fa-receipt"></i> Bukti Ada
-                                </span>
+                                <a href="{{ asset('storage/' . $order->payment_proof) }}" target="_blank" class="block text-[10px] text-cyan-700 mt-0.5 font-semibold hover:underline">
+                                    <i class="fa-solid fa-receipt"></i> Bukti Bayar
+                                </a>
                             @endif
+                        </td>
+                        <td class="px-5 py-3.5 text-center">
+                            <div class="flex flex-col items-center gap-1">
+                                <a href="{{ route('orders.shipping_label', $order) }}" target="_blank"
+                                   class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-700 hover:text-cyan-700 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-colors" title="Cetak Label Pengiriman">
+                                    <i class="fa-solid fa-print text-[9px]"></i> Label Resi
+                                </a>
+                                @if(in_array($order->status, ['processing', 'shipped', 'completed']))
+                                    <a href="{{ route('orders.tracking', $order) }}" target="_blank"
+                                       class="inline-flex items-center gap-1 text-[10px] font-bold text-cyan-700 hover:text-cyan-800 bg-cyan-50 hover:bg-cyan-100 px-2 py-0.5 rounded border border-cyan-200 transition-colors" title="Lacak Posisi Paket di Peta Live">
+                                        <i class="fa-solid fa-map-location-dot text-[9px]"></i> Lacak Peta
+                                    </a>
+                                @endif
+                                <a href="{{ route('orders.invoice', $order) }}" target="_blank"
+                                   class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500 hover:text-cyan-700 hover:underline">
+                                    <i class="fa-solid fa-file-invoice text-[9px]"></i> Invoice
+                                </a>
+                                @if($order->tracking_number)
+                                    <span class="font-mono text-[10px] text-slate-600 bg-white px-1.5 py-0.2 rounded border border-slate-200">
+                                        {{ $order->tracking_number }}
+                                    </span>
+                                @endif
+                            </div>
                         </td>
                         <td class="px-5 py-3.5 text-center">
                             <form action="{{ route('seller.orders.update_status', $order) }}" method="POST" class="inline-flex items-center gap-1">
@@ -113,7 +186,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-5 py-12 text-center text-slate-400">
+                        <td colspan="7" class="px-5 py-12 text-center text-slate-400">
                             Tidak ada pesanan pada status ini.
                         </td>
                     </tr>

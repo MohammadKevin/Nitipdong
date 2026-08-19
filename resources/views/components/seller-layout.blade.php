@@ -74,6 +74,20 @@
                             Tambah Produk Baru
                         </a>
 
+                        <a href="{{ route('seller.wallet.index') }}"
+                           class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('seller.wallet.*') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-wallet w-4 h-4 text-xs flex items-center justify-center {{ request()->routeIs('seller.wallet.*') ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
+                            Dompet & Saldo Toko
+                        </a>
+
+                        <a href="{{ route('seller.complaints.index') }}"
+                           class="flex items-center justify-between px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('seller.complaints.*') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
+                            <div class="flex items-center gap-2.5">
+                                <i class="fa-solid fa-triangle-exclamation w-4 h-4 text-xs flex items-center justify-center {{ request()->routeIs('seller.complaints.*') ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
+                                Pusat Komplain
+                            </div>
+                        </a>
+
                         <a href="{{ route('seller.orders.index') }}"
                            class="flex items-center justify-between px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('seller.orders.*') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
                             <div class="flex items-center gap-2.5">

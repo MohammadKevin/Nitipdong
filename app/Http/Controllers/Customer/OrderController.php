@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\AppNotification;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -60,61 +61,53 @@ class OrderController extends Controller
             }
         }
 
-        $finalTotal = max(0, $subtotal - $voucherDiscount);
-
-        $addresses = UserAddress::where('user_id', Auth::id())
-            ->orderByDesc('is_default')
-            ->latest()
-            ->get();
-
+        $addresses = UserAddress::where('user_id', Auth::id())->get();
         $defaultAddress = $addresses->firstWhere('is_default', true) ?? $addresses->first();
+
+        $grandTotal = max(0, $subtotal - $voucherDiscount);
 
         return view('customer.order.checkout', compact(
             'carts',
-            'itemsTotal',
             'subtotal',
+            'itemsTotal',
             'productSavings',
             'voucherDiscount',
-            'appliedVoucher',
-            'finalTotal',
+            'grandTotal',
             'addresses',
-            'defaultAddress'
+            'defaultAddress',
+            'appliedVoucher'
         ));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'address_id'       => ['nullable', 'exists:user_addresses,id'],
-            'shipping_address' => ['required_without:address_id', 'nullable', 'string', 'min:10'],
+            'address_id' => ['required', 'exists:user_addresses,id'],
+        ], [
+            'address_id.required' => 'Pilih alamat pengiriman terlebih dahulu.',
         ]);
 
-        $shippingAddress = $request->shipping_address;
+        $address = UserAddress::where('id', $request->address_id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
 
-        if ($request->filled('address_id')) {
-            $userAddress = UserAddress::where('id', $request->address_id)
-                ->where('user_id', Auth::id())
-                ->first();
+        $shippingAddress = "{$address->recipient_name} ({$address->phone})\n{$address->full_address}, {$address->city}, {$address->province} {$address->postal_code}";
 
-            if ($userAddress) {
-                $shippingAddress = "{$userAddress->recipient_name} ({$userAddress->phone})\n{$userAddress->full_address}";
-                if ($userAddress->city || $userAddress->province) {
-                    $shippingAddress .= "\n" . implode(', ', array_filter([$userAddress->city, $userAddress->province, $userAddress->postal_code]));
-                }
+        $carts = Cart::with(['product.store', 'product.category'])
+            ->where('user_id', Auth::id())
+            ->get();
+
+        if ($carts->isEmpty()) {
+            return redirect()->route('customer.cart.index')->with('error', 'Keranjang belanja kosong.');
+        }
+
+        foreach ($carts as $cart) {
+            if ($cart->product->stock < $cart->quantity) {
+                return redirect()->route('customer.cart.index')->with('error', "Stok untuk produk '{$cart->product->name}' tidak mencukupi. Sisa stok: {$cart->product->stock}");
             }
         }
 
-        if (empty($shippingAddress)) {
-            return back()->with('error', 'Alamat pengiriman wajib diisi.');
-        }
-
-        $carts = Cart::with('product')->where('user_id', Auth::id())->get();
-
-        if ($carts->isEmpty()) {
-            return redirect()->route('customer.cart.index')->with('error', 'Keranjang Anda kosong.');
-        }
-
-        $totalSubtotal = $carts->sum(fn ($i) => $i->product->final_price * $i->quantity);
+        $totalSubtotal = $carts->sum(fn ($item) => $item->product->final_price * $item->quantity);
 
         $appliedVoucher = null;
         $totalVoucherDiscount = 0;
@@ -123,8 +116,8 @@ class OrderController extends Controller
             $appliedVoucher = Voucher::active()->where('code', session('applied_voucher'))->first();
             if ($appliedVoucher) {
                 if ($appliedVoucher->is_store_voucher) {
-                    $storeItems = $carts->filter(fn ($i) => $i->product && $i->product->store_id == $appliedVoucher->store_id);
-                    $applicableSubtotal = $storeItems->sum(fn ($i) => $i->product->final_price * $i->quantity);
+                    $applicableSubtotal = $carts->filter(fn ($item) => $item->product && $item->product->store_id == $appliedVoucher->store_id)
+                        ->sum(fn ($item) => $item->product->final_price * $item->quantity);
                 } else {
                     $applicableSubtotal = $totalSubtotal;
                 }
@@ -139,7 +132,9 @@ class OrderController extends Controller
         $groupedByStore = $carts->groupBy(fn ($item) => $item->product->store_id);
         $storeCount = $groupedByStore->count();
 
-        DB::transaction(function () use ($groupedByStore, $shippingAddress, $totalSubtotal, $appliedVoucher, $totalVoucherDiscount, $storeCount) {
+        $firstOrderId = null;
+
+        DB::transaction(function () use ($groupedByStore, $shippingAddress, $totalSubtotal, $appliedVoucher, $totalVoucherDiscount, $storeCount, &$firstOrderId) {
             $remainingVoucherDiscount = $totalVoucherDiscount;
             $processedStores = 0;
 
@@ -180,6 +175,10 @@ class OrderController extends Controller
                     'shipping_address' => $shippingAddress,
                 ]);
 
+                if (!$firstOrderId) {
+                    $firstOrderId = $order->id;
+                }
+
                 foreach ($items as $item) {
                     OrderItem::create([
                         'order_id'   => $order->id,
@@ -189,32 +188,37 @@ class OrderController extends Controller
                     ]);
 
                     $item->product->decrement('stock', $item->quantity);
+                }
 
-                    if ($fsi = $item->product->current_flash_sale_item) {
-                        $fsi->increment('stock_sold', $item->quantity);
-                    }
+                // Notify seller
+                if ($order->store && $order->store->user_id) {
+                    AppNotification::send(
+                        $order->store->user_id,
+                        'Pesanan Baru Masuk',
+                        "Pesanan baru #{$order->invoice_number} senilai Rp " . number_format($order->total_amount, 0, ',', '.') . " menunggu konfirmasi pembayaran.",
+                        'order',
+                        route('seller.orders.index')
+                    );
                 }
             }
 
-            if ($appliedVoucher && $totalVoucherDiscount > 0) {
-                $appliedVoucher->decrement('quota');
+            if ($appliedVoucher) {
+                $appliedVoucher->increment('used_count');
+                session()->forget('applied_voucher');
             }
 
             Cart::where('user_id', Auth::id())->delete();
-            session()->forget('applied_voucher');
         });
 
-        return redirect()->route('customer.cart.index')->with('success', 'Pesanan berhasil dibuat! Lanjutkan ke pembayaran dari halaman keranjang.');
+        $firstOrder = Order::find($firstOrderId);
+        return redirect()->route('customer.order.payment', $firstOrder)
+            ->with('success', 'Pesanan Anda berhasil dibuat! Silakan selesaikan pembayaran.');
     }
 
-    public function payment(Order $order): View|RedirectResponse
+    public function payment(Order $order): View
     {
         if ($order->user_id !== Auth::id()) {
             abort(403);
-        }
-
-        if ($order->status !== 'pending' || $order->payment_proof) {
-            return redirect()->back()->with('info', 'Pesanan ini sudah dibayar atau tidak dalam status pending.');
         }
 
         return view('customer.order.payment', compact('order'));
@@ -226,12 +230,8 @@ class OrderController extends Controller
             abort(403);
         }
 
-        if ($order->status !== 'pending' || $order->payment_proof) {
-            return redirect()->back()->with('info', 'Pesanan ini sudah dibayar.');
-        }
-
         $request->validate([
-            'payment_proof' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'payment_proof' => ['required', 'image', 'max:2048'],
         ]);
 
         $path = $request->file('payment_proof')->store('payments', 'public');
@@ -240,6 +240,17 @@ class OrderController extends Controller
             'payment_proof' => $path,
             'status'        => 'processing',
         ]);
+
+        // Notify seller
+        if ($order->store && $order->store->user_id) {
+            AppNotification::send(
+                $order->store->user_id,
+                'Bukti Pembayaran Diunggah',
+                "Bukti pembayaran untuk pesanan #{$order->invoice_number} telah diunggah oleh pembeli. Silakan proses pengiriman barang!",
+                'order',
+                route('seller.orders.index')
+            );
+        }
 
         return redirect()->route('customer.cart.index')->with('success', 'Bukti pembayaran berhasil diunggah! Penjual akan segera memproses pesanan Anda.');
     }
@@ -254,10 +265,27 @@ class OrderController extends Controller
             return redirect()->route('customer.dashboard')->with('error', 'Hanya pesanan yang sedang dalam pengiriman yang dapat diselesaikan.');
         }
 
-        $order->update([
-            'status'       => 'completed',
-            'completed_at' => now(),
-        ]);
+        DB::transaction(function () use ($order) {
+            $order->update([
+                'status'       => 'completed',
+                'completed_at' => now(),
+            ]);
+
+            // Auto-credit 95% balance to seller store (5% platform commission kept)
+            $sellerEarnings = round($order->total_amount * 0.95);
+            $order->store->increment('balance', $sellerEarnings);
+
+            // Notify seller
+            if ($order->store && $order->store->user_id) {
+                AppNotification::send(
+                    $order->store->user_id,
+                    'Pesanan Selesai & Dana Masuk',
+                    "Pesanan #{$order->invoice_number} telah diterima pembeli! Dana sebesar Rp " . number_format($sellerEarnings, 0, ',', '.') . " telah masuk ke saldo dompet toko Anda.",
+                    'wallet',
+                    route('seller.wallet.index')
+                );
+            }
+        });
 
         return redirect()->route('customer.dashboard')->with('success', 'Pesanan berhasil diselesaikan! Silakan berikan ulasan untuk produk yang telah Anda terima.');
     }
