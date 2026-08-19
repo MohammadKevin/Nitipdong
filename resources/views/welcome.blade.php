@@ -1,16 +1,81 @@
 <x-app-layout>
+    {{-- Flash Notifications --}}
     @if(session('success'))
         <div class="page-container mt-3">
-            <div class="flex items-center gap-2.5 px-4 py-2.5 bg-cyan-50 border border-cyan-200 text-cyan-900 rounded-md text-xs font-semibold animate-fade-up">
+            <div class="flex items-center gap-2.5 px-4 py-2.5 bg-cyan-50 border border-cyan-200 text-cyan-900 rounded-xl text-xs font-semibold animate-fade-up">
                 <i class="fa-solid fa-circle-check text-cyan-600 text-sm"></i>
                 <span>{{ session('success') }}</span>
             </div>
         </div>
     @endif
 
-    <section class="page-container pt-4 pb-6">
+    {{-- Logged In vs Guest Contextual Welcome Strip (Shopee Style) --}}
+    <section class="page-container pt-3 pb-1">
+        @auth
+            {{-- Logged In User Greeting Banner --}}
+            <div class="bg-gradient-to-r from-cyan-900 via-cyan-800 to-slate-900 rounded-2xl p-4 sm:p-5 text-white shadow-card flex flex-col md:flex-row items-center justify-between gap-4 border border-cyan-700/40 relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="flex items-center gap-3.5 z-10 w-full md:w-auto">
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0891b2&color=fff&size=90"
+                         class="w-12 h-12 rounded-full border-2 border-cyan-300 object-cover shadow-sm" alt="User">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-sm sm:text-base font-bold text-white leading-tight">
+                                Halo, <span class="text-cyan-200">{{ auth()->user()->name }}</span>!
+                            </h2>
+                            <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-cyan-400/20 text-cyan-300 border border-cyan-400/30 uppercase tracking-wider">
+                                Member BelanjaIn
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-cyan-100/80 mt-0.5">Nikmati diskon eksklusif dan gratis ongkir spesial untukmu hari ini.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 sm:gap-3 z-10 w-full md:w-auto justify-between md:justify-end text-xs">
+                    <a href="{{ route('customer.dashboard') }}" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white font-medium flex items-center gap-1.5 transition-all text-xs">
+                        <i class="fa-solid fa-receipt text-cyan-300 text-[11px]"></i>
+                        <span>Pesanan Saya</span>
+                    </a>
+                    <a href="{{ route('customer.wishlist.index') }}" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white font-medium flex items-center gap-1.5 transition-all text-xs">
+                        <i class="fa-solid fa-heart text-rose-400 text-[11px]"></i>
+                        <span>Wishlist ({{ auth()->user()->wishlists()->count() }})</span>
+                    </a>
+                    <a href="{{ route('customer.addresses.index') }}" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white font-medium flex items-center gap-1.5 transition-all text-xs hidden sm:flex">
+                        <i class="fa-solid fa-location-dot text-cyan-300 text-[11px]"></i>
+                        <span>Buku Alamat</span>
+                    </a>
+                </div>
+            </div>
+        @else
+            {{-- Guest New User Welcome Promo Banner --}}
+            <div class="bg-gradient-to-r from-slate-900 via-cyan-950 to-slate-900 rounded-2xl p-3.5 sm:p-4 text-white shadow-card flex flex-col sm:flex-row items-center justify-between gap-3 border border-cyan-800/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-300 text-lg shrink-0">
+                        <i class="fa-solid fa-gift"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5">
+                            Spesial Pengguna Baru: Voucher Diskon Rp50.000 + Gratis Ongkir Rp0!
+                        </h3>
+                        <p class="text-[11px] text-slate-300 mt-0.5">Daftar akun gratis sekarang dan klaim kupon belanja pertamamu.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <a href="{{ route('register') }}" class="btn-primary h-8 px-4 text-xs bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg shadow-sm">
+                        Daftar Sekarang
+                    </a>
+                    <a href="{{ route('login') }}" class="h-8 px-3.5 inline-flex items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-slate-200 hover:text-white text-xs font-medium transition-colors">
+                        Masuk
+                    </a>
+                </div>
+            </div>
+        @endauth
+    </section>
+
+    {{-- Hero Section (Shopee 2:1 Carousel & Promo Cards) --}}
+    <section class="page-container py-3">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-            <!-- Hero Banner with Auto Carousel (5s delay) -->
+            <!-- Hero Banner with Auto Carousel -->
             <div class="lg:col-span-8" x-data="{
                 currentSlide: 0,
                 totalSlides: 3,
@@ -24,7 +89,7 @@
                         if (!this.isPaused) {
                             this.nextSlide();
                         }
-                    }, 5000);
+                    }, 4500);
                 },
                 nextSlide() {
                     this.currentSlide = (this.currentSlide + 1) % this.totalSlides;
@@ -39,7 +104,7 @@
                     this.isPaused = false;
                 }
             }">
-                <div class="relative rounded-xl overflow-hidden bg-slate-950 border border-slate-800 shadow-card h-full min-h-[300px]"
+                <div class="relative rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-card h-full min-h-[310px] sm:min-h-[340px]"
                      @mouseenter="pauseAutoPlay()"
                      @mouseleave="resumeAutoPlay()">
 
@@ -49,64 +114,65 @@
                          x-transition:enter-start="opacity-0"
                          x-transition:enter-end="opacity-100"
                          class="absolute inset-0">
-                        <div class="absolute inset-0 opacity-25">
+                        <div class="absolute inset-0 opacity-30">
                             <img src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?q=80&w=2001&auto=format&fit=crop" class="w-full h-full object-cover" alt="Hero">
                         </div>
-                        <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent"></div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-transparent"></div>
 
-                        <div class="relative z-10 h-full flex flex-col justify-between p-7 sm:p-9">
+                        <div class="relative z-10 h-full flex flex-col justify-between p-6 sm:p-8">
                             <div class="max-w-lg">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-300 border border-cyan-400/20 mb-3">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 mb-2.5">
                                     <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                                    Curated Tech & Lifestyle 2026
+                                    BelanjaIn Mega Mall 2026
                                 </span>
-                                <h1 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight tracking-tight">
-                                    Eksplorasi Produk Pilihan dengan Standar Kurasi Tertinggi
+                                <h1 class="text-xl sm:text-3xl font-extrabold text-white leading-tight tracking-tight">
+                                    Pesta Diskon Akbar & Produk Official Store Terpercaya
                                 </h1>
-                                <p class="text-xs sm:text-sm text-slate-300 mt-2.5 leading-relaxed font-normal">
-                                    Koleksi gadget original, kebutuhan esensial, dan official store terverifikasi langsung dengan jaminan perlindungan pembeli 100%.
+                                <p class="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
+                                    Dapatkan jaminan 100% original, ekstra cashback hingga 50%, dan gratis ongkir ke seluruh Indonesia.
                                 </p>
                             </div>
-                            <div class="pt-6 flex items-center gap-3">
-                                <a href="{{ url('/products') }}" class="btn-primary text-xs h-9 px-4.5 bg-cyan-600 hover:bg-cyan-500 text-white shadow-sm">
-                                    Jelajahi Katalog
-                                    <i class="fa-solid fa-arrow-right text-[10px] ml-2"></i>
+                            <div class="pt-5 flex items-center gap-3">
+                                <a href="{{ url('/products') }}" class="btn-primary text-xs h-9 px-5 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-xl shadow-md flex items-center gap-2">
+                                    <span>Belanja Sekarang</span>
+                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                 </a>
-                                <a href="{{ url('/products?flash_sale=1') }}" class="px-4 h-9 inline-flex items-center justify-center rounded-md border border-slate-700 bg-slate-900/80 text-slate-200 hover:text-white hover:border-slate-500 text-xs font-medium transition-colors">
-                                    Lihat Flash Sale
+                                <a href="{{ url('/products?flash_sale=1') }}" class="px-4 h-9 inline-flex items-center justify-center rounded-xl border border-slate-700 bg-slate-900/80 text-slate-200 hover:text-white hover:border-slate-500 text-xs font-semibold transition-colors">
+                                    <i class="fa-solid fa-bolt text-cyan-400 mr-1.5"></i>
+                                    Flash Sale
                                 </a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Slide 2: Flash Sale -->
+                    <!-- Slide 2: Flash Sale Promo -->
                     <div x-show="currentSlide === 1"
                          x-transition:enter="transition ease-out duration-500"
                          x-transition:enter-start="opacity-0"
                          x-transition:enter-end="opacity-100"
                          class="absolute inset-0">
-                        <div class="absolute inset-0 opacity-30">
+                        <div class="absolute inset-0 opacity-35">
                             <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover" alt="Flash Sale">
                         </div>
                         <div class="absolute inset-0 bg-gradient-to-r from-rose-950 via-rose-950/90 to-transparent"></div>
 
-                        <div class="relative z-10 h-full flex flex-col justify-between p-7 sm:p-9">
+                        <div class="relative z-10 h-full flex flex-col justify-between p-6 sm:p-8">
                             <div class="max-w-lg">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-yellow-500/20 text-yellow-300 border border-yellow-400/30 mb-3">
-                                    <i class="fa-solid fa-bolt"></i>
-                                    Flash Sale Aktif
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-400/30 mb-2.5">
+                                    <i class="fa-solid fa-fire text-amber-400"></i>
+                                    Flash Sale Kilat
                                 </span>
-                                <h1 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight tracking-tight">
-                                    Diskon Hingga 70% Produk Pilihan Hari Ini
-                                </h1>
-                                <p class="text-xs sm:text-sm text-rose-100 mt-2.5 leading-relaxed font-normal">
-                                    Buruan serbu! Stok terbatas dan waktu terbatas untuk hemat maksimal.
+                                <h2 class="text-xl sm:text-3xl font-extrabold text-white leading-tight tracking-tight">
+                                    Diskon Spesial Hingga 70% Setiap Hari
+                                </h2>
+                                <p class="text-xs sm:text-sm text-rose-100/90 mt-2 leading-relaxed">
+                                    Pantau jam flash sale dan rebut barang impianmu dengan harga termurah sebelum kehabisan!
                                 </p>
                             </div>
-                            <div class="pt-6 flex items-center gap-3">
-                                <a href="{{ url('/products?flash_sale=1') }}" class="btn-primary text-xs h-9 px-4.5 bg-rose-600 hover:bg-rose-500 text-white shadow-sm">
-                                    <i class="fa-solid fa-bolt text-yellow-300 mr-1.5"></i>
-                                    Lihat Flash Sale
+                            <div class="pt-5 flex items-center gap-3">
+                                <a href="{{ url('/products?flash_sale=1') }}" class="btn-primary text-xs h-9 px-5 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-xl shadow-md flex items-center gap-2">
+                                    <i class="fa-solid fa-bolt text-amber-300"></i>
+                                    Serbu Flash Sale
                                 </a>
                             </div>
                         </div>
@@ -118,281 +184,212 @@
                          x-transition:enter-start="opacity-0"
                          x-transition:enter-end="opacity-100"
                          class="absolute inset-0">
-                        <div class="absolute inset-0 opacity-25">
+                        <div class="absolute inset-0 opacity-30">
                             <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=2070&auto=format&fit=crop" class="w-full h-full object-cover" alt="Seller">
                         </div>
                         <div class="absolute inset-0 bg-gradient-to-r from-emerald-950 via-emerald-950/90 to-transparent"></div>
 
-                        <div class="relative z-10 h-full flex flex-col justify-between p-7 sm:p-9">
+                        <div class="relative z-10 h-full flex flex-col justify-between p-6 sm:p-8">
                             <div class="max-w-lg">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 mb-3">
-                                    <i class="fa-solid fa-store"></i>
-                                    Peluang Bisnis
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 mb-2.5">
+                                    <i class="fa-solid fa-store text-emerald-400"></i>
+                                    Seller Official Center
                                 </span>
-                                <h1 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight tracking-tight">
-                                    Buka Toko & Jangkau Pasar Digital BelanjaIn
-                                </h1>
-                                <p class="text-xs sm:text-sm text-emerald-100 mt-2.5 leading-relaxed font-normal">
-                                    Daftarkan toko resmi Anda gratis tanpa biaya pendaftaran awal.
+                                <h2 class="text-xl sm:text-3xl font-extrabold text-white leading-tight tracking-tight">
+                                    Buka Toko Gratis & Raih Jutaan Pembeli
+                                </h2>
+                                <p class="text-xs sm:text-sm text-emerald-100/90 mt-2 leading-relaxed">
+                                    Daftarkan tokomu dalam 2 menit tanpa biaya pendaftaran dan nikmati fitur promosi lengkap.
                                 </p>
                             </div>
-                            <div class="pt-6 flex items-center gap-3">
-                                <a href="{{ route('store.register') }}" class="btn-primary text-xs h-9 px-4.5 bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm">
-                                    <i class="fa-solid fa-rocket mr-1.5"></i>
-                                    Mulai Berjualan
+                            <div class="pt-5 flex items-center gap-3">
+                                <a href="{{ route('store.register') }}" class="btn-primary text-xs h-9 px-5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-md flex items-center gap-2">
+                                    <i class="fa-solid fa-rocket"></i>
+                                    Buka Toko Sekarang
                                 </a>
                             </div>
                         </div>
                     </div>
 
                     <!-- Carousel Indicators -->
-                    <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex gap-2">
+                    <div class="absolute bottom-3 left-1/2 transform -translate-x-1/2 z-20 flex gap-1.5">
                         <template x-for="i in totalSlides" :key="i">
                             <button @click="goToSlide(i - 1)"
-                                    class="w-2 h-2 rounded-full transition-all"
-                                    :class="currentSlide === (i - 1) ? 'bg-white w-6' : 'bg-white/40 hover:bg-white/60'">
+                                    class="h-1.5 rounded-full transition-all"
+                                    :class="currentSlide === (i - 1) ? 'bg-cyan-400 w-6' : 'bg-white/40 w-2 hover:bg-white/70'">
                             </button>
                         </template>
                     </div>
 
-                    <!-- Navigation Arrows - Positioned at edges -->
+                    <!-- Navigation Arrows -->
                     <button @click="currentSlide = (currentSlide - 1 + totalSlides) % totalSlides"
-                            class="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 items-center justify-center text-white transition-all shadow-lg">
-                        <i class="fa-solid fa-chevron-left text-sm"></i>
+                            class="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-slate-900/50 hover:bg-slate-900/80 backdrop-blur-sm border border-white/20 items-center justify-center text-white transition-all">
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
                     </button>
                     <button @click="nextSlide()"
-                            class="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 items-center justify-center text-white transition-all shadow-lg">
-                        <i class="fa-solid fa-chevron-right text-sm"></i>
+                            class="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-slate-900/50 hover:bg-slate-900/80 backdrop-blur-sm border border-white/20 items-center justify-center text-white transition-all">
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
                     </button>
                 </div>
             </div>
 
-            <div class="lg:col-span-4 flex flex-col gap-4">
-                <div class="p-5 rounded-xl bg-white border border-slate-200/80 shadow-card flex flex-col justify-between flex-1">
+            <!-- Right 2 Stacked Promo Banners (Shopee Style) -->
+            <div class="lg:col-span-4 flex flex-col gap-3.5">
+                <div class="p-5 rounded-2xl bg-gradient-to-br from-cyan-600 to-cyan-800 text-white shadow-card flex flex-col justify-between flex-1 relative overflow-hidden border border-cyan-500/30">
+                    <div class="absolute -right-4 -bottom-4 text-cyan-400/20 text-7xl font-bold">
+                        <i class="fa-solid fa-truck-fast"></i>
+                    </div>
                     <div>
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded border border-cyan-200">
-                            Garansi Pengiriman
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-white/20 text-white px-2 py-0.5 rounded-md backdrop-blur-xs border border-white/20">
+                            Gratis Ongkir XTRA
                         </span>
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900 mt-2.5 leading-snug">Voucher Ekstra Ongkir Rp0 Bebas Syarat</h3>
-                        <p class="text-xs text-slate-500 mt-1">Gunakan kode voucher eksklusif untuk hemat biaya pengiriman ke seluruh Nusantara.</p>
+                        <h3 class="text-sm sm:text-base font-bold text-white mt-2.5 leading-snug">Voucher Ekstra Ongkir Rp0 Seluruh Indonesia</h3>
+                        <p class="text-xs text-cyan-100 mt-1">Klaim voucher dan nikmati potongan pengiriman tanpa minimum belanja.</p>
                     </div>
                     <div class="pt-3">
-                        <a href="{{ url('/products') }}" class="text-xs font-semibold text-cyan-700 hover:text-cyan-800 inline-flex items-center gap-1">
+                        <a href="{{ url('/products') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-white/20 hover:bg-white/30 px-3.5 py-1.5 rounded-lg backdrop-blur-xs transition-colors">
                             Klaim Kupon <i class="fa-solid fa-chevron-right text-[9px]"></i>
                         </a>
                     </div>
                 </div>
 
-                <div class="p-5 rounded-xl bg-slate-900 text-white shadow-card flex flex-col justify-between flex-1 border border-slate-800">
+                <div class="p-5 rounded-2xl bg-slate-900 text-white shadow-card flex flex-col justify-between flex-1 border border-slate-800 relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 text-slate-800 text-7xl font-bold">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
                     <div>
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
-                            Peluang Bisnis
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-amber-300 bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/20">
+                            Garansi 100% Aman
                         </span>
-                        <h3 class="text-xs sm:text-sm font-bold text-white mt-2.5 leading-snug">Buka Toko & Jangkau Pasar Digital BelanjaIn</h3>
-                        <p class="text-xs text-slate-400 mt-1">Daftarkan toko resmi Anda gratis tanpa biaya pendaftaran awal.</p>
+                        <h3 class="text-sm sm:text-base font-bold text-white mt-2.5 leading-snug">Proteksi Belanja & Garansi Pengembalian</h3>
+                        <p class="text-xs text-slate-400 mt-1">Dana Anda aman di rekening bersama hingga pesanan sampai dengan selamat.</p>
                     </div>
                     <div class="pt-3">
-                        <a href="{{ route('store.register') }}" class="text-xs font-semibold text-cyan-400 hover:text-cyan-300 inline-flex items-center gap-1">
-                            Mulai Berjualan <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                        <a href="{{ route('store.register') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-cyan-400 hover:text-cyan-300">
+                            Mulai Jual di BelanjaIn <i class="fa-solid fa-chevron-right text-[9px]"></i>
                         </a>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Features with Auto Scroll - 6 Cards -->
-        <div class="mt-4 relative" x-data="{
-            autoScroll: null,
-            scrollSpeed: 1,
-            init() {
-                this.startAutoScroll();
-            },
-            startAutoScroll() {
-                const container = this.$refs.scrollContainer;
-                const cardWidth = 294; // 280px + 14px gap
-                const totalCards = 6;
-
-                this.autoScroll = setInterval(() => {
-                    container.scrollLeft += this.scrollSpeed;
-
-                    // Reset ke awal setelah card ke-6 untuk infinite loop
-                    if (container.scrollLeft >= cardWidth * totalCards) {
-                        container.scrollLeft = 0;
-                    }
-                }, 30);
-            },
-            destroy() {
-                if (this.autoScroll) {
-                    clearInterval(this.autoScroll);
-                }
-            },
-            pauseScroll() {
-                if (this.autoScroll) {
-                    clearInterval(this.autoScroll);
-                    this.autoScroll = null;
-                }
-            },
-            resumeScroll() {
-                if (!this.autoScroll) {
-                    this.startAutoScroll();
-                }
-            }
-        }">
-            <div x-ref="scrollContainer"
-                 @mouseenter="pauseScroll()"
-                 @mouseleave="resumeScroll()"
-                 class="flex gap-3.5 overflow-x-auto scrollbar-hide scroll-smooth">
-
-                <!-- Feature 1 -->
-                <div class="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-card min-w-[280px] flex-shrink-0">
-                    <div class="w-9 h-9 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center text-sm shrink-0 border border-cyan-100">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-xs font-bold text-slate-900">Jaminan 100% Original</p>
-                        <p class="text-[11px] text-slate-500">Semua seller terverifikasi resmi</p>
-                    </div>
-                </div>
-
-                <!-- Feature 2 -->
-                <div class="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-card min-w-[280px] flex-shrink-0">
-                    <div class="w-9 h-9 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center text-sm shrink-0 border border-cyan-100">
-                        <i class="fa-solid fa-truck-fast"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-xs font-bold text-slate-900">Pengiriman Instan & Aman</p>
-                        <p class="text-[11px] text-slate-500">Tracking paket langsung real-time</p>
-                    </div>
-                </div>
-
-                <!-- Feature 3 -->
-                <div class="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-card min-w-[280px] flex-shrink-0">
-                    <div class="w-9 h-9 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center text-sm shrink-0 border border-cyan-100">
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-xs font-bold text-slate-900">Proteksi Pengembalian</p>
-                        <p class="text-[11px] text-slate-500">Garansi retur mudah hingga 7 hari</p>
-                    </div>
-                </div>
-
-                <!-- Feature 4: Pembayaran Aman -->
-                <div class="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-card min-w-[280px] flex-shrink-0">
-                    <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm shrink-0 border border-emerald-100">
-                        <i class="fa-solid fa-lock"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-xs font-bold text-slate-900">Pembayaran Terlindungi</p>
-                        <p class="text-[11px] text-slate-500">Transaksi aman dengan enkripsi SSL</p>
-                    </div>
-                </div>
-
-                <!-- Feature 5: Customer Service 24/7 -->
-                <div class="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-card min-w-[280px] flex-shrink-0">
-                    <div class="w-9 h-9 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center text-sm shrink-0 border border-purple-100">
-                        <i class="fa-solid fa-headset"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-xs font-bold text-slate-900">Layanan Pelanggan 24/7</p>
-                        <p class="text-[11px] text-slate-500">CS responsif siap bantu kapan saja</p>
-                    </div>
-                </div>
-
-                <!-- Feature 6: Cashback & Rewards -->
-                <div class="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-card min-w-[280px] flex-shrink-0">
-                    <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-sm shrink-0 border border-amber-100">
-                        <i class="fa-solid fa-coins"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-xs font-bold text-slate-900">Cashback & Poin Rewards</p>
-                        <p class="text-[11px] text-slate-500">Belanja makin untung dengan poin</p>
-                    </div>
-                </div>
-
-                <!-- Duplicate for seamless loop - Feature 1 -->
-                <div class="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-card min-w-[280px] flex-shrink-0">
-                    <div class="w-9 h-9 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center text-sm shrink-0 border border-cyan-100">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-xs font-bold text-slate-900">Jaminan 100% Original</p>
-                        <p class="text-[11px] text-slate-500">Semua seller terverifikasi resmi</p>
-                    </div>
-                </div>
-
-                <!-- Duplicate - Feature 2 -->
-                <div class="flex items-center gap-3 p-3.5 rounded-xl bg-white border border-slate-200/80 shadow-card min-w-[280px] flex-shrink-0">
-                    <div class="w-9 h-9 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center text-sm shrink-0 border border-cyan-100">
-                        <i class="fa-solid fa-truck-fast"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="text-xs font-bold text-slate-900">Pengiriman Instan & Aman</p>
-                        <p class="text-[11px] text-slate-500">Tracking paket langsung real-time</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <style>
-            .scrollbar-hide::-webkit-scrollbar {
-                display: none;
-            }
-            .scrollbar-hide {
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-            }
-        </style>
     </section>
 
+    {{-- 10 Shopee-Style Quick Service Icon Ribbon --}}
+    <section class="page-container py-3">
+        <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-card">
+            <div class="grid grid-cols-5 sm:grid-cols-10 gap-3 text-center">
+                <a href="{{ url('/products') }}" class="flex flex-col items-center group">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-cyan-50 border border-cyan-100 text-cyan-600 flex items-center justify-center text-lg mb-1.5 group-hover:scale-110 group-hover:bg-cyan-600 group-hover:text-white transition-all shadow-xs">
+                        <i class="fa-solid fa-store"></i>
+                    </div>
+                    <span class="text-[10px] sm:text-[11px] font-semibold text-slate-700 group-hover:text-cyan-700 leading-tight">BelanjaIn Mall</span>
+                </a>
+
+                <a href="{{ url('/products?flash_sale=1') }}" class="flex flex-col items-center group">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center text-lg mb-1.5 group-hover:scale-110 group-hover:bg-rose-600 group-hover:text-white transition-all shadow-xs">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <span class="text-[10px] sm:text-[11px] font-semibold text-slate-700 group-hover:text-rose-600 leading-tight">Flash Sale</span>
+                </a>
+
+                <a href="{{ url('/products') }}" class="flex flex-col items-center group">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center text-lg mb-1.5 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-xs">
+                        <i class="fa-solid fa-ticket"></i>
+                    </div>
+                    <span class="text-[10px] sm:text-[11px] font-semibold text-slate-700 group-hover:text-emerald-700 leading-tight">Gratis Ongkir</span>
+                </a>
+
+                <a href="{{ url('/products') }}" class="flex flex-col items-center group">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-amber-50 border border-amber-100 text-amber-600 flex items-center justify-center text-lg mb-1.5 group-hover:scale-110 group-hover:bg-amber-600 group-hover:text-white transition-all shadow-xs">
+                        <i class="fa-solid fa-tag"></i>
+                    </div>
+                    <span class="text-[10px] sm:text-[11px] font-semibold text-slate-700 group-hover:text-amber-700 leading-tight">Murah Lebay</span>
+                </a>
+
+                <a href="{{ url('/products') }}" class="flex flex-col items-center group">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-purple-50 border border-purple-100 text-purple-600 flex items-center justify-center text-lg mb-1.5 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all shadow-xs">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                    </div>
+                    <span class="text-[10px] sm:text-[11px] font-semibold text-slate-700 group-hover:text-purple-700 leading-tight">Pulsa & Tagihan</span>
+                </a>
+
+                <a href="{{ url('/products') }}" class="flex flex-col items-center group">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center text-lg mb-1.5 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-xs">
+                        <i class="fa-solid fa-hand-holding-dollar"></i>
+                    </div>
+                    <span class="text-[10px] sm:text-[11px] font-semibold text-slate-700 group-hover:text-blue-700 leading-tight">COD Bayar Ditempat</span>
+                </a>
+
+                <a href="{{ url('/products') }}" class="flex flex-col items-center group">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-red-50 border border-red-100 text-red-600 flex items-center justify-center text-lg mb-1.5 group-hover:scale-110 group-hover:bg-red-600 group-hover:text-white transition-all shadow-xs">
+                        <i class="fa-solid fa-flag"></i>
+                    </div>
+                    <span class="text-[10px] sm:text-[11px] font-semibold text-slate-700 group-hover:text-red-700 leading-tight">Pilih Lokal</span>
+                </a>
+
+                <a href="{{ url('/products') }}" class="flex flex-col items-center group">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-yellow-50 border border-yellow-100 text-yellow-600 flex items-center justify-center text-lg mb-1.5 group-hover:scale-110 group-hover:bg-yellow-600 group-hover:text-white transition-all shadow-xs">
+                        <i class="fa-solid fa-coins"></i>
+                    </div>
+                    <span class="text-[10px] sm:text-[11px] font-semibold text-slate-700 group-hover:text-yellow-700 leading-tight">Koin BelanjaIn</span>
+                </a>
+
+                <a href="{{ route('customer.wishlist.index') }}" class="flex flex-col items-center group">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-pink-50 border border-pink-100 text-pink-600 flex items-center justify-center text-lg mb-1.5 group-hover:scale-110 group-hover:bg-pink-600 group-hover:text-white transition-all shadow-xs">
+                        <i class="fa-solid fa-heart"></i>
+                    </div>
+                    <span class="text-[10px] sm:text-[11px] font-semibold text-slate-700 group-hover:text-pink-700 leading-tight">Favorit Saya</span>
+                </a>
+
+                <a href="{{ url('/products') }}" class="flex flex-col items-center group">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-lg mb-1.5 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-xs">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <span class="text-[10px] sm:text-[11px] font-semibold text-slate-700 group-hover:text-indigo-700 leading-tight">Semua Promo</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    {{-- Kategori Pilihan (Shopee Style Grid) --}}
     @if(isset($categories) && $categories->count() > 0)
     <section class="page-container py-3">
-        <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-card">
-            <div class="flex items-center justify-between mb-4">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-card">
+            <div class="flex items-center justify-between pb-3.5 border-b border-slate-100 mb-4">
                 <div>
-                    <h2 class="text-sm sm:text-base font-bold text-slate-900 tracking-tight">Kategori</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Pilih kategori yang Anda cari</p>
+                    <h2 class="text-sm sm:text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                        <i class="fa-solid fa-border-all text-cyan-600"></i>
+                        KATEGORI PILIHAN
+                    </h2>
                 </div>
-                <a href="{{ url('/products') }}" class="text-xs font-semibold text-cyan-700 hover:text-cyan-800">
-                    Lihat Semua &rarr;
+                <a href="{{ url('/products') }}" class="text-xs font-semibold text-cyan-700 hover:text-cyan-800 flex items-center gap-1">
+                    <span>Lihat Semua</span>
+                    <i class="fa-solid fa-chevron-right text-[9px]"></i>
                 </a>
             </div>
 
-            <!-- Horizontal Scrollable Categories -->
-            <div class="overflow-x-auto scrollbar-hide">
-                <div class="flex gap-4 pb-2">
-                    @foreach($categories as $category)
-                    <a href="{{ route('products.index', ['category' => $category->slug]) }}"
-                       class="flex flex-col items-center text-center min-w-[85px] group">
-                        <!-- Icon Container with larger size -->
-                        <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 shadow-sm flex items-center justify-center text-slate-600 group-hover:from-cyan-50 group-hover:to-cyan-100 group-hover:border-cyan-300 group-hover:text-cyan-700 text-2xl mb-2 transition-all duration-200">
-                            @if($category->icon)
-                                <i class="{{ $category->icon }}"></i>
-                            @else
-                                <i class="fa-solid fa-tag"></i>
-                            @endif
-                        </div>
-                        <!-- Category Name -->
-                        <span class="text-xs font-medium text-slate-700 group-hover:text-cyan-800 transition-colors line-clamp-2 leading-tight">
-                            {{ $category->name }}
-                        </span>
-                    </a>
-                    @endforeach
-                </div>
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+                @foreach($categories as $category)
+                <a href="{{ route('products.index', ['category' => $category->slug]) }}"
+                   class="flex flex-col items-center text-center p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all group">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 shadow-2xs flex items-center justify-center text-slate-600 group-hover:from-cyan-50 group-hover:to-cyan-100 group-hover:border-cyan-300 group-hover:text-cyan-700 text-2xl mb-2 transition-all">
+                        @if($category->icon)
+                            <i class="{{ $category->icon }}"></i>
+                        @else
+                            <i class="fa-solid fa-box-open"></i>
+                        @endif
+                    </div>
+                    <span class="text-xs font-semibold text-slate-700 group-hover:text-cyan-800 transition-colors line-clamp-2 leading-tight">
+                        {{ $category->name }}
+                    </span>
+                </a>
+                @endforeach
             </div>
         </div>
-
-        <style>
-            .scrollbar-hide::-webkit-scrollbar {
-                display: none;
-            }
-            .scrollbar-hide {
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-            }
-        </style>
     </section>
     @endif
 
+    {{-- Shopee-Style Signature FLASH SALE Section with Live Flame & Countdown --}}
     @if(isset($activeFlashSale) && $activeFlashSale && $activeFlashSale->items->count() > 0)
     <section class="page-container py-3"
              x-data="{
@@ -418,30 +415,35 @@
                     this.seconds = String(s).padStart(2, '0');
                 }
              }">
-        <div class="bg-slate-900 rounded-xl p-5 text-white border border-slate-800 shadow-card">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-800">
+        <div class="bg-gradient-to-r from-rose-900 via-rose-950 to-slate-900 rounded-2xl p-5 text-white border border-rose-800/80 shadow-card">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-rose-800/50">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-lg bg-cyan-400/10 border border-cyan-400/20 text-cyan-400 flex items-center justify-center text-base">
-                        <i class="fa-solid fa-bolt"></i>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl sm:text-2xl font-black italic tracking-tighter text-white flex items-center gap-1.5">
+                            <i class="fa-solid fa-fire text-amber-400 animate-bounce"></i>
+                            FLASH SALE
+                        </span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400 text-slate-950 uppercase tracking-wider">
+                            DISKON KILAT
+                        </span>
                     </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h2 class="text-sm sm:text-base font-bold text-white tracking-tight">{{ $activeFlashSale->name }}</h2>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-600 text-white">LIMITED TIME</span>
+
+                    {{-- Countdown Timer --}}
+                    <div class="flex items-center gap-1.5 ml-2">
+                        <div class="flex items-center gap-1 font-mono font-bold text-xs">
+                            <span class="px-2 py-1 rounded-md bg-slate-950 text-white border border-rose-700/50" x-text="hours">00</span>
+                            <span class="text-amber-400 font-bold">:</span>
+                            <span class="px-2 py-1 rounded-md bg-slate-950 text-white border border-rose-700/50" x-text="minutes">00</span>
+                            <span class="text-amber-400 font-bold">:</span>
+                            <span class="px-2 py-1 rounded-md bg-slate-950 text-white border border-rose-700/50" x-text="seconds">00</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 bg-slate-950 px-3.5 py-1.5 rounded-lg border border-slate-800">
-                    <span class="text-xs text-slate-400 font-medium">Sisa Waktu:</span>
-                    <div class="flex items-center gap-1 font-mono font-bold text-xs text-cyan-300">
-                        <span class="px-1.5 py-0.5 rounded bg-slate-800" x-text="hours">00</span>
-                        <span class="text-slate-600">:</span>
-                        <span class="px-1.5 py-0.5 rounded bg-slate-800" x-text="minutes">00</span>
-                        <span class="text-slate-600">:</span>
-                        <span class="px-1.5 py-0.5 rounded bg-slate-800" x-text="seconds">00</span>
-                    </div>
-                </div>
+                <a href="{{ url('/products?flash_sale=1') }}" class="text-xs font-bold text-amber-300 hover:text-white flex items-center gap-1">
+                    <span>Lihat Semua Promo</span>
+                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </a>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5 pt-4">
@@ -449,40 +451,44 @@
                     @php $product = $fsItem->product; @endphp
                     @if($product)
                     <a href="{{ route('product.show', $product) }}"
-                       class="product-card group text-slate-900 p-2.5">
-                        <div class="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-100 mb-2.5 border border-slate-100">
-                            @if($product->image)
-                                <img src="{{ $product->image_url }}" class="w-full h-full object-cover" alt="{{ $product->name }}">
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-slate-300 text-xl">
-                                    <i class="fa-solid fa-box"></i>
-                                </div>
-                            @endif
-                            <span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-600 text-white">
-                                -{{ $fsItem->discount_percentage }}%
-                            </span>
-                        </div>
-
-                        <p class="text-xs text-slate-800 line-clamp-2 leading-snug group-hover:text-cyan-700 transition-colors">
-                            {{ $product->name }}
-                        </p>
-
-                        <div class="mt-2">
-                            <p class="text-xs sm:text-sm font-bold text-rose-600">
-                                Rp {{ number_format($fsItem->flash_sale_price, 0, ',', '.') }}
-                            </p>
-                            <p class="text-[10px] text-slate-400 line-through">
-                                Rp {{ number_format($product->price, 0, ',', '.') }}
-                            </p>
-                        </div>
-
-                        <div class="mt-2.5 pt-1.5 border-t border-slate-100">
-                            <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                                <div class="bg-rose-500 h-full rounded-full" style="width: {{ $fsItem->sold_percentage }}%"></div>
+                       class="bg-white rounded-xl overflow-hidden p-2.5 text-slate-900 group shadow-sm hover:shadow-lg transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-50 mb-2 border border-slate-100">
+                                @if($product->image_url)
+                                    <img src="{{ $product->image_url }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" alt="{{ $product->name }}">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center text-slate-300 text-xl">
+                                        <i class="fa-solid fa-box"></i>
+                                    </div>
+                                @endif
+                                <span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-black bg-rose-600 text-white">
+                                    -{{ $fsItem->discount_percentage }}%
+                                </span>
                             </div>
-                            <div class="flex items-center justify-between text-[10px] text-slate-400 mt-1">
-                                <span>Terjual {{ $fsItem->stock_sold }}</span>
-                                <span>Sisa {{ $fsItem->stock_remaining }}</span>
+
+                            <p class="text-xs font-semibold text-slate-800 line-clamp-2 leading-snug group-hover:text-cyan-700 transition-colors">
+                                {{ $product->name }}
+                            </p>
+                        </div>
+
+                        <div class="mt-2.5">
+                            <div class="flex flex-col">
+                                <span class="text-sm sm:text-base font-extrabold text-rose-600 leading-none">
+                                    Rp {{ number_format($fsItem->flash_sale_price, 0, ',', '.') }}
+                                </span>
+                                <span class="text-[10px] text-slate-400 line-through mt-0.5">
+                                    Rp {{ number_format($product->price, 0, ',', '.') }}
+                                </span>
+                            </div>
+
+                            {{-- Progress Bar Terjual --}}
+                            <div class="mt-2 pt-1 border-t border-slate-100">
+                                <div class="w-full bg-rose-100 rounded-full h-3.5 relative overflow-hidden flex items-center">
+                                    <div class="bg-gradient-to-r from-amber-400 to-rose-500 h-full rounded-full transition-all" style="width: {{ max($fsItem->sold_percentage, 15) }}%"></div>
+                                    <span class="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-slate-900 uppercase">
+                                        🔥 Terjual {{ $fsItem->stock_sold }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </a>
@@ -493,133 +499,92 @@
     </section>
     @endif
 
-    <section class="page-container py-5">
-        <div class="flex items-center justify-between mb-4">
-            <div>
-                <h2 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight">Koleksi Produk Pilihan</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Produk original langsung dari official seller terverifikasi</p>
-            </div>
-
-            <a href="{{ url('/products') }}" class="text-xs font-semibold text-cyan-700 hover:text-cyan-800">
-                Lihat Semua Produk &rarr;
-            </a>
-        </div>
-
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
-            @forelse($products as $prod)
-            <div class="product-card group">
-                <a href="{{ route('product.show', $prod) }}" class="block">
-                    <div class="product-img-frame">
-                        @if($prod->image)
-                            <img src="{{ $prod->image_url }}" class="w-full h-full object-cover" alt="{{ $prod->name }}" loading="lazy">
-                        @else
-                            <div class="w-full h-full flex items-center justify-center text-slate-300 text-2xl">
-                                <i class="fa-solid fa-box"></i>
-                            </div>
-                        @endif
-
-                        @if($prod->has_discount)
-                            <span class="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-600 text-white">
-                                -{{ $prod->discount_percentage_effective }}%
-                            </span>
-                        @endif
-
-                        @if($prod->is_in_flash_sale)
-                            <span class="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-900 text-cyan-200 flex items-center gap-1 border border-cyan-700/50">
-                                <i class="fa-solid fa-bolt text-cyan-400"></i> Flash Sale
-                            </span>
-                        @endif
-                    </div>
-                </a>
-
-                <div class="p-3.5 flex flex-col justify-between flex-1 gap-2.5">
-                    <div>
-                        <div class="flex items-center gap-1 text-[11px] text-slate-400 mb-1 truncate">
-                            <i class="fa-solid fa-store text-[9px] text-cyan-700"></i>
-                            <span class="truncate">{{ $prod->store->name ?? 'Official Store' }}</span>
-                        </div>
-
-                        <a href="{{ route('product.show', $prod) }}" class="text-xs sm:text-sm font-normal text-slate-800 line-clamp-2 hover:text-cyan-700 transition-colors leading-snug">
-                            {{ $prod->name }}
-                        </a>
-                    </div>
-
-                    <div>
-                        <div class="flex flex-col">
-                            <span class="text-sm sm:text-base font-bold text-slate-900">
-                                Rp {{ number_format($prod->final_price, 0, ',', '.') }}
-                            </span>
-                            @if($prod->has_discount)
-                                <span class="text-[11px] text-slate-400 line-through">
-                                    Rp {{ number_format($prod->price, 0, ',', '.') }}
-                                </span>
-                            @endif
-                        </div>
-
-                        <div class="flex items-center justify-between text-xs text-slate-500 pt-2.5 border-t border-slate-100 mt-2.5">
-                            <div class="flex items-center gap-1 text-amber-500 font-semibold text-[11px]">
-                                <i class="fa-solid fa-star"></i>
-                                <span>5.0</span>
-                            </div>
-                            <span class="text-slate-400 text-[11px]">50+ terjual</span>
+    {{-- BelanjaIn Mall (Official Stores & Verified Brands Showcase) --}}
+    @if(isset($officialStores) && $officialStores->count() > 0)
+    <section class="page-container py-3">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-card">
+            <div class="flex items-center justify-between pb-3.5 border-b border-slate-100 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm sm:text-base font-black text-slate-900 tracking-tight flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-check text-cyan-600"></i>
+                            BELANJAIN MALL
+                        </span>
+                        <span class="hidden sm:inline-block text-slate-300">•</span>
+                        <div class="hidden sm:flex items-center gap-3 text-xs text-slate-500 font-medium">
+                            <span class="flex items-center gap-1"><i class="fa-solid fa-rotate-left text-cyan-600 text-[10px]"></i> 7 Hari Pengembalian</span>
+                            <span class="flex items-center gap-1"><i class="fa-solid fa-badge-check text-cyan-600 text-[10px]"></i> 100% Original</span>
+                            <span class="flex items-center gap-1"><i class="fa-solid fa-truck-fast text-cyan-600 text-[10px]"></i> Gratis Ongkir</span>
                         </div>
                     </div>
                 </div>
+                <a href="{{ url('/products') }}" class="text-xs font-semibold text-cyan-700 hover:text-cyan-800 flex items-center gap-1">
+                    <span>Lihat Semua Mall</span>
+                    <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                </a>
             </div>
-            @empty
-            <div class="col-span-full py-12 text-center text-slate-400 bg-white rounded-xl border border-slate-200">
-                <i class="fa-solid fa-boxes-stacked text-2xl mb-2 text-slate-300"></i>
-                <p class="text-xs font-semibold text-slate-700">Belum ada produk yang tersedia</p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                @foreach($officialStores as $store)
+                <a href="{{ url('/products?store='.$store->id) }}"
+                   class="p-3.5 rounded-xl bg-slate-50 hover:bg-cyan-50/50 border border-slate-200/80 hover:border-cyan-300 transition-all text-center flex flex-col items-center group">
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode($store->name) }}&background=0891b2&color=fff&size=90"
+                         class="w-14 h-14 rounded-2xl object-cover border border-slate-200 group-hover:scale-105 transition-transform mb-2 shadow-2xs" alt="{{ $store->name }}">
+                    <h3 class="text-xs font-bold text-slate-900 group-hover:text-cyan-800 line-clamp-1">{{ $store->name }}</h3>
+                    <span class="text-[10px] text-slate-400 mt-0.5">{{ $store->products_count }} Produk</span>
+                    <span class="mt-2 inline-flex items-center gap-1 text-[9px] font-bold text-cyan-800 bg-cyan-100/70 px-2 py-0.5 rounded-full border border-cyan-200">
+                        <i class="fa-solid fa-circle-check text-cyan-600 text-[8px]"></i> Official
+                    </span>
+                </a>
+                @endforeach
             </div>
-            @endforelse
         </div>
     </section>
+    @endif
 
+    {{-- Kupon & Voucher Promo Belanja --}}
     @if(isset($vouchers) && $vouchers->count() > 0)
-    <section class="page-container py-3 mb-6">
-        <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-card">
-            <div class="flex items-center justify-between mb-4">
+    <section class="page-container py-3">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-card"
+             x-data="{
+                copiedCode: null,
+                copyCode(code) {
+                    navigator.clipboard.writeText(code);
+                    this.copiedCode = code;
+                    setTimeout(() => this.copiedCode = null, 2000);
+                }
+             }">
+            <div class="flex items-center justify-between pb-3.5 border-b border-slate-100 mb-4">
                 <div>
-                    <h2 class="text-sm sm:text-base font-bold text-slate-900 tracking-tight">Kupon & Voucher Belanja</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Klaim kode voucher untuk potongan harga otomatis saat checkout</p>
+                    <h2 class="text-sm sm:text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                        <i class="fa-solid fa-ticket text-cyan-600"></i>
+                        VOUCHER & KUPON DISKON
+                    </h2>
                 </div>
+                <span class="text-xs text-slate-400">Klaim kode & gunakan saat checkout</span>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5"
-                 x-data="{
-                    copiedCode: null,
-                    copyCode(code) {
-                        navigator.clipboard.writeText(code);
-                        this.copiedCode = code;
-                        setTimeout(() => this.copiedCode = null, 2000);
-                    }
-                 }">
-                @foreach($vouchers->take(4) as $vch)
-                <div class="p-3.5 rounded-lg border border-dashed border-cyan-300 bg-cyan-50/20 flex flex-col justify-between gap-3">
-                    <div>
-                        <div class="flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-white text-cyan-800 border border-cyan-200">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                @foreach($vouchers as $vch)
+                <div class="p-3.5 rounded-xl border border-dashed border-cyan-400 bg-cyan-50/30 flex items-center justify-between gap-3 relative overflow-hidden">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-white text-cyan-800 border border-cyan-300 shadow-2xs">
                                 {{ $vch->code }}
                             </span>
-                            <span class="text-[10px] text-slate-400">
-                                {{ $vch->store_id ? ($vch->store->name ?? 'Toko') : 'Platform' }}
+                            <span class="text-[10px] font-bold text-cyan-700 uppercase">
+                                {{ $vch->type === 'percent' ? 'Diskon '.$vch->amount.'%' : 'Potongan Rp '.number_format($vch->amount, 0, ',', '.') }}
                             </span>
                         </div>
-                        <h3 class="text-xs sm:text-sm font-bold text-slate-900 mt-2">{{ $vch->name }}</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">
-                            @if($vch->type === 'percent')
-                                Diskon {{ $vch->amount }}% (Min. Rp {{ number_format($vch->min_spend, 0, ',', '.') }})
-                            @else
-                                Potongan Rp {{ number_format($vch->amount, 0, ',', '.') }} (Min. Rp {{ number_format($vch->min_spend, 0, ',', '.') }})
-                            @endif
-                        </p>
+                        <h3 class="text-xs font-bold text-slate-900 mt-1.5 truncate">{{ $vch->name }}</h3>
+                        <p class="text-[10px] text-slate-500">Min. Belanja Rp {{ number_format($vch->min_spend, 0, ',', '.') }}</p>
                     </div>
 
                     <button @click="copyCode('{{ $vch->code }}')"
-                            class="w-full py-1.5 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5"
-                            :class="copiedCode === '{{ $vch->code }}' ? 'bg-cyan-700 text-white' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'">
+                            class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all shrink-0 flex items-center gap-1 shadow-2xs"
+                            :class="copiedCode === '{{ $vch->code }}' ? 'bg-emerald-600 text-white' : 'bg-cyan-700 hover:bg-cyan-800 text-white'">
                         <i :class="copiedCode === '{{ $vch->code }}' ? 'fa-solid fa-check' : 'fa-regular fa-copy'"></i>
-                        <span x-text="copiedCode === '{{ $vch->code }}' ? 'Tersalin!' : 'Salin Kode'"></span>
+                        <span x-text="copiedCode === '{{ $vch->code }}' ? 'Tersalin' : 'Klaim'"></span>
                     </button>
                 </div>
                 @endforeach
@@ -627,4 +592,128 @@
         </div>
     </section>
     @endif
+
+    {{-- Shopee-Style "REKOMENDASI / DAILY DISCOVER" Sticky Tabs & Catalog Grid --}}
+    <section class="page-container py-4 mb-8" x-data="{ activeTab: 'rekomendasi' }">
+        {{-- Sticky Header Tabs (Shopee Signature) --}}
+        <div class="bg-white rounded-2xl p-2 border border-slate-200/80 shadow-card mb-5 sticky top-16 z-30">
+            <div class="grid grid-cols-3 sm:grid-cols-4 gap-1 text-center text-xs font-bold">
+                <button @click="activeTab = 'rekomendasi'"
+                        class="py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5"
+                        :class="activeTab === 'rekomendasi' ? 'bg-cyan-700 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50'">
+                    <i class="fa-solid fa-sparkles text-[11px]"></i>
+                    <span>Rekomendasi</span>
+                </button>
+                <button @click="activeTab = 'terlaris'"
+                        class="py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5"
+                        :class="activeTab === 'terlaris' ? 'bg-cyan-700 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50'">
+                    <i class="fa-solid fa-fire text-[11px]"></i>
+                    <span>Terlaris</span>
+                </button>
+                <button @click="activeTab = 'official'"
+                        class="py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5"
+                        :class="activeTab === 'official' ? 'bg-cyan-700 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-50'">
+                    <i class="fa-solid fa-shield-check text-[11px]"></i>
+                    <span>Official Store</span>
+                </button>
+                <a href="{{ url('/products') }}"
+                   class="hidden sm:flex py-2.5 px-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-all items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                    <span>Semua Produk</span>
+                </a>
+            </div>
+        </div>
+
+        {{-- Products Grid --}}
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+            @forelse($products as $prod)
+            <div class="bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-card hover:shadow-lg transition-all duration-200 flex flex-col justify-between group relative">
+                
+                {{-- Wishlist Heart Button Top Right (Shopee Style Quick Action) --}}
+                @auth
+                    @if(auth()->user()->role === 'customer')
+                        @php $isWish = $prod->isWishlistedBy(auth()->user()); @endphp
+                        <form action="{{ route('customer.wishlist.toggle', $prod) }}" method="POST" class="absolute top-2 right-2 z-10">
+                            @csrf
+                            <button type="submit" title="{{ $isWish ? 'Hapus Wishlist' : 'Tambah Wishlist' }}"
+                                    class="w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm border border-slate-200 flex items-center justify-center text-xs transition-colors shadow-2xs {{ $isWish ? 'text-rose-600' : 'text-slate-400 hover:text-rose-600' }}">
+                                <i class="{{ $isWish ? 'fa-solid text-rose-600' : 'fa-regular' }} fa-heart"></i>
+                            </button>
+                        </form>
+                    @endif
+                @endauth
+
+                {{-- Product Image --}}
+                <a href="{{ route('product.show', $prod) }}" class="relative aspect-square bg-slate-50 overflow-hidden block">
+                    @if($prod->image_url)
+                        <img src="{{ $prod->image_url }}" alt="{{ $prod->name }}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
+                    @else
+                        <div class="w-full h-full flex items-center justify-center text-slate-300 text-2xl">
+                            <i class="fa-solid fa-box"></i>
+                        </div>
+                    @endif
+
+                    {{-- Badges --}}
+                    @if($prod->is_in_flash_sale)
+                        <span class="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[9px] font-bold bg-cyan-900 text-cyan-200 flex items-center gap-1 border border-cyan-700/50 shadow-2xs">
+                            <i class="fa-solid fa-bolt text-cyan-400 text-[8px]"></i> Flash Sale
+                        </span>
+                    @elseif($prod->has_discount)
+                        <span class="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[9px] font-black bg-rose-600 text-white shadow-2xs">
+                            -{{ $prod->discount_percentage_effective }}%
+                        </span>
+                    @endif
+
+                    {{-- Free Shipping Badge (Shopee Signature) --}}
+                    <span class="absolute bottom-1.5 left-1.5 px-1.5 py-0.2 rounded text-[8px] font-bold bg-emerald-600 text-white flex items-center gap-0.5 shadow-2xs">
+                        <i class="fa-solid fa-truck-fast text-[7px]"></i> Bebas Ongkir
+                    </span>
+                </a>
+
+                {{-- Product Info --}}
+                <div class="p-3 flex-1 flex flex-col justify-between space-y-2.5">
+                    <div>
+                        <a href="{{ route('product.show', $prod) }}" class="text-xs font-semibold text-slate-800 group-hover:text-cyan-700 transition-colors line-clamp-2 leading-snug">
+                            {{ $prod->name }}
+                        </a>
+
+                        <div class="mt-2 flex flex-col">
+                            <span class="text-sm font-black text-slate-900 leading-tight">
+                                Rp {{ number_format($prod->final_price, 0, ',', '.') }}
+                            </span>
+                            @if($prod->has_discount)
+                                <span class="text-[10px] text-slate-400 line-through mt-0.5">
+                                    Rp {{ number_format($prod->price, 0, ',', '.') }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+                        <div class="flex items-center gap-1 text-amber-500 font-bold">
+                            <i class="fa-solid fa-star text-[9px]"></i>
+                            <span>{{ number_format($prod->rating ?? 5.0, 1) }}</span>
+                        </div>
+                        <span class="truncate">{{ $prod->sold_count ?? 50 }}+ terjual</span>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="col-span-full py-16 text-center text-slate-400 bg-white rounded-2xl border border-slate-200 shadow-card">
+                <i class="fa-solid fa-boxes-stacked text-3xl mb-2 text-slate-300"></i>
+                <p class="text-xs font-bold text-slate-700">Belum ada produk yang tersedia</p>
+                <p class="text-xs text-slate-400 mt-0.5">Silakan kembali lagi nanti untuk produk-produk terbaik!</p>
+            </div>
+            @endforelse
+        </div>
+
+        {{-- Load More CTA --}}
+        <div class="mt-8 text-center">
+            <a href="{{ url('/products') }}" class="btn-primary h-10 px-8 text-xs font-bold bg-cyan-700 hover:bg-cyan-800 text-white rounded-xl shadow-md inline-flex items-center gap-2">
+                <span>Lihat Lebih Banyak Produk</span>
+                <i class="fa-solid fa-arrow-down text-[10px]"></i>
+            </a>
+        </div>
+    </section>
 </x-app-layout>

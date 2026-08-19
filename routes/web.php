@@ -25,14 +25,19 @@ Route::get('/', function () {
             $q->where('status', 'approved');
         })
         ->latest()
-        ->take(10)
+        ->take(24)
         ->get();
 
     $categories = Category::all();
     $activeFlashSale = \App\Models\FlashSale::active()->with(['items.product'])->first();
-    $vouchers = \App\Models\Voucher::where('is_active', true)->latest()->take(4)->get();
+    $vouchers = \App\Models\Voucher::where('is_active', true)->latest()->take(6)->get();
+    
+    $officialStores = \App\Models\Store::where('status', 'approved')
+        ->withCount('products')
+        ->take(6)
+        ->get();
 
-    return view('welcome', compact('products', 'categories', 'activeFlashSale', 'vouchers'));
+    return view('welcome', compact('products', 'categories', 'activeFlashSale', 'vouchers', 'officialStores'));
 });
 
 Route::get('/products', [\App\Http\Controllers\ProductController::class, 'index'])->name('products.index');

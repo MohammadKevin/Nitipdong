@@ -6,34 +6,47 @@
     class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-xs">
 
     <div class="page-container">
-        <div class="flex items-center justify-between h-14 gap-4">
+        <div class="flex items-center justify-between h-16 gap-4">
 
             <a href="/" class="flex items-center gap-2.5 shrink-0 group" aria-label="BelanjaIn Home">
-                <div class="w-8 h-8 rounded-lg overflow-hidden border border-cyan-200 bg-cyan-50 flex items-center justify-center">
+                <div class="w-9 h-9 rounded-xl overflow-hidden border border-cyan-200 bg-cyan-50 flex items-center justify-center shadow-xs">
                     <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-full h-full object-cover">
                 </div>
-                <span class="font-bold text-base tracking-tight text-slate-900 leading-tight">
-                    Belanja<span class="text-cyan-600 font-extrabold">In</span>
-                </span>
+                <div>
+                    <span class="font-bold text-base tracking-tight text-slate-900 leading-none block">
+                        Belanja<span class="text-cyan-600 font-black">In</span>
+                    </span>
+                    <span class="text-[9px] font-bold text-cyan-700 tracking-wider uppercase">Official Mall</span>
+                </div>
             </a>
 
-            <form action="{{ url('/products') }}" method="GET" class="flex-1 max-w-xl hidden md:flex items-center relative">
-                <div class="relative w-full flex items-center">
-                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+            <div class="flex-1 max-w-xl hidden md:flex flex-col justify-center">
+                <form action="{{ url('/products') }}" method="GET" class="w-full flex items-center relative">
+                    <div class="relative w-full flex items-center">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                        </div>
+                        <input id="nav-search" type="text" name="q" value="{{ request('q') }}"
+                               placeholder="Cari di BelanjaIn (contoh: Laptop, Sepatu, Smartwatch, TWS)..."
+                               class="w-full h-9 pl-8 pr-20 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-cyan-600 focus:ring-2 focus:ring-cyan-500/20 outline-none transition-all placeholder:text-slate-400">
+                        <div class="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                            <kbd class="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[9px] font-mono text-slate-400 bg-slate-100 border border-slate-200 rounded">Ctrl K</kbd>
+                            <button type="submit"
+                                    class="h-7 px-3.5 bg-cyan-700 hover:bg-cyan-800 active:bg-cyan-900 text-white text-xs font-semibold rounded-md transition-colors">
+                                Cari
+                            </button>
+                        </div>
                     </div>
-                    <input id="nav-search" type="text" name="q" value="{{ request('q') }}"
-                           placeholder="Cari produk, kategori, brand, atau official store..."
-                           class="w-full h-9 pl-8 pr-20 text-xs bg-slate-50 border border-slate-200 rounded-md focus:bg-white focus:border-cyan-600 focus:ring-2 focus:ring-cyan-500/20 outline-none transition-all placeholder:text-slate-400">
-                    <div class="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                        <kbd class="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[9px] font-mono text-slate-400 bg-slate-100 border border-slate-200 rounded">Ctrl K</kbd>
-                        <button type="submit"
-                                class="h-7 px-3 bg-cyan-700 hover:bg-cyan-800 active:bg-cyan-900 text-white text-xs font-semibold rounded transition-colors">
-                            Cari
-                        </button>
-                    </div>
+                </form>
+                <div class="flex items-center gap-2 mt-1 overflow-hidden text-[10px] text-slate-400">
+                    <span class="font-semibold text-slate-500 shrink-0">Populer:</span>
+                    <a href="{{ url('/products?q=Laptop') }}" class="hover:text-cyan-700 transition-colors truncate">Laptop Gaming</a>
+                    <a href="{{ url('/products?q=Sepatu') }}" class="hover:text-cyan-700 transition-colors truncate">Sepatu Pria</a>
+                    <a href="{{ url('/products?q=Smartwatch') }}" class="hover:text-cyan-700 transition-colors truncate">Smartwatch</a>
+                    <a href="{{ url('/products?q=TWS') }}" class="hover:text-cyan-700 transition-colors truncate">TWS Earbuds</a>
+                    <a href="{{ url('/products?q=Kemeja') }}" class="hover:text-cyan-700 transition-colors truncate">Kemeja</a>
                 </div>
-            </form>
+            </div>
 
             <div class="flex items-center gap-1.5 sm:gap-2">
 
