@@ -180,8 +180,6 @@
             </div>
         </footer>
 
-        <x-chat-widget />
-
         @stack('scripts')
     </body>
 </html>
