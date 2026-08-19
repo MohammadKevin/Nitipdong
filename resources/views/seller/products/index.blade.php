@@ -46,7 +46,7 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto max-h-[600px] overflow-y-auto border-t border-slate-100">
+        <div class="overflow-x-auto max-h-[calc(100vh-260px)] min-h-[500px] overflow-y-auto border-t border-slate-100">
             <table class="w-full text-left text-xs">
                 <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 sticky top-0 z-10 shadow-xs">
                     <tr>
