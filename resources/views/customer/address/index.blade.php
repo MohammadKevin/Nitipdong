@@ -31,7 +31,7 @@
         }
     }">
         <nav class="flex text-xs text-slate-400 mb-4 items-center gap-1.5 flex-wrap" aria-label="Breadcrumb">
-            <a href="/" class="hover:text-cyan-700 transition-colors">Beranda</a>
+            <a href="{{ auth()->check() ? url('/?is_from_login=true') : url('/') }}" class="hover:text-cyan-700 transition-colors">Beranda</a>
             <i class="fa-solid fa-chevron-right text-[8px] text-slate-300"></i>
             <a href="{{ route('customer.dashboard') }}" class="hover:text-cyan-700 transition-colors">Akun Saya</a>
             <i class="fa-solid fa-chevron-right text-[8px] text-slate-300"></i>

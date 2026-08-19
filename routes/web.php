@@ -19,6 +19,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    if (Auth::check() && !request()->has('is_from_login') && empty(request()->query())) {
+        return redirect('/?is_from_login=true');
+    }
+
     $products = Product::with(['store', 'category'])
         ->where('is_active', true)
         ->whereHas('store', function ($q) {
@@ -38,7 +42,7 @@ Route::get('/', function () {
         ->get();
 
     return view('welcome', compact('products', 'categories', 'activeFlashSale', 'vouchers', 'officialStores'));
-});
+})->name('home');
 
 Route::get('/products', [\App\Http\Controllers\ProductController::class, 'index'])->name('products.index');
 Route::get('/product/{product}', [\App\Http\Controllers\ProductController::class, 'show'])->name('product.show');
