@@ -1,76 +1,24 @@
 <x-app-layout>
-    {{-- Flash Notifications --}}
-    @if(session('success'))
+    {{-- Flash Notifications & Welcome after Login (Shopee Style) --}}
+    @if(session('success') || request('is_from_login'))
         <div class="page-container mt-3">
-            <div class="flex items-center gap-2.5 px-4 py-2.5 bg-cyan-50 border border-cyan-200 text-cyan-900 rounded-xl text-xs font-semibold animate-fade-up">
-                <i class="fa-solid fa-circle-check text-cyan-600 text-sm"></i>
-                <span>{{ session('success') }}</span>
+            <div class="flex items-center justify-between px-4 py-2.5 bg-cyan-50 border border-cyan-200 text-cyan-900 rounded-xl text-xs font-semibold animate-fade-up shadow-2xs">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-circle-check text-cyan-600 text-sm"></i>
+                    @if(request('is_from_login') && auth()->check())
+                        <span>Selamat datang kembali, <strong>{{ auth()->user()->name }}</strong>! Selamat berbelanja di BelanjaIn.</span>
+                    @else
+                        <span>{{ session('success') }}</span>
+                    @endif
+                </div>
+                @auth
+                    <a href="{{ route('customer.dashboard') }}" class="text-[11px] font-bold text-cyan-700 hover:underline">
+                        Lihat Pesanan Saya &rarr;
+                    </a>
+                @endauth
             </div>
         </div>
     @endif
-
-    {{-- Logged In vs Guest Contextual Welcome Strip (Shopee Style) --}}
-    <section class="page-container pt-3 pb-1">
-        @auth
-            {{-- Logged In User Greeting Banner --}}
-            <div class="bg-gradient-to-r from-cyan-900 via-cyan-800 to-slate-900 rounded-2xl p-4 sm:p-5 text-white shadow-card flex flex-col md:flex-row items-center justify-between gap-4 border border-cyan-700/40 relative overflow-hidden">
-                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
-                <div class="flex items-center gap-3.5 z-10 w-full md:w-auto">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=0891b2&color=fff&size=90"
-                         class="w-12 h-12 rounded-full border-2 border-cyan-300 object-cover shadow-sm" alt="User">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h2 class="text-sm sm:text-base font-bold text-white leading-tight">
-                                Halo, <span class="text-cyan-200">{{ auth()->user()->name }}</span>!
-                            </h2>
-                            <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-cyan-400/20 text-cyan-300 border border-cyan-400/30 uppercase tracking-wider">
-                                Member BelanjaIn
-                            </span>
-                        </div>
-                        <p class="text-[11px] text-cyan-100/80 mt-0.5">Nikmati diskon eksklusif dan gratis ongkir spesial untukmu hari ini.</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-2 sm:gap-3 z-10 w-full md:w-auto justify-between md:justify-end text-xs">
-                    <a href="{{ route('customer.dashboard') }}" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white font-medium flex items-center gap-1.5 transition-all text-xs">
-                        <i class="fa-solid fa-receipt text-cyan-300 text-[11px]"></i>
-                        <span>Pesanan Saya</span>
-                    </a>
-                    <a href="{{ route('customer.wishlist.index') }}" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white font-medium flex items-center gap-1.5 transition-all text-xs">
-                        <i class="fa-solid fa-heart text-rose-400 text-[11px]"></i>
-                        <span>Wishlist ({{ auth()->user()->wishlists()->count() }})</span>
-                    </a>
-                    <a href="{{ route('customer.addresses.index') }}" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white font-medium flex items-center gap-1.5 transition-all text-xs hidden sm:flex">
-                        <i class="fa-solid fa-location-dot text-cyan-300 text-[11px]"></i>
-                        <span>Buku Alamat</span>
-                    </a>
-                </div>
-            </div>
-        @else
-            {{-- Guest New User Welcome Promo Banner --}}
-            <div class="bg-gradient-to-r from-slate-900 via-cyan-950 to-slate-900 rounded-2xl p-3.5 sm:p-4 text-white shadow-card flex flex-col sm:flex-row items-center justify-between gap-3 border border-cyan-800/50">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-300 text-lg shrink-0">
-                        <i class="fa-solid fa-gift"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5">
-                            Spesial Pengguna Baru: Voucher Diskon Rp50.000 + Gratis Ongkir Rp0!
-                        </h3>
-                        <p class="text-[11px] text-slate-300 mt-0.5">Daftar akun gratis sekarang dan klaim kupon belanja pertamamu.</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 shrink-0">
-                    <a href="{{ route('register') }}" class="btn-primary h-8 px-4 text-xs bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg shadow-sm">
-                        Daftar Sekarang
-                    </a>
-                    <a href="{{ route('login') }}" class="h-8 px-3.5 inline-flex items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-slate-200 hover:text-white text-xs font-medium transition-colors">
-                        Masuk
-                    </a>
-                </div>
-            </div>
-        @endauth
-    </section>
 
     {{-- Hero Section (Shopee 2:1 Carousel & Promo Cards) --}}
     <section class="page-container py-3">

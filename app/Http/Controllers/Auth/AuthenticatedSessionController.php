@@ -28,7 +28,7 @@ class AuthenticatedSessionController extends Controller
             'super_admin' => redirect()->route('super_admin.dashboard'),
             'admin'       => redirect()->route('admin.dashboard'),
             'seller'      => redirect()->route('seller.dashboard'),
-            default       => redirect('/'),
+            default       => redirect('/?is_from_login=true'),
         };
     }
 
