@@ -42,7 +42,7 @@
                 </div>
             </form>
             <div class="text-xs text-slate-500">
-                Total: <span class="font-bold text-slate-800">{{ $products->total() }}</span> Produk
+                Total: <span class="font-bold text-slate-800">{{ count($products) }}</span> Produk
             </div>
         </div>
 
