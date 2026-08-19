@@ -280,19 +280,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="sticky bottom-0 -mx-6 -mb-6 p-4 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-md flex items-center justify-between z-30 rounded-b-xl">
-                <span class="text-xs text-slate-500 hidden sm:inline-block">Pastikan data dan harga produk sudah sesuai sebelum menyimpan.</span>
-                <div class="flex items-center gap-2.5 ml-auto">
-                    <a href="{{ route('seller.products.index') }}" class="btn-secondary text-xs h-9 px-4 rounded-xl border border-slate-300 font-medium">
-                        Batal
-                    </a>
-                    <button type="submit" class="btn-primary text-xs h-9 px-5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold flex items-center gap-1.5 shadow-xs">
-                        <i class="fa-solid fa-check text-[11px]"></i>
-                        <span>Simpan Perubahan Produk</span>
-                    </button>
-                </div>
-            </div>
         </form>
     </div>
 </x-seller-layout>
