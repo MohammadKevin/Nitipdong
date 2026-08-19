@@ -29,8 +29,8 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-card border border-slate-200/80 overflow-hidden">
-        <form id="product-edit-form" action="{{ route('seller.products.update', $product) }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-5">
+    <div class="bg-white rounded-2xl shadow-card border border-slate-200/80 overflow-hidden mb-12">
+        <form id="product-edit-form" action="{{ route('seller.products.update', $product) }}" method="POST" enctype="multipart/form-data" class="p-6 sm:p-8 space-y-6">
             @csrf
             @method('PUT')
 

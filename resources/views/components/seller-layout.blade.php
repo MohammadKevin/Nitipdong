@@ -129,7 +129,7 @@
                 </div>
             </aside>
 
-            <main class="flex-1 p-6 lg:p-8 flex flex-col gap-6 overflow-y-auto relative">
+            <main class="flex-1 p-5 sm:p-6 lg:p-8 pb-28 sm:pb-36 flex flex-col gap-6 overflow-y-auto relative">
                 @if(session('success'))
                     <div class="bg-cyan-50 border border-cyan-200 text-cyan-900 rounded-lg p-3.5 flex gap-2.5 shadow-xs text-xs font-semibold" role="alert">
                         <i class="fa-solid fa-circle-check text-cyan-600 text-sm mt-0.5"></i>
