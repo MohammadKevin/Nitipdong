@@ -59,12 +59,17 @@ class Product extends Model
             return null;
         }
 
-        // Jika path dimulai dengan 'img/', langsung dari public
+        // Direct Cloudinary or external URL
+        if (str_starts_with($this->image, 'http://') || str_starts_with($this->image, 'https://')) {
+            return $this->image;
+        }
+
+        // Local public folder
         if (str_starts_with($this->image, 'img/')) {
             return asset($this->image);
         }
 
-        // Jika tidak, asumsi dari storage
+        // Local storage folder
         return asset('storage/' . $this->image);
     }
 
@@ -75,6 +80,9 @@ class Product extends Model
         }
 
         return array_map(function ($img) {
+            if (str_starts_with($img, 'http://') || str_starts_with($img, 'https://')) {
+                return $img;
+            }
             if (str_starts_with($img, 'img/')) {
                 return asset($img);
             }

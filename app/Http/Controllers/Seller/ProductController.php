@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\CloudinaryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,13 @@ use Illuminate\View\View;
 
 class ProductController extends Controller
 {
+    protected CloudinaryService $cloudinary;
+
+    public function __construct(CloudinaryService $cloudinary)
+    {
+        $this->cloudinary = $cloudinary;
+    }
+
     public function index(Request $request): View
     {
         $store = Auth::user()->store;
@@ -64,13 +72,16 @@ class ProductController extends Controller
 
         $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
+            $imagePath = $this->uploadImage($request->file('image'));
         }
 
         $extraImages = [];
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $img) {
-                $extraImages[] = $img->store('products', 'public');
+                $uploaded = $this->uploadImage($img);
+                if ($uploaded) {
+                    $extraImages[] = $uploaded;
+                }
             }
         }
 
@@ -122,29 +133,25 @@ class ProductController extends Controller
 
         $imagePath = $product->image;
         if ($request->hasFile('image')) {
-            if ($imagePath && Storage::disk('public')->exists($imagePath)) {
-                Storage::disk('public')->delete($imagePath);
-            }
-            $imagePath = $request->file('image')->store('products', 'public');
+            $this->deleteImage($imagePath);
+            $imagePath = $this->uploadImage($request->file('image'));
         }
 
-        // Handle extra images: delete removed ones, keep existing, add new
         $existingImages = $product->images ?? [];
 
-        // Delete images that were marked for removal
         if ($request->has('delete_images')) {
             foreach ($request->delete_images as $pathToDelete) {
-                if (Storage::disk('public')->exists($pathToDelete)) {
-                    Storage::disk('public')->delete($pathToDelete);
-                }
+                $this->deleteImage($pathToDelete);
                 $existingImages = array_values(array_filter($existingImages, fn($p) => $p !== $pathToDelete));
             }
         }
 
-        // Add newly uploaded images
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $img) {
-                $existingImages[] = $img->store('products', 'public');
+                $uploaded = $this->uploadImage($img);
+                if ($uploaded) {
+                    $existingImages[] = $uploaded;
+                }
             }
         }
 
@@ -174,14 +181,10 @@ class ProductController extends Controller
             abort(403);
         }
 
-        if ($product->image && Storage::disk('public')->exists($product->image)) {
-            Storage::disk('public')->delete($product->image);
-        }
+        $this->deleteImage($product->image);
 
         foreach ($product->images ?? [] as $extraImage) {
-            if (Storage::disk('public')->exists($extraImage)) {
-                Storage::disk('public')->delete($extraImage);
-            }
+            $this->deleteImage($extraImage);
         }
 
         $product->delete();
@@ -215,13 +218,9 @@ class ProductController extends Controller
         switch ($request->action) {
             case 'delete':
                 foreach ($products as $product) {
-                    if ($product->image && Storage::disk('public')->exists($product->image)) {
-                        Storage::disk('public')->delete($product->image);
-                    }
+                    $this->deleteImage($product->image);
                     foreach ($product->images ?? [] as $extraImage) {
-                        if (Storage::disk('public')->exists($extraImage)) {
-                            Storage::disk('public')->delete($extraImage);
-                        }
+                        $this->deleteImage($extraImage);
                     }
                     $product->delete();
                 }
@@ -248,6 +247,42 @@ class ProductController extends Controller
 
             default:
                 return redirect()->route('seller.products.index')->with('error', 'Aksi masal tidak dikenali.');
+        }
+    }
+
+    /**
+     * Helper to upload image to Cloudinary (with fallback to local storage).
+     */
+    protected function uploadImage($file): ?string
+    {
+        if ($this->cloudinary->isConfigured()) {
+            $cloudinaryUrl = $this->cloudinary->upload($file, 'belanjain_products');
+            if ($cloudinaryUrl) {
+                return $cloudinaryUrl;
+            }
+        }
+
+        return $file->store('products', 'public');
+    }
+
+    /**
+     * Helper to delete image from Cloudinary or local storage.
+     */
+    protected function deleteImage(?string $path): void
+    {
+        if (!$path) {
+            return;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            if (str_contains($path, 'cloudinary.com')) {
+                $this->cloudinary->delete($path);
+            }
+            return;
+        }
+
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
         }
     }
 }
