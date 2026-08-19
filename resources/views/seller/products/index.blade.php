@@ -46,20 +46,20 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto max-h-[600px] overflow-y-auto border-t border-slate-100">
             <table class="w-full text-left text-xs">
-                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
+                <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 sticky top-0 z-10 shadow-xs">
                     <tr>
-                        <th class="px-5 py-3.5">Produk</th>
-                        <th class="px-5 py-3.5">Kategori</th>
-                        <th class="px-5 py-3.5">Harga Dasar Toko</th>
-                        <th class="px-5 py-3.5">Harga Tayang Konsumen (+5%)</th>
-                        <th class="px-5 py-3.5 text-center">Stok</th>
-                        <th class="px-5 py-3.5 text-center">Status</th>
-                        <th class="px-5 py-3.5 text-center">Aksi</th>
+                        <th class="px-5 py-3.5 bg-slate-50">Produk</th>
+                        <th class="px-5 py-3.5 bg-slate-50">Kategori</th>
+                        <th class="px-5 py-3.5 bg-slate-50">Harga Dasar Toko</th>
+                        <th class="px-5 py-3.5 bg-slate-50">Harga Tayang Konsumen (+5%)</th>
+                        <th class="px-5 py-3.5 text-center bg-slate-50">Stok</th>
+                        <th class="px-5 py-3.5 text-center bg-slate-50">Status</th>
+                        <th class="px-5 py-3.5 text-center bg-slate-50">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody class="divide-y divide-slate-100 bg-white">
                     @forelse ($products as $product)
                     <tr class="hover:bg-slate-50/80 transition-colors">
                         <td class="px-5 py-3.5">
