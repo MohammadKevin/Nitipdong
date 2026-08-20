@@ -292,11 +292,13 @@
                             </div>
 
                             <div class="flex gap-3 mt-4">
-                                <button type="button" @click="addToCartAnimated($event)"
+                                <button type="button"
+                                        @click.prevent.stop="addToCartAnimated($event)"
+                                        onclick="event.preventDefault(); event.stopPropagation();"
                                         :disabled="isAddingToCart"
-                                        class="flex-1 h-10 rounded-xl border border-cyan-700 text-cyan-800 font-bold text-xs hover:bg-cyan-50/80 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-2xs cursor-pointer disabled:opacity-50">
+                                        class="flex-1 h-11 rounded-xl border border-cyan-700 text-cyan-800 font-bold text-xs hover:bg-cyan-50/80 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-2xs cursor-pointer disabled:opacity-50">
                                     <i class="fa-solid" :class="isAddingToCart ? 'fa-spinner animate-spin text-xs' : 'fa-cart-plus text-xs'"></i>
-                                    <span x-text="isAddingToCart ? 'Menambahkan...' : '+ Keranjang'"></span>
+                                    <span x-text="isAddingToCart ? 'Menambahkan...' : '+ Keranjang'">+ Keranjang</span>
                                 </button>
                                 <form action="{{ route('customer.cart.store', $product) }}" method="POST" class="flex-1">
                                     @csrf

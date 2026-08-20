@@ -139,7 +139,7 @@
             }
         }
     }"
-    @cart-updated.window="fetchCartItems(); cartBounce = true; setTimeout(() => cartBounce = false, 1200)"
+    @cart-updated.window="fetchCartItems(); cartBounce = true; cartOpen = true; setTimeout(() => { cartBounce = false; }, 1200); setTimeout(() => { cartOpen = false; }, 4000)"
     class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-xs">
 
     <div class="page-container">
