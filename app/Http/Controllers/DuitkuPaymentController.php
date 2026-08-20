@@ -60,11 +60,31 @@ class DuitkuPaymentController extends Controller
         $customerName    = preg_replace('/[^a-zA-Z0-9\s]/', '', $order->user->name ?? Auth::user()->name ?? 'Customer') ?: 'Customer';
 
         // Rumus Signature MD5: md5(merchantCode + merchantOrderId + paymentAmount + apiKey)
+        $rawMethod     = $request->input('payment_method') ?: ($order->payment_method ?: 'BC');
+        $methodMap     = [
+            'va_bca'     => 'BC',
+            'va_mandiri' => 'M1',
+            'va_bni'     => 'I1',
+            'va_bri'     => 'BR',
+            'qris'       => 'NQ',
+            'shopeepay'  => 'SP',
+            'ovo'        => 'OV',
+            'dana'       => 'DA',
+            'bca'        => 'BC',
+            'mandiri'    => 'M1',
+            'bni'        => 'I1',
+            'bri'        => 'BR',
+            'duitku'     => 'BC',
+        ];
+        $paymentMethod = $methodMap[strtolower($rawMethod)] ?? ($rawMethod ?: 'BC');
+
+        // Rumus Signature MD5: md5(merchantCode + merchantOrderId + paymentAmount + apiKey)
         $signature = md5($this->merchantCode . $merchantOrderId . $paymentAmount . $this->apiKey);
 
         $payload = [
             'merchantCode'     => $this->merchantCode,
             'paymentAmount'    => $paymentAmount,
+            'paymentMethod'    => $paymentMethod,
             'merchantOrderId'  => $merchantOrderId,
             'productDetails'   => 'Pembayaran Pesanan #' . $merchantOrderId,
             'email'            => $customerEmail,
@@ -75,11 +95,6 @@ class DuitkuPaymentController extends Controller
             'signature'        => $signature,
             'expiryPeriod'     => 1440,
         ];
-
-        // Jangan kirim parameter paymentMethod jika kosong
-        if (!empty($request->input('payment_method'))) {
-            $payload['paymentMethod'] = $request->input('payment_method');
-        }
 
         try {
             $response = Http::asJson()
