@@ -19,8 +19,12 @@ class UserAddress extends Model
         'phone',
         'full_address',
         'city',
+        'district',
         'province',
         'postal_code',
+        'latitude',
+        'longitude',
+        'notes',
         'is_default',
     ];
 

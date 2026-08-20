@@ -1,4 +1,7 @@
 <x-app-layout>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
     @php
         $subtotal = $carts->sum(fn($c) => $c->product->final_price * $c->quantity);
         $totalItemsCount = $carts->sum('quantity');
@@ -8,8 +11,12 @@
     <div class="page-container py-5"
          x-data="{
             isSubmitting: false,
+            isRecalculatingShipping: false,
+            showAddressModal: false,
+            showAddAddressModal: false,
             useSaved: {{ count($addresses) > 0 ? 'true' : 'false' }},
             selectedAddressId: {{ $defaultAddress ? $defaultAddress->id : 'null' }},
+            activeAddress: {{ $defaultAddress ? $defaultAddress->toJson() : 'null' }},
             selectedPaymentMethod: 'qris',
             baseSubtotal: {{ $subtotal }},
             voucherDiscount: {{ $voucherDiscount ?? 0 }},
@@ -21,6 +28,11 @@
             selectedCouriers: {
                 @foreach($storeShippingData as $stId => $stData)
                     '{{ $stId }}': '{{ $stData['selected_id'] }}',
+                @endforeach
+            },
+            storeShippingOptions: {
+                @foreach($storeShippingData as $stId => $stData)
+                    '{{ $stId }}': {{ json_encode($stData['options']) }},
                 @endforeach
             },
             updateCourierCost(storeId, cost, optionId) {
@@ -35,6 +47,171 @@
             },
             formatRupiah(number) {
                 return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(number).replace('IDR', 'Rp');
+            },
+            selectAddress(addr) {
+                this.selectedAddressId = addr.id;
+                this.activeAddress = addr;
+                this.useSaved = true;
+                this.showAddressModal = false;
+                this.recalculateShipping(addr.id, addr.city);
+            },
+            async recalculateShipping(addressId, city) {
+                this.isRecalculatingShipping = true;
+                try {
+                    const response = await fetch('{{ route('customer.shipping.calculate_options') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            address_id: addressId,
+                            city: city
+                        })
+                    });
+                    const res = await response.json();
+                    if (res.status === 'success' && res.storeShippingData) {
+                        for (const [storeId, sData] of Object.entries(res.storeShippingData)) {
+                            this.storeShippingOptions[storeId] = sData.options;
+                            this.courierCosts[storeId] = sData.selected_cost;
+                            this.selectedCouriers[storeId] = sData.selected_id;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Gagal menghitung ulang ongkir:', e);
+                } finally {
+                    this.isRecalculatingShipping = false;
+                }
+            },
+            // Map Modal properties
+            newAddr: {
+                label: 'Rumah',
+                recipient_name: '{{ auth()->user()->name }}',
+                phone: '{{ auth()->user()->phone ?? '' }}',
+                full_address: '',
+                city: '',
+                district: '',
+                province: '',
+                postal_code: '',
+                latitude: '-6.2088',
+                longitude: '106.8456',
+                notes: '',
+                is_default: true
+            },
+            mapObj: null,
+            markerObj: null,
+            isLocating: false,
+            searchQuery: '',
+            searchResults: [],
+            isSearching: false,
+            openAddModal() {
+                this.showAddressModal = false;
+                this.showAddAddressModal = true;
+                this.$nextTick(() => {
+                    this.initCheckoutMap();
+                });
+            },
+            initCheckoutMap() {
+                const lat = parseFloat(this.newAddr.latitude) || -6.2088;
+                const lng = parseFloat(this.newAddr.longitude) || 106.8456;
+                if (this.mapObj) {
+                    this.mapObj.remove();
+                }
+                this.mapObj = L.map('checkout-map').setView([lat, lng], 14);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap'
+                }).addTo(this.mapObj);
+
+                this.markerObj = L.marker([lat, lng], { draggable: true }).addTo(this.mapObj);
+                this.markerObj.on('dragend', (e) => {
+                    const pos = e.target.getLatLng();
+                    this.newAddr.latitude = pos.lat.toFixed(6);
+                    this.newAddr.longitude = pos.lng.toFixed(6);
+                    this.reverseGeocode(pos.lat, pos.lng);
+                });
+            },
+            getCurrentLocation() {
+                if (!navigator.geolocation) return;
+                this.isLocating = true;
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        this.isLocating = false;
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
+                        this.newAddr.latitude = lat.toFixed(6);
+                        this.newAddr.longitude = lng.toFixed(6);
+                        if (this.mapObj && this.markerObj) {
+                            this.mapObj.setView([lat, lng], 16);
+                            this.markerObj.setLatLng([lat, lng]);
+                        }
+                        this.reverseGeocode(lat, lng);
+                    },
+                    () => { this.isLocating = false; },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            },
+            searchLocation(q) {
+                if (!q || q.length < 3) { this.searchResults = []; return; }
+                this.isSearching = true;
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q + ', Indonesia')}&addressdetails=1&limit=5`)
+                    .then(r => r.json())
+                    .then(data => { this.searchResults = data; this.isSearching = false; })
+                    .catch(() => { this.isSearching = false; });
+            },
+            pickSearchResult(res) {
+                const lat = parseFloat(res.lat);
+                const lng = parseFloat(res.lon);
+                this.newAddr.latitude = lat.toFixed(6);
+                this.newAddr.longitude = lng.toFixed(6);
+                if (this.mapObj && this.markerObj) {
+                    this.mapObj.setView([lat, lng], 16);
+                    this.markerObj.setLatLng([lat, lng]);
+                }
+                const addr = res.address || {};
+                this.newAddr.city = addr.city || addr.town || addr.municipality || addr.county || '';
+                this.newAddr.district = addr.suburb || addr.neighbourhood || addr.quarter || '';
+                this.newAddr.province = addr.state || '';
+                this.newAddr.postal_code = addr.postcode || '';
+                this.newAddr.full_address = res.display_name;
+                this.searchResults = [];
+                this.searchQuery = '';
+            },
+            reverseGeocode(lat, lng) {
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data && data.address) {
+                            const addr = data.address;
+                            this.newAddr.city = addr.city || addr.town || addr.municipality || addr.county || this.newAddr.city;
+                            this.newAddr.district = addr.suburb || addr.neighbourhood || addr.quarter || this.newAddr.district;
+                            this.newAddr.province = addr.state || this.newAddr.province;
+                            this.newAddr.postal_code = addr.postcode || this.newAddr.postal_code;
+                            if (!this.newAddr.full_address) {
+                                this.newAddr.full_address = data.display_name;
+                            }
+                        }
+                    }).catch(() => {});
+            },
+            async saveNewAddress() {
+                try {
+                    const resp = await fetch('{{ route('customer.addresses.store') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(this.newAddr)
+                    });
+                    const res = await resp.json();
+                    if (res.status === 'success' && res.data) {
+                        this.showAddAddressModal = false;
+                        this.selectAddress(res.data);
+                    }
+                } catch (e) {
+                    alert('Gagal menyimpan alamat: ' + e.message);
+                }
             }
          }">
 
@@ -69,102 +246,96 @@
               class="max-w-4xl mx-auto space-y-4">
             @csrf
 
-            {{-- 1. ALAMAT PENGIRIMAN --}}
+            {{-- 1. ALAMAT PENGIRIMAN (REALTIME INTERACTIVE CARD) --}}
             <div class="bg-white rounded-xl border border-slate-200/80 p-5 sm:p-6 shadow-card space-y-4">
                 <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-location-dot text-cyan-700 text-xs"></i>
                         <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider">1. Alamat Pengiriman</h2>
                     </div>
-                    @if(count($addresses) > 0)
-                        <a href="{{ route('customer.addresses.index') }}" target="_blank" class="text-[11px] font-semibold text-cyan-700 hover:underline flex items-center gap-1">
-                            <i class="fa-solid fa-gear text-[10px]"></i> Kelola Buku Alamat
-                        </a>
-                    @endif
-                </div>
-
-                @if(count($addresses) > 0)
-                    <div x-show="useSaved" class="space-y-3">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            @foreach($addresses as $addr)
-                                <label class="border rounded-xl p-3.5 cursor-pointer flex items-start gap-3 transition-all relative"
-                                       :class="selectedAddressId == {{ $addr->id }} ? 'border-cyan-600 bg-cyan-50/40 ring-1 ring-cyan-600' : 'border-slate-200 hover:border-slate-300 bg-white'">
-                                    <input type="radio" name="address_id" value="{{ $addr->id }}"
-                                           :disabled="!useSaved"
-                                           x-model="selectedAddressId" class="mt-0.5 text-cyan-600 focus:ring-cyan-500">
-                                    <div class="text-xs min-w-0">
-                                        <div class="flex items-center gap-1.5 mb-1">
-                                            <span class="font-bold text-slate-900">{{ $addr->label }}</span>
-                                            @if($addr->is_default)
-                                                <span class="px-1.5 py-0.2 bg-cyan-100 text-cyan-800 text-[9px] font-bold rounded">Utama</span>
-                                            @endif
-                                        </div>
-                                        <p class="font-semibold text-slate-800">{{ $addr->recipient_name }} <span class="font-normal text-slate-500 font-mono">({{ $addr->phone }})</span></p>
-                                        <p class="text-slate-600 text-[11px] mt-1 line-clamp-2">{{ $addr->full_address }}</p>
-                                        @if($addr->city || $addr->province)
-                                            <p class="text-[10px] text-slate-400 mt-0.5">{{ implode(', ', array_filter([$addr->city, $addr->province, $addr->postal_code])) }}</p>
-                                        @endif
-                                    </div>
-                                </label>
-                            @endforeach
-                        </div>
-
-                        @error('address_id')
-                            <p class="text-rose-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
-
-                        <button type="button" @click="useSaved = false; selectedAddressId = null"
-                                class="text-xs font-semibold text-slate-600 hover:text-cyan-700 flex items-center gap-1.5 pt-1 cursor-pointer">
-                            <i class="fa-solid fa-plus text-[10px]"></i> Tulis Alamat Baru Lainnya
+                    <div class="flex items-center gap-3">
+                        @if(count($addresses) > 0)
+                            <button type="button" @click="showAddressModal = true"
+                                    class="text-xs font-bold text-cyan-700 hover:text-cyan-800 flex items-center gap-1.5 bg-cyan-50/70 hover:bg-cyan-100/70 px-3 py-1.5 rounded-lg border border-cyan-200 transition-all cursor-pointer">
+                                <i class="fa-solid fa-arrows-rotate text-xs"></i>
+                                <span>Pilih Alamat Lain</span>
+                            </button>
+                        @endif
+                        <button type="button" @click="openAddModal()"
+                                class="text-xs font-bold text-slate-700 hover:text-cyan-700 flex items-center gap-1 cursor-pointer">
+                            <i class="fa-solid fa-plus text-[10px]"></i> Alamat Baru
                         </button>
                     </div>
+                </div>
 
-                    <div x-show="!useSaved" x-cloak class="space-y-3">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs bg-slate-50 p-4 rounded-lg border border-slate-200">
-                            <div class="font-medium text-slate-800">
-                                <p class="font-bold text-slate-900 text-sm">{{ auth()->user()->name }}</p>
-                                <p class="text-slate-500 mt-0.5">{{ auth()->user()->email }}</p>
-                                <button type="button" @click="useSaved = true; selectedAddressId = {{ $defaultAddress ? $defaultAddress->id : 'null' }}"
-                                        class="mt-3 text-[11px] font-semibold text-cyan-700 hover:underline block cursor-pointer">
-                                    ← Pilih Dari Alamat Tersimpan
-                                </button>
+                {{-- Active Address Card Display --}}
+                <div x-show="useSaved && activeAddress" class="space-y-3">
+                    <input type="hidden" name="address_id" :value="selectedAddressId">
+
+                    <div class="p-4 rounded-xl border-2 border-cyan-600 bg-cyan-50/30 relative">
+                        <div class="flex items-center justify-between gap-2 mb-1.5">
+                            <div class="flex items-center gap-2">
+                                <span class="font-extrabold text-slate-900 text-xs uppercase" x-text="activeAddress ? activeAddress.label : 'Alamat'"></span>
+                                <template x-if="activeAddress && activeAddress.is_default">
+                                    <span class="px-2 py-0.2 bg-cyan-100 text-cyan-800 text-[9px] font-bold rounded">Utama</span>
+                                </template>
+                                <template x-if="activeAddress && activeAddress.latitude">
+                                    <span class="px-2 py-0.2 bg-emerald-100 text-emerald-800 text-[9px] font-bold rounded flex items-center gap-1">
+                                        <i class="fa-solid fa-location-crosshairs text-[8px]"></i> Pinpoint GPS
+                                    </span>
+                                </template>
                             </div>
-                            <div class="md:col-span-2">
-                                <label for="shipping_address_new" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                                    Alamat Pengiriman Baru <span class="text-rose-500">*</span>
-                                </label>
-                                <textarea name="shipping_address" id="shipping_address_new" rows="3"
-                                          :disabled="useSaved"
-                                          class="input text-xs rounded-md"
-                                          placeholder="Nama penerima, no. HP, dan alamat lengkap tujuan...">{{ old('shipping_address') }}</textarea>
-                                @error('shipping_address')
-                                    <p class="text-rose-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
+                            <span class="text-[11px] font-semibold text-cyan-800 flex items-center gap-1">
+                                <i class="fa-solid fa-circle-check text-xs text-cyan-600"></i> Alamat Terpilih
+                            </span>
                         </div>
+
+                        <p class="font-bold text-slate-900 text-sm">
+                            <span x-text="activeAddress ? activeAddress.recipient_name : ''"></span>
+                            <span class="font-mono font-normal text-slate-500 text-xs ml-1" x-text="activeAddress ? '(' + activeAddress.phone + ')' : ''"></span>
+                        </p>
+                        <p class="text-slate-700 text-xs mt-1 leading-relaxed" x-text="activeAddress ? activeAddress.full_address : ''"></p>
+                        
+                        <template x-if="activeAddress && (activeAddress.district || activeAddress.city || activeAddress.province)">
+                            <p class="text-[11px] text-slate-500 font-medium mt-1 flex items-center gap-1">
+                                <i class="fa-solid fa-map-pin text-cyan-600 text-[10px]"></i>
+                                <span x-text="[activeAddress.district, activeAddress.city, activeAddress.province, activeAddress.postal_code].filter(Boolean).join(', ')"></span>
+                            </p>
+                        </template>
+
+                        <template x-if="activeAddress && activeAddress.notes">
+                            <div class="mt-2 p-2 bg-white/80 rounded-lg border border-slate-200 text-[11px] text-slate-600 flex items-start gap-1.5">
+                                <i class="fa-solid fa-circle-info text-cyan-600 text-[10px] mt-0.5 shrink-0"></i>
+                                <span><strong>Catatan Kurir:</strong> <span x-text="activeAddress.notes"></span></span>
+                            </div>
+                        </template>
                     </div>
-                @else
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs bg-slate-50 p-4 rounded-lg border border-slate-200">
+                </div>
+
+                {{-- Manual Address Fallback --}}
+                <div x-show="!useSaved" x-cloak class="space-y-3">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <div class="font-medium text-slate-800">
                             <p class="font-bold text-slate-900 text-sm">{{ auth()->user()->name }}</p>
                             <p class="text-slate-500 mt-0.5">{{ auth()->user()->email }}</p>
-                            <span class="inline-block mt-2 px-2 py-0.5 bg-cyan-50 text-cyan-800 font-semibold rounded text-[10px] border border-cyan-200">
-                                Penerima Pesanan
-                            </span>
+                            @if(count($addresses) > 0)
+                                <button type="button" @click="useSaved = true; selectedAddressId = {{ $defaultAddress ? $defaultAddress->id : 'null' }}; activeAddress = {{ $defaultAddress ? $defaultAddress->toJson() : 'null' }}"
+                                        class="mt-3 text-[11px] font-semibold text-cyan-700 hover:underline block cursor-pointer">
+                                    ← Pilih Dari Alamat Tersimpan
+                                </button>
+                            @endif
                         </div>
                         <div class="md:col-span-2">
-                            <label for="shipping_address" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                                Alamat Lengkap Tujuan <span class="text-rose-500">*</span>
+                            <label for="shipping_address_manual" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Alamat Pengiriman Lengkap Tujuan <span class="text-rose-500">*</span>
                             </label>
-                            <textarea name="shipping_address" id="shipping_address" rows="3" required
+                            <textarea name="shipping_address" id="shipping_address_manual" rows="3"
+                                      :disabled="useSaved"
                                       class="input text-xs rounded-md"
-                                      placeholder="Contoh: Jl. Kebon Sirih No. 45, Menteng, Jakarta Pusat 10340">{{ old('shipping_address', auth()->user()->address) }}</textarea>
-                            @error('shipping_address')
-                                <p class="text-rose-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
+                                      placeholder="Nama penerima, no. HP, dan alamat lengkap tujuan...">{{ old('shipping_address', auth()->user()->address) }}</textarea>
                         </div>
                     </div>
-                @endif
+                </div>
             </div>
 
             {{-- 2. RINCIAN BARANG & PILIHAN KURIR PENGIRIMAN PER TOKO --}}
@@ -231,15 +402,19 @@
                         </div>
 
                         {{-- Courier Shipping Selection Row --}}
-                        @if($shippingInfo && count($shippingInfo['options']) > 0)
                         <div class="p-3.5 sm:p-4 bg-cyan-50/20 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                             <div class="flex items-center gap-2">
                                 <div class="w-7 h-7 rounded-lg bg-cyan-100 text-cyan-800 flex items-center justify-center text-xs shrink-0">
                                     <i class="fa-solid fa-truck-fast"></i>
                                 </div>
                                 <div>
-                                    <span class="font-bold text-slate-800 block text-xs">Pilih Opsi Kurir Ekspedisi:</span>
-                                    <span class="text-[10px] text-slate-400">Tarif otomatis dihitung sesuai berat dan estimasi pengiriman</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-slate-800 text-xs">Pilih Opsi Kurir Ekspedisi:</span>
+                                        <span x-show="isRecalculatingShipping" x-cloak class="text-[10px] text-cyan-700 font-semibold flex items-center gap-1 animate-pulse">
+                                            <i class="fa-solid fa-circle-notch fa-spin text-[9px]"></i> Menghitung ulang tarif...
+                                        </span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400">Tarif otomatis dihitung sesuai berat dan kota alamat tujuan</span>
                                 </div>
                             </div>
 
@@ -250,17 +425,16 @@
                                             updateCourierCost('{{ $storeId }}', opt.dataset.cost, opt.value);
                                         "
                                         class="w-full text-xs font-semibold text-slate-800 bg-white border border-slate-300 rounded-xl px-3 py-2 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500 shadow-2xs cursor-pointer">
-                                    @foreach($shippingInfo['options'] as $cOpt)
-                                        <option value="{{ $cOpt['id'] }}"
-                                                data-cost="{{ $cOpt['cost'] }}"
-                                                {{ ($shippingInfo['selected_id'] == $cOpt['id']) ? 'selected' : '' }}>
-                                            {{ $cOpt['courier_name'] }} - {{ $cOpt['service_name'] }} ({{ $cOpt['etd'] }}) : {{ $cOpt['formatted_cost'] }}
+                                    <template x-for="cOpt in storeShippingOptions['{{ $storeId }}'] || []" :key="cOpt.id">
+                                        <option :value="cOpt.id"
+                                                :data-cost="cOpt.cost"
+                                                :selected="selectedCouriers['{{ $storeId }}'] === cOpt.id"
+                                                x-text="cOpt.courier_name + ' - ' + cOpt.service_name + ' (' + cOpt.etd + ') : ' + cOpt.formatted_cost">
                                         </option>
-                                    @endforeach
+                                    </template>
                                 </select>
                             </div>
                         </div>
-                        @endif
                     </div>
                 @endforeach
             </div>
@@ -387,7 +561,7 @@
                         Kembali ke Keranjang
                     </a>
                     <button type="submit"
-                            :disabled="isSubmitting"
+                            :disabled="isSubmitting || isRecalculatingShipping"
                             class="w-full sm:w-auto btn-primary h-10 px-6 text-xs flex items-center justify-center gap-2 bg-cyan-700 hover:bg-cyan-800 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer transition-all shadow-xs">
                         <span x-show="!isSubmitting" class="flex items-center gap-2">
                             <i class="fa-solid fa-lock text-xs"></i>
@@ -401,6 +575,194 @@
                 </div>
             </div>
         </form>
+
+        {{-- MODAL PILIH ALAMAT LAIN (QUICK SWITCHER) --}}
+        <div x-show="showAddressModal" x-cloak
+             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+            <div @click.outside="showAddressModal = false"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 class="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-slate-200 my-4 max-h-[85vh] overflow-y-auto">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-map-location-dot text-cyan-600 text-base"></i>
+                        <h3 class="font-bold text-sm text-slate-900">Pilih Alamat Pengiriman</h3>
+                    </div>
+                    <button @click="showAddressModal = false" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+                        <i class="fa-solid fa-xmark text-base"></i>
+                    </button>
+                </div>
+
+                <div class="mt-4 space-y-3">
+                    @foreach($addresses as $addr)
+                        <div @click="selectAddress({{ $addr->toJson() }})"
+                             class="p-4 rounded-xl border cursor-pointer transition-all relative"
+                             :class="selectedAddressId == {{ $addr->id }} ? 'border-cyan-600 bg-cyan-50/40 ring-1 ring-cyan-600' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                            <div class="flex items-center justify-between gap-2 mb-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-slate-900 text-xs uppercase">{{ $addr->label }}</span>
+                                    @if($addr->is_default)
+                                        <span class="px-1.5 py-0.2 bg-cyan-100 text-cyan-800 text-[9px] font-bold rounded">Utama</span>
+                                    @endif
+                                    @if($addr->latitude)
+                                        <span class="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 text-[9px] font-bold rounded flex items-center gap-1">
+                                            <i class="fa-solid fa-location-crosshairs text-[8px]"></i> Pinpoint
+                                        </span>
+                                    @endif
+                                </div>
+                                <template x-if="selectedAddressId == {{ $addr->id }}">
+                                    <span class="text-cyan-700 font-bold text-xs"><i class="fa-solid fa-check"></i> Terpilih</span>
+                                </template>
+                            </div>
+                            <p class="font-semibold text-slate-800 text-xs">{{ $addr->recipient_name }} <span class="text-slate-500 font-mono">({{ $addr->phone }})</span></p>
+                            <p class="text-slate-600 text-[11px] mt-1 line-clamp-2">{{ $addr->full_address }}</p>
+                            @if($addr->city || $addr->province)
+                                <p class="text-[10px] text-slate-400 mt-0.5">{{ implode(', ', array_filter([$addr->district, $addr->city, $addr->province, $addr->postal_code])) }}</p>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <button type="button" @click="openAddModal()"
+                            class="text-xs font-bold text-cyan-700 hover:text-cyan-800 flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-plus text-xs"></i> Tambah Alamat Baru
+                    </button>
+                    <button type="button" @click="showAddressModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold cursor-pointer">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{-- MODAL TAMBAH ALAMAT BARU DENGAN LEAFLET GPS & PINPOINT --}}
+        <div x-show="showAddAddressModal" x-cloak
+             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+            <div @click.outside="showAddAddressModal = false"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 class="bg-white rounded-2xl max-w-xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200 my-4 max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-map-location-dot text-cyan-600 text-base"></i>
+                        <h3 class="font-bold text-sm sm:text-base text-slate-900">Tambah Alamat Pengiriman Baru</h3>
+                    </div>
+                    <button @click="showAddAddressModal = false" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+                        <i class="fa-solid fa-xmark text-base"></i>
+                    </button>
+                </div>
+
+                {{-- Interactive Map Pinpoint Section --}}
+                <div class="mt-4 space-y-3">
+                    <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
+                        <div class="relative flex-1">
+                            <input type="text" x-model="searchQuery"
+                                   @input.debounce.500ms="searchLocation(searchQuery)"
+                                   placeholder="Cari jalan, kelurahan, kecamatan, atau kota..."
+                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 pl-8 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                            <div x-show="isSearching" class="absolute right-3 top-2.5 text-cyan-600 text-xs">
+                                <i class="fa-solid fa-circle-notch fa-spin"></i>
+                            </div>
+
+                            {{-- Autocomplete Dropdown --}}
+                            <div x-show="searchResults.length > 0" x-cloak
+                                 class="absolute z-20 top-10 left-0 right-0 bg-white rounded-xl shadow-xl border border-slate-200 divide-y divide-slate-100 max-h-48 overflow-y-auto text-xs">
+                                <template x-for="res in searchResults" :key="res.place_id">
+                                    <button type="button" @click="pickSearchResult(res)"
+                                            class="w-full p-2.5 text-left hover:bg-cyan-50/70 flex items-start gap-2 cursor-pointer transition-colors">
+                                        <i class="fa-solid fa-location-dot text-cyan-600 text-xs mt-0.5 shrink-0"></i>
+                                        <span class="truncate" x-text="res.display_name"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+
+                        <button type="button" @click="getCurrentLocation()"
+                                :disabled="isLocating"
+                                class="h-9 px-3.5 bg-cyan-50 text-cyan-800 hover:bg-cyan-100 rounded-xl border border-cyan-200 text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0 cursor-pointer transition-all">
+                            <i class="fa-solid fa-location-crosshairs text-cyan-700" :class="isLocating ? 'animate-spin' : ''"></i>
+                            <span x-text="isLocating ? 'Mendeteksi...' : 'Lokasi Saya'"></span>
+                        </button>
+                    </div>
+
+                    {{-- Map Container --}}
+                    <div id="checkout-map" class="w-full h-40 rounded-xl border border-slate-200 overflow-hidden shadow-inner"></div>
+                </div>
+
+                <div class="mt-4 space-y-3.5 text-xs">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Label Alamat</label>
+                            <select x-model="newAddr.label" class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                                <option value="Rumah">Rumah</option>
+                                <option value="Kantor">Kantor</option>
+                                <option value="Apartemen">Apartemen</option>
+                                <option value="Kos">Kos</option>
+                                <option value="Toko">Toko</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Nama Penerima <span class="text-rose-500">*</span></label>
+                            <input type="text" x-model="newAddr.recipient_name" required placeholder="Nama Lengkap"
+                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Nomor Telepon/HP <span class="text-rose-500">*</span></label>
+                            <input type="text" x-model="newAddr.phone" required placeholder="08123456789"
+                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Kota/Kabupaten</label>
+                            <input type="text" x-model="newAddr.city" placeholder="Jakarta Selatan"
+                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Kecamatan</label>
+                            <input type="text" x-model="newAddr.district" placeholder="Kebayoran Baru"
+                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Provinsi</label>
+                            <input type="text" x-model="newAddr.province" placeholder="DKI Jakarta"
+                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Kode Pos</label>
+                            <input type="text" x-model="newAddr.postal_code" placeholder="12190"
+                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Alamat Lengkap <span class="text-rose-500">*</span></label>
+                        <textarea x-model="newAddr.full_address" rows="2" required placeholder="Jl. Sudirman No. 45, RT 02/RW 03..."
+                                  class="w-full rounded-xl border border-slate-300 text-xs p-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Catatan Patokan untuk Kurir (Opsional)</label>
+                        <input type="text" x-model="newAddr.notes" placeholder="Contoh: Rumah pagar hitam samping minimarket"
+                               class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+                        <button type="button" @click="showAddAddressModal = false" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium cursor-pointer">
+                            Batal
+                        </button>
+                        <button type="button" @click="saveNewAddress()" class="px-5 py-2 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold shadow-xs cursor-pointer">
+                            Simpan & Gunakan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </x-app-layout>
 

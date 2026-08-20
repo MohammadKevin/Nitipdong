@@ -34,8 +34,12 @@ class AddressController extends Controller
             'phone'          => ['required', 'string', 'max:20'],
             'full_address'   => ['required', 'string', 'max:1000'],
             'city'           => ['nullable', 'string', 'max:100'],
+            'district'       => ['nullable', 'string', 'max:100'],
             'province'       => ['nullable', 'string', 'max:100'],
             'postal_code'    => ['nullable', 'string', 'max:10'],
+            'latitude'       => ['nullable', 'string', 'max:50'],
+            'longitude'      => ['nullable', 'string', 'max:50'],
+            'notes'          => ['nullable', 'string', 'max:500'],
             'is_default'     => ['nullable', 'boolean'],
         ]);
 
@@ -54,8 +58,12 @@ class AddressController extends Controller
             'phone'          => $validated['phone'],
             'full_address'   => $validated['full_address'],
             'city'           => $validated['city'] ?? null,
+            'district'       => $validated['district'] ?? null,
             'province'       => $validated['province'] ?? null,
             'postal_code'    => $validated['postal_code'] ?? null,
+            'latitude'       => $validated['latitude'] ?? null,
+            'longitude'      => $validated['longitude'] ?? null,
+            'notes'          => $validated['notes'] ?? null,
             'is_default'     => $isDefault,
         ]);
 
@@ -78,8 +86,12 @@ class AddressController extends Controller
             'phone'          => ['required', 'string', 'max:20'],
             'full_address'   => ['required', 'string', 'max:1000'],
             'city'           => ['nullable', 'string', 'max:100'],
+            'district'       => ['nullable', 'string', 'max:100'],
             'province'       => ['nullable', 'string', 'max:100'],
             'postal_code'    => ['nullable', 'string', 'max:10'],
+            'latitude'       => ['nullable', 'string', 'max:50'],
+            'longitude'      => ['nullable', 'string', 'max:50'],
+            'notes'          => ['nullable', 'string', 'max:500'],
             'is_default'     => ['nullable', 'boolean'],
         ]);
 
@@ -95,8 +107,12 @@ class AddressController extends Controller
             'phone'          => $validated['phone'],
             'full_address'   => $validated['full_address'],
             'city'           => $validated['city'] ?? null,
+            'district'       => $validated['district'] ?? null,
             'province'       => $validated['province'] ?? null,
             'postal_code'    => $validated['postal_code'] ?? null,
+            'latitude'       => $validated['latitude'] ?? null,
+            'longitude'      => $validated['longitude'] ?? null,
+            'notes'          => $validated['notes'] ?? null,
             'is_default'     => $isDefault ? true : $address->is_default,
         ]);
 

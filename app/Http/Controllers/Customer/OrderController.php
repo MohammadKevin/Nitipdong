@@ -106,6 +106,53 @@ class OrderController extends Controller
         ));
     }
 
+    public function calculateShippingOptions(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $addressId = $request->input('address_id');
+        $city = $request->input('city');
+
+        if ($addressId) {
+            $addr = UserAddress::where('id', $addressId)->where('user_id', Auth::id())->first();
+            if ($addr && ! empty($addr->city)) {
+                $city = $addr->city;
+            }
+        }
+
+        $carts = Cart::with(['product.store'])
+            ->where('user_id', Auth::id())
+            ->get();
+
+        if ($carts->isEmpty()) {
+            return response()->json(['status' => 'error', 'message' => 'Keranjang belanja kosong.'], 422);
+        }
+
+        $groupedByStore = $carts->groupBy(fn ($item) => $item->product->store_id);
+        $storeShippingData = [];
+        $totalShipping = 0;
+
+        foreach ($groupedByStore as $storeId => $items) {
+            $storeWeight = $items->sum(fn ($it) => max(0.2, (float) ($it->product->weight ?? 0.5)) * $it->quantity);
+            $options = ShippingService::getAvailableOptions($storeWeight, $city);
+            $defaultOption = $options[0] ?? ShippingService::getDefaultOption($storeWeight);
+
+            $storeShippingData[$storeId] = [
+                'weight'         => $storeWeight,
+                'options'        => $options,
+                'selected_id'    => $defaultOption['id'] ?? 'JNE_REG',
+                'selected_cost'  => $defaultOption['cost'],
+            ];
+
+            $totalShipping += $defaultOption['cost'];
+        }
+
+        return response()->json([
+            'status'            => 'success',
+            'city'              => $city,
+            'storeShippingData' => $storeShippingData,
+            'totalShipping'     => $totalShipping,
+        ]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $hasAddressId = $request->filled('address_id');

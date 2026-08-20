@@ -193,6 +193,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/checkout', [OrderController::class, 'checkout'])->name('order.checkout');
         Route::post('/checkout', [OrderController::class, 'store'])->name('order.store');
+        Route::post('/shipping/calculate-options', [OrderController::class, 'calculateShippingOptions'])->name('shipping.calculate_options');
 
         Route::get('/orders/{order}/payment', [OrderController::class, 'payment'])->name('order.payment');
         Route::post('/orders/{order}/payment', [OrderController::class, 'confirmPayment'])->name('order.confirm_payment');
