@@ -20,7 +20,7 @@
         </div>
     </div>
 
-    <div class="max-w-3xl bg-white rounded-xl shadow-card border border-slate-200/80 overflow-hidden"
+    <div class="max-w-3xl bg-white rounded-xl shadow-card border border-slate-200/80"
          x-data="{
              type: '{{ old('type', 'percent') }}',
              amount: {{ old('amount', 10) }},
@@ -172,8 +172,8 @@
                     Batal
                 </a>
                 <button type="submit" class="btn-primary text-xs h-9 px-5 rounded-md bg-cyan-700 hover:bg-cyan-800 flex items-center gap-1.5">
-                    <i class="fa-solid fa-check text-[10px]"></i>
-                    Simpan & Terbitkan Voucher
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    Terbitkan Voucher
                 </button>
             </div>
         </form>

@@ -55,7 +55,7 @@ Route::get('/', function () {
     $categories = Category::all();
     $activeFlashSale = FlashSale::active()->with(['items.product'])->first();
     $vouchers = Voucher::where('is_active', true)->latest()->take(6)->get();
-    
+
     $officialStores = Store::where('status', 'approved')
         ->withCount('products')
         ->take(6)
@@ -180,6 +180,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/cart/add/{product}', [CartController::class, 'store'])->name('cart.store');
         Route::patch('/cart/{cart}', [CartController::class, 'update'])->name('cart.update');
         Route::delete('/cart/{cart}', [CartController::class, 'destroy'])->name('cart.destroy');
+
+        // Voucher Routes
+        Route::get('/vouchers', [CartController::class, 'vouchers'])->name('vouchers.index');
+        Route::post('/vouchers/{voucher}/select', [CartController::class, 'selectVoucher'])->name('vouchers.select');
         Route::post('/cart/voucher/apply', [CartController::class, 'applyVoucher'])->name('cart.voucher.apply');
         Route::delete('/cart/voucher/remove', [CartController::class, 'removeVoucher'])->name('cart.voucher.remove');
 

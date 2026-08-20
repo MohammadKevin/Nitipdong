@@ -14,7 +14,7 @@
         
         <div class="flex items-center gap-3">
             <a href="{{ route('seller.vouchers.create') }}" class="btn-primary text-xs h-9 px-4 rounded-md bg-cyan-700 hover:bg-cyan-800 flex items-center gap-1.5">
-                <i class="fa-solid fa-plus text-[10px]"></i>
+                <i class="fa-solid fa-plus text-xs"></i>
                 Buat Voucher Baru
             </a>
         </div>

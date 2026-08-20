@@ -196,6 +196,23 @@
                                     </span>
                                 @endif
                             </a>
+
+                            <a href="{{ route('customer.vouchers.index') }}"
+                               class="flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-slate-700 hover:bg-slate-50 hover:text-cyan-700 transition-colors">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-6 h-6 rounded-lg bg-orange-50 text-orange-500 border border-orange-100 flex items-center justify-center text-xs">
+                                        <i class="fa-solid fa-ticket"></i>
+                                    </div>
+                                    <span>Voucher Saya</span>
+                                </div>
+                                @if(session('applied_voucher'))
+                                    <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
+                                        <i class="fa-solid fa-check text-[9px]"></i> Dipilih
+                                    </span>
+                                @else
+                                    <span class="text-[11px] text-slate-400">50+ Voucher</span>
+                                @endif
+                            </a>
                         </div>
                     </div>
 
@@ -203,6 +220,17 @@
                     <div class="pt-3 border-t border-slate-100">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">Pengaturan Akun</p>
                         <div class="space-y-1 text-xs">
+                            <a href="{{ route('customer.vouchers.index') }}"
+                               class="flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-slate-700 hover:bg-slate-50 hover:text-cyan-700 transition-colors">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-6 h-6 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center text-xs">
+                                        <i class="fa-solid fa-ticket"></i>
+                                    </div>
+                                    <span>Voucher Saya</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                            </a>
+
                             <a href="{{ route('customer.addresses.index') }}"
                                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-slate-700 hover:bg-slate-50 hover:text-cyan-700 transition-colors">
                                 <div class="flex items-center gap-2.5">

@@ -184,4 +184,56 @@ class CartController extends Controller
 
         return back()->with('success', 'Voucher promo berhasil dilepas.');
     }
+
+    /**
+     * Halaman daftar voucher customer (seperti Shopee "Voucher Saya")
+     */
+    public function vouchers(): View
+    {
+        $carts = Cart::with('product')->where('user_id', Auth::id())->get();
+        $cartStoreIds = $carts->pluck('product.store_id')->filter()->unique()->toArray();
+        $subtotal = $carts->sum(fn ($i) => $i->product->final_price * $i->quantity);
+
+        // Get all available vouchers (platform + store vouchers)
+        $vouchers = Voucher::active()
+            ->with('store')
+            ->where(function ($q) use ($cartStoreIds) {
+                $q->whereNull('store_id') // Platform vouchers
+                  ->orWhereIn('store_id', $cartStoreIds); // Store vouchers for items in cart
+            })
+            ->orderBy('amount', 'desc')
+            ->get();
+
+        $selectedVoucherCode = session('applied_voucher');
+
+        return view('customer.vouchers.index', compact('vouchers', 'subtotal', 'selectedVoucherCode'));
+    }
+
+    /**
+     * Select voucher (simpan ke session, tidak redirect ke cart)
+     */
+    public function selectVoucher(Request $request, Voucher $voucher): RedirectResponse
+    {
+        $carts = Cart::with('product')->where('user_id', Auth::id())->get();
+
+        if ($voucher->is_store_voucher) {
+            $storeItems = $carts->filter(fn ($i) => $i->product && $i->product->store_id == $voucher->store_id);
+            if ($storeItems->isEmpty()) {
+                return back()->with('error', 'Voucher ini hanya untuk produk dari toko ' . ($voucher->store->name ?? 'tertentu') . '.');
+            }
+            $applicableSubtotal = $storeItems->sum(fn ($i) => $i->product->final_price * $i->quantity);
+        } else {
+            $applicableSubtotal = $carts->sum(fn ($i) => $i->product->final_price * $i->quantity);
+        }
+
+        $validation = $voucher->validateForSubtotal($applicableSubtotal);
+        if (!$validation['valid']) {
+            return back()->with('error', $validation['message']);
+        }
+
+        // Simpan voucher ke session
+        session(['applied_voucher' => $voucher->code]);
+
+        return back()->with('success', 'Voucher ' . $voucher->code . ' dipilih! Silakan lanjut ke checkout.');
+    }
 }

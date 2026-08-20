@@ -11,13 +11,13 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Super Admin
-        User::create([
-            'name'              => 'Super Admin Platform',
-            'email'             => 'superadmin@belanjain.test',
-            'email_verified_at' => now(),
-            'password'          => Hash::make('password'),
-            'role'              => 'super_admin',
-        ]);
+        // User::create([
+        //     'name'              => 'Super Admin Platform',
+        //     'email'             => 'superadmin@belanjain.test',
+        //     'email_verified_at' => now(),
+        //     'password'          => Hash::make('password'),
+        //     'role'              => 'super_admin',
+        // ]);
 
         // Admin
         User::create([

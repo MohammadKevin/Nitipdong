@@ -22,7 +22,7 @@
         $activeVouchers = $sellerStore ? \App\Models\Voucher::where('store_id', $sellerStore->id)->count() : 0;
     @endphp
 
-    <div class="h-screen bg-slate-50 text-slate-800 overflow-hidden">
+    <div class="h-screen bg-slate-50 text-slate-800">
         <div class="flex h-screen w-full">
 
             <aside class="w-64 h-full shrink-0 bg-slate-900 text-slate-300 flex flex-col justify-between py-5 px-3.5 overflow-y-auto border-r border-slate-800">

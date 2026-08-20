@@ -87,11 +87,29 @@
             </div>
 
             <div class="lg:col-span-4 space-y-4">
+                {{-- Ringkasan Tagihan --}}
                 <div class="bg-white rounded-xl border border-slate-200/80 p-5 shadow-card space-y-4 sticky top-20">
                     <h3 class="font-bold text-xs text-slate-900 pb-3 border-b border-slate-100 uppercase tracking-wider">Ringkasan Tagihan</h3>
 
                     @php
                         $subtotal = $carts->sum(fn($c) => $c->product->final_price * $c->quantity);
+                        $voucherDiscount = 0;
+
+                        if (session('applied_voucher')) {
+                            $voucherCode = session('applied_voucher');
+                            $appliedVoucher = \App\Models\Voucher::where('code', $voucherCode)->first();
+                            if ($appliedVoucher) {
+                                if ($appliedVoucher->is_store_voucher) {
+                                    $storeItems = $carts->filter(fn($item) => $item->product && $item->product->store_id == $appliedVoucher->store_id);
+                                    $applicableSubtotal = $storeItems->sum(fn($item) => $item->product->final_price * $item->quantity);
+                                } else {
+                                    $applicableSubtotal = $subtotal;
+                                }
+                                $voucherDiscount = $appliedVoucher->calculateDiscount($applicableSubtotal);
+                            }
+                        }
+
+                        $finalTotal = max(0, $subtotal - $voucherDiscount);
                     @endphp
 
                     <div class="space-y-2 text-xs">
@@ -99,18 +117,29 @@
                             <span>Total Harga ({{ $carts->sum('quantity') }} unit)</span>
                             <span class="font-medium text-slate-900">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
                         </div>
+
+                        @if($voucherDiscount > 0)
+                        <div class="flex items-center justify-between text-slate-500">
+                            <span class="flex items-center gap-1">
+                                <i class="fa-solid fa-ticket text-rose-500 text-[10px]"></i>
+                                Diskon Voucher
+                            </span>
+                            <span class="font-semibold text-rose-600">-Rp {{ number_format($voucherDiscount, 0, ',', '.') }}</span>
+                        </div>
+                        @endif
+
                         <div class="flex items-center justify-between text-slate-500">
                             <span>Ekstra Bebas Ongkir</span>
                             <span class="font-semibold text-cyan-700">Rp 0 (Gratis)</span>
                         </div>
                         <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
                             <span class="font-bold text-xs sm:text-sm text-slate-900">Total Pembayaran</span>
-                            <span class="font-extrabold text-base sm:text-lg text-slate-900">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
+                            <span class="font-extrabold text-base sm:text-lg text-slate-900">Rp {{ number_format($finalTotal, 0, ',', '.') }}</span>
                         </div>
                     </div>
 
-                    <a href="{{ route('customer.order.checkout') }}" class="w-full btn-primary h-10 text-xs flex items-center justify-center gap-2 bg-cyan-700 hover:bg-cyan-800">
-                        <span>Lanjut ke Checkout</span>
+                    <a href="{{ route('customer.order.checkout') }}" class="w-full h-10 text-xs flex items-center justify-center gap-2 bg-cyan-700 hover:bg-cyan-800 text-white rounded-lg font-semibold transition-colors">
+                        <span>Konfirmasi & Buat Pesanan</span>
                         <i class="fa-solid fa-arrow-right text-[10px]"></i>
                     </a>
                 </div>
@@ -130,3 +159,5 @@
         @endif
     </div>
 </x-app-layout>
+
+{{-- Cache bust: 20260820113027 --}}

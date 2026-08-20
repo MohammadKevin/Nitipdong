@@ -145,11 +145,43 @@
                 </div>
             @endforeach
 
+            {{-- 3. VOUCHER & PROMO Section (Simple Design) --}}
+            <div class="bg-white rounded-xl border border-slate-200/80 p-5 sm:p-6 shadow-card">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fa-solid fa-ticket text-cyan-700"></i>
+                    <h2 class="text-sm font-bold text-slate-900">3. VOUCHER & PROMO</h2>
+                </div>
+
+                @if($appliedVoucher)
+                    <div class="border border-slate-200 rounded-lg p-3">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="flex-1">
+                                <div class="font-bold text-sm text-slate-900 mb-1">{{ $appliedVoucher->code }}</div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-slate-600">{{ $appliedVoucher->name }}</span>
+                                    <a href="{{ route('customer.vouchers.index') }}" class="text-cyan-600 hover:text-cyan-700 text-xs font-medium">
+                                        Ubah
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <a href="{{ route('customer.vouchers.index') }}" class="block border border-slate-200 rounded-lg p-3 hover:border-cyan-400 hover:bg-cyan-50/30 transition-all group">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-slate-700 group-hover:text-cyan-700">Pilih atau masukkan kode promo</span>
+                            <i class="fa-solid fa-chevron-right text-slate-400 text-xs group-hover:text-cyan-600"></i>
+                        </div>
+                    </a>
+                @endif
+            </div>
+
             <div class="bg-white rounded-xl border border-slate-200/80 p-5 sm:p-6 shadow-card space-y-4">
-                <h3 class="font-bold text-xs text-slate-900 pb-3 border-b border-slate-100 uppercase tracking-wider">2. Rincian Pembayaran</h3>
+                <h3 class="font-bold text-xs text-slate-900 pb-3 border-b border-slate-100 uppercase tracking-wider">4. Rincian Pembayaran</h3>
 
                 @php
                     $subtotal = $carts->sum(fn($c) => $c->product->final_price * $c->quantity);
+                    $grandTotal = max(0, $subtotal - $voucherDiscount);
                 @endphp
 
                 <div class="space-y-2 text-xs">
@@ -165,25 +197,41 @@
                         <span>Biaya Penanganan Platform</span>
                         <span class="font-semibold text-cyan-700">Rp 0 (Gratis)</span>
                     </div>
+                    @if($voucherDiscount > 0)
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-1.5 font-semibold text-slate-600">
+                                <i class="fa-solid fa-ticket text-rose-500 text-[9px]"></i>
+                                Diskon Voucher
+                            </span>
+                            <span class="font-bold text-rose-600">-Rp {{ number_format($voucherDiscount, 0, ',', '.') }}</span>
+                        </div>
+                    @endif
                     <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
                         <span class="font-bold text-sm text-slate-900">Total Tagihan Final</span>
-                        <span class="font-extrabold text-base sm:text-lg text-slate-900">
-                            Rp {{ number_format($subtotal, 0, ',', '.') }}
-                        </span>
+                        <div class="text-right">
+                            @if($voucherDiscount > 0)
+                                <p class="text-[10px] text-slate-400 line-through">Rp {{ number_format($subtotal, 0, ',', '.') }}</p>
+                            @endif
+                            <span class="font-extrabold text-base sm:text-lg {{ $voucherDiscount > 0 ? 'text-emerald-700' : 'text-slate-900' }}">
+                                Rp {{ number_format($grandTotal, 0, ',', '.') }}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <a href="{{ route('customer.cart.index') }}" class="text-xs font-semibold text-slate-500 hover:text-cyan-700 flex items-center gap-1.5">
-                        <i class="fa-solid fa-arrow-left text-[10px]"></i>
+                        <i class="fa-solid fa-arrow-left text-xs"></i>
                         Kembali ke Keranjang
                     </a>
                     <button type="submit" class="w-full sm:w-auto btn-primary h-10 px-6 text-xs flex items-center justify-center gap-2 bg-cyan-700 hover:bg-cyan-800">
                         <i class="fa-solid fa-lock text-xs"></i>
-                        <span>Konfirmasi & Buat Pesanan</span>
+                        <span>Konfirmasi &amp; Buat Pesanan</span>
                     </button>
                 </div>
             </div>
         </form>
     </div>
 </x-app-layout>
+
+{{-- Cache bust: 20260820113044 --}}
