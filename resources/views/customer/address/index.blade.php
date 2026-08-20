@@ -2,6 +2,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
+    @php
+        $regionsData = \App\Services\IndonesianRegionService::PROVINCES_DATA;
+    @endphp
+
     <div class="page-container py-5" x-data="{
         showCreateModal: false,
         showEditModal: false,
@@ -13,6 +17,7 @@
         markerCreate: null,
         mapEdit: null,
         markerEdit: null,
+        provincesData: {{ json_encode($regionsData) }},
         formData: {
             id: null,
             label: 'Rumah',
@@ -21,13 +26,44 @@
             full_address: '',
             city: '',
             district: '',
-            province: '',
+            province: 'DKI Jakarta',
             postal_code: '',
             latitude: '-6.2088',
             longitude: '106.8456',
             notes: '',
             is_default: false,
             actionUrl: ''
+        },
+        getAvailableCities() {
+            if (this.formData.province && this.provincesData[this.formData.province]) {
+                return Object.keys(this.provincesData[this.formData.province].cities);
+            }
+            return [];
+        },
+        onProvinceChange(mode) {
+            const prov = this.formData.province;
+            const cities = this.getAvailableCities();
+            if (cities.length > 0 && !cities.includes(this.formData.city)) {
+                this.formData.city = cities[0];
+            }
+            this.onCityChange(mode);
+        },
+        onCityChange(mode) {
+            const prov = this.formData.province;
+            const city = this.formData.city;
+            if (prov && city && this.provincesData[prov] && this.provincesData[prov].cities[city]) {
+                const cityInfo = this.provincesData[prov].cities[city];
+                this.formData.postal_code = cityInfo.postal || this.formData.postal_code;
+                this.formData.latitude = cityInfo.lat.toFixed(6);
+                this.formData.longitude = cityInfo.lng.toFixed(6);
+
+                const map = mode === 'create' ? this.mapCreate : this.mapEdit;
+                const marker = mode === 'create' ? this.markerCreate : this.markerEdit;
+                if (map && marker) {
+                    map.flyTo([cityInfo.lat, cityInfo.lng], 13);
+                    marker.setLatLng([cityInfo.lat, cityInfo.lng]);
+                }
+            }
         },
         openCreate() {
             this.formData = {
@@ -36,10 +72,10 @@
                 recipient_name: '{{ auth()->user()->name }}',
                 phone: '{{ auth()->user()->phone ?? '' }}',
                 full_address: '',
-                city: '',
+                city: 'Jakarta Pusat',
                 district: '',
-                province: '',
-                postal_code: '',
+                province: 'DKI Jakarta',
+                postal_code: '10110',
                 latitude: '-6.2088',
                 longitude: '106.8456',
                 notes: '',
@@ -58,9 +94,9 @@
                 recipient_name: addr.recipient_name,
                 phone: addr.phone,
                 full_address: addr.full_address,
-                city: addr.city || '',
+                city: addr.city || 'Jakarta Pusat',
                 district: addr.district || '',
-                province: addr.province || '',
+                province: addr.province || 'DKI Jakarta',
                 postal_code: addr.postal_code || '',
                 latitude: addr.latitude || '-6.2088',
                 longitude: addr.longitude || '106.8456',
@@ -425,18 +461,26 @@
 
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Kota/Kabupaten</label>
-                            <input type="text" name="city" x-model="formData.city" placeholder="Contoh: Jakarta Selatan"
-                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                            <label class="block font-semibold text-slate-700 mb-1">Provinsi <span class="text-rose-500">*</span></label>
+                            <select name="province" x-model="formData.province" @change="onProvinceChange('create')"
+                                    class="w-full h-9 rounded-xl border border-slate-300 text-xs px-2.5 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                                <template x-for="prov in Object.keys(provincesData)" :key="prov">
+                                    <option :value="prov" x-text="prov" :selected="formData.province === prov"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Kota/Kabupaten <span class="text-rose-500">*</span></label>
+                            <select name="city" x-model="formData.city" @change="onCityChange('create')"
+                                    class="w-full h-9 rounded-xl border border-slate-300 text-xs px-2.5 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                                <template x-for="c in getAvailableCities()" :key="c">
+                                    <option :value="c" x-text="c" :selected="formData.city === c"></option>
+                                </template>
+                            </select>
                         </div>
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">Kecamatan</label>
                             <input type="text" name="district" x-model="formData.district" placeholder="Contoh: Kebayoran Baru"
-                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Provinsi</label>
-                            <input type="text" name="province" x-model="formData.province" placeholder="DKI Jakarta"
                                    class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
                         </div>
                         <div>
@@ -561,18 +605,26 @@
 
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Kota/Kabupaten</label>
-                            <input type="text" name="city" x-model="formData.city"
-                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                            <label class="block font-semibold text-slate-700 mb-1">Provinsi <span class="text-rose-500">*</span></label>
+                            <select name="province" x-model="formData.province" @change="onProvinceChange('edit')"
+                                    class="w-full h-9 rounded-xl border border-slate-300 text-xs px-2.5 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                                <template x-for="prov in Object.keys(provincesData)" :key="prov">
+                                    <option :value="prov" x-text="prov" :selected="formData.province === prov"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Kota/Kabupaten <span class="text-rose-500">*</span></label>
+                            <select name="city" x-model="formData.city" @change="onCityChange('edit')"
+                                    class="w-full h-9 rounded-xl border border-slate-300 text-xs px-2.5 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                                <template x-for="c in getAvailableCities()" :key="c">
+                                    <option :value="c" x-text="c" :selected="formData.city === c"></option>
+                                </template>
+                            </select>
                         </div>
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">Kecamatan</label>
                             <input type="text" name="district" x-model="formData.district"
-                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Provinsi</label>
-                            <input type="text" name="province" x-model="formData.province"
                                    class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
                         </div>
                         <div>

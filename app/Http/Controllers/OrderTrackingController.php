@@ -35,13 +35,25 @@ class OrderTrackingController extends Controller
         $originLat = $baseLat - 0.045;
         $originLng = $baseLng - 0.035;
 
-        // Sorting Hub Location
-        $hubLat = $baseLat - 0.015;
-        $hubLng = $baseLng - 0.010;
-
         // Buyer Destination Location (Rumah Pembeli)
         $destLat = $baseLat + 0.040;
         $destLng = $baseLng + 0.045;
+
+        // Use real saved GPS Pinpoint coordinates if available
+        $userAddress = \App\Models\UserAddress::where('user_id', $order->user_id)
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->orderByDesc('is_default')
+            ->first();
+
+        if ($userAddress && (float) $userAddress->latitude != 0 && (float) $userAddress->longitude != 0) {
+            $destLat = (float) $userAddress->latitude;
+            $destLng = (float) $userAddress->longitude;
+            $originLat = $destLat - 0.055;
+            $originLng = $destLng - 0.045;
+            $hubLat = $destLat - 0.020;
+            $hubLng = $destLng - 0.015;
+        }
 
         // Progress based on order status
         $progressPercentage = match ($order->status) {

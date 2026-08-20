@@ -84,20 +84,50 @@
                     this.isRecalculatingShipping = false;
                 }
             },
+            provincesData: {{ json_encode(\App\Services\IndonesianRegionService::PROVINCES_DATA) }},
             // Map Modal properties
             newAddr: {
                 label: 'Rumah',
                 recipient_name: '{{ auth()->user()->name }}',
                 phone: '{{ auth()->user()->phone ?? '' }}',
                 full_address: '',
-                city: '',
+                city: 'Jakarta Pusat',
                 district: '',
-                province: '',
-                postal_code: '',
+                province: 'DKI Jakarta',
+                postal_code: '10110',
                 latitude: '-6.2088',
                 longitude: '106.8456',
                 notes: '',
                 is_default: true
+            },
+            getAvailableCities() {
+                if (this.newAddr.province && this.provincesData[this.newAddr.province]) {
+                    return Object.keys(this.provincesData[this.newAddr.province].cities);
+                }
+                return [];
+            },
+            onProvinceChange() {
+                const prov = this.newAddr.province;
+                const cities = this.getAvailableCities();
+                if (cities.length > 0 && !cities.includes(this.newAddr.city)) {
+                    this.newAddr.city = cities[0];
+                }
+                this.onCityChange();
+            },
+            onCityChange() {
+                const prov = this.newAddr.province;
+                const city = this.newAddr.city;
+                if (prov && city && this.provincesData[prov] && this.provincesData[prov].cities[city]) {
+                    const cityInfo = this.provincesData[prov].cities[city];
+                    this.newAddr.postal_code = cityInfo.postal || this.newAddr.postal_code;
+                    this.newAddr.latitude = cityInfo.lat.toFixed(6);
+                    this.newAddr.longitude = cityInfo.lng.toFixed(6);
+
+                    if (this.mapObj && this.markerObj) {
+                        this.mapObj.flyTo([cityInfo.lat, cityInfo.lng], 13);
+                        this.markerObj.setLatLng([cityInfo.lat, cityInfo.lng]);
+                    }
+                }
             },
             mapObj: null,
             markerObj: null,
@@ -719,18 +749,26 @@
 
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Kota/Kabupaten</label>
-                            <input type="text" x-model="newAddr.city" placeholder="Jakarta Selatan"
-                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                            <label class="block font-semibold text-slate-700 mb-1">Provinsi <span class="text-rose-500">*</span></label>
+                            <select x-model="newAddr.province" @change="onProvinceChange()"
+                                    class="w-full h-9 rounded-xl border border-slate-300 text-xs px-2.5 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                                <template x-for="prov in Object.keys(provincesData)" :key="prov">
+                                    <option :value="prov" x-text="prov" :selected="newAddr.province === prov"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Kota/Kabupaten <span class="text-rose-500">*</span></label>
+                            <select x-model="newAddr.city" @change="onCityChange()"
+                                    class="w-full h-9 rounded-xl border border-slate-300 text-xs px-2.5 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                                <template x-for="c in getAvailableCities()" :key="c">
+                                    <option :value="c" x-text="c" :selected="newAddr.city === c"></option>
+                                </template>
+                            </select>
                         </div>
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">Kecamatan</label>
                             <input type="text" x-model="newAddr.district" placeholder="Kebayoran Baru"
-                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Provinsi</label>
-                            <input type="text" x-model="newAddr.province" placeholder="DKI Jakarta"
                                    class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
                         </div>
                         <div>
