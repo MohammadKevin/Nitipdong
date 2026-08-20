@@ -84,7 +84,7 @@ class PaymentService
         }
 
         // Generate QR code data payload
-        $qrisData = "00020101021226680016ID.CO.BELANJAIN.WWW011893600999" . $orderIdPad . "5204541153033605802ID5918BELANJAIN INDONESIA6007JAKARTA62070703A016304" . strtoupper(substr(md5($order->invoice_number), 0, 4));
+        $qrisData = "00020101021226680016ID.CO.SAKSERSHOP.WWW011893600999" . $orderIdPad . "5204541153033605802ID5918SAKSERSHOP INDONESIA6007JAKARTA62070703A016304" . strtoupper(substr(md5($order->invoice_number), 0, 4));
 
         $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($qrisData);
 
