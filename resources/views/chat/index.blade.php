@@ -84,7 +84,8 @@
                         $lastMsg = $conv->messages->first();
                         $unreadCount = $conv->messages->where('sender_id', '!=', auth()->id())->where('is_read', false)->count();
                     @endphp
-                    <a href="{{ route('chat.show', $conv) }}" class="p-4 sm:p-5 flex items-center justify-between hover:bg-cyan-50/30 transition-all block group">
+                    <div @click="$dispatch('open-chat', { receiver_id: {{ $partner->id }}, receiver_name: '{{ addslashes($partner->name) }}', receiver_avatar: '{{ addslashes($partner->avatar_url ?? '') }}' })"
+                         class="p-4 sm:p-5 flex items-center justify-between hover:bg-cyan-50/40 transition-all cursor-pointer group select-none">
                         <div class="flex items-center gap-3.5 min-w-0">
                             <div class="relative shrink-0">
                                 <img src="https://ui-avatars.com/api/?name={{ urlencode($partner->name) }}&background=0e7490&color=fff&size=80" class="w-11 h-11 rounded-2xl object-cover border border-slate-200 shadow-2xs group-hover:border-cyan-300 transition-colors" alt="User">
@@ -122,13 +123,18 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="text-right shrink-0 ml-4 flex flex-col items-end gap-1">
+                        <div class="text-right shrink-0 ml-4 flex items-center gap-3">
                             <span class="text-[10px] text-slate-400 whitespace-nowrap font-mono">{{ $conv->updated_at->diffForHumans() }}</span>
+                            <a href="{{ route('chat.show', $conv) }}" @click.stop
+                               class="w-7 h-7 rounded-lg border border-slate-200 bg-white hover:bg-cyan-50 hover:border-cyan-300 text-slate-400 hover:text-cyan-800 flex items-center justify-center transition-colors shadow-2xs"
+                               title="Buka Obrolan Layar Penuh">
+                                <i class="fa-solid fa-expand text-[10px]"></i>
+                            </a>
                             <span class="text-xs text-slate-300 group-hover:text-cyan-600 group-hover:translate-x-1 transition-all">
                                 <i class="fa-solid fa-chevron-right text-[10px]"></i>
                             </span>
                         </div>
-                    </a>
+                    </div>
                 @empty
                     <div class="p-16 flex flex-col items-center justify-center text-center my-auto">
                         <div class="w-16 h-16 bg-cyan-50 text-cyan-700 rounded-2xl flex items-center justify-center text-2xl mb-3.5 border border-cyan-200 shadow-2xs">
