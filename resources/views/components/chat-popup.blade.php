@@ -2,6 +2,7 @@
 <div x-data="chatPopupComponent()"
      x-init="initChatPopup()"
      @open-chat.window="handleOpenChat($event)"
+     @close-seller-chat.window="isOpen = false"
      @keydown.escape.window="if(isOpen) isOpen = false"
      class="relative">
 
@@ -220,6 +221,7 @@
 
             openPopup() {
                 this.isOpen = true;
+                window.dispatchEvent(new CustomEvent('close-ai-chat'));
                 if (!this.activeConversation) {
                     this.fetchConversations();
                 }
@@ -330,6 +332,7 @@
 
             async handleOpenChat(event) {
                 this.isOpen = true;
+                window.dispatchEvent(new CustomEvent('close-ai-chat'));
                 if (event.detail && event.detail.receiver_id) {
                     // Start or open conversation with receiver
                     try {
