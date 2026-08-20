@@ -1,17 +1,42 @@
 <x-app-layout>
     <div class="page-container py-5"
          x-data="{
-            activeTab: '{{ $charge['type'] ?? ($order->payment_method ?: 'qris') }}',
+            activeTab: 'duitku',
             copied: false,
+            isLoadingDuitku: false,
             copyText(text) {
                 navigator.clipboard.writeText(text);
                 this.copied = true;
                 setTimeout(() => this.copied = false, 2500);
+            },
+            payWithDuitku() {
+                this.isLoadingDuitku = true;
+                fetch('{{ route('customer.order.duitku_create', $order) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    this.isLoadingDuitku = false;
+                    if (data.status === 'success' && data.payment_url) {
+                        window.location.href = data.payment_url;
+                    } else {
+                        alert(data.message || 'Gagal memproses transaksi Payment Gateway.');
+                    }
+                })
+                .catch(err => {
+                    this.isLoadingDuitku = false;
+                    alert('Terjadi kesalahan jaringan: ' + err.message);
+                });
             }
          }">
         <div class="max-w-2xl mx-auto mb-4">
             <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Selesaikan Pembayaran</h1>
-            <p class="text-xs text-slate-400 mt-0.5">Pilih channel pembayaran di bawah untuk memproses pesanan Anda secara instan</p>
+            <p class="text-xs text-slate-500 mt-0.5">Pilih metode pembayaran resmi di bawah untuk memproses pesanan Anda secara instan</p>
         </div>
 
         @if(session('success'))
@@ -50,8 +75,8 @@
                             :class="activeTab === 'duitku' ? 'border-cyan-600 text-cyan-800 font-bold border-b-2' : 'text-slate-500 hover:text-slate-800 font-medium'"
                             class="pb-2.5 px-3 text-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer">
                         <i class="fa-solid fa-wallet text-cyan-600 text-xs"></i>
-                        <span>Duitku Gateway (Sandbox)</span>
-                        <span class="px-1.5 py-0.2 bg-cyan-100 text-cyan-800 text-[9px] font-bold rounded">Live API</span>
+                        <span>Payment Gateway Resmi</span>
+                        <span class="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 text-[9px] font-bold rounded">Semua Metode</span>
                     </button>
                     <button type="button" @click="activeTab = 'qris'"
                             :class="activeTab === 'qris' ? 'border-cyan-600 text-cyan-800 font-bold border-b-2' : 'text-slate-500 hover:text-slate-800 font-medium'"
@@ -73,56 +98,28 @@
                     </button>
                 </div>
 
-                {{-- 0. TAB DUITKU PAYMENT GATEWAY (SANDBOX) --}}
-                <div x-show="activeTab === 'duitku'" class="space-y-4 pt-1"
-                     x-data="{
-                        isLoadingDuitku: false,
-                        payWithDuitku() {
-                            this.isLoadingDuitku = true;
-                            fetch('{{ route('customer.order.duitku_create', $order) }}', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                    'Accept': 'application/json'
-                                }
-                            })
-                            .then(res => res.json())
-                            .then(data => {
-                                this.isLoadingDuitku = false;
-                                if (data.status === 'success' && data.payment_url) {
-                                    // Redirect ke Payment Page Duitku
-                                    window.location.href = data.payment_url;
-                                } else {
-                                    alert(data.message || 'Gagal memproses transaksi Duitku Sandbox.');
-                                }
-                            })
-                            .catch(err => {
-                                this.isLoadingDuitku = false;
-                                alert('Terjadi kesalahan jaringan: ' + err.message);
-                            });
-                        }
-                     }">
+                {{-- 0. TAB PAYMENT GATEWAY RESMI (DUITKU) --}}
+                <div x-show="activeTab === 'duitku'" class="space-y-4 pt-1">
                     <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-cyan-950 text-white rounded-2xl p-5 sm:p-6 space-y-4 shadow-xl border border-cyan-500/30 relative overflow-hidden">
                         <div class="absolute -right-8 -top-8 w-36 h-36 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
 
                         <div class="flex items-center justify-between gap-3 flex-wrap">
                             <div class="flex items-center gap-2.5">
                                 <div class="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 flex items-center justify-center text-lg shadow-inner">
-                                    <i class="fa-solid fa-wallet"></i>
+                                    <i class="fa-solid fa-shield-halved"></i>
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-sm text-white">Duitku Payment Gateway</h3>
-                                    <p class="text-[11px] text-cyan-200/80">Sandbox Mode Testing (Merchant: DS34393)</p>
+                                    <h3 class="font-bold text-sm text-white">SakserShop Payment Gateway</h3>
+                                    <p class="text-[11px] text-cyan-200/80">Pembayaran Terverifikasi Otomatis & Instan 24 Jam</p>
                                 </div>
                             </div>
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                                Official Gateway
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1">
+                                <i class="fa-solid fa-check"></i> Official Gateway
                             </span>
                         </div>
 
                         <p class="text-xs text-slate-300 leading-relaxed">
-                            Bayar dengan mudah menggunakan puluhan metode pembayaran terverifikasi otomatis:
+                            Bayar dengan mudah dan aman menggunakan puluhan metode pembayaran resmi:
                         </p>
 
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
@@ -144,34 +141,22 @@
                             </div>
                         </div>
 
-                        @if($order->total_amount < 10000)
-                            <div class="p-3 bg-amber-500/20 border border-amber-400/40 text-amber-200 rounded-xl text-xs flex items-center justify-between gap-3 flex-wrap">
-                                <div class="flex items-center gap-2">
-                                    <i class="fa-solid fa-circle-info text-amber-400 text-sm shrink-0"></i>
-                                    <span>Nominal tagihan (<strong>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</strong>) di bawah batas minimal Duitku Gateway (Rp 10.000).</span>
-                                </div>
-                                <button type="button" @click="activeTab = 'qris'" class="px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 font-bold text-[11px] hover:bg-amber-300 transition-colors shrink-0">
-                                    Gunakan QRIS Instan →
-                                </button>
-                            </div>
-                        @endif
-
-                        <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div class="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-white/10">
                             <div>
-                                <span class="text-[10px] text-slate-400 block uppercase">Total yang Akan Dibayar:</span>
-                                <span class="font-black text-lg text-cyan-300">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
+                                <span class="text-[10px] text-slate-400 block uppercase font-medium">Total Tagihan:</span>
+                                <span class="font-black text-xl text-cyan-300">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
                             </div>
 
                             <button type="button" @click="payWithDuitku()"
                                     :disabled="isLoadingDuitku"
-                                    class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-cyan-900/40 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
+                                    class="w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-cyan-900/40 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-98">
                                 <span x-show="!isLoadingDuitku" class="flex items-center gap-2">
-                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                                    <span>Buka Halaman Pembayaran Duitku</span>
+                                    <i class="fa-solid fa-lock"></i>
+                                    <span>Bayar Sekarang via Payment Gateway</span>
                                 </span>
                                 <span x-show="isLoadingDuitku" x-cloak class="flex items-center gap-2">
                                     <i class="fa-solid fa-circle-notch fa-spin"></i>
-                                    <span>Menghubungkan ke Duitku...</span>
+                                    <span>Menghubungkan ke Gateway...</span>
                                 </span>
                             </button>
                         </div>
@@ -181,33 +166,29 @@
                 {{-- 1. TAB QRIS --}}
                 <div x-show="activeTab === 'qris'" class="space-y-4 pt-1">
                     <div class="text-center bg-slate-50 border border-slate-200/80 rounded-xl p-5 space-y-3">
-                        <div class="inline-block p-3 bg-white rounded-xl shadow-xs border border-slate-200">
-                            <img src="{{ $charge['qr_image_url'] ?? ('https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' . urlencode('SAKSERSHOP-QRIS-' . $order->invoice_number . '-' . $order->total_amount)) }}"
-                                 alt="QRIS Code" class="w-48 h-48 sm:w-52 sm:h-52 mx-auto rounded-lg">
+                        <div class="inline-block p-3.5 bg-white rounded-2xl shadow-xs border border-slate-200">
+                            <img src="{{ $charge['qr_image_url'] ?? ('https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' . urlencode('SAKSERSHOP-QRIS-' . $order->invoice_number . '-' . $order->total_amount)) }}"
+                                 alt="QRIS Code" class="w-52 h-52 sm:w-56 sm:h-56 mx-auto rounded-lg">
                         </div>
                         <div>
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-cyan-100 text-cyan-900 rounded-full text-[11px] font-bold">
-                                <i class="fa-solid fa-bolt text-amber-500"></i> QRIS Dinamis Otomatis
+                                <i class="fa-solid fa-bolt text-amber-500"></i> QRIS Standar Bank Indonesia (ASPI)
                             </span>
-                            <p class="text-xs text-slate-500 mt-2">
-                                Pindai QR Code di atas menggunakan aplikasi perbankan (BCA, Mandiri, BRI, BNI) atau e-wallet (GoPay, OVO, Dana, ShopeePay, LinkAja).
+                            <p class="text-xs text-slate-500 mt-2 max-w-md mx-auto">
+                                Buka aplikasi mobile banking (BCA, Mandiri, BRI, BNI, Permata) atau e-wallet (GoPay, OVO, Dana, ShopeePay, LinkAja) Anda lalu scan kode QR di atas.
                             </p>
                         </div>
-                    </div>
 
-                    {{-- Sandbox Instant Simulation Button --}}
-                    <div class="p-3.5 bg-cyan-50/60 border border-cyan-200 rounded-xl flex items-center justify-between gap-3">
-                        <div class="text-xs text-cyan-900">
-                            <span class="font-bold block">Mode Simulasi Pembayaran Instan:</span>
-                            <span class="text-[11px] text-cyan-700">Gunakan simulator untuk memvalidasi pembayaran QRIS secara langsung tanpa scan manual.</span>
+                        <div class="p-3 bg-white rounded-xl border border-slate-200 max-w-sm mx-auto text-xs">
+                            <div class="flex justify-between text-slate-500">
+                                <span>Merchant:</span>
+                                <span class="font-bold text-slate-800">SakserShop Official</span>
+                            </div>
+                            <div class="flex justify-between text-slate-500 mt-1">
+                                <span>Total Tagihan:</span>
+                                <span class="font-bold text-cyan-800 text-sm">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
+                            </div>
                         </div>
-                        <form action="{{ route('customer.order.simulate_payment', $order) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="px-4 py-2 bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs rounded-lg shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer">
-                                <i class="fa-solid fa-bolt text-amber-300"></i>
-                                <span>Bayar Sekarang (Instan)</span>
-                            </button>
-                        </form>
                     </div>
                 </div>
 
@@ -246,24 +227,9 @@
                                 <li>Buka Mobile Banking atau ATM bank Anda.</li>
                                 <li>Pilih menu <strong>Transfer / Pembayaran</strong> &gt; <strong>Virtual Account</strong>.</li>
                                 <li>Masukkan nomor Virtual Account di atas dan pastikan nominal sesuai.</li>
-                                <li>Konfirmasi transaksi. Status pesanan akan otomatis berubah tanpa perlu upload struk!</li>
+                                <li>Konfirmasi transaksi. Status pesanan akan otomatis terverifikasi tanpa perlu upload struk!</li>
                             </ol>
                         </div>
-                    </div>
-
-                    {{-- Sandbox Simulation Button for VA --}}
-                    <div class="p-3.5 bg-cyan-50/60 border border-cyan-200 rounded-xl flex items-center justify-between gap-3">
-                        <div class="text-xs text-cyan-900">
-                            <span class="font-bold block">Simulasi Transfer Virtual Account:</span>
-                            <span class="text-[11px] text-cyan-700">Klik untuk mensimulasikan notifikasi pembayaran VA masuk dari bank.</span>
-                        </div>
-                        <form action="{{ route('customer.order.simulate_payment', $order) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="px-4 py-2 bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs rounded-lg shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer">
-                                <i class="fa-solid fa-building-columns"></i>
-                                <span>Simulasi VA Lunas</span>
-                            </button>
-                        </form>
                     </div>
                 </div>
 

@@ -17,7 +17,7 @@
             useSaved: {{ count($addresses) > 0 ? 'true' : 'false' }},
             selectedAddressId: {{ $defaultAddress ? $defaultAddress->id : 'null' }},
             activeAddress: {{ $defaultAddress ? $defaultAddress->toJson() : 'null' }},
-            selectedPaymentMethod: 'qris',
+            selectedPaymentMethod: 'duitku',
             baseSubtotal: {{ $subtotal }},
             voucherDiscount: {{ $voucherDiscount ?? 0 }},
             courierCosts: {

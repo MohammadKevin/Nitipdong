@@ -54,22 +54,15 @@ class DuitkuPaymentController extends Controller
 
         $order->load(['user', 'orderItems.product']);
 
-        $paymentAmount   = (int) $order->total_amount;
+        $rawAmount       = (int) $order->total_amount;
+        // Duitku Payment Gateway membutuhkan minimal Rp 10.000 untuk inisiasi semua channel
+        $paymentAmount   = max(10000, $rawAmount);
         $merchantOrderId = $order->invoice_number; // e.g. INV-202608200001
         $paymentMethod   = $request->input('payment_method', ''); // Kosongkan jika ingin popup menampilkan semua channel
         $productDetails  = 'Pembayaran Pesanan #' . $merchantOrderId;
         $customerEmail   = $order->user->email ?? Auth::user()->email ?? 'customer@example.com';
         $customerPhone   = $order->user->phone ?? Auth::user()->phone ?? '081234567890';
         $customerName    = $order->user->name ?? Auth::user()->name ?? 'Customer';
-
-        // Validasi batas minimal nominal transaksi Payment Gateway Duitku (Rp 10.000)
-        if ($paymentAmount < 10000) {
-            $msg = "Nominal tagihan (Rp " . number_format($paymentAmount, 0, ',', '.') . ") di bawah batas minimal Duitku Gateway (Rp 10.000). Silakan gunakan tab 'QRIS Instan', 'Virtual Account', atau 'Simulasi Bayar' untuk menyelesaikan pesanan ini.";
-            if ($request->wantsJson()) {
-                return response()->json(['status' => 'error', 'message' => $msg], 400);
-            }
-            return back()->with('error', $msg);
-        }
 
         // Perhitungan Signature MD5 Inquiry: md5(merchantCode + merchantOrderId + paymentAmount + apiKey)
         $signature = md5($this->merchantCode . $merchantOrderId . $paymentAmount . $this->apiKey);
