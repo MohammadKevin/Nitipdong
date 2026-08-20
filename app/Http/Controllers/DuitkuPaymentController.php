@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 class DuitkuPaymentController extends Controller
 {
     /**
-     * URL Endpoint Duitku
+     * URL Endpoint Duitku Sandbox
      */
     private string $baseUrl;
     private string $merchantCode;
@@ -24,15 +24,11 @@ class DuitkuPaymentController extends Controller
 
     public function __construct()
     {
-        $env = config('services.duitku.env', env('DUITKU_ENV', 'sandbox'));
-        $this->baseUrl = ($env === 'production')
-            ? 'https://passport.duitku.com/webapi/api/merchant/v2/inquiry'
-            : 'https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry';
-
-        $this->merchantCode = config('services.duitku.merchant_code', env('DUITKU_MERCHANT_CODE', 'DS34393'));
-        $this->apiKey       = config('services.duitku.api_key', env('DUITKU_API_KEY', '72cf764c6dd4fbf92f134f39bde5dbe3'));
-        $this->callbackUrl  = config('services.duitku.callback_url', env('DUITKU_CALLBACK_URL', url('/api/duitku/callback')));
-        $this->returnUrl    = config('services.duitku.return_url', env('DUITKU_RETURN_URL', url('/payment/finish')));
+        $this->baseUrl      = 'https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry';
+        $this->merchantCode = env('DUITKU_MERCHANT_CODE', 'DS34393');
+        $this->apiKey       = env('DUITKU_API_KEY', '72cf764c6dd4fbf92f134f39bde5dbe3');
+        $this->callbackUrl  = env('DUITKU_CALLBACK_URL', 'https://budayakita.com/api/duitku/callback');
+        $this->returnUrl    = env('DUITKU_RETURN_URL', 'https://budayakita.com/payment/finish');
     }
 
     /**
@@ -57,95 +53,88 @@ class DuitkuPaymentController extends Controller
 
         $order->load(['user', 'orderItems.product']);
 
-        $paymentAmount   = (int) $order->total_amount;
-        // Duitku mengharuskan merchantOrderId alfanumerik tanpa tanda hubung (-)
-        $merchantOrderId = preg_replace('/[^a-zA-Z0-9]/', '', $order->invoice_number);
-        $paymentMethod   = $request->input('payment_method', ''); // Kosongkan untuk menampilkan semua channel
-        $productDetails  = 'Pesanan ' . $merchantOrderId;
+        $paymentAmount   = (int) round($order->total_amount);
+        $merchantOrderId = (string) ($order->order_number ?? $order->invoice_number ?? $order->id);
         $customerEmail   = filter_var($order->user->email ?? Auth::user()->email ?? 'customer@example.com', FILTER_VALIDATE_EMAIL) ?: 'customer@example.com';
         $customerPhone   = preg_replace('/[^0-9]/', '', $order->user->phone ?? Auth::user()->phone ?? '081234567890') ?: '081234567890';
         $customerName    = preg_replace('/[^a-zA-Z0-9\s]/', '', $order->user->name ?? Auth::user()->name ?? 'Customer') ?: 'Customer';
 
-        // Perhitungan Signature MD5 Inquiry sesuai dokumentasi Duitku: md5(merchantCode + merchantOrderId + paymentAmount + apiKey)
+        // Rumus Signature MD5: md5(merchantCode + merchantOrderId + paymentAmount + apiKey)
         $signature = md5($this->merchantCode . $merchantOrderId . $paymentAmount . $this->apiKey);
-
-        // Siapkan Item Details yang selalu sesuai dengan total paymentAmount
-        $itemDetails = [
-            [
-                'name'     => substr('Pesanan ' . $merchantOrderId, 0, 50),
-                'price'    => (int) $paymentAmount,
-                'quantity' => 1,
-            ],
-        ];
 
         $payload = [
             'merchantCode'     => $this->merchantCode,
             'paymentAmount'    => $paymentAmount,
-            'paymentMethod'    => $paymentMethod,
             'merchantOrderId'  => $merchantOrderId,
-            'productDetails'   => $productDetails,
-            'additionalParam'  => (string) $order->id,
-            'merchantUserInfo' => (string) $order->user_id,
-            'customerVaName'   => $customerName,
+            'productDetails'   => 'Pembayaran Pesanan #' . $merchantOrderId,
             'email'            => $customerEmail,
             'phoneNumber'      => $customerPhone,
-            'itemDetails'      => $itemDetails,
+            'customerVaName'   => $customerName,
             'callbackUrl'      => $this->callbackUrl,
             'returnUrl'        => $this->returnUrl,
             'signature'        => $signature,
-            'expiryPeriod'     => 1440, // 24 Jam
+            'expiryPeriod'     => 1440,
         ];
 
+        // Jangan kirim parameter paymentMethod jika kosong
+        if (!empty($request->input('payment_method'))) {
+            $payload['paymentMethod'] = $request->input('payment_method');
+        }
+
         try {
-            $response = Http::withoutVerifying()
-                ->timeout(15)
-                ->withHeaders([
-                    'Content-Type' => 'application/json',
-                    'Accept'       => 'application/json',
-                ])
+            $response = Http::asJson()
+                ->withoutVerifying()
+                ->timeout(20)
                 ->post($this->baseUrl, $payload);
 
             $result = $response->json();
 
-            Log::info('Duitku Inquiry Response:', ['order' => $merchantOrderId, 'response' => $result]);
-
             if ($response->successful() && isset($result['statusCode']) && $result['statusCode'] === '00' && !empty($result['paymentUrl'])) {
-                // Simpan reference Duitku ke database order
                 $order->update([
                     'payment_reference' => $result['reference'] ?? null,
                 ]);
 
                 if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
                     return response()->json([
-                        'status'         => 'success',
-                        'paymentUrl'     => $result['paymentUrl'],
-                        'payment_url'    => $result['paymentUrl'],
-                        'reference'      => $result['reference'] ?? null,
-                        'merchant_code'  => $this->merchantCode,
-                        'merchant_order' => $merchantOrderId,
-                        'amount'         => $paymentAmount,
+                        'status'     => 'success',
+                        'paymentUrl' => $result['paymentUrl'],
                     ]);
                 }
 
-                // Redirect user langsung ke Duitku Payment Page
                 return redirect()->away($result['paymentUrl']);
             }
 
-            $errorMessage = $result['statusMessage'] ?? $result['message'] ?? 'Gagal membuat tagihan gateway Duitku.';
-            Log::error('Duitku Inquiry Error:', ['order' => $merchantOrderId, 'error' => $result, 'http_status' => $response->status()]);
+            Log::error('Duitku Inquiry Error:', [
+                'order'    => $merchantOrderId,
+                'response' => $result,
+                'raw_body' => $response->body(),
+                'status'   => $response->status(),
+            ]);
+
+            $errorMessage = $result['statusMessage'] ?? $result['message'] ?? 'Ditolak Duitku';
 
             if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
-                return response()->json(['status' => 'error', 'message' => $errorMessage], 400);
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => $errorMessage,
+                ], 400);
             }
 
             return redirect()->route('customer.order.payment', $order)->with('error', 'Pembayaran Duitku Gagal: ' . $errorMessage);
 
         } catch (\Exception $e) {
-            Log::error('Duitku Exception:', ['order' => $merchantOrderId, 'message' => $e->getMessage()]);
+            Log::error('Duitku Exception:', [
+                'order'   => $merchantOrderId,
+                'message' => $e->getMessage(),
+            ]);
 
-            $errorMsg = 'Koneksi ke gateway Duitku Sandbox terjadi kendala. Silakan coba kembali.';
+            $errorMsg = 'Koneksi ke gateway Duitku Sandbox terjadi kendala: ' . $e->getMessage();
+
             if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
-                return response()->json(['status' => 'error', 'message' => $errorMsg], 500);
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => $errorMsg,
+                ], 500);
             }
 
             return redirect()->route('customer.order.payment', $order)->with('error', $errorMsg);
@@ -185,6 +174,7 @@ class DuitkuPaymentController extends Controller
 
         // Cari pesanan berdasarkan invoice_number / merchantOrderId
         $order = Order::where('invoice_number', $merchantOrderId)
+            ->orWhere('id', $merchantOrderId)
             ->orWhereRaw("REPLACE(invoice_number, '-', '') = ?", [$merchantOrderId])
             ->first();
 
@@ -219,11 +209,12 @@ class DuitkuPaymentController extends Controller
 
         if ($merchantOrderId) {
             $order = Order::where('invoice_number', $merchantOrderId)
+                ->orWhere('id', $merchantOrderId)
                 ->orWhereRaw("REPLACE(invoice_number, '-', '') = ?", [$merchantOrderId])
                 ->first();
+
             if ($order) {
                 if ($resultCode === '00') {
-                    // Update status jika belum terupdate oleh webhook
                     if ($order->status === 'pending') {
                         PaymentService::handlePaymentSuccess($order, $reference ?: ('DK-' . $merchantOrderId), 'Duitku');
                     }
