@@ -16,6 +16,7 @@ use App\Http\Controllers\Customer\WishlistController;
 use App\Http\Controllers\DuitkuPaymentController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\MidtransPaymentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderTrackingController;
 use App\Http\Controllers\PaymentCallbackController;
@@ -42,7 +43,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // Public Webhook Payment Callbacks (Exempt from CSRF)
-Route::post('/api/payment/notification', [PaymentCallbackController::class, 'handleWebhook'])->name('payment.webhook');
+Route::post('/api/midtrans/notification', [MidtransPaymentController::class, 'handleNotification'])->name('midtrans.notification');
+Route::post('/api/payment/notification', [MidtransPaymentController::class, 'handleNotification'])->name('payment.webhook');
 Route::post('/api/duitku/callback', [DuitkuPaymentController::class, 'handleCallback'])->name('duitku.callback');
 
 // Return URL Redirect after Duitku Payment
@@ -215,7 +217,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/orders/{order}/payment', [OrderController::class, 'payment'])->name('order.payment');
         Route::post('/orders/{order}/payment', [OrderController::class, 'confirmPayment'])->name('order.confirm_payment');
-        Route::match(['get', 'post'], '/orders/{order}/duitku/create', [DuitkuPaymentController::class, 'createInvoice'])->name('order.duitku_create');
+        Route::match(['get', 'post'], '/orders/{order}/midtrans/snap-token', [MidtransPaymentController::class, 'getSnapToken'])->name('order.midtrans_snap_token');
+        Route::match(['get', 'post'], '/orders/{order}/duitku/create', [MidtransPaymentController::class, 'getSnapToken'])->name('order.duitku_create');
         Route::post('/orders/{order}/simulate-payment', [PaymentCallbackController::class, 'simulateInstantPayment'])->name('order.simulate_payment');
         Route::post('/orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('order.confirm_received');
         Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('order.cancel');

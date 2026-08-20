@@ -10,6 +10,13 @@
 @endphp
 
 <x-app-layout>
+    {{-- Midtrans Snap Script --}}
+    @push('scripts')
+        <script src="{{ config('services.midtrans.is_production', false) ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
+                data-client-key="{{ config('services.midtrans.client_key', env('MIDTRANS_CLIENT_KEY', 'Mid-client-nNuy0AuFjI35ym6k')) }}">
+        </script>
+    @endpush
+
     <div class="page-container py-5"
          x-data="{
             activeTab: '{{ $defaultTab }}',
@@ -27,10 +34,54 @@
                 'va_bri': 'Bank Rakyat Indonesia (BRI / BRIVA)',
             },
             copied: false,
+            isLoadingMidtrans: false,
             copyText(text) {
                 navigator.clipboard.writeText(text);
                 this.copied = true;
                 setTimeout(() => this.copied = false, 2500);
+            },
+            payWithMidtrans() {
+                this.isLoadingMidtrans = true;
+                fetch('{{ route('customer.order.midtrans_snap_token', $order) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    this.isLoadingMidtrans = false;
+                    const token = data.snap_token || data.token;
+                    if (data.status === 'success' && token) {
+                        if (window.snap) {
+                            window.snap.pay(token, {
+                                onSuccess: function(result) {
+                                    window.location.href = '{{ route('customer.dashboard') }}?payment=success';
+                                },
+                                onPending: function(result) {
+                                    window.location.href = '{{ route('customer.dashboard') }}?payment=pending';
+                                },
+                                onError: function(result) {
+                                    alert('Pembayaran gagal atau dibatalkan!');
+                                },
+                                onClose: function() {
+                                    console.log('Customer closed popup without finishing payment');
+                                }
+                            });
+                        } else {
+                            alert('Midtrans Snap SDK gagal dimuat. Silakan periksa koneksi internet Anda.');
+                        }
+                    } else {
+                        alert(data.message || 'Gagal memproses transaksi Midtrans Snap.');
+                    }
+                })
+                .catch(err => {
+                    this.isLoadingMidtrans = false;
+                    alert('Terjadi kesalahan jaringan: ' + err.message);
+                });
             }
          }">
         <div class="max-w-2xl mx-auto mb-4">
@@ -53,6 +104,31 @@
         @endif
 
         <div class="max-w-2xl mx-auto space-y-4">
+            {{-- Primary Midtrans Snap Instant Action Box --}}
+            <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-cyan-950 text-white rounded-2xl p-5 sm:p-6 shadow-xl border border-cyan-500/30 relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1">
+                            <i class="fa-solid fa-bolt text-amber-300"></i> Midtrans Snap Gateway
+                        </span>
+                    </div>
+                    <h3 class="font-extrabold text-sm text-white mt-1">Bayar Otomatis 24 Jam Instan</h3>
+                    <p class="text-xs text-slate-300">Buka pop-up resmi Midtrans untuk bayar via QRIS, BCA, Mandiri, BRI, BNI, GoPay, OVO, ShopeePay, atau Minimarket.</p>
+                </div>
+                <button type="button" @click="payWithMidtrans()"
+                        :disabled="isLoadingMidtrans"
+                        class="px-6 py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-cyan-900/40 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-98 shrink-0">
+                    <span x-show="!isLoadingMidtrans" class="flex items-center gap-2">
+                        <i class="fa-solid fa-credit-card"></i>
+                        <span>Buka Pop-up Midtrans</span>
+                    </span>
+                    <span x-show="isLoadingMidtrans" x-cloak class="flex items-center gap-2">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i>
+                        <span>Memuat Snap...</span>
+                    </span>
+                </button>
+            </div>
+
             {{-- Order Summary Header --}}
             <div class="bg-white rounded-xl border border-slate-200/80 p-5 sm:p-6 shadow-card space-y-4">
                 <div class="flex items-center justify-between pb-4 border-b border-slate-100">
@@ -124,6 +200,14 @@
                                 </span>
                             </div>
                         </div>
+
+                        <div class="pt-2">
+                            <button type="button" @click="payWithMidtrans()"
+                                    class="w-full sm:w-auto px-6 py-2.5 bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 mx-auto cursor-pointer">
+                                <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                                <span>Buka Popup QRIS Midtrans</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -190,6 +274,14 @@
                                 <li>Masukkan nomor Virtual Account di atas dan pastikan nominal sesuai (Rp {{ number_format($order->total_amount, 0, ',', '.') }}).</li>
                                 <li>Konfirmasi transaksi. Status pesanan akan otomatis terverifikasi tanpa perlu upload struk!</li>
                             </ol>
+                        </div>
+
+                        <div class="pt-2">
+                            <button type="button" @click="payWithMidtrans()"
+                                    class="w-full sm:w-auto px-6 py-2.5 bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 mx-auto cursor-pointer">
+                                <i class="fa-solid fa-building-columns text-xs"></i>
+                                <span>Buka Popup Virtual Account Midtrans</span>
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -41,12 +41,13 @@ return [
         'api_secret' => env('CLOUDINARY_API_SECRET'),
     ],
 
-    'duitku' => [
-        'merchant_code' => env('DUITKU_MERCHANT_CODE', 'DS34393'),
-        'api_key'       => env('DUITKU_API_KEY', '72cf764c6dd4fbf92f134f39bde5dbe3'),
-        'callback_url'  => env('DUITKU_CALLBACK_URL', 'https://budayakita.com/api/duitku/callback'),
-        'return_url'    => env('DUITKU_RETURN_URL', 'https://budayakita.com/payment/finish'),
-        'env'           => env('DUITKU_ENV', 'sandbox'),
+    'midtrans' => [
+        'merchant_id'   => env('MIDTRANS_MERCHANT_ID', 'M649728282'),
+        'client_key'    => env('MIDTRANS_CLIENT_KEY', 'Mid-client-nNuy0AuFjI35ym6k'),
+        'server_key'    => env('MIDTRANS_SERVER_KEY', 'Mid-server-ORIG4umIOjT0Q4w1JDxzlc0c'),
+        'is_production' => env('MIDTRANS_IS_PRODUCTION', false),
+        'is_sanitized'  => true,
+        'is_3ds'        => true,
     ],
 
 ];
