@@ -1,20 +1,24 @@
 @auth
 <div x-data="aiChatWidget()"
-     @close-ai-chat.window="openChat = false"
-     @keydown.escape.window="if(openChat) openChat = false"
+     x-init="initAiWidget()"
+     @toggle-ai-chat.window="toggleAiChat()"
+     @open-ai-chat.window="openAiChat()"
+     @close-ai-chat.window="closeAiChat()"
+     @keydown.escape.window="if(openChat) closeAiChat()"
      class="relative">
-    {{-- AI Chat Floating Popup Window --}}
+    {{-- AI Chat Floating Popup Window (Directly above the floating dock) --}}
     <div x-show="openChat"
          x-cloak
-         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter="transition ease-out duration-200 transform"
          x-transition:enter-start="opacity-0 translate-y-4 scale-95"
          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave="transition ease-in duration-150 transform"
          x-transition:leave-start="opacity-100 translate-y-0 scale-100"
          x-transition:leave-end="opacity-0 translate-y-4 scale-95"
-         class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-white rounded-2xl shadow-2xl border border-slate-200 w-[calc(100vw-2rem)] sm:w-96 overflow-hidden flex flex-col h-[490px] max-h-[85vh] text-xs">
+         class="fixed bottom-20 right-4 sm:bottom-20 sm:right-5 z-50 bg-white rounded-2xl shadow-2xl border border-slate-200 w-[calc(100vw-2rem)] sm:w-96 overflow-hidden flex flex-col h-[500px] max-h-[calc(100vh-6.5rem)] text-xs font-sans">
 
-        <div class="bg-slate-900 px-4 py-3 text-white flex justify-between items-center shrink-0 border-b border-slate-800">
+        {{-- Header --}}
+        <div class="bg-slate-900 px-4 py-3 text-white flex justify-between items-center shrink-0 border-b border-slate-800 select-none">
             <div class="flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 flex items-center justify-center text-xs shadow-xs">
                     <i class="fa-solid fa-robot"></i>
@@ -27,11 +31,12 @@
                     </p>
                 </div>
             </div>
-            <button @click="openChat = false" class="text-slate-400 hover:text-white transition-colors w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-sm leading-none cursor-pointer">
+            <button @click="closeAiChat()" class="text-slate-400 hover:text-white transition-colors w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center text-sm leading-none cursor-pointer">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
+        {{-- Messages Container --}}
         <div x-ref="chatBox" class="p-4 bg-slate-50/70 flex-1 overflow-y-auto flex flex-col gap-3 text-xs scrollbar-thin">
             <div class="text-[10px] text-slate-400 text-center my-1">
                 Hari ini
@@ -63,6 +68,7 @@
             </div>
         </div>
 
+        {{-- Quick Prompts --}}
         <div class="px-3 pt-2 pb-1 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto scrollbar-none shrink-0">
             <button type="button" @click="askQuick('Bagaimana cara buka toko?')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-cyan-50 hover:text-cyan-800 text-slate-600 text-[10px] font-medium shrink-0 transition-colors cursor-pointer">
                 Buka Toko
@@ -75,6 +81,7 @@
             </button>
         </div>
 
+        {{-- Input Form --}}
         <div class="p-3 bg-white border-t border-slate-100 shrink-0">
             <form @submit.prevent="sendMessage()" class="flex gap-2">
                 <input x-model="inputText" type="text" placeholder="Ketik pertanyaan ke AI..."
@@ -89,17 +96,14 @@
         </div>
     </div>
 
-    {{-- Trigger Button: Positioned next to Chat button without overlap --}}
-    <div x-show="!openChat"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         class="fixed bottom-5 right-26 z-40">
+    {{-- Fallback Standalone Trigger (Only displayed if unified dock is not present on the page) --}}
+    <div x-show="!hasUnifiedDock"
+         class="fixed bottom-5 right-5 z-40">
         <button @click="toggleAiChat()"
-                class="h-11 px-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-full shadow-lg border border-slate-700 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 text-xs font-bold cursor-pointer group"
+                class="h-11 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-full shadow-lg border border-slate-700 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 text-xs font-bold cursor-pointer group"
                 title="Tanya Asisten AI">
             <i class="fa-solid fa-sparkles text-cyan-400 text-xs group-hover:rotate-12 transition-transform"></i>
-            <span class="hidden sm:inline text-[11px] font-bold">Asisten AI</span>
+            <span>Asisten AI</span>
         </button>
     </div>
 </div>
@@ -110,18 +114,34 @@ function aiChatWidget() {
         openChat: false,
         inputText: '',
         isLoading: false,
+        hasUnifiedDock: false,
         messages: [
             { 
                 role: 'ai', 
                 text: 'Halo! 👋 Saya <strong>Asisten AI SakserShop</strong>. Ada yang bisa saya bantu hari ini seputar toko, belanja, atau promo flash sale?' 
             }
         ],
+        initAiWidget() {
+            setTimeout(() => {
+                this.hasUnifiedDock = !!window.hasChatPopupDock;
+            }, 100);
+        },
         toggleAiChat() {
-            this.openChat = !this.openChat;
             if (this.openChat) {
-                window.dispatchEvent(new CustomEvent('close-seller-chat'));
-                this.scrollToBottom();
+                this.closeAiChat();
+            } else {
+                this.openAiChat();
             }
+        },
+        openAiChat() {
+            this.openChat = true;
+            window.dispatchEvent(new CustomEvent('close-seller-chat'));
+            window.dispatchEvent(new CustomEvent('ai-chat-state-changed', { detail: { isOpen: true } }));
+            this.scrollToBottom();
+        },
+        closeAiChat() {
+            this.openChat = false;
+            window.dispatchEvent(new CustomEvent('ai-chat-state-changed', { detail: { isOpen: false } }));
         },
         askQuick(promptText) {
             this.inputText = promptText;

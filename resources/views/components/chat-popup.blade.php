@@ -6,36 +6,47 @@
      @keydown.escape.window="if(isOpen) isOpen = false"
      class="relative">
 
-    {{-- Floating Dock Mini Trigger (Bottom Right) --}}
-    <div x-show="!isOpen"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 translate-y-4 scale-95"
-         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-         class="fixed bottom-5 right-5 z-40">
+    {{-- Unified Floating Dock (Bottom Right): AI Button + Chat Button Side-by-Side --}}
+    <div class="fixed bottom-5 right-4 sm:right-5 z-40 flex items-center gap-2 select-none">
+        {{-- Button 1: Asisten AI --}}
         <button type="button"
-                @click="openPopup()"
-                class="h-11 px-4 rounded-full bg-cyan-700 hover:bg-cyan-800 text-white shadow-lg hover:shadow-xl transition-all flex items-center gap-2 text-xs font-bold cursor-pointer group active:scale-95 border border-cyan-600">
+                @click="$dispatch('toggle-ai-chat')"
+                :class="isAiOpen ? 'bg-cyan-700 text-white shadow-lg ring-2 ring-cyan-400' : 'bg-slate-900 hover:bg-slate-800 text-white shadow-md'"
+                class="h-11 px-3.5 sm:px-4 rounded-full border border-slate-700/80 flex items-center gap-2 text-xs font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                title="Tanya Asisten AI SakserShop">
+            <i class="fa-solid fa-sparkles text-cyan-400 text-xs"></i>
+            <span class="text-xs">Asisten AI</span>
+            <span x-show="isAiOpen" class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+        </button>
+
+        {{-- Button 2: Chat Penjual --}}
+        <button type="button"
+                @click="togglePopup()"
+                :class="isOpen ? 'bg-cyan-800 text-white shadow-lg ring-2 ring-cyan-400' : 'bg-cyan-700 hover:bg-cyan-800 text-white shadow-md hover:shadow-lg'"
+                class="h-11 px-3.5 sm:px-4 rounded-full border border-cyan-600 flex items-center gap-2 text-xs font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer relative"
+                title="Pesan & Obrolan Toko">
             <div class="relative">
-                <i class="fa-solid fa-comments text-sm group-hover:scale-110 transition-transform"></i>
+                <i class="fa-solid fa-comments text-sm"></i>
                 <span x-show="totalUnread > 0"
                       class="absolute -top-2 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white"
                       x-text="totalUnread > 99 ? '99+' : totalUnread">
                 </span>
             </div>
-            <span>Chat</span>
+            <span class="text-xs">Chat</span>
+            <span x-show="isOpen" class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
         </button>
     </div>
 
-    {{-- Floating Chat Popup Window --}}
+    {{-- Floating Chat Popup Window (Directly above the dock) --}}
     <div x-show="isOpen"
          x-cloak
          x-transition:enter="transition ease-out duration-200 transform"
-         x-transition:enter-start="opacity-0 translate-y-6 scale-95"
+         x-transition:enter-start="opacity-0 translate-y-4 scale-95"
          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
          x-transition:leave="transition ease-in duration-150 transform"
          x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-         x-transition:leave-end="opacity-0 translate-y-6 scale-95"
-         class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-96 h-[500px] max-h-[85vh] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col text-xs font-sans">
+         x-transition:leave-end="opacity-0 translate-y-4 scale-95"
+         class="fixed bottom-20 right-4 sm:bottom-20 sm:right-5 z-50 w-[calc(100vw-2rem)] sm:w-96 h-[500px] max-h-[calc(100vh-6.5rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col text-xs font-sans">
 
         {{-- 1. HEADER --}}
         <div class="bg-cyan-700 text-white px-4 py-3 flex items-center justify-between shadow-xs shrink-0 select-none">
@@ -196,9 +207,12 @@
 
 @pushOnce('scripts')
 <script>
+    window.hasChatPopupDock = true;
+
     function chatPopupComponent() {
         return {
             isOpen: false,
+            isAiOpen: false,
             conversations: [],
             totalUnread: 0,
             activeConversation: null,
@@ -211,12 +225,23 @@
             pollInterval: null,
 
             initChatPopup() {
+                window.addEventListener('ai-chat-state-changed', (e) => {
+                    this.isAiOpen = !!e.detail?.isOpen;
+                });
                 this.fetchConversations();
                 setInterval(() => {
                     if (!this.activeConversation) {
                         this.fetchConversations(false);
                     }
                 }, 10000);
+            },
+
+            togglePopup() {
+                if (this.isOpen) {
+                    this.isOpen = false;
+                } else {
+                    this.openPopup();
+                }
             },
 
             openPopup() {
