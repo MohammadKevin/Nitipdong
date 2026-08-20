@@ -57,12 +57,13 @@ class DuitkuPaymentController extends Controller
         $rawAmount       = (int) $order->total_amount;
         // Duitku Payment Gateway membutuhkan minimal Rp 10.000 untuk inisiasi semua channel
         $paymentAmount   = max(10000, $rawAmount);
-        $merchantOrderId = $order->invoice_number; // e.g. INV-202608200001
+        // Duitku mengharuskan merchantOrderId alfanumerik tanpa tanda hubung (-)
+        $merchantOrderId = preg_replace('/[^a-zA-Z0-9]/', '', $order->invoice_number);
         $paymentMethod   = $request->input('payment_method', ''); // Kosongkan jika ingin popup menampilkan semua channel
-        $productDetails  = 'Pembayaran Pesanan #' . $merchantOrderId;
-        $customerEmail   = $order->user->email ?? Auth::user()->email ?? 'customer@example.com';
-        $customerPhone   = $order->user->phone ?? Auth::user()->phone ?? '081234567890';
-        $customerName    = $order->user->name ?? Auth::user()->name ?? 'Customer';
+        $productDetails  = 'Pesanan ' . $merchantOrderId;
+        $customerEmail   = filter_var($order->user->email ?? Auth::user()->email ?? 'customer@example.com', FILTER_VALIDATE_EMAIL) ?: 'customer@example.com';
+        $customerPhone   = preg_replace('/[^0-9]/', '', $order->user->phone ?? Auth::user()->phone ?? '081234567890') ?: '081234567890';
+        $customerName    = preg_replace('/[^a-zA-Z0-9\s]/', '', $order->user->name ?? Auth::user()->name ?? 'Customer') ?: 'Customer';
 
         // Perhitungan Signature MD5 Inquiry: md5(merchantCode + merchantOrderId + paymentAmount + apiKey)
         $signature = md5($this->merchantCode . $merchantOrderId . $paymentAmount . $this->apiKey);
@@ -70,7 +71,7 @@ class DuitkuPaymentController extends Controller
         // Siapkan Item Details yang selalu sesuai dengan total paymentAmount
         $itemDetails = [
             [
-                'name'     => substr('Pesanan #' . $merchantOrderId, 0, 50),
+                'name'     => substr('Pesanan ' . $merchantOrderId, 0, 50),
                 'price'    => (int) $paymentAmount,
                 'quantity' => 1,
             ],
@@ -181,7 +182,9 @@ class DuitkuPaymentController extends Controller
         }
 
         // Cari pesanan berdasarkan invoice_number / merchantOrderId
-        $order = Order::where('invoice_number', $merchantOrderId)->first();
+        $order = Order::where('invoice_number', $merchantOrderId)
+            ->orWhereRaw("REPLACE(invoice_number, '-', '') = ?", [$merchantOrderId])
+            ->first();
 
         if (!$order) {
             Log::error("Duitku Callback: Order #{$merchantOrderId} not found.");
@@ -213,7 +216,9 @@ class DuitkuPaymentController extends Controller
         Log::info('Duitku Return URL Triggered:', $request->all());
 
         if ($merchantOrderId) {
-            $order = Order::where('invoice_number', $merchantOrderId)->first();
+            $order = Order::where('invoice_number', $merchantOrderId)
+                ->orWhereRaw("REPLACE(invoice_number, '-', '') = ?", [$merchantOrderId])
+                ->first();
             if ($order) {
                 if ($resultCode === '00') {
                     // Update status jika belum terupdate oleh webhook
