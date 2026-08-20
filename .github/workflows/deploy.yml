@@ -56,7 +56,8 @@ jobs:
             # Salin asset frontend terbaru ke public_html
             cp -r public/* /home/${{ secrets.CPANEL_USER }}/public_html/
             
-            # Buat symlink storage
+            # Buat symlink storage ke public_html agar gambar tersaji langsung dari server
+            ln -sfn /home/${{ secrets.CPANEL_USER }}/laravel_app/storage/app/public /home/${{ secrets.CPANEL_USER }}/public_html/storage
             php artisan storage:link || true
             
             # Jalankan migrasi database

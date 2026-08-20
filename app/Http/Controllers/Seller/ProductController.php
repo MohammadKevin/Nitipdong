@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
-use App\Services\CloudinaryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,13 +14,6 @@ use Illuminate\View\View;
 
 class ProductController extends Controller
 {
-    protected CloudinaryService $cloudinary;
-
-    public function __construct(CloudinaryService $cloudinary)
-    {
-        $this->cloudinary = $cloudinary;
-    }
-
     public function index(Request $request): View
     {
         $store = Auth::user()->store;
@@ -289,22 +281,15 @@ class ProductController extends Controller
     }
 
     /**
-     * Helper to upload image to Cloudinary (with fallback to local storage).
+     * Helper to upload image to server storage.
      */
     protected function uploadImage($file): ?string
     {
-        if ($this->cloudinary->isConfigured()) {
-            $cloudinaryUrl = $this->cloudinary->upload($file, 'belanjain_products');
-            if ($cloudinaryUrl) {
-                return $cloudinaryUrl;
-            }
-        }
-
         return $file->store('products', 'public');
     }
 
     /**
-     * Helper to delete image from Cloudinary or local storage.
+     * Helper to delete image from server storage.
      */
     protected function deleteImage(?string $path): void
     {
@@ -312,15 +297,10 @@ class ProductController extends Controller
             return;
         }
 
-        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
-            if (str_contains($path, 'cloudinary.com')) {
-                $this->cloudinary->delete($path);
+        if (!str_starts_with($path, 'http://') && !str_starts_with($path, 'https://') && !str_starts_with($path, 'img/')) {
+            if (Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
             }
-            return;
-        }
-
-        if (Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
         }
     }
 }
