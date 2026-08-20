@@ -323,6 +323,7 @@ class OrderController extends Controller
                         ]);
 
                         $product->decrement('stock', $item->quantity);
+                        $product->increment('sold_count', $item->quantity);
                     }
 
                     // Notifikasi ke seller

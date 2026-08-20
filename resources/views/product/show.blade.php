@@ -84,7 +84,7 @@
                         <div class="flex items-center gap-3 text-xs text-slate-500 mt-2">
                             <div class="flex items-center gap-1">
                                 <span class="text-slate-900 font-bold">Terjual</span>
-                                <span class="text-slate-600">{{ $product->sold_count ?? rand(50, 500) }}+</span>
+                                <span class="text-slate-700 font-semibold">{{ $product->formatted_sold_count }}</span>
                             </div>
                             <span class="text-slate-300">•</span>
                             <div class="flex items-center gap-1 text-amber-500">

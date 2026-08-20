@@ -643,7 +643,7 @@
                             <i class="fa-solid fa-star text-[9px]"></i>
                             <span>{{ number_format($prod->rating ?? 5.0, 1) }}</span>
                         </div>
-                        <span class="truncate">{{ $prod->sold_count ?? 50 }}+ terjual</span>
+                        <span class="truncate">{{ $prod->formatted_sold_count }} terjual</span>
                     </div>
                 </div>
             </div>

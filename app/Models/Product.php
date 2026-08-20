@@ -197,6 +197,27 @@ class Product extends Model
         return $this->hasMany(ProductDiscussion::class)->whereNull('parent_id')->latest();
     }
 
+    public function getSoldCountAttribute(): int
+    {
+        $base = (int) ($this->attributes['sold_count'] ?? 0);
+        $fromOrders = (int) $this->orderItems()
+            ->whereHas('order', function ($q) {
+                $q->where('status', '!=', 'cancelled');
+            })
+            ->sum('quantity');
+
+        return max($base, $fromOrders);
+    }
+
+    public function getFormattedSoldCountAttribute(): string
+    {
+        $count = $this->sold_count;
+        if ($count >= 1000) {
+            return number_format($count / 1000, 1, ',', '.') . ' rb+';
+        }
+        return (string) $count;
+    }
+
     public function recalculateRating(): void
     {
         $avg = $this->reviews()->avg('rating') ?: 0;
