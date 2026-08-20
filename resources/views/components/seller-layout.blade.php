@@ -122,6 +122,12 @@
                             Pesan Chat Admin
                         </a>
 
+                        <a href="{{ route('seller.settings.edit') }}"
+                           class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('seller.settings.*') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-shop w-4 h-4 text-xs flex items-center justify-center {{ request()->routeIs('seller.settings.*') ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
+                            Pengaturan Toko & Alamat
+                        </a>
+
                         <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 px-3 mt-5 mb-2">Pintasan</p>
                         <a href="/" target="_blank" class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition-colors group">
                             <i class="fa-solid fa-arrow-up-right-from-square w-4 h-4 text-xs flex items-center justify-center text-slate-400 group-hover:text-slate-200"></i>
@@ -129,7 +135,7 @@
                         </a>
                         <a href="{{ route('profile.edit') }}" class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('profile.*') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
                             <i class="fa-solid fa-user-gear w-4 h-4 text-xs flex items-center justify-center {{ request()->routeIs('profile.*') ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
-                            Pengaturan Profil
+                            Pengaturan Akun User
                         </a>
                     </nav>
                 </div>

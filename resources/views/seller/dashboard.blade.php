@@ -96,6 +96,32 @@
         </div>
     </div>
 
+    {{-- Store Location & Shipping Origin Overview Card --}}
+    <div class="bg-gradient-to-r from-cyan-950 via-slate-900 to-slate-950 text-white rounded-2xl p-5 sm:p-6 shadow-card border border-cyan-500/20 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-start sm:items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 flex items-center justify-center text-xl shrink-0 shadow-inner">
+                <i class="fa-solid fa-location-dot"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h3 class="font-extrabold text-sm text-white">Alamat & Lokasi Asal Gudang Toko</h3>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                        <i class="fa-solid fa-truck-fast"></i> Gratis Ongkir 1 Kota
+                    </span>
+                </div>
+                <p class="text-xs text-slate-300 mt-1 flex items-center gap-1.5 flex-wrap">
+                    <span>Kota Pengiriman: <strong class="text-cyan-300 font-bold">{{ $store->city ?: ($store->effective_city ?: 'Jakarta Pusat') }}</strong></span>
+                    <span class="text-slate-500">•</span>
+                    <span class="text-slate-400 truncate max-w-md">{{ $store->address ?: 'Alamat belum diatur lengkap' }}</span>
+                </p>
+            </div>
+        </div>
+        <a href="{{ route('seller.settings.edit') }}" class="btn-primary text-xs h-9.5 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold flex items-center justify-center gap-2 shadow-xs shrink-0 cursor-pointer">
+            <i class="fa-solid fa-pen-to-square text-xs"></i>
+            <span>Ubah Alamat & Pinpoint Toko</span>
+        </a>
+    </div>
+
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
         <a href="{{ route('seller.products.create') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 hover:border-cyan-600 shadow-card hover:shadow-card-hover transition-all group flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-700 flex items-center justify-center text-sm border border-cyan-200 shrink-0">
@@ -127,13 +153,13 @@
             </div>
         </a>
 
-        <a href="{{ route('seller.vouchers.index') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 hover:border-cyan-600 shadow-card hover:shadow-card-hover transition-all group flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center text-sm border border-purple-200 shrink-0">
-                <i class="fa-solid fa-ticket"></i>
+        <a href="{{ route('seller.settings.edit') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 hover:border-cyan-600 shadow-card hover:shadow-card-hover transition-all group flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-700 flex items-center justify-center text-sm border border-cyan-200 shrink-0">
+                <i class="fa-solid fa-shop"></i>
             </div>
             <div>
-                <p class="text-xs font-bold text-slate-900 group-hover:text-cyan-700 transition-colors">Voucher Promo</p>
-                <p class="text-[10px] text-slate-400">Diskon toko</p>
+                <p class="text-xs font-bold text-slate-900 group-hover:text-cyan-700 transition-colors">Pengaturan Toko</p>
+                <p class="text-[10px] text-slate-400">Alamat & profil</p>
             </div>
         </a>
     </div>

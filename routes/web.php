@@ -26,6 +26,7 @@ use App\Http\Controllers\Seller\ComplaintController as SellerComplaintController
 use App\Http\Controllers\Seller\OrderManagementController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Seller\ReviewController as SellerReviewController;
+use App\Http\Controllers\Seller\StoreSettingsController;
 use App\Http\Controllers\Seller\VoucherController as SellerVoucherController;
 use App\Http\Controllers\Seller\WalletController as SellerWalletController;
 use App\Http\Controllers\StoreFrontController;
@@ -163,6 +164,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Wallet & Withdrawals
         Route::get('/wallet', [SellerWalletController::class, 'index'])->name('wallet.index');
         Route::post('/wallet/withdraw', [SellerWalletController::class, 'withdraw'])->name('wallet.withdraw');
+
+        // Seller Store Profile & Shipping Address Settings
+        Route::get('/settings', [StoreSettingsController::class, 'edit'])->name('settings.edit');
+        Route::put('/settings', [StoreSettingsController::class, 'update'])->name('settings.update');
 
         // Complaints & Returns
         Route::get('/complaints', [SellerComplaintController::class, 'index'])->name('complaints.index');
