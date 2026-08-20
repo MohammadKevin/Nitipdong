@@ -169,5 +169,6 @@
     </div>
 
     <x-chat-widget />
+    <x-toast-notifier />
 </body>
 </html>

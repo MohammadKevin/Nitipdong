@@ -65,6 +65,7 @@ class ProductController extends Controller
             'store',
             'category',
             'reviews' => fn ($q) => $q->with('user')->latest(),
+            'discussions' => fn ($q) => $q->with(['user', 'replies.user'])->latest(),
         ]);
 
         $storeProducts = Product::where('store_id', $product->store_id)

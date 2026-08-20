@@ -20,6 +20,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderTrackingController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\ProductController as PublicProductController;
+use App\Http\Controllers\ProductDiscussionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Seller\ComplaintController as SellerComplaintController;
 use App\Http\Controllers\Seller\OrderManagementController;
@@ -95,6 +96,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders/{order}/invoice', [InvoiceController::class, 'show'])->name('orders.invoice');
     Route::get('/orders/{order}/shipping-label', [InvoiceController::class, 'shippingLabel'])->name('orders.shipping_label');
     Route::get('/orders/{order}/tracking', [OrderTrackingController::class, 'show'])->name('orders.tracking');
+
+    // Product Discussions (Q&A)
+    Route::post('/products/{product}/discussions', [ProductDiscussionController::class, 'store'])->name('products.discussions.store');
+    Route::post('/products/{product}/discussions/{discussion}/reply', [ProductDiscussionController::class, 'reply'])->name('products.discussions.reply');
+    Route::delete('/discussions/{discussion}', [ProductDiscussionController::class, 'destroy'])->name('products.discussions.destroy');
 
     // Super Admin Routes
     Route::middleware(['role:super_admin'])->prefix('super-admin')->name('super_admin.')->group(function () {

@@ -192,6 +192,11 @@ class Product extends Model
         return $this->hasMany(Wishlist::class);
     }
 
+    public function discussions(): HasMany
+    {
+        return $this->hasMany(ProductDiscussion::class)->whereNull('parent_id')->latest();
+    }
+
     public function recalculateRating(): void
     {
         $avg = $this->reviews()->avg('rating') ?: 0;
