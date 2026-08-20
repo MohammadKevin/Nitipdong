@@ -70,6 +70,12 @@ class CartController extends Controller
             ->take(6)
             ->get();
 
+        $recommendedProducts = Product::with(['store', 'category'])
+            ->where('stock', '>', 0)
+            ->inRandomOrder()
+            ->take(8)
+            ->get();
+
         return view('customer.cart.index', compact(
             'carts',
             'itemsTotal',
@@ -78,7 +84,8 @@ class CartController extends Controller
             'voucherDiscount',
             'appliedVoucher',
             'finalTotal',
-            'availableVouchers'
+            'availableVouchers',
+            'recommendedProducts'
         ));
     }
 
