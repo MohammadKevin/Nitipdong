@@ -190,7 +190,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/dashboard', function () {
             $userStore = Auth::user()->store;
             $orders = Auth::user()->orders()->with(['store', 'orderItems.product.reviews', 'reviews', 'complaint'])->latest()->get();
-            return view('customer.dashboard', compact('userStore', 'orders'));
+            $recommendedProducts = Product::with(['store', 'category'])
+                ->where('is_active', true)
+                ->where('stock', '>', 0)
+                ->whereHas('store', function ($q) {
+                    $q->where('status', 'approved');
+                })
+                ->inRandomOrder()
+                ->take(8)
+                ->get();
+            return view('customer.dashboard', compact('userStore', 'orders', 'recommendedProducts'));
         })->name('dashboard');
 
         Route::get('/store/register', [StoreRegistrationController::class, 'create'])->name('store.register');

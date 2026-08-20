@@ -1,7 +1,80 @@
 <x-app-layout>
+    @php
+        $pendingOrders = $orders->where('status', 'pending');
+        $processingOrders = $orders->where('status', 'processing');
+        $shippedOrders = $orders->where('status', 'shipped');
+        $completedOrders = $orders->where('status', 'completed');
+        $cancelledOrders = $orders->where('status', 'cancelled');
+        $complaintOrders = $orders->filter(fn($o) => $o->complaint !== null);
+
+        $pendingCount = $pendingOrders->count();
+        $processingCount = $processingOrders->count();
+        $shippedCount = $shippedOrders->count();
+        $completedCount = $completedOrders->count();
+        $cancelledCount = $cancelledOrders->count();
+        $complaintCount = $complaintOrders->count();
+        $totalOrdersCount = $orders->count();
+
+        $wishlistCount = auth()->user()->wishlists()->count();
+        $addressCount = auth()->user()->addresses()->count();
+
+        // Calculate Member Loyalty Tier
+        $totalSpent = $completedOrders->sum('total_amount');
+        if ($completedCount >= 10 || $totalSpent >= 5000000) {
+            $loyaltyTier = [
+                'name'        => 'Platinum VIP',
+                'badge'       => 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-400',
+                'icon'        => 'fa-crown text-amber-300',
+                'color'       => 'text-purple-600',
+                'next_label'  => 'Tier Tertinggi (Sultan)',
+                'progress'    => 100,
+                'target'      => 10,
+                'current'     => $completedCount,
+            ];
+        } elseif ($completedCount >= 5 || $totalSpent >= 2000000) {
+            $loyaltyTier = [
+                'name'        => 'Gold Member',
+                'badge'       => 'bg-gradient-to-r from-amber-500 to-amber-600 text-white border-amber-300',
+                'icon'        => 'fa-medal text-amber-100',
+                'color'       => 'text-amber-600',
+                'next_label'  => (10 - $completedCount) . ' pesanan lagi menuju Platinum',
+                'progress'    => min(100, round(($completedCount / 10) * 100)),
+                'target'      => 10,
+                'current'     => $completedCount,
+            ];
+        } elseif ($completedCount >= 2 || $totalSpent >= 500000) {
+            $loyaltyTier = [
+                'name'        => 'Silver Member',
+                'badge'       => 'bg-gradient-to-r from-slate-500 to-slate-700 text-white border-slate-400',
+                'icon'        => 'fa-shield-halved text-slate-200',
+                'color'       => 'text-slate-700',
+                'next_label'  => (5 - $completedCount) . ' pesanan lagi menuju Gold',
+                'progress'    => min(100, round(($completedCount / 5) * 100)),
+                'target'      => 5,
+                'current'     => $completedCount,
+            ];
+        } else {
+            $loyaltyTier = [
+                'name'        => 'Bronze Member',
+                'badge'       => 'bg-gradient-to-r from-amber-700 to-amber-900 text-white border-amber-600',
+                'icon'        => 'fa-award text-amber-200',
+                'color'       => 'text-amber-800',
+                'next_label'  => (2 - $completedCount) . ' pesanan lagi menuju Silver',
+                'progress'    => min(100, round(($completedCount / 2) * 100)),
+                'target'      => 2,
+                'current'     => $completedCount,
+            ];
+        }
+
+        // Active Order for highlight banner (Priority: Pending Payment > Shipped in Delivery > Processing)
+        $highlightOrder = $pendingOrders->first() ?: ($shippedOrders->first() ?: $processingOrders->first());
+    @endphp
+
     <div class="page-container py-6" x-data="{
         activeTab: 'all',
         searchQuery: '',
+        isReordering: null,
+        isAddingRecommended: null,
         showReviewModal: false,
         reviewData: {
             orderId: null,
@@ -41,6 +114,9 @@
         copyToClipboard(text) {
             navigator.clipboard.writeText(text);
             this.copiedInvoice = text;
+            if (window.toast) {
+                window.toast.success('Nomor Invoice #' + text + ' berhasil disalin!', 'Tersalin');
+            }
             setTimeout(() => {
                 if (this.copiedInvoice === text) this.copiedInvoice = null;
             }, 2000);
@@ -69,6 +145,88 @@
                 actionUrl: actionUrl
             };
             this.showComplaintModal = true;
+        },
+        async reorderItem(url, productName, orderId) {
+            this.isReordering = orderId;
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ quantity: 1 })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    if (window.toast) {
+                        window.toast.success(
+                            productName + ' berhasil ditambahkan kembali ke keranjang belanja!',
+                            'Beli Lagi Berhasil',
+                            {
+                                action: {
+                                    label: 'Buka Keranjang',
+                                    url: '{{ route('customer.cart.index') }}'
+                                }
+                            }
+                        );
+                    }
+                    window.dispatchEvent(new CustomEvent('cart-updated'));
+                } else {
+                    if (window.toast) {
+                        window.toast.error(data.message || 'Gagal menambahkan produk ke keranjang.');
+                    }
+                }
+            } catch (e) {
+                if (window.toast) {
+                    window.toast.error('Terjadi kesalahan jaringan.');
+                }
+            } finally {
+                this.isReordering = null;
+            }
+        },
+        async addRecommendedProduct(url, productName, productId) {
+            this.isAddingRecommended = productId;
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ quantity: 1 })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    if (window.toast) {
+                        window.toast.success(
+                            productName + ' masuk ke keranjang belanja!',
+                            'Berhasil Ditambahkan',
+                            {
+                                action: {
+                                    label: 'Lihat Keranjang',
+                                    url: '{{ route('customer.cart.index') }}'
+                                }
+                            }
+                        );
+                    }
+                    window.dispatchEvent(new CustomEvent('cart-updated'));
+                } else {
+                    if (window.toast) {
+                        window.toast.error(data.message || 'Gagal menambahkan ke keranjang.');
+                    }
+                }
+            } catch (e) {
+                if (window.toast) {
+                    window.toast.error('Terjadi kendala saat menambahkan barang.');
+                }
+            } finally {
+                this.isAddingRecommended = null;
+            }
         }
     }">
         {{-- Breadcrumb --}}
@@ -87,12 +245,16 @@
             <div class="absolute -right-8 -top-8 w-32 h-32 bg-cyan-50 rounded-full blur-2xl pointer-events-none"></div>
             <div class="relative z-10">
                 <div class="flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-600"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-600 animate-pulse"></span>
                     <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Akun & Riwayat Belanja</h1>
                 </div>
-                <p class="text-xs text-slate-500 mt-1">Pantau status pesanan, kelola alamat pengiriman, dan kelola akun belanja Anda di SakserShop</p>
+                <p class="text-xs text-slate-500 mt-1">Pantau status pesanan, kelola alamat pengiriman, dan nikmati keuntungan member SakserShop</p>
             </div>
             <div class="flex items-center gap-2 relative z-10 shrink-0">
+                <a href="{{ route('customer.wishlist.index') }}" class="h-9 px-3.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center gap-1.5 transition-colors">
+                    <i class="fa-regular fa-heart text-rose-500 text-xs"></i>
+                    <span>Wishlist ({{ $wishlistCount }})</span>
+                </a>
                 <a href="{{ url('/products') }}" class="btn-primary text-xs h-9 px-4 rounded-xl bg-cyan-700 hover:bg-cyan-800 flex items-center gap-2 shadow-xs transition-all">
                     <i class="fa-solid fa-bag-shopping text-xs"></i>
                     <span>Jelajahi Produk</span>
@@ -100,46 +262,20 @@
             </div>
         </div>
 
-        {{-- Flash Messages --}}
-        @if(session('success'))
-            <div class="mb-5 flex items-center gap-3 px-4 py-3.5 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl text-xs font-semibold shadow-xs animate-fade-up">
-                <div class="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                    <i class="fa-solid fa-check text-emerald-600 text-xs"></i>
-                </div>
-                <span class="flex-1">{{ session('success') }}</span>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="mb-5 flex items-center gap-3 px-4 py-3.5 bg-rose-50 border border-rose-200 text-rose-900 rounded-xl text-xs font-semibold shadow-xs animate-fade-up">
-                <div class="w-6 h-6 rounded-full bg-rose-100 flex items-center justify-center shrink-0">
-                    <i class="fa-solid fa-xmark text-rose-600 text-xs"></i>
-                </div>
-                <span class="flex-1">{{ session('error') }}</span>
-            </div>
-        @endif
-
-        @php
-            $pendingCount = $orders->where('status', 'pending')->count();
-            $processingCount = $orders->where('status', 'processing')->count();
-            $shippedCount = $orders->where('status', 'shipped')->count();
-            $completedCount = $orders->where('status', 'completed')->count();
-            $cancelledCount = $orders->where('status', 'cancelled')->count();
-            $complaintCount = $orders->filter(fn($o) => $o->complaint !== null)->count();
-            $totalOrdersCount = $orders->count();
-
-            $wishlistCount = auth()->user()->wishlists()->count();
-            $addressCount = auth()->user()->addresses()->count();
-        @endphp
-
         <div class="flex flex-col lg:flex-row gap-6 items-start">
             {{-- Left Sidebar Cards --}}
             <aside class="w-full lg:w-72 shrink-0 space-y-4">
-                {{-- Card 1: User Profile Card --}}
+                {{-- Card 1: User Profile & Loyalty Tier Card --}}
                 <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden transition-all hover:shadow-card-hover">
-                    {{-- Decorative Top Header --}}
-                    <div class="h-20 bg-gradient-to-r from-cyan-600 via-cyan-700 to-slate-900 relative">
+                    {{-- Decorative Header with Tier Gradient --}}
+                    <div class="h-20 bg-gradient-to-r from-cyan-700 via-cyan-800 to-slate-900 relative">
                         <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:12px_12px]"></div>
+                        <div class="absolute top-2.5 right-3">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold shadow-sm border {{ $loyaltyTier['badge'] }}">
+                                <i class="fa-solid {{ $loyaltyTier['icon'] }}"></i>
+                                <span>{{ $loyaltyTier['name'] }}</span>
+                            </span>
+                        </div>
                     </div>
 
                     <div class="px-5 pb-5 pt-0 text-center relative">
@@ -147,7 +283,7 @@
                         <div class="relative w-20 h-20 mx-auto -mt-10 mb-3">
                             <img src="{{ auth()->user()->avatar_url }}"
                                  class="w-full h-full rounded-2xl border-4 border-white shadow-md object-cover bg-cyan-700" alt="{{ auth()->user()->name }}">
-                            <span class="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-[10px] text-white shadow-xs" title="Akun Aktif">
+                            <span class="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-[10px] text-white shadow-xs" title="Akun Terverifikasi">
                                 <i class="fa-solid fa-check"></i>
                             </span>
                         </div>
@@ -155,13 +291,26 @@
                         <h3 class="font-bold text-sm text-slate-900 leading-snug">{{ auth()->user()->name }}</h3>
                         <p class="text-xs text-slate-400 mt-0.5 truncate">{{ auth()->user()->email }}</p>
 
-                        <div class="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-50 text-cyan-800 text-[11px] font-semibold border border-cyan-200">
-                            <i class="fa-solid fa-shield-check text-cyan-600 text-[10px]"></i>
-                            <span>Pembeli Terverifikasi</span>
+                        {{-- Loyalty Tier Progress Bar --}}
+                        <div class="mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-left">
+                            <div class="flex items-center justify-between text-[10px] font-bold">
+                                <span class="text-slate-600 flex items-center gap-1">
+                                    <i class="fa-solid fa-medal {{ $loyaltyTier['color'] }}"></i> Member Level
+                                </span>
+                                <span class="{{ $loyaltyTier['color'] }}">{{ $loyaltyTier['name'] }}</span>
+                            </div>
+                            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mt-1.5">
+                                <div class="bg-gradient-to-r from-cyan-500 to-cyan-700 h-full rounded-full transition-all duration-500"
+                                     style="width: {{ $loyaltyTier['progress'] }}%"></div>
+                            </div>
+                            <p class="text-[9px] text-slate-400 mt-1 flex items-center justify-between">
+                                <span>{{ $loyaltyTier['next_label'] }}</span>
+                                <span class="font-bold font-mono text-slate-600">{{ $loyaltyTier['current'] }}/{{ $loyaltyTier['target'] }}</span>
+                            </p>
                         </div>
 
                         {{-- Mini Stats Grid inside Profile Card --}}
-                        <div class="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-slate-100 text-center">
+                        <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-100 text-center">
                             <a href="{{ route('customer.dashboard') }}" class="p-2 rounded-xl bg-slate-50 hover:bg-cyan-50 transition-colors group">
                                 <span class="block font-bold text-slate-900 text-sm group-hover:text-cyan-700">{{ $totalOrdersCount }}</span>
                                 <span class="block text-[10px] text-slate-400 mt-0.5">Pesanan</span>
@@ -218,22 +367,16 @@
                                     <div class="w-6 h-6 rounded-lg bg-orange-50 text-orange-500 border border-orange-100 flex items-center justify-center text-xs">
                                         <i class="fa-solid fa-ticket"></i>
                                     </div>
-                                    <span>Voucher Saya</span>
+                                    <span>Voucher Diskon & Ongkir</span>
                                 </div>
-                                @if(session('applied_voucher'))
-                                    <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
-                                        <i class="fa-solid fa-check text-[9px]"></i> Dipilih
-                                    </span>
-                                @else
-                                    <span class="text-[11px] text-slate-400">50+ Voucher</span>
-                                @endif
+                                <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">Klaim</span>
                             </a>
                         </div>
                     </div>
 
-                    {{-- Section 2: Pengaturan Akun --}}
+                    {{-- Section 2: Pengaturan Akun & Pesan --}}
                     <div class="pt-3 border-t border-slate-100">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">Pengaturan Akun</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">Pengaturan & Bantuan</p>
                         <div class="space-y-1 text-xs">
                             <a href="{{ route('chat.index') }}"
                                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-slate-700 hover:bg-slate-50 hover:text-cyan-700 transition-colors">
@@ -252,9 +395,9 @@
                                     <div class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs">
                                         <i class="fa-solid fa-location-dot"></i>
                                     </div>
-                                    <span>Buku Alamat</span>
+                                    <span>Buku Alamat Pinpoint</span>
                                 </div>
-                                <span class="text-[11px] text-slate-400">{{ $addressCount }} Alamat</span>
+                                <span class="text-[11px] text-slate-400 font-semibold">{{ $addressCount }} Alamat</span>
                             </a>
 
                             <a href="{{ route('profile.edit') }}"
@@ -312,6 +455,75 @@
 
             {{-- Right Main Content --}}
             <div class="flex-1 min-w-0 w-full space-y-5">
+                {{-- FEATURE 1: ACTIVE ORDER LIVE TRACKER BANNER (JIKA ADA PESANAN BERJALAN) --}}
+                @if($highlightOrder)
+                    <div class="rounded-2xl p-5 sm:p-6 shadow-xl border relative overflow-hidden transition-all
+                        {{ $highlightOrder->status === 'pending'
+                            ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950 text-white border-amber-500/40 shadow-amber-950/20'
+                            : ($highlightOrder->status === 'shipped'
+                                ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 text-white border-cyan-500/40 shadow-cyan-950/20'
+                                : 'bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 text-white border-blue-500/40 shadow-blue-950/20') }}">
+
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
+                            <div class="space-y-1.5 min-w-0 flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    @if($highlightOrder->status === 'pending')
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-400/40 flex items-center gap-1.5 animate-pulse">
+                                            <i class="fa-solid fa-hourglass-half text-amber-400"></i> Perlu Pembayaran
+                                        </span>
+                                    @elseif($highlightOrder->status === 'shipped')
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-500/20 text-purple-300 border border-purple-400/40 flex items-center gap-1.5">
+                                            <i class="fa-solid fa-truck-fast text-purple-400 animate-bounce"></i> Paket Sedang Dikirim
+                                        </span>
+                                    @else
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 flex items-center gap-1.5">
+                                            <i class="fa-solid fa-box-open text-cyan-400"></i> Sedang Diproses Penjual
+                                        </span>
+                                    @endif
+
+                                    <span class="text-xs font-mono font-bold text-slate-300">#{{ $highlightOrder->invoice_number }}</span>
+                                </div>
+
+                                <h3 class="text-sm sm:text-base font-extrabold text-white leading-snug">
+                                    @if($highlightOrder->status === 'pending')
+                                        Selesaikan pembayaran Rp {{ number_format($highlightOrder->total_amount, 0, ',', '.') }} untuk memproses pesanan
+                                    @elseif($highlightOrder->status === 'shipped')
+                                        Kurir sedang menuju alamat tujuan Anda (No. Resi: {{ $highlightOrder->tracking_number ?: 'Dalam Perjalanan' }})
+                                    @else
+                                        Pesanan Anda sedang dikemas oleh toko {{ $highlightOrder->store?->name ?? 'SakserShop' }}
+                                    @endif
+                                </h3>
+
+                                <p class="text-xs text-slate-300 line-clamp-1">
+                                    Item: {{ $highlightOrder->orderItems->map(fn($it) => ($it->product?->name ?? 'Produk') . ' (' . $it->quantity . 'x)')->join(', ') }}
+                                </p>
+                            </div>
+
+                            <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                                @if($highlightOrder->status === 'pending')
+                                    <a href="{{ route('customer.order.payment', $highlightOrder) }}"
+                                       class="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold text-xs rounded-xl shadow-lg shadow-amber-900/40 flex items-center justify-center gap-2 transition-all cursor-pointer">
+                                        <i class="fa-solid fa-bolt"></i>
+                                        <span>Bayar Sekarang</span>
+                                    </a>
+                                @elseif($highlightOrder->status === 'shipped')
+                                    <a href="{{ route('orders.tracking', $highlightOrder) }}"
+                                       class="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-cyan-900/40 flex items-center justify-center gap-2 transition-all">
+                                        <i class="fa-solid fa-map-location-dot"></i>
+                                        <span>Lacak Posisi Live Map</span>
+                                    </a>
+                                @else
+                                    <a href="{{ route('orders.invoice', $highlightOrder) }}" target="_blank"
+                                       class="w-full sm:w-auto px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-semibold text-xs rounded-xl border border-white/20 flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="fa-solid fa-file-invoice"></i>
+                                        <span>Lihat Rincian</span>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 {{-- Quick Stats Row --}}
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
                     {{-- Total Orders --}}
@@ -326,7 +538,7 @@
                         </div>
                         <div class="mt-2">
                             <span class="text-xl font-extrabold text-slate-900">{{ $totalOrdersCount }}</span>
-                            <span class="text-[10px] text-slate-400 block mt-0.5">Semua status</span>
+                            <span class="text-[10px] text-slate-400 block mt-0.5">Semua riwayat</span>
                         </div>
                     </button>
 
@@ -403,9 +615,9 @@
                                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
                                 <input type="text"
                                        x-model="searchQuery"
-                                       placeholder="Cari no. invoice / produk..."
+                                       placeholder="Cari no. invoice / nama produk..."
                                        class="w-full pl-9 pr-3.5 py-1.5 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500 bg-slate-50/50">
-                                <button type="button" x-show="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600">
+                                <button type="button" x-show="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 cursor-pointer">
                                     <i class="fa-solid fa-xmark"></i>
                                 </button>
                             </div>
@@ -429,7 +641,7 @@
                                     class="px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer">
                                 <span>Belum Bayar</span>
                                 @if($pendingCount > 0)
-                                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white font-bold">
+                                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white font-bold animate-pulse">
                                         {{ $pendingCount }}
                                     </span>
                                 @endif
@@ -521,12 +733,13 @@
                                                 </div>
                                             @endif
                                             <span class="text-slate-300">|</span>
+
                                             {{-- Invoice badge with copy --}}
                                             <div class="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-slate-200">
                                                 <span class="font-mono font-semibold text-slate-700 text-[11px]">#{{ $order->invoice_number }}</span>
                                                 <button type="button" @click="copyToClipboard('{{ $order->invoice_number }}')"
                                                         class="text-slate-400 hover:text-cyan-700 text-[10px] ml-1 cursor-pointer" title="Salin No. Invoice">
-                                                    <i class="fa-regular fa-copy" :class="copiedInvoice === '{{ $order->invoice_number }}' ? 'fa-solid fa-check text-emerald-600' : 'fa-regular fa-copy'"></i>
+                                                    <i :class="copiedInvoice === '{{ $order->invoice_number }}' ? 'fa-solid fa-check text-emerald-600' : 'fa-regular fa-copy'"></i>
                                                 </button>
                                                 <a href="{{ route('orders.invoice', $order) }}" target="_blank" class="text-slate-400 hover:text-cyan-700 text-[10px] ml-1" title="Lihat & Cetak Invoice Resmi">
                                                     <i class="fa-solid fa-file-invoice"></i>
@@ -560,6 +773,38 @@
                                         </div>
                                     </div>
 
+                                    {{-- FEATURE 2: COUNTDOWN TIMER UNTUK PESANAN PENDING --}}
+                                    @if($order->status === 'pending')
+                                        <div class="px-4 sm:px-5 py-2 bg-amber-50/70 border-b border-amber-100 text-amber-900 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                                             x-data="{
+                                                expiresAt: new Date('{{ $order->created_at->addDay()->toISOString() }}').getTime(),
+                                                timeLeft: '',
+                                                isExpired: false,
+                                                updateTimer() {
+                                                    const now = new Date().getTime();
+                                                    const diff = this.expiresAt - now;
+                                                    if (diff <= 0) {
+                                                        this.timeLeft = 'Batas waktu pembayaran habis';
+                                                        this.isExpired = true;
+                                                    } else {
+                                                        const h = Math.floor(diff / (1000 * 60 * 60));
+                                                        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                                                        const s = Math.floor((diff % (1000 * 60)) / 1000);
+                                                        this.timeLeft = `${h} jam ${m} mnt ${s} dtk`;
+                                                    }
+                                                }
+                                             }"
+                                             x-init="updateTimer(); setInterval(() => updateTimer(), 1000);">
+                                            <div class="flex items-center gap-2">
+                                                <i class="fa-solid fa-clock text-amber-600 animate-spin text-xs"></i>
+                                                <span class="font-medium text-[11px]">Selesaikan pembayaran sebelum batas waktu berakhir:</span>
+                                            </div>
+                                            <div class="font-mono font-extrabold text-xs text-amber-800 bg-amber-100/80 px-2.5 py-0.5 rounded-lg border border-amber-300 shrink-0">
+                                                <span x-text="timeLeft">Menghitung...</span>
+                                            </div>
+                                        </div>
+                                    @endif
+
                                     {{-- Order Items List --}}
                                     <div class="p-4 sm:p-5 divide-y divide-slate-100 space-y-3.5">
                                         @foreach($order->orderItems as $item)
@@ -588,6 +833,9 @@
                                                 <div class="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
                                                     <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium">{{ $item->quantity }}x</span>
                                                     <span>Rp {{ number_format($item->price, 0, ',', '.') }}</span>
+                                                    @if($item->variant)
+                                                        <span class="text-slate-400">| Varian: <strong class="text-slate-700">{{ $item->variant }}</strong></span>
+                                                    @endif
                                                 </div>
                                             </div>
 
@@ -621,8 +869,8 @@
                                     <div class="px-4 sm:px-5 py-3.5 bg-slate-50/70 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
                                         <div class="flex items-center gap-3 flex-wrap">
                                             <div class="flex items-baseline gap-1.5">
-                                                <span class="text-slate-500 text-xs">Total Pembayaran:</span>
-                                                <span class="font-extrabold text-slate-900 text-base text-cyan-800">
+                                                <span class="text-slate-500 text-xs">Total Tagihan:</span>
+                                                <span class="font-extrabold text-cyan-800 text-base">
                                                     Rp {{ number_format($order->total_amount, 0, ',', '.') }}
                                                 </span>
                                             </div>
@@ -694,12 +942,16 @@
                                                 </form>
                                             @endif
 
+                                            {{-- FEATURE 3: QUICK RE-ORDER "BELI LAGI" DENGAN AJAX & SONNER NOTIF --}}
                                             @if($order->orderItems->first() && $order->orderItems->first()->product)
-                                                <a href="{{ route('product.show', $order->orderItems->first()->product) }}"
-                                                   class="h-8 px-3.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center gap-1.5 transition-colors">
-                                                    <i class="fa-solid fa-arrow-rotate-left text-[10px] text-slate-400"></i>
-                                                    <span>Beli Lagi</span>
-                                                </a>
+                                                @php $firstProduct = $order->orderItems->first()->product; @endphp
+                                                <button type="button"
+                                                        @click="reorderItem('{{ route('customer.cart.store', $firstProduct) }}', '{{ addslashes($firstProduct->name) }}', {{ $order->id }})"
+                                                        :disabled="isReordering === {{ $order->id }}"
+                                                        class="h-8 px-3.5 rounded-xl border border-slate-200 hover:border-cyan-300 bg-white hover:bg-cyan-50 text-slate-700 hover:text-cyan-800 font-semibold text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer disabled:opacity-50">
+                                                    <i class="fa-solid fa-cart-plus text-cyan-600 text-xs" :class="isReordering === {{ $order->id }} ? 'fa-spinner animate-spin' : ''"></i>
+                                                    <span x-text="isReordering === {{ $order->id }} ? 'Memasukkan...' : 'Beli Lagi'"></span>
+                                                </button>
                                             @endif
                                         </div>
                                     </div>
@@ -717,7 +969,7 @@
                                 </div>
                                 <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Belum Ada Riwayat Belanja</h3>
                                 <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
-                                    Semua transaksi belanja, status pengiriman, dan ulasan pesanan Anda akan tercatat dengan rapi di sini.
+                                    Semua transaksi belanja, status pengiriman kurir, dan ulasan pesanan Anda akan tercatat dengan rapi di sini.
                                 </p>
                                 <div class="mt-6 flex items-center justify-center gap-3 flex-wrap">
                                     <a href="{{ url('/products') }}"
@@ -735,6 +987,89 @@
                         @endif
                     </div>
                 </div>
+
+                {{-- FEATURE 4: SECTION "REKOMENDASI KHUSUS UNTUK ANDA" DI BAWAH DASHBOARD --}}
+                @if(isset($recommendedProducts) && $recommendedProducts->count() > 0)
+                    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-card space-y-4">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center text-xs">
+                                    <i class="fa-solid fa-fire"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-extrabold text-sm text-slate-900">Rekomendasi Pilihan Untuk Anda</h3>
+                                    <p class="text-[11px] text-slate-400">Produk terlaris dan penawaran terbaik di SakserShop Official</p>
+                                </div>
+                            </div>
+                            <a href="{{ url('/products') }}" class="text-xs font-bold text-cyan-700 hover:underline flex items-center gap-1">
+                                <span>Lihat Semua</span>
+                                <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                            </a>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 sm:gap-4">
+                            @foreach($recommendedProducts as $prod)
+                            <div class="group bg-slate-50/50 hover:bg-white rounded-2xl border border-slate-200/80 hover:border-cyan-300 transition-all shadow-2xs hover:shadow-card flex flex-col justify-between overflow-hidden">
+                                <div>
+                                    {{-- Thumbnail with link --}}
+                                    <a href="{{ route('product.show', $prod) }}" class="block aspect-square relative overflow-hidden bg-slate-100">
+                                        <img src="{{ $prod->image_url }}" alt="{{ $prod->name }}"
+                                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                             onerror="this.src='{{ asset('img/saksershop-logo.png') }}'">
+                                        @if($prod->has_discount)
+                                            <span class="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-rose-600 text-white font-extrabold text-[9px] shadow-xs">
+                                                -{{ $prod->discount_percentage }}%
+                                            </span>
+                                        @endif
+                                    </a>
+
+                                    {{-- Content --}}
+                                    <div class="p-3">
+                                        <span class="text-[9px] font-bold text-cyan-700 uppercase tracking-wider block truncate">
+                                            {{ $prod->category?->name ?? 'Produk' }}
+                                        </span>
+                                        <a href="{{ route('product.show', $prod) }}"
+                                           class="font-semibold text-xs text-slate-900 group-hover:text-cyan-700 transition-colors line-clamp-2 mt-0.5 leading-snug"
+                                           title="{{ $prod->name }}">
+                                            {{ $prod->name }}
+                                        </a>
+
+                                        <div class="mt-2">
+                                            <span class="font-extrabold text-xs sm:text-sm text-cyan-900 block">
+                                                Rp {{ number_format($prod->final_price, 0, ',', '.') }}
+                                            </span>
+                                            @if($prod->has_discount)
+                                                <span class="text-[10px] text-slate-400 line-through block">
+                                                    Rp {{ number_format($prod->price, 0, ',', '.') }}
+                                                </span>
+                                            @endif
+                                        </div>
+
+                                        <div class="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-400">
+                                            <span class="text-amber-500 font-bold flex items-center gap-0.5">
+                                                <i class="fa-solid fa-star text-[9px]"></i> {{ number_format($prod->rating ?? 5.0, 1) }}
+                                            </span>
+                                            <span>•</span>
+                                            <span>Terjual {{ $prod->sold_count ?? 12 }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Quick Add to Cart Button --}}
+                                <div class="p-3 pt-0">
+                                    <button type="button"
+                                            @click="addRecommendedProduct('{{ route('customer.cart.store', $prod) }}', '{{ addslashes($prod->name) }}', {{ $prod->id }})"
+                                            :disabled="isAddingRecommended === {{ $prod->id }}"
+                                            class="w-full py-1.5 px-2.5 rounded-xl border border-cyan-200 hover:border-cyan-400 bg-cyan-50 hover:bg-cyan-600 text-cyan-800 hover:text-white font-bold text-[11px] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50">
+                                        <i class="fa-solid fa-cart-plus text-xs" :class="isAddingRecommended === {{ $prod->id }} ? 'fa-spinner animate-spin' : ''"></i>
+                                        <span x-text="isAddingRecommended === {{ $prod->id }} ? 'Menambah...' : '+ Keranjang'"></span>
+                                    </button>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -750,7 +1085,7 @@
                     <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2">
                         <i class="fa-solid fa-star text-amber-500"></i> Berikan Ulasan Produk
                     </h3>
-                    <button @click="showReviewModal = false" class="text-slate-400 hover:text-slate-600 w-7 h-7 rounded-lg flex items-center justify-center hover:bg-slate-100 transition-colors">
+                    <button @click="showReviewModal = false" class="text-slate-400 hover:text-slate-600 w-7 h-7 rounded-lg flex items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer">
                         <i class="fa-solid fa-xmark text-base"></i>
                     </button>
                 </div>
@@ -762,7 +1097,7 @@
 
                     {{-- Product summary --}}
                     <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
-                        <img :src="reviewData.productImage || 'https://via.placeholder.com/60'"
+                        <img :src="reviewData.productImage || '{{ asset('img/saksershop-logo.png') }}'"
                              class="w-11 h-11 rounded-lg object-cover border border-slate-200 bg-white" alt="Product">
                         <div class="min-w-0">
                             <p class="font-bold text-slate-800 truncate" x-text="reviewData.productName"></p>
@@ -806,10 +1141,10 @@
                     </label>
 
                     <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
-                        <button type="button" @click="showReviewModal = false" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium">
+                        <button type="button" @click="showReviewModal = false" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium cursor-pointer">
                             Batal
                         </button>
-                        <button type="submit" class="px-5 py-2 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold shadow-xs">
+                        <button type="submit" class="px-5 py-2 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold shadow-xs cursor-pointer">
                             Kirim Ulasan
                         </button>
                     </div>
