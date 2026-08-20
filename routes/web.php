@@ -65,6 +65,33 @@ Route::get('/', function () {
         ->take(24)
         ->get();
 
+    $topProducts = Product::with(['store', 'category'])
+        ->where('is_active', true)
+        ->whereHas('store', function ($q) {
+            $q->where('status', 'approved');
+        })
+        ->orderByDesc('sold_count')
+        ->orderByDesc('rating')
+        ->take(24)
+        ->get();
+
+    $officialProducts = Product::with(['store', 'category'])
+        ->where('is_active', true)
+        ->whereHas('store', function ($q) {
+            $q->where('status', 'approved');
+        })
+        ->where(function ($q) {
+            $q->where('is_featured', true)
+              ->orWhereNotNull('discount_percentage');
+        })
+        ->latest()
+        ->take(24)
+        ->get();
+
+    if ($officialProducts->isEmpty()) {
+        $officialProducts = $products;
+    }
+
     $categories = Category::all();
     $activeFlashSale = FlashSale::active()->with(['items.product'])->first();
     $vouchers = Voucher::where('is_active', true)->latest()->take(6)->get();
@@ -74,7 +101,7 @@ Route::get('/', function () {
         ->take(6)
         ->get();
 
-    return view('welcome', compact('products', 'categories', 'activeFlashSale', 'vouchers', 'officialStores'));
+    return view('welcome', compact('products', 'topProducts', 'officialProducts', 'categories', 'activeFlashSale', 'vouchers', 'officialStores'));
 })->name('home');
 
 // Public Product Catalog, Detail & Suggestions

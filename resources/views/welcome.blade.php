@@ -572,12 +572,15 @@
             </div>
         </div>
 
-        {{-- Products Grid --}}
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+        {{-- TAB 1: REKOMENDASI GRID --}}
+        <div x-show="activeTab === 'rekomendasi'"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
             @forelse($products as $prod)
             <div class="bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-card hover:shadow-lg transition-all duration-200 flex flex-col justify-between group relative">
-                
-                {{-- Wishlist Heart Button Top Right (Shopee Style Quick Action) --}}
+                {{-- Wishlist Heart Button Top Right --}}
                 @auth
                     @if(auth()->user()->role === 'customer')
                         @php $isWish = $prod->isWishlistedBy(auth()->user()); @endphp
@@ -613,7 +616,6 @@
                         </span>
                     @endif
 
-                    {{-- Free Shipping Badge (Shopee Signature) --}}
                     <span class="absolute bottom-1.5 left-1.5 px-1.5 py-0.2 rounded text-[8px] font-bold bg-emerald-600 text-white flex items-center gap-0.5 shadow-2xs">
                         <i class="fa-solid fa-truck-fast text-[7px]"></i> Bebas Ongkir
                     </span>
@@ -651,7 +653,170 @@
             <div class="col-span-full py-16 text-center text-slate-400 bg-white rounded-2xl border border-slate-200 shadow-card">
                 <i class="fa-solid fa-boxes-stacked text-3xl mb-2 text-slate-300"></i>
                 <p class="text-xs font-bold text-slate-700">Belum ada produk yang tersedia</p>
-                <p class="text-xs text-slate-400 mt-0.5">Silakan kembali lagi nanti untuk produk-produk terbaik!</p>
+            </div>
+            @endforelse
+        </div>
+
+        {{-- TAB 2: TERLARIS GRID --}}
+        <div x-show="activeTab === 'terlaris'"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5"
+             x-cloak>
+            @forelse($topProducts as $index => $prod)
+            <div class="bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-card hover:shadow-lg transition-all duration-200 flex flex-col justify-between group relative">
+                {{-- Sales Rank Tag for Top 3 --}}
+                @if($index === 0)
+                    <div class="absolute top-2 left-2 z-20 px-2 py-0.5 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black text-[9px] shadow-sm flex items-center gap-1 border border-amber-300">
+                        <i class="fa-solid fa-crown text-[8px]"></i> Top #1
+                    </div>
+                @elseif($index === 1)
+                    <div class="absolute top-2 left-2 z-20 px-2 py-0.5 rounded-lg bg-gradient-to-r from-slate-400 to-slate-300 text-slate-900 font-black text-[9px] shadow-sm flex items-center gap-1 border border-slate-300">
+                        <i class="fa-solid fa-medal text-[8px]"></i> Top #2
+                    </div>
+                @elseif($index === 2)
+                    <div class="absolute top-2 left-2 z-20 px-2 py-0.5 rounded-lg bg-gradient-to-r from-amber-700 to-amber-600 text-white font-black text-[9px] shadow-sm flex items-center gap-1 border border-amber-600">
+                        <i class="fa-solid fa-award text-[8px]"></i> Top #3
+                    </div>
+                @else
+                    <div class="absolute top-2 left-2 z-20 px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-700 font-bold text-[9px] shadow-2xs flex items-center gap-0.5 border border-amber-200">
+                        <i class="fa-solid fa-fire text-amber-500 text-[8px]"></i> Terlaris
+                    </div>
+                @endif
+
+                {{-- Product Image --}}
+                <a href="{{ route('product.show', $prod) }}" class="relative aspect-square bg-slate-50 overflow-hidden block">
+                    @if($prod->image_url)
+                        <img src="{{ $prod->image_url }}" alt="{{ $prod->name }}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
+                    @else
+                        <div class="w-full h-full flex items-center justify-center text-slate-300 text-2xl">
+                            <i class="fa-solid fa-box"></i>
+                        </div>
+                    @endif
+
+                    @if($prod->has_discount)
+                        <span class="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-black bg-rose-600 text-white shadow-2xs">
+                            -{{ $prod->discount_percentage_effective }}%
+                        </span>
+                    @endif
+
+                    <span class="absolute bottom-1.5 left-1.5 px-1.5 py-0.2 rounded text-[8px] font-bold bg-emerald-600 text-white flex items-center gap-0.5 shadow-2xs">
+                        <i class="fa-solid fa-truck-fast text-[7px]"></i> Bebas Ongkir
+                    </span>
+                </a>
+
+                {{-- Product Info --}}
+                <div class="p-3 flex-1 flex flex-col justify-between space-y-2.5">
+                    <div>
+                        <a href="{{ route('product.show', $prod) }}" class="text-xs font-semibold text-slate-800 group-hover:text-cyan-700 transition-colors line-clamp-2 leading-snug">
+                            {{ $prod->name }}
+                        </a>
+
+                        <div class="mt-2 flex flex-col">
+                            <span class="text-sm font-black text-slate-900 leading-tight">
+                                Rp {{ number_format($prod->final_price, 0, ',', '.') }}
+                            </span>
+                            @if($prod->has_discount)
+                                <span class="text-[10px] text-slate-400 line-through mt-0.5">
+                                    Rp {{ number_format($prod->price, 0, ',', '.') }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                        <div class="flex items-center gap-1 text-amber-500 font-bold">
+                            <i class="fa-solid fa-star text-[9px]"></i>
+                            <span>{{ number_format($prod->rating ?? 5.0, 1) }}</span>
+                        </div>
+                        <span class="font-extrabold text-amber-600 flex items-center gap-0.5 truncate">
+                            <i class="fa-solid fa-fire text-[9px]"></i>
+                            {{ $prod->formatted_sold_count }} terjual
+                        </span>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="col-span-full py-16 text-center text-slate-400 bg-white rounded-2xl border border-slate-200 shadow-card">
+                <i class="fa-solid fa-fire text-3xl mb-2 text-slate-300"></i>
+                <p class="text-xs font-bold text-slate-700">Belum ada data produk terlaris</p>
+            </div>
+            @endforelse
+        </div>
+
+        {{-- TAB 3: OFFICIAL STORE GRID --}}
+        <div x-show="activeTab === 'official'"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5"
+             x-cloak>
+            @forelse($officialProducts as $prod)
+            <div class="bg-white rounded-xl border border-cyan-100 overflow-hidden shadow-card hover:shadow-lg transition-all duration-200 flex flex-col justify-between group relative">
+                {{-- Official Mall Badge --}}
+                <div class="absolute top-2 left-2 z-20 px-2 py-0.5 rounded-lg bg-cyan-700 text-white font-extrabold text-[9px] shadow-sm flex items-center gap-1 border border-cyan-500">
+                    <i class="fa-solid fa-shield-check text-[8px]"></i> Official
+                </div>
+
+                {{-- Product Image --}}
+                <a href="{{ route('product.show', $prod) }}" class="relative aspect-square bg-slate-50 overflow-hidden block">
+                    @if($prod->image_url)
+                        <img src="{{ $prod->image_url }}" alt="{{ $prod->name }}"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
+                    @else
+                        <div class="w-full h-full flex items-center justify-center text-slate-300 text-2xl">
+                            <i class="fa-solid fa-box"></i>
+                        </div>
+                    @endif
+
+                    @if($prod->has_discount)
+                        <span class="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[9px] font-black bg-rose-600 text-white shadow-2xs">
+                            -{{ $prod->discount_percentage_effective }}%
+                        </span>
+                    @endif
+
+                    <span class="absolute bottom-1.5 left-1.5 px-1.5 py-0.2 rounded text-[8px] font-bold bg-cyan-600 text-white flex items-center gap-0.5 shadow-2xs">
+                        <i class="fa-solid fa-certificate text-[7px]"></i> 100% Original
+                    </span>
+                </a>
+
+                {{-- Product Info --}}
+                <div class="p-3 flex-1 flex flex-col justify-between space-y-2.5">
+                    <div>
+                        <span class="text-[9px] font-bold text-cyan-700 truncate block">
+                            {{ $prod->store?->name ?? 'Official Store' }}
+                        </span>
+                        <a href="{{ route('product.show', $prod) }}" class="text-xs font-semibold text-slate-800 group-hover:text-cyan-700 transition-colors line-clamp-2 leading-snug mt-0.5">
+                            {{ $prod->name }}
+                        </a>
+
+                        <div class="mt-2 flex flex-col">
+                            <span class="text-sm font-black text-slate-900 leading-tight">
+                                Rp {{ number_format($prod->final_price, 0, ',', '.') }}
+                            </span>
+                            @if($prod->has_discount)
+                                <span class="text-[10px] text-slate-400 line-through mt-0.5">
+                                    Rp {{ number_format($prod->price, 0, ',', '.') }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+                        <div class="flex items-center gap-1 text-amber-500 font-bold">
+                            <i class="fa-solid fa-star text-[9px]"></i>
+                            <span>{{ number_format($prod->rating ?? 5.0, 1) }}</span>
+                        </div>
+                        <span class="text-cyan-700 font-semibold truncate">{{ $prod->store?->city ?: 'Official Mall' }}</span>
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div class="col-span-full py-16 text-center text-slate-400 bg-white rounded-2xl border border-slate-200 shadow-card">
+                <i class="fa-solid fa-store text-3xl mb-2 text-slate-300"></i>
+                <p class="text-xs font-bold text-slate-700">Belum ada produk Official Store</p>
             </div>
             @endforelse
         </div>
@@ -659,8 +824,8 @@
         {{-- Load More CTA --}}
         <div class="mt-8 text-center">
             <a href="{{ url('/products') }}" class="btn-primary h-10 px-8 text-xs font-bold bg-cyan-700 hover:bg-cyan-800 text-white rounded-xl shadow-md inline-flex items-center gap-2">
-                <span>Lihat Lebih Banyak Produk</span>
-                <i class="fa-solid fa-arrow-down text-[10px]"></i>
+                <span>Lihat Semua Katalog Produk</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
             </a>
         </div>
     </section>
