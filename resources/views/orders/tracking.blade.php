@@ -91,36 +91,83 @@
                             <i class="fa-solid fa-clock text-cyan-600 text-xs"></i>
                             <strong>Estimasi Tiba:</strong> {{ $estimated_time }}
                         </p>
-                    </div>
-
-                    {{-- Courier Profile Card Overlay --}}
+                    </div>                    {{-- Courier / Store Profile Card Overlay (Adaptive to Order Status) --}}
                     <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-4 flex-wrap">
-                        <div class="flex items-center gap-3">
-                            <div class="relative">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($courier['name']) }}&background=0891b2&color=fff&size=80&bold=true"
-                                     class="w-11 h-11 rounded-xl object-cover border border-cyan-200" alt="Kurir">
-                                <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center text-[8px] text-white">
-                                    <i class="fa-solid fa-check"></i>
-                                </span>
+                        @if($order->status === 'shipped')
+                            {{-- Shipped: Courier is on the road --}}
+                            <div class="flex items-center gap-3">
+                                <div class="relative">
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($courier['name']) }}&background=0891b2&color=fff&size=80&bold=true"
+                                         class="w-11 h-11 rounded-xl object-cover border border-cyan-200" alt="Kurir">
+                                    <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center text-[8px] text-white">
+                                        <i class="fa-solid fa-check"></i>
+                                    </span>
+                                </div>
+                                <div>
+                                    <h3 class="text-xs font-bold text-slate-900">{{ $courier['name'] }}</h3>
+                                    <p class="text-[11px] text-slate-500 font-medium">Kurir Pengantar • <span class="font-mono font-bold text-slate-700">{{ $courier['plate'] }}</span></p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="text-xs font-bold text-slate-900">{{ $courier['name'] }}</h3>
-                                <p class="text-[11px] text-slate-500 font-medium">Kurir Pengantar • <span class="font-mono font-bold text-slate-700">{{ $courier['plate'] }}</span></p>
-                            </div>
-                        </div>
 
-                        <div class="flex items-center gap-2">
-                            <a href="https://wa.me/?text=Halo%20Kurir%20{{ urlencode($courier['name']) }},%20saya%20pembeli%20pesanan%20{{ $order->invoice_number }}" target="_blank"
-                               class="btn-primary text-xs h-8.5 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center gap-1.5 shadow-xs transition-all">
-                                <i class="fa-brands fa-whatsapp text-sm"></i>
-                                <span>Chat Kurir</span>
-                            </a>
-                            <button type="button" @click="copyResi('{{ $order->tracking_number ?: 'BLJEXP' . $order->id }}')"
-                                    class="h-8.5 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer" title="Salin Resi">
-                                <i class="fa-solid fa-barcode text-slate-400"></i>
-                                <span x-text="copiedResi ? 'Tersalin!' : 'Salin Resi'"></span>
-                            </button>
-                        </div>
+                            <div class="flex items-center gap-2">
+                                <a href="https://wa.me/?text=Halo%20Kurir%20{{ urlencode($courier['name']) }},%20saya%20pembeli%20pesanan%20{{ $order->invoice_number }}" target="_blank"
+                                   class="btn-primary text-xs h-8.5 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold flex items-center gap-1.5 shadow-xs transition-all">
+                                    <i class="fa-brands fa-whatsapp text-sm"></i>
+                                    <span>Chat Kurir</span>
+                                </a>
+                                <button type="button" @click="copyResi('{{ $order->tracking_number ?: 'BLJEXP' . $order->id }}')"
+                                        class="h-8.5 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer" title="Salin Resi">
+                                    <i class="fa-solid fa-barcode text-slate-400"></i>
+                                    <span x-text="copiedResi ? 'Tersalin!' : 'Salin Resi'"></span>
+                                </button>
+                            </div>
+                        @elseif($order->status === 'completed')
+                            {{-- Completed: Package delivered --}}
+                            <div class="flex items-center gap-3">
+                                <div class="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center text-lg shadow-xs">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xs font-bold text-slate-900">Pesanan Telah Tiba & Diterima</h3>
+                                    <p class="text-[11px] text-slate-500 font-medium">Diterima oleh <strong class="text-slate-800">{{ $order->user->name }}</strong></p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('orders.invoice', $order) }}" target="_blank"
+                                   class="h-8.5 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs flex items-center gap-1.5 transition-colors">
+                                    <i class="fa-solid fa-file-invoice text-slate-500"></i>
+                                    <span>Invoice</span>
+                                </a>
+                            </div>
+                        @else
+                            {{-- Processing / Pending: Package still being prepared at store --}}
+                            <div class="flex items-center gap-3">
+                                <div class="w-11 h-11 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-700 flex items-center justify-center text-lg shadow-xs">
+                                    <i class="fa-solid fa-boxes-packing"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xs font-bold text-slate-900">{{ $order->store->name ?? 'Toko Penjual' }}</h3>
+                                    <p class="text-[11px] text-slate-500 font-medium">Paket sedang dikemas di toko • Menunggu kurir</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                @if($order->store)
+                                    <button type="button"
+                                            @click="$dispatch('open-chat', { receiver_id: '{{ $order->store->user?->getRouteKey() ?? $order->store->user_id }}', receiver_name: '{{ addslashes($order->store->name) }}' })"
+                                            class="h-8.5 px-3.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-800 font-bold text-xs border border-cyan-200 flex items-center gap-1.5 transition-colors cursor-pointer">
+                                        <i class="fa-regular fa-comment-dots text-cyan-700"></i>
+                                        <span>Chat Penjual</span>
+                                    </button>
+                                @endif
+                                <button type="button" @click="copyResi('{{ $order->invoice_number }}')"
+                                        class="h-8.5 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer" title="Salin No. Invoice">
+                                    <i class="fa-regular fa-copy text-slate-400"></i>
+                                    <span x-text="copiedResi ? 'Tersalin!' : '#{{ $order->invoice_number }}'"></span>
+                                </button>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -145,19 +192,21 @@
                     <div class="p-3 bg-white border-t border-slate-100 flex items-center justify-around text-[10px] text-slate-500 font-semibold flex-wrap gap-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-3 h-3 rounded-full bg-purple-600 border-2 border-white shadow-xs"></span>
-                            <span>Gudang Penjual</span>
+                            <span>{{ $order->status === 'shipped' ? 'Gudang Penjual' : 'Lokasi Paket (Toko)' }}</span>
                         </div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="w-3 h-3 rounded-full bg-amber-500 border-2 border-white shadow-xs"></span>
-                            <span>DC Sortir Hub</span>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="w-3 h-3 rounded-full bg-cyan-600 border-2 border-white shadow-xs"></span>
-                            <span>Posisi Kurir</span>
-                        </div>
+                        @if($order->status === 'shipped')
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-3 h-3 rounded-full bg-amber-500 border-2 border-white shadow-xs"></span>
+                                <span>DC Sortir Hub</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-3 h-3 rounded-full bg-cyan-600 border-2 border-white shadow-xs"></span>
+                                <span>Posisi Kurir</span>
+                            </div>
+                        @endif
                         <div class="flex items-center gap-1.5">
                             <span class="w-3 h-3 rounded-full bg-emerald-600 border-2 border-white shadow-xs"></span>
-                            <span>Alamat Pembeli</span>
+                            <span>Alamat Pembeli (Tujuan)</span>
                         </div>
                     </div>
                 </div>
@@ -251,16 +300,20 @@
     {{-- Leaflet Map Initialization Script --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const orderStatus = '{{ $order->status }}';
             const originCoord = [{{ $origin['lat'] }}, {{ $origin['lng'] }}];
             const hubCoord = [{{ $hub['lat'] }}, {{ $hub['lng'] }}];
             const destCoord = [{{ $destination['lat'] }}, {{ $destination['lng'] }}];
             const courierCoord = [{{ $courier_pos['lat'] }}, {{ $courier_pos['lng'] }}];
 
+            // Determine initial map center
+            const initialCenter = (orderStatus === 'shipped') ? courierCoord : originCoord;
+
             // Initialize map
             const map = L.map('liveTrackingMap', {
                 zoomControl: true,
                 attributionControl: false
-            }).setView(courierCoord, 13);
+            }).setView(initialCenter, 13);
 
             // Add tile layer (OpenStreetMap Standard)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -286,71 +339,113 @@
                 });
             }
 
-            // 1. Origin Marker (Store)
+            const markersToFit = [];
+
+            // 1. Origin Marker (Store / Gudang Penjual)
             const originMarker = L.marker(originCoord, {
-                icon: createCustomIcon('fa-store', 'bg-purple-600')
-            }).addTo(map).bindPopup('<strong>Toko Penjual</strong><br>{{ addslashes($order->store->name ?? "Toko") }}');
+                icon: createCustomIcon('fa-store', 'bg-purple-600', orderStatus !== 'shipped' && orderStatus !== 'completed')
+            }).addTo(map);
 
-            // 2. Hub Marker
-            const hubMarker = L.marker(hubCoord, {
-                icon: createCustomIcon('fa-warehouse', 'bg-amber-500')
-            }).addTo(map).bindPopup('<strong>Pusat Sortir Hub DC</strong><br>Paket telah melewati sortir transit.');
+            if (orderStatus === 'processing' || orderStatus === 'pending') {
+                originMarker.bindPopup('<strong>Toko Penjual (Lokasi Paket)</strong><br>{{ addslashes($order->store->name ?? "Toko") }}<br><span class="text-cyan-700 font-semibold text-[11px]">📦 Sedang Dikemas & Menunggu Kurir</span>').openPopup();
+            } else {
+                originMarker.bindPopup('<strong>Gudang Penjual</strong><br>{{ addslashes($order->store->name ?? "Toko") }}');
+            }
+            markersToFit.push(originMarker);
 
-            // 3. Destination Marker (Buyer Home)
+            // 2. Destination Marker (Buyer Home)
             const destMarker = L.marker(destCoord, {
-                icon: createCustomIcon('fa-house-chimney', 'bg-emerald-600')
-            }).addTo(map).bindPopup('<strong>Alamat Tujuan Anda</strong><br>{{ addslashes($order->user->name) }}');
-
-            // 4. Live Courier Marker (Pulsating)
-            const courierMarker = L.marker(courierCoord, {
-                icon: createCustomIcon('fa-motorcycle', 'bg-cyan-600', true)
-            }).addTo(map).bindPopup('<strong>Kurir: {{ addslashes($courier["name"]) }}</strong><br>{{ $courier["plate"] }}<br><span class="text-cyan-700 font-bold">Sedang Mengantar Paket</span>').openPopup();
-
-            // Route Polylines
-            // Route from Origin to Hub (Completed leg)
-            const leg1 = L.polyline([originCoord, hubCoord], {
-                color: '#9333ea',
-                weight: 4,
-                opacity: 0.7,
-                dashArray: '6, 8'
+                icon: createCustomIcon('fa-house-chimney', 'bg-emerald-600', orderStatus === 'completed')
             }).addTo(map);
 
-            // Route from Hub to Courier
-            const leg2 = L.polyline([hubCoord, courierCoord], {
-                color: '#0891b2',
-                weight: 5,
-                opacity: 0.9
-            }).addTo(map);
+            if (orderStatus === 'completed') {
+                destMarker.bindPopup('<strong>Alamat Tujuan Anda</strong><br><span class="text-emerald-600 font-bold">✓ Paket Telah Tiba & Diterima</span>').openPopup();
+            } else {
+                destMarker.bindPopup('<strong>Alamat Tujuan Anda</strong><br>{{ addslashes($order->user->name) }}');
+            }
+            markersToFit.push(destMarker);
 
-            // Route from Courier to Destination (Remaining leg)
-            const leg3 = L.polyline([courierCoord, destCoord], {
-                color: '#10b981',
-                weight: 4,
-                opacity: 0.6,
-                dashArray: '8, 8'
-            }).addTo(map);
+            let courierMarker = null;
 
-            // Fit all markers in viewport
-            const group = new L.featureGroup([originMarker, hubMarker, courierMarker, destMarker]);
+            // 3. Conditional Elements based on Status
+            if (orderStatus === 'shipped') {
+                // Hub Marker
+                const hubMarker = L.marker(hubCoord, {
+                    icon: createCustomIcon('fa-warehouse', 'bg-amber-500')
+                }).addTo(map).bindPopup('<strong>Pusat Sortir Hub DC</strong><br>Paket telah melewati sortir transit.');
+                markersToFit.push(hubMarker);
+
+                // Live Courier Marker
+                courierMarker = L.marker(courierCoord, {
+                    icon: createCustomIcon('fa-motorcycle', 'bg-cyan-600', true)
+                }).addTo(map).bindPopup('<strong>Kurir: {{ addslashes($courier["name"]) }}</strong><br>{{ $courier["plate"] }}<br><span class="text-cyan-700 font-bold">Sedang Mengantar Paket</span>').openPopup();
+                markersToFit.push(courierMarker);
+
+                // Polylines for Active Delivery
+                L.polyline([originCoord, hubCoord], {
+                    color: '#9333ea',
+                    weight: 4,
+                    opacity: 0.7,
+                    dashArray: '6, 8'
+                }).addTo(map);
+
+                L.polyline([hubCoord, courierCoord], {
+                    color: '#0891b2',
+                    weight: 5,
+                    opacity: 0.9
+                }).addTo(map);
+
+                L.polyline([courierCoord, destCoord], {
+                    color: '#10b981',
+                    weight: 4,
+                    opacity: 0.6,
+                    dashArray: '8, 8'
+                }).addTo(map);
+
+                // Simulated micro-motion heartbeat for courier marker
+                let step = 0;
+                setInterval(() => {
+                    step = (step + 1) % 4;
+                    const jitterLat = (Math.sin(step) * 0.00015);
+                    const jitterLng = (Math.cos(step) * 0.00015);
+                    courierMarker.setLatLng([courierCoord[0] + jitterLat, courierCoord[1] + jitterLng]);
+                }, 3000);
+
+            } else if (orderStatus === 'completed') {
+                // Completed: Solid Green line between Store and Customer
+                L.polyline([originCoord, destCoord], {
+                    color: '#10b981',
+                    weight: 5,
+                    opacity: 0.85
+                }).addTo(map);
+
+            } else {
+                // Processing / Pending: Subtle, clean dashed line for planned route
+                L.polyline([originCoord, destCoord], {
+                    color: '#0891b2',
+                    weight: 3,
+                    opacity: 0.4,
+                    dashArray: '6, 10'
+                }).addTo(map);
+            }
+
+            // Fit markers in viewport
+            const group = new L.featureGroup(markersToFit);
             map.fitBounds(group.getBounds().pad(0.2));
 
             // Re-center button action
             document.getElementById('recenterBtn').addEventListener('click', function () {
-                map.flyTo(courierCoord, 14, {
+                const targetCoord = courierMarker ? courierCoord : originCoord;
+                map.flyTo(targetCoord, 14, {
                     animate: true,
                     duration: 1
                 });
-                courierMarker.openPopup();
+                if (courierMarker) {
+                    courierMarker.openPopup();
+                } else {
+                    originMarker.openPopup();
+                }
             });
-
-            // Simulated micro-motion heartbeat for courier marker
-            let step = 0;
-            setInterval(() => {
-                step = (step + 1) % 4;
-                const jitterLat = (Math.sin(step) * 0.00015);
-                const jitterLng = (Math.cos(step) * 0.00015);
-                courierMarker.setLatLng([courierCoord[0] + jitterLat, courierCoord[1] + jitterLng]);
-            }, 3000);
         });
     </script>
 </x-app-layout>
