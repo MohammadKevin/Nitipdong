@@ -1,7 +1,8 @@
 <nav x-data="{
         mobileSearch: false,
         userOpen: false,
-        notifOpen: false
+        notifOpen: false,
+        cartOpen: false
     }"
     class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-xs">
 
@@ -23,23 +24,20 @@
             <div class="flex-1 max-w-xl hidden md:flex flex-col justify-center">
                 <form action="{{ url('/products') }}" method="GET" class="w-full flex items-center relative">
                     <div class="relative w-full flex items-center">
-                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-                            <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                        </div>
-                        <input id="nav-search" type="text" name="q" value="{{ request('q') }}"
+                        <input type="text" name="q" value="{{ request('q') }}"
                                placeholder="Cari di BelanjaIn (contoh: Laptop, Sepatu, Smartwatch, TWS)..."
-                               class="w-full h-9 pl-8 pr-20 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:border-cyan-600 focus:ring-2 focus:ring-cyan-500/20 outline-none transition-all placeholder:text-slate-400">
-                        <div class="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                            <kbd class="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[9px] font-mono text-slate-400 bg-slate-100 border border-slate-200 rounded">Ctrl K</kbd>
-                            <button type="submit"
-                                    class="h-7 px-3.5 bg-cyan-700 hover:bg-cyan-800 active:bg-cyan-900 text-white text-xs font-semibold rounded-md transition-colors">
+                               class="w-full h-10 pl-9 pr-24 rounded-xl border border-slate-200 bg-slate-50/70 text-xs focus:bg-white focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100 transition-all">
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3 text-xs"></i>
+                        <div class="absolute right-1.5 flex items-center gap-1">
+                            <span class="text-[10px] text-slate-400 font-mono hidden lg:inline-block px-1.5 py-0.5 bg-slate-200/60 rounded">Ctrl K</span>
+                            <button type="submit" class="h-7 px-3.5 bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs rounded-lg shadow-xs transition-colors cursor-pointer">
                                 Cari
                             </button>
                         </div>
                     </div>
                 </form>
-                <div class="flex items-center gap-2 mt-1 overflow-hidden text-[10px] text-slate-400">
-                    <span class="font-semibold text-slate-500 shrink-0">Populer:</span>
+                <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-1 pl-1 font-medium overflow-hidden whitespace-nowrap">
+                    <span class="text-slate-500 font-bold">Populer:</span>
                     <a href="{{ url('/products?q=Laptop') }}" class="hover:text-cyan-700 transition-colors truncate">Laptop Gaming</a>
                     <a href="{{ url('/products?q=Sepatu') }}" class="hover:text-cyan-700 transition-colors truncate">Sepatu Pria</a>
                     <a href="{{ url('/products?q=Smartwatch') }}" class="hover:text-cyan-700 transition-colors truncate">Smartwatch</a>
@@ -58,6 +56,10 @@
                     @php 
                         $cartCount = auth()->user()->role === 'customer' ? auth()->user()->carts()->count() : 0;
                         $wishlistCount = auth()->user()->role === 'customer' ? auth()->user()->wishlists()->count() : 0;
+                        $userCarts = auth()->user()->role === 'customer'
+                            ? auth()->user()->carts()->with(['product.store'])->latest()->take(5)->get()
+                            : collect();
+                        $cartSubtotal = $userCarts->sum(fn($c) => ($c->product ? $c->product->final_price : 0) * $c->quantity);
                     @endphp
 
                     @if(auth()->user()->role === 'customer')
@@ -71,14 +73,96 @@
                     </a>
                     @endif
 
-                    <a href="{{ route('customer.cart.index') }}" aria-label="Keranjang Belanja" class="btn-icon relative" title="Keranjang Belanja">
-                        <i class="fa-solid fa-cart-shopping text-sm text-slate-600"></i>
-                        @if($cartCount > 0)
-                            <span class="absolute top-1 right-1 min-w-[15px] h-3.5 px-0.5 rounded-full bg-cyan-600 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
-                                {{ $cartCount > 99 ? '99+' : $cartCount }}
-                            </span>
-                        @endif
-                    </a>
+                    {{-- PopUp Mini-Cart Dropdown --}}
+                    <div class="relative" @click.outside="cartOpen = false">
+                        <button type="button" @click="cartOpen = !cartOpen" aria-label="Keranjang Belanja" class="btn-icon relative cursor-pointer" title="Keranjang Belanja">
+                            <i class="fa-solid fa-cart-shopping text-sm text-slate-600"></i>
+                            @if($cartCount > 0)
+                                <span class="absolute top-1 right-1 min-w-[15px] h-3.5 px-0.5 rounded-full bg-cyan-600 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
+                                    {{ $cartCount > 99 ? '99+' : $cartCount }}
+                                </span>
+                            @endif
+                        </button>
+
+                        {{-- Dropdown Container --}}
+                        <div x-show="cartOpen" x-cloak
+                             x-transition:enter="transition ease-out duration-150"
+                             x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-100"
+                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                             class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200/90 z-50 overflow-hidden text-xs">
+                            
+                            {{-- Header --}}
+                            <div class="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+                                <div class="flex items-center gap-1.5 font-bold text-slate-900">
+                                    <i class="fa-solid fa-cart-shopping text-cyan-600"></i>
+                                    <span>Keranjang Belanja ({{ $cartCount }})</span>
+                                </div>
+                                <a href="{{ route('customer.cart.index') }}" @click="cartOpen = false" class="text-[11px] font-semibold text-cyan-700 hover:text-cyan-800 hover:underline">
+                                    Lihat Semua
+                                </a>
+                            </div>
+
+                            {{-- Body List --}}
+                            @if($userCarts->count() > 0)
+                                <div class="divide-y divide-slate-100 max-h-72 overflow-y-auto p-1">
+                                    @foreach($userCarts as $cItem)
+                                        @if($cItem->product)
+                                            <a href="{{ route('product.show', $cItem->product) }}" @click="cartOpen = false"
+                                               class="p-2.5 hover:bg-cyan-50/40 rounded-xl transition-colors flex items-center gap-3 block group">
+                                                <img src="{{ $cItem->product->image_url }}" alt="{{ $cItem->product->name }}" class="w-12 h-12 rounded-lg object-cover border border-slate-200 shrink-0">
+                                                <div class="flex-1 min-w-0">
+                                                    <h4 class="font-semibold text-slate-800 text-xs truncate group-hover:text-cyan-700 transition-colors">{{ $cItem->product->name }}</h4>
+                                                    @if($cItem->variant)
+                                                        <span class="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.2 rounded inline-block mt-0.5">{{ $cItem->variant }}</span>
+                                                    @endif
+                                                    <div class="flex items-center justify-between mt-1">
+                                                        <span class="text-[11px] text-slate-500 font-medium">{{ $cItem->quantity }} &times; Rp {{ number_format($cItem->product->final_price, 0, ',', '.') }}</span>
+                                                        <span class="font-bold text-cyan-800 text-xs">Rp {{ number_format($cItem->product->final_price * $cItem->quantity, 0, ',', '.') }}</span>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        @endif
+                                    @endforeach
+                                </div>
+
+                                {{-- Footer Checkout Buttons --}}
+                                <div class="p-3.5 border-t border-slate-100 bg-slate-50/50 space-y-2.5">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[11px] text-slate-500 font-medium">Total Perkiraan:</span>
+                                        <span class="font-black text-sm text-cyan-800">
+                                            Rp {{ number_format($cartSubtotal, 0, ',', '.') }}
+                                        </span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <a href="{{ route('customer.cart.index') }}" @click="cartOpen = false"
+                                           class="h-8 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs flex items-center justify-center transition-colors">
+                                            Buka Keranjang
+                                        </a>
+                                        <a href="{{ route('customer.order.checkout') }}" @click="cartOpen = false"
+                                           class="h-8 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs flex items-center justify-center shadow-xs transition-colors">
+                                            Checkout ({{ $cartCount }})
+                                        </a>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="py-8 px-4 text-center space-y-2">
+                                    <div class="w-12 h-12 rounded-full bg-cyan-50 text-cyan-600 flex items-center justify-center mx-auto text-lg">
+                                        <i class="fa-solid fa-cart-shopping"></i>
+                                    </div>
+                                    <p class="font-bold text-slate-800 text-xs">Wah, keranjang belanjamu kosong</p>
+                                    <p class="text-[11px] text-slate-400">Yuk, isi dengan barang-barang impianmu!</p>
+                                    <div class="pt-2">
+                                        <a href="{{ url('/products') }}" @click="cartOpen = false" class="btn-primary text-xs h-7.5 px-4 rounded-lg bg-cyan-700 hover:bg-cyan-800 text-white inline-flex items-center justify-center font-semibold">
+                                            Mulai Belanja
+                                        </a>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
 
                     <a href="{{ route('chat.index') }}" aria-label="Pesan Chat" class="btn-icon relative" title="Pesan & Chat">
                         <i class="fa-regular fa-comment-dots text-sm text-slate-600"></i>
@@ -176,6 +260,35 @@
                         </div>
                     </div>
                 @else
+                    {{-- Guest Cart Icon with PopUp --}}
+                    <div class="relative" @click.outside="cartOpen = false">
+                        <button type="button" @click="cartOpen = !cartOpen" aria-label="Keranjang Belanja" class="btn-icon relative cursor-pointer" title="Keranjang Belanja">
+                            <i class="fa-solid fa-cart-shopping text-sm text-slate-600"></i>
+                        </button>
+
+                        <div x-show="cartOpen" x-cloak
+                             x-transition:enter="transition ease-out duration-150"
+                             x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             class="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 p-5 text-center text-xs space-y-3">
+                            <div class="w-12 h-12 rounded-full bg-cyan-50 text-cyan-600 flex items-center justify-center mx-auto text-lg">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-xs">Keranjang Belanja</h4>
+                                <p class="text-[11px] text-slate-500 mt-0.5">Masuk ke akun Anda untuk melihat produk yang telah disimpan di keranjang.</p>
+                            </div>
+                            <div class="pt-1 flex flex-col gap-1.5">
+                                <a href="{{ route('login') }}" class="w-full h-8 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold flex items-center justify-center transition-colors">
+                                    Masuk Akun
+                                </a>
+                                <a href="{{ route('register') }}" class="w-full h-8 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold flex items-center justify-center transition-colors">
+                                    Daftar Akun Baru
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                     <a href="{{ route('login') }}" class="btn-outline text-xs h-8 px-3">
                         Masuk
                     </a>
