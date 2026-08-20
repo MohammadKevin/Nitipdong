@@ -731,6 +731,7 @@
                                 @php
                                     $itemSearchData = $order->orderItems->map(fn($it) => $it->product?->name ?? '')->join(' ');
                                     $searchBlob = strtolower($order->invoice_number . ' ' . ($order->store->name ?? '') . ' ' . $itemSearchData);
+                                    $hasReviewed = $order->orderItems->contains(fn($it) => $it->review !== null);
                                 @endphp
                                 <div x-show="(activeTab === 'all' || (activeTab === 'complaint' ? {{ $order->complaint ? 'true' : 'false' }} : activeTab === '{{ $order->status }}')) && (!searchQuery || '{{ addslashes($searchBlob) }}'.includes(searchQuery.toLowerCase()))"
                                      class="border border-slate-200/90 rounded-2xl overflow-hidden shadow-xs hover:shadow-card hover:border-cyan-200 transition-all bg-white">
@@ -779,11 +780,18 @@
                                         @endphp
                                         <div class="flex items-center gap-2 shrink-0">
                                             @if($order->tracking_number)
-                                                <a href="{{ route('orders.tracking', $order) }}"
-                                                   class="text-[11px] font-mono text-cyan-800 hover:text-cyan-900 bg-white hover:bg-cyan-50 px-2.5 py-0.5 rounded-lg border border-slate-200 hover:border-cyan-300 flex items-center gap-1 transition-colors" title="Lacak Posisi Paket di Peta">
-                                                    <i class="fa-solid fa-map-location-dot text-cyan-600 text-[10px]"></i>
-                                                    <span>{{ $order->tracking_number }}</span>
-                                                </a>
+                                                @if($order->status === 'shipped' || ($order->status === 'completed' && !$hasReviewed))
+                                                    <a href="{{ route('orders.tracking', $order) }}"
+                                                       class="text-[11px] font-mono text-cyan-800 hover:text-cyan-900 bg-white hover:bg-cyan-50 px-2.5 py-0.5 rounded-lg border border-slate-200 hover:border-cyan-300 flex items-center gap-1 transition-colors" title="Lacak Posisi Paket di Peta Live">
+                                                        <i class="fa-solid fa-map-location-dot text-cyan-600 text-[10px]"></i>
+                                                        <span>{{ $order->tracking_number }}</span>
+                                                    </a>
+                                                @else
+                                                    <div class="text-[11px] font-mono text-slate-700 bg-white px-2.5 py-0.5 rounded-lg border border-slate-200 flex items-center gap-1" title="No. Resi Pengiriman">
+                                                        <i class="fa-solid fa-barcode text-slate-400 text-[10px]"></i>
+                                                        <span>{{ $order->tracking_number }}</span>
+                                                    </div>
+                                                @endif
                                             @endif
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border {{ $currStatus['bg'] }}">
                                                 <i class="fa-solid {{ $currStatus['icon'] }} text-[10px]"></i>
@@ -930,8 +938,8 @@
                                                     </button>
                                                 @endif
 
-                                                {{-- Live Maps Tracking Button for Shipped/Completed --}}
-                                                @if(in_array($order->status, ['shipped', 'completed']))
+                                                {{-- Live Maps Tracking Button: Only if shipped, or completed but NOT reviewed yet --}}
+                                                @if($order->status === 'shipped' || ($order->status === 'completed' && !$hasReviewed))
                                                     <a href="{{ route('orders.tracking', $order) }}"
                                                        class="h-8 px-3.5 rounded-xl border border-cyan-200 hover:border-cyan-300 bg-cyan-50 hover:bg-cyan-100 text-cyan-800 font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs" title="Lacak Posisi Paket di Peta Live">
                                                         <i class="fa-solid fa-map-location-dot text-cyan-600 text-xs"></i>
@@ -946,8 +954,8 @@
                                                     <span>Invoice</span>
                                                 </a>
 
-                                                {{-- Complaint Trigger Button --}}
-                                                @if(!$order->complaint && in_array($order->status, ['processing', 'shipped', 'completed']))
+                                                {{-- Complaint Trigger Button: Only if not complained, and status is processing/shipped or completed but NOT reviewed yet --}}
+                                                @if(!$order->complaint && (in_array($order->status, ['processing', 'shipped']) || ($order->status === 'completed' && !$hasReviewed)))
                                                     <button type="button"
                                                             @click="openComplaint({{ $order->toJson() }}, '{{ route('customer.complaints.store', $order) }}')"
                                                             class="h-8 px-3 rounded-xl border border-rose-200 hover:border-rose-300 bg-white hover:bg-rose-50 text-rose-600 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer" title="Ajukan Komplain / Pengembalian">

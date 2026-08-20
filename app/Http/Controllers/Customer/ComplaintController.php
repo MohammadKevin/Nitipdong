@@ -22,6 +22,11 @@ class ComplaintController extends Controller
             return back()->with('error', 'Pesanan yang belum dibayar atau dibatalkan tidak dapat dikomplain.');
         }
 
+        $hasReviewed = $order->orderItems()->whereHas('review')->exists();
+        if ($hasReviewed) {
+            return back()->with('error', 'Pesanan yang telah diulas tidak dapat diajukan komplain.');
+        }
+
         $existing = OrderComplaint::where('order_id', $order->id)->whereIn('status', ['pending', 'approved'])->first();
         if ($existing) {
             return back()->with('error', 'Anda sudah memiliki pengajuan komplain aktif untuk pesanan ini.');
