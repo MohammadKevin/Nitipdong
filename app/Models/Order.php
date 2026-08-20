@@ -30,6 +30,7 @@ class Order extends Model
         'total_weight',
         'payment_method',
         'payment_reference',
+        'snap_token',
         'tracking_number',
     ];
 

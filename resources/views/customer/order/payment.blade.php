@@ -12,9 +12,7 @@
 <x-app-layout>
     {{-- Midtrans Snap Script (Sandbox) --}}
     @push('scripts')
-        <script src="https://app.sandbox.midtrans.com/snap/snap.js"
-                data-client-key="{{ config('services.midtrans.client_key') ?? 'Mid-client-nNuy0AuFjI35ym6k' }}">
-        </script>
+        <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="Mid-client-nNuy0AuFjI35ym6k"></script>
     @endpush
 
     <div class="page-container py-5"
