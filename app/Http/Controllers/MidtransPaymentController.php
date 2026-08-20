@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class MidtransPaymentController extends Controller
 {
-    private const SERVER_KEY = 'Mid-server-ORIG4umlOjT0Q4w1JDxzlc0c';
+    private const SERVER_KEY = 'Mid-server-QRIG4umIOjT0Q4w1JDxzIc0c';
     private const CLIENT_KEY = 'Mid-client-nNuy0AuFjI35ym6k';
     private const SNAP_URL   = 'https://app.sandbox.midtrans.com/snap/v1/transactions';
 
