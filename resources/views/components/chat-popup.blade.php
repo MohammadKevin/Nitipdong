@@ -189,12 +189,15 @@
                     <form @submit.prevent="sendMessage()" class="flex items-center gap-1.5">
                         <input type="text"
                                x-model="newMessageText"
+                               @keydown.enter.prevent="sendMessage()"
                                placeholder="Tulis pesan ke penjual..."
                                :disabled="isSending"
-                               class="flex-1 h-9 px-3 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 transition-all disabled:opacity-50">
-                        <button type="submit"
+                               class="flex-1 h-9 px-3 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-cyan-600 focus:ring-1 focus:ring-cyan-600 transition-all disabled:opacity-50 outline-none">
+                        <button type="button"
+                                @click="sendMessage()"
                                 :disabled="isSending || !newMessageText.trim()"
-                                class="w-9 h-9 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white flex items-center justify-center transition-all shadow-xs disabled:opacity-50 disabled:cursor-not-allowed shrink-0 cursor-pointer">
+                                class="w-9 h-9 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white flex items-center justify-center transition-all shadow-xs disabled:opacity-50 disabled:cursor-not-allowed shrink-0 cursor-pointer"
+                                title="Kirim Pesan">
                             <i class="fa-solid fa-paper-plane text-xs" :class="isSending ? 'animate-pulse' : ''"></i>
                         </button>
                     </form>
@@ -323,9 +326,58 @@
                 const text = this.newMessageText.trim();
                 if (!text || !this.activeConversation || this.isSending) return;
 
+                let convId = this.activeConversation.id;
+
+                // If conversation ID is not yet assigned but receiver_id exists, initialize it on-the-fly
+                if (!convId && this.activeConversation.receiver_id) {
+                    this.isSending = true;
+                    try {
+                        const initRes = await fetch(`/chat/api/start/${encodeURIComponent(this.activeConversation.receiver_id)}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+                        const initData = await initRes.json();
+                        if (initRes.ok && initData.status === 'success') {
+                            convId = initData.conversation_id;
+                            this.activeConversation.id = convId;
+                            this.activeConversation.full_url = initData.full_url;
+                            if (initData.partner) this.activeConversation.partner = initData.partner;
+                            this.startPolling(convId);
+                        }
+                    } catch (e) {
+                        console.error('Error starting conversation:', e);
+                    }
+                }
+
+                if (!convId) {
+                    if (window.toast) window.toast.error('Sedang menghubungkan ke toko, silakan coba lagi...');
+                    this.isSending = false;
+                    return;
+                }
+
                 this.isSending = true;
+                this.newMessageText = '';
+
+                // Optimistic UI push for instant feel
+                const tempId = 'temp_' + Date.now();
+                const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':');
+                const optimisticMsg = {
+                    id: tempId,
+                    sender_id: {{ Auth::id() ?? 0 }},
+                    is_me: true,
+                    message: text,
+                    time: nowTime
+                };
+                this.messages.push(optimisticMsg);
+                this.$nextTick(() => this.scrollToBottom());
+
                 try {
-                    const res = await fetch(`/chat/api/${this.activeConversation.id}/send`, {
+                    const res = await fetch(`/chat/api/${convId}/send`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -337,12 +389,17 @@
                     });
                     const data = await res.json();
                     if (res.ok && data.status === 'success') {
-                        this.newMessageText = '';
-                        this.messages.push(data.message);
+                        const idx = this.messages.findIndex(m => m.id === tempId);
+                        if (idx !== -1) {
+                            this.messages[idx] = data.message;
+                        }
                         this.$nextTick(() => this.scrollToBottom());
+                    } else {
+                        if (window.toast) window.toast.error(data.message || 'Pesan gagal terkirim');
                     }
                 } catch (e) {
                     console.error(e);
+                    if (window.toast) window.toast.error('Tidak dapat mengirim pesan.');
                 } finally {
                     this.isSending = false;
                 }
@@ -360,9 +417,10 @@
                 window.dispatchEvent(new CustomEvent('close-ai-chat'));
 
                 if (event.detail && event.detail.receiver_id) {
-                    // Set active conversation immediately so user is taken straight into the seller chat room
+                    // Set active conversation immediately with receiver_id so user can type immediately
                     this.activeConversation = {
                         id: null,
+                        receiver_id: event.detail.receiver_id,
                         full_url: '{{ route('chat.index') }}',
                         partner: {
                             name: event.detail.receiver_name || 'Penjual',
@@ -387,6 +445,7 @@
                         if (res.ok && data.status === 'success') {
                             this.activeConversation = {
                                 id: data.conversation_id,
+                                receiver_id: event.detail.receiver_id,
                                 full_url: data.full_url,
                                 partner: data.partner || this.activeConversation.partner
                             };

@@ -20,7 +20,11 @@ trait HasObfuscatedId
         $id = SecureId::decode((string) $value, static::class);
 
         if (!$id) {
-            abort(404);
+            if (is_numeric($value)) {
+                $id = (int) $value;
+            } else {
+                abort(404);
+            }
         }
 
         return $this->where($this->getRouteKeyName(), $id)->firstOrFail();

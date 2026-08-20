@@ -210,23 +210,39 @@ class ChatController extends Controller
         ]);
     }
 
-    public function apiMessages(Conversation $conversation): \Illuminate\Http\JsonResponse
+    protected function resolveConversationInstance($conversation): ?Conversation
     {
+        if ($conversation instanceof Conversation) {
+            return $conversation;
+        }
+        if (is_numeric($conversation)) {
+            return Conversation::find((int) $conversation);
+        }
+        return Conversation::findByObfuscatedId((string) $conversation) ?: Conversation::find($conversation);
+    }
+
+    public function apiMessages($conversation): \Illuminate\Http\JsonResponse
+    {
+        $conv = $this->resolveConversationInstance($conversation);
+        if (!$conv) {
+            return response()->json(['status' => 'error', 'message' => 'Percakapan tidak ditemukan.'], 404);
+        }
+
         $userId = Auth::id();
-        if ($conversation->user_one_id !== $userId && $conversation->user_two_id !== $userId) {
+        if ($conv->user_one_id !== $userId && $conv->user_two_id !== $userId) {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
         }
 
         // Mark as read
-        Message::where('conversation_id', $conversation->id)
+        Message::where('conversation_id', $conv->id)
             ->where('sender_id', '!=', $userId)
             ->where('is_read', false)
             ->update(['is_read' => true]);
 
-        $partner = $conversation->user_one_id === $userId ? $conversation->userTwo : $conversation->userOne;
-        $partnerName = $partner->role === 'seller' && $partner->store ? $partner->store->name : $partner->name;
+        $partner = $conv->user_one_id === $userId ? $conv->userTwo : $conv->userOne;
+        $partnerName = $partner && $partner->role === 'seller' && $partner->store ? $partner->store->name : ($partner?->name ?? 'Pengguna');
 
-        $messages = $conversation->messages()->oldest()->get()->map(function ($msg) use ($userId) {
+        $messages = $conv->messages()->oldest()->get()->map(function ($msg) use ($userId) {
             return [
                 'id'         => $msg->id,
                 'sender_id'  => $msg->sender_id,
@@ -240,38 +256,43 @@ class ChatController extends Controller
         return response()->json([
             'status'       => 'success',
             'conversation' => [
-                'id'       => $conversation->id,
-                'full_url' => route('chat.show', $conversation),
+                'id'       => $conv->id,
+                'full_url' => route('chat.show', $conv),
             ],
             'partner'      => [
-                'id'     => $partner->id,
+                'id'     => $partner?->id,
                 'name'   => $partnerName,
-                'avatar' => $partner->avatar_url,
-                'role'   => $partner->role,
+                'avatar' => $partner?->avatar_url ?? '/img/saksershop-logo.png',
+                'role'   => $partner?->role ?? 'user',
             ],
             'messages'     => $messages,
         ]);
     }
 
-    public function apiSendMessage(Request $request, Conversation $conversation): \Illuminate\Http\JsonResponse
+    public function apiSendMessage(Request $request, $conversation): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'message' => ['required', 'string', 'max:1000'],
         ]);
 
+        $conv = $this->resolveConversationInstance($conversation);
+        if (!$conv) {
+            return response()->json(['status' => 'error', 'message' => 'Percakapan tidak ditemukan.'], 404);
+        }
+
         $userId = Auth::id();
-        if ($conversation->user_one_id !== $userId && $conversation->user_two_id !== $userId) {
+        if ($conv->user_one_id !== $userId && $conv->user_two_id !== $userId) {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
         }
 
         $msg = Message::create([
-            'conversation_id' => $conversation->id,
+            'conversation_id' => $conv->id,
             'sender_id'       => $userId,
             'message'         => $request->message,
             'is_read'         => false,
         ]);
 
-        $conversation->touch();
+        $conv->touch();
 
         return response()->json([
             'status'  => 'success',
