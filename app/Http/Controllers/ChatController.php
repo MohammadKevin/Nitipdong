@@ -102,32 +102,37 @@ class ChatController extends Controller
 
         if ($sender->role === 'seller') {
             if (in_array($receiver->role, ['admin', 'super_admin'])) {
-                return redirect()->route('seller.chat.admin.show', $conversation);
+                return redirect()->route('seller.chat.admin', ['conv' => $conversation->id]);
             }
-            return redirect()->route('seller.chat.cus.show', $conversation);
+            return redirect()->route('seller.chat.cus', ['conv' => $conversation->id]);
         }
 
-        return redirect()->route('chat.show', $conversation);
+        return redirect()->route('chat.index', ['conv' => $conversation->id]);
     }
 
-    public function show(Conversation $conversation): View
+    public function show($conversation): View|RedirectResponse
     {
-        $userId = Auth::id();
+        $conv = $this->resolveConversationInstance($conversation);
+        if (!$conv) {
+            abort(404);
+        }
 
-        if ($conversation->user_one_id !== $userId && $conversation->user_two_id !== $userId) {
+        $user = Auth::user();
+        $userId = $user->id;
+
+        if ($conv->user_one_id !== $userId && $conv->user_two_id !== $userId) {
             abort(403);
         }
 
-        $partner = $conversation->user_one_id === $userId ? $conversation->userTwo : $conversation->userOne;
+        if ($user->role === 'seller') {
+            $partner = $conv->user_one_id === $userId ? $conv->userTwo : $conv->userOne;
+            if ($partner && in_array($partner->role, ['admin', 'super_admin'])) {
+                return redirect()->route('seller.chat.admin', ['conv' => $conv->id]);
+            }
+            return redirect()->route('seller.chat.cus', ['conv' => $conv->id]);
+        }
 
-        Message::where('conversation_id', $conversation->id)
-            ->where('sender_id', '!=', $userId)
-            ->where('is_read', false)
-            ->update(['is_read' => true]);
-
-        $messages = $conversation->messages()->with('sender')->oldest()->get();
-
-        return view('chat.show', compact('conversation', 'partner', 'messages'));
+        return redirect()->route('chat.index', ['conv' => $conv->id]);
     }
 
     public function sendMessage(Request $request, Conversation $conversation): RedirectResponse
