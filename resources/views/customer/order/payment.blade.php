@@ -144,6 +144,18 @@
                             </div>
                         </div>
 
+                        @if($order->total_amount < 10000)
+                            <div class="p-3 bg-amber-500/20 border border-amber-400/40 text-amber-200 rounded-xl text-xs flex items-center justify-between gap-3 flex-wrap">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-circle-info text-amber-400 text-sm shrink-0"></i>
+                                    <span>Nominal tagihan (<strong>Rp {{ number_format($order->total_amount, 0, ',', '.') }}</strong>) di bawah batas minimal Duitku Gateway (Rp 10.000).</span>
+                                </div>
+                                <button type="button" @click="activeTab = 'qris'" class="px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 font-bold text-[11px] hover:bg-amber-300 transition-colors shrink-0">
+                                    Gunakan QRIS Instan →
+                                </button>
+                            </div>
+                        @endif
+
                         <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
                             <div>
                                 <span class="text-[10px] text-slate-400 block uppercase">Total yang Akan Dibayar:</span>

@@ -59,30 +59,29 @@ class DuitkuPaymentController extends Controller
         $paymentMethod   = $request->input('payment_method', ''); // Kosongkan jika ingin popup menampilkan semua channel
         $productDetails  = 'Pembayaran Pesanan #' . $merchantOrderId;
         $customerEmail   = $order->user->email ?? Auth::user()->email ?? 'customer@example.com';
-        $customerPhone   = $order->user->phone ?? Auth::user()->phone ?? '08123456789';
+        $customerPhone   = $order->user->phone ?? Auth::user()->phone ?? '081234567890';
         $customerName    = $order->user->name ?? Auth::user()->name ?? 'Customer';
+
+        // Validasi batas minimal nominal transaksi Payment Gateway Duitku (Rp 10.000)
+        if ($paymentAmount < 10000) {
+            $msg = "Nominal tagihan (Rp " . number_format($paymentAmount, 0, ',', '.') . ") di bawah batas minimal Duitku Gateway (Rp 10.000). Silakan gunakan tab 'QRIS Instan', 'Virtual Account', atau 'Simulasi Bayar' untuk menyelesaikan pesanan ini.";
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => $msg], 400);
+            }
+            return back()->with('error', $msg);
+        }
 
         // Perhitungan Signature MD5 Inquiry: md5(merchantCode + merchantOrderId + paymentAmount + apiKey)
         $signature = md5($this->merchantCode . $merchantOrderId . $paymentAmount . $this->apiKey);
 
-        // Siapkan Item Details
-        $itemDetails = [];
-        foreach ($order->orderItems as $item) {
-            $itemDetails[] = [
-                'name'     => substr($item->product->name ?? 'Produk SakserShop', 0, 50),
-                'price'    => (int) $item->price,
-                'quantity' => (int) $item->quantity,
-            ];
-        }
-
-        // Tambahkan ongkir jika ada
-        if (($order->shipping_cost ?? 0) > 0) {
-            $itemDetails[] = [
-                'name'     => 'Biaya Pengiriman Ekspedisi',
-                'price'    => (int) $order->shipping_cost,
+        // Siapkan Item Details yang selalu sesuai dengan total paymentAmount
+        $itemDetails = [
+            [
+                'name'     => substr('Pesanan #' . $merchantOrderId, 0, 50),
+                'price'    => (int) $paymentAmount,
                 'quantity' => 1,
-            ];
-        }
+            ],
+        ];
 
         $payload = [
             'merchantCode'     => $this->merchantCode,
@@ -103,9 +102,11 @@ class DuitkuPaymentController extends Controller
         ];
 
         try {
-            $response = Http::timeout(30)
+            $response = Http::withoutVerifying()
+                ->timeout(15)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
+                    'Accept'       => 'application/json',
                 ])
                 ->post($this->baseUrl, $payload);
 
@@ -113,7 +114,7 @@ class DuitkuPaymentController extends Controller
 
             Log::info('Duitku Inquiry Response:', ['order' => $merchantOrderId, 'response' => $result]);
 
-            if ($response->successful() && isset($result['statusCode']) && $result['statusCode'] === '00') {
+            if ($response->successful() && isset($result['statusCode']) && $result['statusCode'] === '00' && !empty($result['paymentUrl'])) {
                 // Simpan reference Duitku ke database order
                 $order->update([
                     'payment_reference' => $result['reference'] ?? null,
@@ -123,7 +124,7 @@ class DuitkuPaymentController extends Controller
                     return response()->json([
                         'status'         => 'success',
                         'reference'      => $result['reference'] ?? null,
-                        'payment_url'    => $result['paymentUrl'] ?? null,
+                        'payment_url'    => $result['paymentUrl'],
                         'merchant_code'  => $this->merchantCode,
                         'merchant_order' => $merchantOrderId,
                         'amount'         => $paymentAmount,
@@ -134,7 +135,7 @@ class DuitkuPaymentController extends Controller
                 return redirect()->away($result['paymentUrl']);
             }
 
-            $errorMessage = $result['statusMessage'] ?? 'Gagal menghubungi gateway Duitku Sandbox.';
+            $errorMessage = $result['statusMessage'] ?? 'Gagal menghubungi gateway Duitku Sandbox. Silakan gunakan tab QRIS Instan / Virtual Account.';
             Log::error('Duitku Inquiry Error:', ['error' => $result]);
 
             if ($request->wantsJson()) {
@@ -146,11 +147,12 @@ class DuitkuPaymentController extends Controller
         } catch (\Exception $e) {
             Log::error('Duitku Exception:', ['message' => $e->getMessage()]);
 
+            $errorMsg = 'Koneksi ke gateway Duitku Sandbox timeout atau sedang offline. Silakan gunakan tab QRIS Instan / Simulasi Bayar.';
             if ($request->wantsJson()) {
-                return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+                return response()->json(['status' => 'error', 'message' => $errorMsg], 500);
             }
 
-            return back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+            return back()->with('error', $errorMsg);
         }
     }
 
