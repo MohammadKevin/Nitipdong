@@ -32,7 +32,19 @@ jobs:
           npm ci
           npm run build
 
-      - name: Deploy and Sync to Server via SSH
+      - name: Sync Laravel App Files via Rsync
+        uses: easingthemes/ssh-deploy@v5.0.3
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.CPANEL_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.CPANEL_HOST }}
+          REMOTE_USER: ${{ secrets.CPANEL_USER }}
+          REMOTE_PORT: ${{ secrets.CPANEL_PORT || 22 }}
+          ARGS: "-rlgoDzvc -i --delete"
+          SOURCE: "."
+          TARGET: "/home/${{ secrets.CPANEL_USER }}/laravel_app"
+          EXCLUDE: "/.git/, /.github/, /storage/, /node_modules/, .env"
+
+      - name: Post-Deployment Steps on Server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.CPANEL_HOST }}
@@ -42,26 +54,22 @@ jobs:
           timeout: 60s
           command_timeout: 15m
           script: |
-            echo "🚀 Starting Automated Deployment on Server..."
+            echo "🚀 Finalizing Deployment..."
             cd /home/${{ secrets.CPANEL_USER }}/laravel_app || exit 1
-            
-            # Pull update terbaru dari GitHub
-            git fetch origin main
-            git reset --hard origin/main
-            
-            # Pastikan permission folder tepat
+
+            # 1. Pastikan permission folder tepat
             chmod -R 775 storage bootstrap/cache
-            
-            # Salin asset public ke public_html
-            cp -a public/. /home/${{ secrets.CPANEL_USER }}/public_html/
-            
-            # Buat / pastikan symlink storage terhubung
+
+            # 2. Salin seluruh isi public (gambar, css, js, build) ke public_html
+            cp -rf public/* /home/${{ secrets.CPANEL_USER }}/public_html/ 2>/dev/null || true
+            cp -rf public/.* /home/${{ secrets.CPANEL_USER }}/public_html/ 2>/dev/null || true
+
+            # 3. Hubungkan symlink storage
             rm -f /home/${{ secrets.CPANEL_USER }}/public_html/storage
             ln -sfn /home/${{ secrets.CPANEL_USER }}/laravel_app/storage/app/public /home/${{ secrets.CPANEL_USER }}/public_html/storage
-            
-            # Jalankan migrasi dan optimize
+
+            # 4. Jalankan migrasi dan bersihkan cache
             php artisan migrate --force
             php artisan optimize:clear
-            php artisan optimize
-            
+
             echo "✅ Deployment Successful & Live!"
