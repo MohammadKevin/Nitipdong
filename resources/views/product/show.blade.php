@@ -89,8 +89,12 @@
                             <span class="text-slate-300">•</span>
                             <div class="flex items-center gap-1 text-amber-500">
                                 <i class="fa-solid fa-star text-[10px]"></i>
-                                <span class="font-bold text-slate-900">{{ number_format($product->rating ?? 5.0, 1) }}</span>
-                                <span class="text-slate-500">({{ $product->reviews->count() }} rating)</span>
+                                <span class="font-bold text-slate-900">{{ number_format($product->rating, 1) }}</span>
+                                @if($product->reviews->count() > 0)
+                                    <span class="text-slate-500">({{ $product->reviews->count() }} ulasan)</span>
+                                @else
+                                    <span class="text-slate-400 font-medium">(Belum ada ulasan)</span>
+                                @endif
                             </div>
                         </div>
                     </div>

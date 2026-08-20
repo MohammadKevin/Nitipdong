@@ -173,10 +173,10 @@
 
                                 <div class="flex items-center justify-between text-xs text-slate-500 pt-2.5 border-t border-slate-100 mt-2.5">
                                     <div class="flex items-center gap-1 text-amber-500 font-semibold text-[11px]">
-                                        <i class="fa-solid fa-star"></i>
-                                        <span>5.0</span>
+                                        <i class="fa-solid fa-star text-[9px]"></i>
+                                        <span>{{ number_format($prod->effective_rating, 1) }}</span>
                                     </div>
-                                    <span class="text-slate-400 text-[11px]">30+ terjual</span>
+                                    <span class="text-slate-400 text-[11px]">{{ $prod->formatted_sold_count }} terjual</span>
                                 </div>
                             </div>
                         </div>

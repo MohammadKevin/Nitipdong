@@ -218,9 +218,38 @@ class Product extends Model
         return (string) $count;
     }
 
+    public function getEffectiveRatingAttribute(): float
+    {
+        $hasReviews = $this->relationLoaded('reviews')
+            ? $this->reviews->isNotEmpty()
+            : $this->reviews()->exists();
+
+        if ($hasReviews) {
+            $avg = $this->relationLoaded('reviews')
+                ? $this->reviews->avg('rating')
+                : $this->reviews()->avg('rating');
+
+            if ($avg && (float)$avg > 0) {
+                return round((float) $avg, 1);
+            }
+        }
+
+        $base = (float) ($this->attributes['rating'] ?? 0);
+        if ($base > 0) {
+            return round($base, 1);
+        }
+
+        return 5.0; // Default standard 5.0 star rating for verified store catalog
+    }
+
+    public function getRatingAttribute(): float
+    {
+        return $this->getEffectiveRatingAttribute();
+    }
+
     public function recalculateRating(): void
     {
-        $avg = $this->reviews()->avg('rating') ?: 0;
+        $avg = $this->reviews()->avg('rating') ?: 5.0;
         $this->update(['rating' => round($avg, 2)]);
     }
 

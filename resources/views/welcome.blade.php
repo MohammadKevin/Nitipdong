@@ -643,7 +643,7 @@
                     <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
                         <div class="flex items-center gap-1 text-amber-500 font-bold">
                             <i class="fa-solid fa-star text-[9px]"></i>
-                            <span>{{ number_format($prod->rating ?? 5.0, 1) }}</span>
+                            <span>{{ number_format($prod->effective_rating, 1) }}</span>
                         </div>
                         <span class="truncate">{{ $prod->formatted_sold_count }} terjual</span>
                     </div>
@@ -729,7 +729,7 @@
                     <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
                         <div class="flex items-center gap-1 text-amber-500 font-bold">
                             <i class="fa-solid fa-star text-[9px]"></i>
-                            <span>{{ number_format($prod->rating ?? 5.0, 1) }}</span>
+                            <span>{{ number_format($prod->effective_rating, 1) }}</span>
                         </div>
                         <span class="font-extrabold text-amber-600 flex items-center gap-0.5 truncate">
                             <i class="fa-solid fa-fire text-[9px]"></i>
@@ -807,7 +807,7 @@
                     <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
                         <div class="flex items-center gap-1 text-amber-500 font-bold">
                             <i class="fa-solid fa-star text-[9px]"></i>
-                            <span>{{ number_format($prod->rating ?? 5.0, 1) }}</span>
+                            <span>{{ number_format($prod->effective_rating, 1) }}</span>
                         </div>
                         <span class="text-cyan-700 font-semibold truncate">{{ $prod->store?->city ?: 'Official Mall' }}</span>
                     </div>

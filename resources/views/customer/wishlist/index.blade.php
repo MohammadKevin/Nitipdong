@@ -90,7 +90,7 @@
                                 <div class="flex items-center gap-2 mt-2 text-[11px] text-slate-500">
                                     <div class="flex items-center gap-1 text-amber-500 font-bold">
                                         <i class="fa-solid fa-star text-[10px]"></i>
-                                        <span>{{ number_format($product->rating ?? 5.0, 1) }}</span>
+                                        <span>{{ number_format($product->effective_rating, 1) }}</span>
                                     </div>
                                     <span class="text-slate-300">•</span>
                                     <span class="text-[10px] truncate text-slate-400">

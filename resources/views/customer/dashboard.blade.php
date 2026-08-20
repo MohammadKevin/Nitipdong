@@ -1047,10 +1047,10 @@
 
                                         <div class="flex items-center gap-1.5 mt-1.5 text-[10px] text-slate-400">
                                             <span class="text-amber-500 font-bold flex items-center gap-0.5">
-                                                <i class="fa-solid fa-star text-[9px]"></i> {{ number_format($prod->rating ?? 5.0, 1) }}
+                                                <i class="fa-solid fa-star text-[9px]"></i> {{ number_format($prod->effective_rating, 1) }}
                                             </span>
                                             <span>•</span>
-                                            <span>Terjual {{ $prod->sold_count ?? 12 }}</span>
+                                            <span>{{ $prod->formatted_sold_count }} terjual</span>
                                         </div>
                                     </div>
                                 </div>
