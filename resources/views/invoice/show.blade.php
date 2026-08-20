@@ -55,8 +55,16 @@
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Diterbitkan Atas Nama:</span>
                 <p class="font-bold text-slate-900 text-sm">{{ $order->store->name ?? 'Official Store BelanjaIn' }}</p>
                 <p class="text-slate-500 mt-0.5">{{ $order->store->address ?? 'Indonesia' }}</p>
+                <p class="text-slate-600 mt-2">
+                    <strong>Metode Pembayaran:</strong> {{ strtoupper($order->payment_method ?? 'QRIS') }}
+                </p>
+                @if($order->shipping_courier)
+                    <p class="text-slate-600">
+                        <strong>Ekspedisi:</strong> {{ $order->shipping_courier }} - {{ $order->shipping_service }} ({{ number_format($order->total_weight ?? 0.5, 1) }} kg)
+                    </p>
+                @endif
                 @if($order->tracking_number)
-                    <p class="mt-2 font-mono text-[11px] bg-slate-50 p-1.5 rounded border border-slate-200 inline-block">
+                    <p class="text-slate-600">
                         <strong>No. Resi Pengiriman:</strong> {{ $order->tracking_number }}
                     </p>
                 @endif
@@ -85,7 +93,12 @@
                     <tr>
                         <td class="py-3.5 pr-3">
                             <span class="font-bold text-slate-900 block">{{ $item->product ? $item->product->name : 'Produk' }}</span>
-                            <span class="text-[10px] text-slate-400">SKU: {{ $item->product->sku ?? '-' }}</span>
+                            @if($item->variant)
+                                <span class="inline-block px-1.5 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded font-medium mt-0.5">
+                                    Varian: {{ $item->variant }}
+                                </span>
+                            @endif
+                            <span class="text-[10px] text-slate-400 block mt-0.5">SKU: {{ $item->product->sku ?? '-' }}</span>
                         </td>
                         <td class="py-3.5 px-3 text-center font-bold text-slate-800">{{ $item->quantity }}</td>
                         <td class="py-3.5 px-3 text-right text-slate-700">Rp {{ number_format($item->price, 0, ',', '.') }}</td>
@@ -132,8 +145,10 @@
                 </div>
                 @endif
                 <div class="flex justify-between text-slate-600">
-                    <span>Biaya Ongkir:</span>
-                    <span class="font-semibold text-emerald-600">Gratis (Rp 0)</span>
+                    <span>Biaya Ongkir ({{ $order->shipping_courier ?? 'Kurir' }}):</span>
+                    <span class="font-semibold {{ $order->shipping_cost > 0 ? 'text-slate-900' : 'text-emerald-600' }}">
+                        {{ $order->shipping_cost > 0 ? 'Rp ' . number_format($order->shipping_cost, 0, ',', '.') : 'Gratis (Rp 0)' }}
+                    </span>
                 </div>
                 <div class="pt-2 border-t border-slate-200 flex justify-between items-baseline">
                     <span class="font-bold text-slate-900 text-sm">Total Bayar:</span>

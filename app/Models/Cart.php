@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'user_id',
     'product_id',
     'quantity',
+    'variant',
 ])]
 class Cart extends Model
 {
@@ -21,6 +22,7 @@ class Cart extends Model
         'user_id',
         'product_id',
         'quantity',
+        'variant',
     ];
 
     protected $appends = [

@@ -7,8 +7,11 @@ use App\Models\AppNotification;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Product;
 use App\Models\UserAddress;
 use App\Models\Voucher;
+use App\Services\PaymentService;
+use App\Services\ShippingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -64,7 +67,28 @@ class OrderController extends Controller
         $addresses = UserAddress::where('user_id', Auth::id())->get();
         $defaultAddress = $addresses->firstWhere('is_default', true) ?? $addresses->first();
 
-        $grandTotal = max(0, $subtotal - $voucherDiscount);
+        // Hitung opsi pengiriman kurir per toko
+        $groupedByStore = $carts->groupBy(fn ($item) => $item->product->store_id);
+        $storeShippingData = [];
+        $totalInitialShipping = 0;
+
+        foreach ($groupedByStore as $storeId => $items) {
+            $storeWeight = $items->sum(fn ($it) => max(0.2, (float) ($it->product->weight ?? 0.5)) * $it->quantity);
+            $options = ShippingService::getAvailableOptions($storeWeight, $defaultAddress?->city);
+            $defaultOption = $options[0] ?? ShippingService::getDefaultOption($storeWeight);
+
+            $storeShippingData[$storeId] = [
+                'weight'         => $storeWeight,
+                'options'        => $options,
+                'selected_id'    => $defaultOption['id'] ?? 'JNE_REG',
+                'selected_cost'  => $defaultOption['cost'],
+            ];
+
+            $totalInitialShipping += $defaultOption['cost'];
+        }
+
+        $grandTotal = max(0, $subtotal - $voucherDiscount + $totalInitialShipping);
+        $paymentChannels = PaymentService::PAYMENT_CHANNELS;
 
         return view('customer.order.checkout', compact(
             'carts',
@@ -75,7 +99,10 @@ class OrderController extends Controller
             'grandTotal',
             'addresses',
             'defaultAddress',
-            'appliedVoucher'
+            'appliedVoucher',
+            'storeShippingData',
+            'totalInitialShipping',
+            'paymentChannels'
         ));
     }
 
@@ -86,6 +113,7 @@ class OrderController extends Controller
         $request->validate([
             'address_id'       => [$hasAddressId ? 'required' : 'nullable', 'exists:user_addresses,id'],
             'shipping_address' => [$hasAddressId ? 'nullable' : 'required', 'string', 'min:5', 'max:1000'],
+            'payment_method'   => ['nullable', 'string'],
         ], [
             'address_id.required'       => 'Pilih alamat pengiriman terlebih dahulu.',
             'shipping_address.required' => 'Masukkan alamat pengiriman tujuan terlebih dahulu.',
@@ -106,8 +134,10 @@ class OrderController extends Controller
             $addressParts = array_filter([$address->city, $address->province, $address->postal_code]);
             $location = ! empty($addressParts) ? ', ' . implode(', ', $addressParts) : '';
             $shippingAddress = "{$address->recipient_name} ({$address->phone})\n{$address->full_address}{$location}";
+            $destinationCity = $address->city;
         } else {
             $shippingAddress = trim($request->shipping_address);
+            $destinationCity = null;
 
             // If user's profile address is empty, update it
             if (empty($user->address)) {
@@ -135,16 +165,6 @@ class OrderController extends Controller
             return redirect()->route('customer.cart.index')->with('error', 'Keranjang belanja Anda kosong.');
         }
 
-        foreach ($carts as $cart) {
-            if (! $cart->product || ! $cart->product->is_active) {
-                return redirect()->route('customer.cart.index')->with('error', 'Salah satu produk di keranjang Anda tidak lagi tersedia.');
-            }
-
-            if ($cart->product->stock < $cart->quantity) {
-                return redirect()->route('customer.cart.index')->with('error', "Stok untuk produk '{$cart->product->name}' tidak mencukupi. Sisa stok: {$cart->product->stock}");
-            }
-        }
-
         $totalSubtotal = $carts->sum(fn ($item) => $item->product->final_price * $item->quantity);
 
         $appliedVoucher = null;
@@ -169,84 +189,116 @@ class OrderController extends Controller
 
         $groupedByStore = $carts->groupBy(fn ($item) => $item->product->store_id);
         $storeCount = $groupedByStore->count();
+        $courierInputs = $request->input('couriers', []);
+        $paymentMethod = $request->input('payment_method', 'qris');
 
         $firstOrderId = null;
 
-        DB::transaction(function () use ($user, $groupedByStore, $shippingAddress, $totalSubtotal, $appliedVoucher, $totalVoucherDiscount, $storeCount, &$firstOrderId) {
-            $remainingVoucherDiscount = $totalVoucherDiscount;
-            $processedStores = 0;
+        try {
+            DB::transaction(function () use ($user, $groupedByStore, $shippingAddress, $destinationCity, $totalSubtotal, $appliedVoucher, $totalVoucherDiscount, $storeCount, $courierInputs, $paymentMethod, &$firstOrderId) {
+                $remainingVoucherDiscount = $totalVoucherDiscount;
+                $processedStores = 0;
 
-            foreach ($groupedByStore as $storeId => $items) {
-                $processedStores++;
-                $storeSubtotal = $items->sum(fn ($i) => $i->product->final_price * $i->quantity);
+                foreach ($groupedByStore as $storeId => $items) {
+                    $processedStores++;
+                    $storeSubtotal = $items->sum(fn ($i) => $i->product->final_price * $i->quantity);
+                    $storeWeight = $items->sum(fn ($it) => max(0.2, (float) ($it->product->weight ?? 0.5)) * $it->quantity);
 
-                $storeDiscount = 0;
-                $orderVoucherCode = null;
+                    // Ambil pilihan kurir untuk toko ini
+                    $courierKey = $courierInputs[$storeId] ?? 'JNE_REG';
+                    $parts = explode('_', $courierKey);
+                    $cCode = $parts[0] ?? 'JNE';
+                    $sCode = $parts[1] ?? 'REG';
 
-                if ($appliedVoucher && $totalVoucherDiscount > 0) {
-                    if ($appliedVoucher->is_store_voucher) {
-                        if ($storeId == $appliedVoucher->store_id) {
-                            $storeDiscount = $totalVoucherDiscount;
-                            $orderVoucherCode = $appliedVoucher->code;
-                        }
-                    } else {
-                        $orderVoucherCode = $appliedVoucher->code;
-                        if ($processedStores === $storeCount) {
-                            $storeDiscount = $remainingVoucherDiscount;
+                    $shippingRate = ShippingService::calculateRate($cCode, $sCode, $storeWeight, $destinationCity);
+
+                    $storeDiscount = 0;
+                    $orderVoucherCode = null;
+
+                    if ($appliedVoucher && $totalVoucherDiscount > 0) {
+                        if ($appliedVoucher->is_store_voucher) {
+                            if ($storeId == $appliedVoucher->store_id) {
+                                $storeDiscount = $totalVoucherDiscount;
+                                $orderVoucherCode = $appliedVoucher->code;
+                            }
                         } else {
-                            $storeDiscount = round(($storeSubtotal / $totalSubtotal) * $totalVoucherDiscount);
-                            $remainingVoucherDiscount -= $storeDiscount;
+                            $orderVoucherCode = $appliedVoucher->code;
+                            if ($processedStores === $storeCount) {
+                                $storeDiscount = $remainingVoucherDiscount;
+                            } else {
+                                $storeDiscount = round(($storeSubtotal / $totalSubtotal) * $totalVoucherDiscount);
+                                $remainingVoucherDiscount -= $storeDiscount;
+                            }
                         }
+                    }
+
+                    $storeTotalAmount = max(0, $storeSubtotal - $storeDiscount + $shippingRate['cost']);
+
+                    $order = Order::create([
+                        'invoice_number'   => 'INV-' . strtoupper(Str::random(10)),
+                        'user_id'          => $user->id,
+                        'store_id'         => $storeId,
+                        'total_amount'     => $storeTotalAmount,
+                        'voucher_code'     => $orderVoucherCode,
+                        'discount_amount'  => $storeDiscount,
+                        'shipping_courier' => $shippingRate['courier_code'],
+                        'shipping_service' => $shippingRate['service_code'],
+                        'shipping_cost'    => $shippingRate['cost'],
+                        'total_weight'     => $storeWeight,
+                        'payment_method'   => $paymentMethod,
+                        'status'           => 'pending',
+                        'shipping_address' => $shippingAddress,
+                    ]);
+
+                    if (! $firstOrderId) {
+                        $firstOrderId = $order->id;
+                    }
+
+                    foreach ($items as $item) {
+                        // Atomic Concurrency Lock: Lock produk untuk memastikan stok tidak overselling
+                        $product = Product::where('id', $item->product_id)->lockForUpdate()->first();
+
+                        if (! $product || ! $product->is_active) {
+                            throw new \Exception("Produk '{$item->product->name}' tidak lagi aktif atau tersedia.");
+                        }
+
+                        if ($product->stock < $item->quantity) {
+                            throw new \Exception("Stok untuk produk '{$product->name}' tidak mencukupi. Sisa stok: {$product->stock}");
+                        }
+
+                        OrderItem::create([
+                            'order_id'   => $order->id,
+                            'product_id' => $item->product_id,
+                            'quantity'   => $item->quantity,
+                            'price'      => $item->product->final_price,
+                            'variant'    => $item->variant,
+                        ]);
+
+                        $product->decrement('stock', $item->quantity);
+                    }
+
+                    // Notifikasi ke seller
+                    if ($order->store && $order->store->user_id) {
+                        AppNotification::send(
+                            $order->store->user_id,
+                            'Pesanan Baru Masuk',
+                            "Pesanan baru #{$order->invoice_number} senilai Rp " . number_format($order->total_amount, 0, ',', '.') . " menunggu konfirmasi pembayaran.",
+                            'order',
+                            route('seller.orders.index')
+                        );
                     }
                 }
 
-                $storeTotalAmount = max(0, $storeSubtotal - $storeDiscount);
-
-                $order = Order::create([
-                    'invoice_number'   => 'INV-' . strtoupper(Str::random(10)),
-                    'user_id'          => $user->id,
-                    'store_id'         => $storeId,
-                    'total_amount'     => $storeTotalAmount,
-                    'voucher_code'     => $orderVoucherCode,
-                    'discount_amount'  => $storeDiscount,
-                    'status'           => 'pending',
-                    'shipping_address' => $shippingAddress,
-                ]);
-
-                if (! $firstOrderId) {
-                    $firstOrderId = $order->id;
+                if ($appliedVoucher) {
+                    $appliedVoucher->decrement('quota');
+                    session()->forget('applied_voucher');
                 }
 
-                foreach ($items as $item) {
-                    OrderItem::create([
-                        'order_id'   => $order->id,
-                        'product_id' => $item->product_id,
-                        'quantity'   => $item->quantity,
-                        'price'      => $item->product->final_price,
-                    ]);
-
-                    $item->product->decrement('stock', $item->quantity);
-                }
-
-                // Notify seller
-                if ($order->store && $order->store->user_id) {
-                    AppNotification::send(
-                        $order->store->user_id,
-                        'Pesanan Baru Masuk',
-                        "Pesanan baru #{$order->invoice_number} senilai Rp " . number_format($order->total_amount, 0, ',', '.') . " menunggu konfirmasi pembayaran.",
-                        'order',
-                        route('seller.orders.index')
-                    );
-                }
-            }
-
-            if ($appliedVoucher) {
-                $appliedVoucher->decrement('quota');
-                session()->forget('applied_voucher');
-            }
-
-            Cart::where('user_id', $user->id)->delete();
-        });
+                Cart::where('user_id', $user->id)->delete();
+            });
+        } catch (\Exception $e) {
+            return redirect()->route('customer.cart.index')->with('error', $e->getMessage());
+        }
 
         $firstOrder = Order::find($firstOrderId);
         return redirect()->route('customer.order.payment', $firstOrder)
@@ -259,7 +311,10 @@ class OrderController extends Controller
             abort(403);
         }
 
-        return view('customer.order.payment', compact('order'));
+        $paymentChannels = PaymentService::PAYMENT_CHANNELS;
+        $charge = PaymentService::createPaymentCharge($order, $order->payment_method ?: 'qris');
+
+        return view('customer.order.payment', compact('order', 'paymentChannels', 'charge'));
     }
 
     public function confirmPayment(Request $request, Order $order): RedirectResponse

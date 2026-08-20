@@ -117,71 +117,91 @@
                         @endif
                     </div>
 
-                    {{-- Variants Section --}}
-                    @if($product->variants && count($product->variants) > 0)
-                    <div class="space-y-4" x-data="{
-                        @foreach($product->variants as $variant)
-                            selected{{ $loop->index }}: '',
-                        @endforeach
-                    }">
-                        @foreach($product->variants as $variantIndex => $variant)
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">
-                                Pilih {{ $variant['name'] }}: <span x-text="selected{{ $variantIndex }}" class="text-cyan-600"></span>
-                            </label>
-                            <div class="grid grid-cols-3 gap-2">
-                                @foreach($variant['options'] as $option)
-                                <button type="button"
-                                        @click="selected{{ $variantIndex }} = '{{ $option }}'"
-                                        :class="selected{{ $variantIndex }} === '{{ $option }}' ? 'border-cyan-500 bg-cyan-50 text-cyan-700' : 'border-slate-200 hover:border-slate-300'"
-                                        class="px-3 py-2 rounded-lg border text-xs font-medium transition-all">
-                                    <span class="block truncate">{{ $option }}</span>
-                                </button>
-                                @endforeach
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                    @endif
-
-                    {{-- Quantity & Actions --}}
-                    <div class="pt-4 border-t border-slate-100" x-data="{
+                    {{-- Interactive Variants & Purchase Panel --}}
+                    <div x-data="{
                         qty: 1,
                         stock: {{ $product->stock }},
-                        price: {{ $product->final_price }}
-                    }">
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Jumlah</label>
-                        <div class="flex items-center gap-3">
-                            <div class="inline-flex items-center rounded-lg border border-slate-300 bg-white">
-                                <button type="button" @click="if(qty > 1) qty--" class="w-9 h-9 flex items-center justify-center text-slate-600 hover:bg-slate-100">
-                                    <i class="fa-solid fa-minus text-xs"></i>
-                                </button>
-                                <input type="number" x-model.number="qty" min="1" :max="stock" class="w-14 text-center text-sm font-bold border-none focus:ring-0 p-0 h-9">
-                                <button type="button" @click="if(qty < stock) qty++" class="w-9 h-9 flex items-center justify-center text-slate-600 hover:bg-slate-100">
-                                    <i class="fa-solid fa-plus text-xs"></i>
-                                </button>
-                            </div>
-                            <span class="text-xs text-slate-500">
-                                Stok: <strong class="text-slate-900">{{ $product->stock }}</strong>
-                            </span>
-                        </div>
+                        price: {{ $product->final_price }},
+                        @if($product->variants && count($product->variants) > 0)
+                            @foreach($product->variants as $variantIndex => $variant)
+                                selected{{ $variantIndex }}: '{{ $variant['options'][0] ?? '' }}',
+                            @endforeach
+                            getVariantString() {
+                                let parts = [];
+                                @foreach($product->variants as $variantIndex => $variant)
+                                    if (this.selected{{ $variantIndex }}) {
+                                        parts.push('{{ $variant['name'] }}: ' + this.selected{{ $variantIndex }});
+                                    }
+                                @endforeach
+                                return parts.join(', ');
+                            }
+                        @else
+                            getVariantString() { return ''; }
+                        @endif
+                    }" class="space-y-4">
 
-                        <div class="flex gap-3 mt-4">
-                            <form action="{{ route('customer.cart.store', $product) }}" method="POST" class="flex-1">
-                                @csrf
-                                <input type="hidden" name="quantity" x-model="qty">
-                                <button type="submit" class="w-full h-11 rounded-lg border-2 border-cyan-600 text-cyan-700 font-semibold text-sm hover:bg-cyan-50 transition-colors">
-                                    + Keranjang
-                                </button>
-                            </form>
-                            <form action="{{ route('customer.cart.store', $product) }}" method="POST" class="flex-1">
-                                @csrf
-                                <input type="hidden" name="quantity" x-model="qty">
-                                <input type="hidden" name="action" value="buy">
-                                <button type="submit" class="w-full h-11 rounded-lg bg-cyan-600 text-white font-semibold text-sm hover:bg-cyan-700 transition-colors">
-                                    Beli Sekarang
-                                </button>
-                            </form>
+                        @if($product->variants && count($product->variants) > 0)
+                        <div class="space-y-3.5 pb-2">
+                            @foreach($product->variants as $variantIndex => $variant)
+                            <div>
+                                <div class="flex items-center justify-between text-xs font-semibold text-slate-700 mb-2">
+                                    <span>Pilih {{ $variant['name'] }}:</span>
+                                    <span x-text="selected{{ $variantIndex }}" class="text-cyan-700 font-bold"></span>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach($variant['options'] as $option)
+                                    <button type="button"
+                                            @click="selected{{ $variantIndex }} = '{{ $option }}'"
+                                            :class="selected{{ $variantIndex }} === '{{ $option }}' ? 'border-cyan-600 bg-cyan-50/80 text-cyan-800 ring-1 ring-cyan-600 font-bold' : 'border-slate-200 bg-white hover:border-slate-300 text-slate-700 font-medium'"
+                                            class="px-3.5 py-1.5 rounded-lg border text-xs transition-all cursor-pointer shadow-2xs">
+                                        <span>{{ $option }}</span>
+                                    </button>
+                                    @endforeach
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                        @endif
+
+                        {{-- Quantity & Actions --}}
+                        <div class="pt-3 border-t border-slate-100">
+                            <label class="block text-xs font-semibold text-slate-700 mb-2 uppercase tracking-wider">Jumlah Pembelian</label>
+                            <div class="flex items-center gap-3">
+                                <div class="inline-flex items-center rounded-lg border border-slate-300 bg-white shadow-2xs overflow-hidden">
+                                    <button type="button" @click="if(qty > 1) qty--" class="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors">
+                                        <i class="fa-solid fa-minus text-[10px]"></i>
+                                    </button>
+                                    <input type="number" x-model.number="qty" min="1" :max="stock" class="w-12 text-center text-xs font-bold border-none focus:ring-0 p-0 h-8">
+                                    <button type="button" @click="if(qty < stock) qty++" class="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors">
+                                        <i class="fa-solid fa-plus text-[10px]"></i>
+                                    </button>
+                                </div>
+                                <span class="text-xs text-slate-500">
+                                    Tersisa <strong class="text-slate-900">{{ $product->stock }}</strong> unit
+                                </span>
+                            </div>
+
+                            <div class="flex gap-3 mt-4">
+                                <form action="{{ route('customer.cart.store', $product) }}" method="POST" class="flex-1">
+                                    @csrf
+                                    <input type="hidden" name="quantity" :value="qty">
+                                    <input type="hidden" name="variant" :value="getVariantString()">
+                                    <button type="submit" class="w-full h-10 rounded-xl border border-cyan-700 text-cyan-800 font-bold text-xs hover:bg-cyan-50/80 transition-all flex items-center justify-center gap-2 shadow-2xs cursor-pointer">
+                                        <i class="fa-solid fa-cart-plus text-xs"></i>
+                                        <span>+ Keranjang</span>
+                                    </button>
+                                </form>
+                                <form action="{{ route('customer.cart.store', $product) }}" method="POST" class="flex-1">
+                                    @csrf
+                                    <input type="hidden" name="quantity" :value="qty">
+                                    <input type="hidden" name="variant" :value="getVariantString()">
+                                    <input type="hidden" name="action" value="buy">
+                                    <button type="submit" class="w-full h-10 rounded-xl bg-cyan-700 text-white font-bold text-xs hover:bg-cyan-800 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer">
+                                        <i class="fa-solid fa-bolt text-xs"></i>
+                                        <span>Beli Sekarang</span>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>

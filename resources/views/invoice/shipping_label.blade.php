@@ -43,7 +43,9 @@
                 <span class="font-extrabold text-base tracking-tight">Belanja<span class="text-cyan-700">In</span></span>
             </div>
             <div class="text-right">
-                <span class="font-extrabold text-xs uppercase px-2 py-0.5 bg-slate-900 text-white rounded">STANDARD REG</span>
+                <span class="font-extrabold text-xs uppercase px-2 py-0.5 bg-slate-900 text-white rounded">
+                    {{ $order->shipping_courier ?? 'EXP' }} - {{ $order->shipping_service ?? 'REG' }}
+                </span>
             </div>
         </div>
 
@@ -54,7 +56,11 @@
             @endphp
             <div class="barcode overflow-hidden select-none">{{ $barcodeText }}</div>
             <p class="font-mono font-bold text-sm tracking-wider mt-0.5">{{ $barcodeText }}</p>
-            <p class="text-[10px] text-slate-500 font-mono mt-0.5">Invoice: #{{ $order->invoice_number }}</p>
+            <div class="flex items-center justify-center gap-3 text-[10px] text-slate-500 font-mono mt-0.5">
+                <span>Invoice: #{{ $order->invoice_number }}</span>
+                <span>•</span>
+                <span>Berat: {{ number_format($order->total_weight ?? 0.5, 1) }} kg</span>
+            </div>
         </div>
 
         {{-- Destination / Receiver Box (Big & Clear) --}}
@@ -76,7 +82,7 @@
             </div>
             <div class="border-l border-slate-200 pl-2">
                 <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">METODE BAYAR:</span>
-                <strong class="text-emerald-700 block mt-0.5 uppercase">NON-COD (LUNAS)</strong>
+                <strong class="text-emerald-700 block mt-0.5 uppercase">{{ strtoupper($order->payment_method ?? 'TRANSFER') }} (LUNAS)</strong>
                 <span class="text-[10px] text-slate-500 block mt-1">Total: Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
             </div>
         </div>
@@ -87,7 +93,12 @@
             <div class="space-y-1 max-h-32 overflow-hidden">
                 @foreach($order->orderItems as $it)
                     <div class="flex justify-between gap-2 text-slate-700">
-                        <span class="truncate font-medium">• {{ $it->product ? $it->product->name : 'Item' }}</span>
+                        <span class="truncate font-medium">
+                            • {{ $it->product ? $it->product->name : 'Item' }}
+                            @if($it->variant)
+                                <span class="text-[10px] text-slate-500 font-normal">({{ $it->variant }})</span>
+                            @endif
+                        </span>
                         <span class="font-bold shrink-0">&times;{{ $it->quantity }}</span>
                     </div>
                 @endforeach

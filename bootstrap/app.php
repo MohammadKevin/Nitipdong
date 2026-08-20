@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: [
+            '/api/payment/notification',
+        ]);
+
         $middleware->redirectUsersTo(function (Request $request) {
             $user = $request->user();
             return match ($user?->role) {

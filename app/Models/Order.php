@@ -24,12 +24,20 @@ class Order extends Model
         'completed_at',
         'payment_proof',
         'shipping_address',
+        'shipping_courier',
+        'shipping_service',
+        'shipping_cost',
+        'total_weight',
+        'payment_method',
+        'payment_reference',
         'tracking_number',
     ];
 
     protected $casts = [
         'total_amount'    => 'float',
         'discount_amount' => 'float',
+        'shipping_cost'   => 'float',
+        'total_weight'    => 'float',
         'completed_at'    => 'datetime',
     ];
 

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'product_id',
     'quantity',
     'price',
+    'variant',
 ])]
 class OrderItem extends Model
 {
@@ -23,6 +24,7 @@ class OrderItem extends Model
         'product_id',
         'quantity',
         'price',
+        'variant',
     ];
 
     public function order(): BelongsTo

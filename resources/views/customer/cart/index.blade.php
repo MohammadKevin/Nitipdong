@@ -52,6 +52,13 @@
                                     <a href="{{ route('product.show', $item->product) }}" class="text-xs sm:text-sm font-medium text-slate-800 hover:text-cyan-700 line-clamp-2 transition-colors">
                                         {{ $item->product->name }}
                                     </a>
+                                    @if($item->variant)
+                                        <div class="mt-1">
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-cyan-50/80 text-cyan-800 text-[10px] font-semibold border border-cyan-200">
+                                                <i class="fa-solid fa-sliders text-[9px]"></i> {{ $item->variant }}
+                                            </span>
+                                        </div>
+                                    @endif
                                     <span class="text-sm font-bold text-slate-900 block mt-1">
                                         Rp {{ number_format($item->product->final_price, 0, ',', '.') }}
                                     </span>

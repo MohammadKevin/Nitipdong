@@ -86,17 +86,26 @@ class CartController extends Controller
     {
         $request->validate([
             'quantity' => ['nullable', 'integer', 'min:1'],
+            'variant'  => ['nullable', 'string', 'max:100'],
         ]);
 
-        $quantity = $request->input('quantity', 1);
+        $quantity = (int) $request->input('quantity', 1);
+        $variant = $request->filled('variant') ? trim($request->input('variant')) : null;
 
         if ($product->stock < $quantity) {
             return back()->with('error', 'Stok produk tidak mencukupi.');
         }
 
-        $cart = Cart::where('user_id', Auth::id())
-            ->where('product_id', $product->id)
-            ->first();
+        $cartQuery = Cart::where('user_id', Auth::id())
+            ->where('product_id', $product->id);
+
+        if ($variant) {
+            $cartQuery->where('variant', $variant);
+        } else {
+            $cartQuery->whereNull('variant');
+        }
+
+        $cart = $cartQuery->first();
 
         if ($cart) {
             $cart->increment('quantity', $quantity);
@@ -105,6 +114,7 @@ class CartController extends Controller
                 'user_id'    => Auth::id(),
                 'product_id' => $product->id,
                 'quantity'   => $quantity,
+                'variant'    => $variant,
             ]);
         }
 

@@ -17,6 +17,7 @@ use App\Http\Controllers\ExportController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderTrackingController;
+use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\ProductController as PublicProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Seller\ComplaintController as SellerComplaintController;
@@ -36,6 +37,9 @@ use App\Models\Store;
 use App\Models\Voucher;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+
+// Public Webhook Payment Callback (Exempt from CSRF)
+Route::post('/api/payment/notification', [PaymentCallbackController::class, 'handleWebhook'])->name('payment.webhook');
 
 // Public Home
 Route::get('/', function () {
@@ -192,6 +196,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/orders/{order}/payment', [OrderController::class, 'payment'])->name('order.payment');
         Route::post('/orders/{order}/payment', [OrderController::class, 'confirmPayment'])->name('order.confirm_payment');
+        Route::post('/orders/{order}/simulate-payment', [PaymentCallbackController::class, 'simulateInstantPayment'])->name('order.simulate_payment');
         Route::post('/orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('order.confirm_received');
 
         // Complaints Route
