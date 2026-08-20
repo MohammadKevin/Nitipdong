@@ -53,16 +53,19 @@ jobs:
           script: |
             cd /home/${{ secrets.CPANEL_USER }}/laravel_app
             
-            # Salin asset frontend terbaru ke public_html
-            cp -r public/* /home/${{ secrets.CPANEL_USER }}/public_html/
+            # Pastikan direktori storage dan cache dapat ditulis oleh web server
+            chmod -R 775 storage bootstrap/cache
             
-            # Buat symlink storage ke public_html agar gambar tersaji langsung dari server
+            # Salin seluruh file public (termasuk .htaccess dan index.php) ke public_html
+            cp -a public/. /home/${{ secrets.CPANEL_USER }}/public_html/
+            
+            # Buat symlink storage ke public_html agar gambar produk & bukti bayar tersaji langsung
+            rm -f /home/${{ secrets.CPANEL_USER }}/public_html/storage
             ln -sfn /home/${{ secrets.CPANEL_USER }}/laravel_app/storage/app/public /home/${{ secrets.CPANEL_USER }}/public_html/storage
-            php artisan storage:link || true
             
             # Jalankan migrasi database
             php artisan migrate --force
             
-            # Bersihkan dan cache konfigurasi/rute/view
+            # Bersihkan dan cache ulang konfigurasi, rute, dan view
             php artisan optimize:clear
             php artisan optimize
