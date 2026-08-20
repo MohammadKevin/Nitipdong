@@ -173,13 +173,21 @@
 
                     <template x-for="msg in messages" :key="msg.id">
                         <div class="flex flex-col" :class="msg.is_me ? 'items-end' : 'items-start'">
-                            <div class="max-w-[80%] rounded-2xl px-3 py-2 text-xs shadow-2xs leading-relaxed break-words"
+                            <div class="max-w-[80%] rounded-2xl px-3.5 py-2 text-xs shadow-2xs leading-relaxed break-words"
                                  :class="msg.is_me
                                     ? 'bg-cyan-700 text-white rounded-tr-xs'
                                     : 'bg-white text-slate-800 border border-slate-200 rounded-tl-xs'">
                                 <p x-text="msg.message"></p>
                             </div>
-                            <span class="text-[9px] text-slate-400 mt-0.5 px-1" x-text="msg.time"></span>
+                            <div class="flex items-center gap-1 mt-0.5 px-1 text-[9px] text-slate-400 font-mono">
+                                <span x-text="msg.time"></span>
+                                <template x-if="msg.is_me">
+                                    <span class="inline-flex items-center ml-0.5" :title="msg.is_read ? 'Sudah dibaca' : 'Terkirim (belum dibaca)'">
+                                        <i class="fa-solid fa-check-double text-[9px]"
+                                           :class="msg.is_read ? 'text-sky-500 font-bold' : 'text-slate-300'"></i>
+                                    </span>
+                                </template>
+                            </div>
                         </div>
                     </template>
                 </div>
@@ -322,6 +330,12 @@
                 this.fetchConversations(false);
             },
 
+            getCsrfToken() {
+                return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') 
+                    || document.querySelector('input[name="_token"]')?.value 
+                    || '{{ csrf_token() }}';
+            },
+
             async sendMessage() {
                 const text = this.newMessageText.trim();
                 if (!text || !this.activeConversation || this.isSending) return;
@@ -336,7 +350,7 @@
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'X-CSRF-TOKEN': this.getCsrfToken(),
                                 'Accept': 'application/json',
                                 'X-Requested-With': 'XMLHttpRequest'
                             }
@@ -371,6 +385,7 @@
                     sender_id: {{ Auth::id() ?? 0 }},
                     is_me: true,
                     message: text,
+                    is_read: false,
                     time: nowTime
                 };
                 this.messages.push(optimisticMsg);
@@ -381,7 +396,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'X-CSRF-TOKEN': this.getCsrfToken(),
                             'Accept': 'application/json',
                             'X-Requested-With': 'XMLHttpRequest'
                         },
@@ -436,7 +451,7 @@
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'X-CSRF-TOKEN': this.getCsrfToken(),
                                 'Accept': 'application/json',
                                 'X-Requested-With': 'XMLHttpRequest'
                             }

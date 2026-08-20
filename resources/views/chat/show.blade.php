@@ -72,7 +72,8 @@
                         <span class="text-[10px] text-slate-400 mt-1 px-1 font-mono flex items-center gap-1">
                             {{ $msg->created_at->format('H:i') }}
                             @if($isMe)
-                                <i class="fa-solid fa-check-double text-[9px] text-cyan-600"></i>
+                                <i class="fa-solid fa-check-double text-[9px] {{ $msg->is_read ? 'text-sky-500 font-bold' : 'text-slate-300' }}"
+                                   title="{{ $msg->is_read ? 'Sudah dibaca' : 'Terkirim (belum dibaca)' }}"></i>
                             @endif
                         </span>
                     </div>

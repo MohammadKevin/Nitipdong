@@ -248,6 +248,7 @@ class ChatController extends Controller
                 'sender_id'  => $msg->sender_id,
                 'is_me'      => $msg->sender_id === $userId,
                 'message'    => $msg->message,
+                'is_read'    => (bool) $msg->is_read,
                 'time'       => $msg->created_at->format('H:i'),
                 'created_at' => $msg->created_at->toIso8601String(),
             ];
@@ -301,6 +302,7 @@ class ChatController extends Controller
                 'sender_id' => $msg->sender_id,
                 'is_me'     => true,
                 'message'   => $msg->message,
+                'is_read'   => false,
                 'time'      => $msg->created_at->format('H:i'),
             ],
         ]);
