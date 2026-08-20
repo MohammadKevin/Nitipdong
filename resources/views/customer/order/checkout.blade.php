@@ -5,7 +5,31 @@
             <p class="text-xs text-slate-400 mt-0.5">Konfirmasi alamat pengiriman dan tinjau tagihan pembayaran Anda</p>
         </div>
 
-        <form action="{{ route('customer.order.store') }}" method="POST" class="max-w-4xl mx-auto space-y-4">
+        @if(session('error'))
+            <div class="max-w-4xl mx-auto mb-4 p-3.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-semibold flex items-center gap-2.5 shadow-2xs animate-fade-up">
+                <i class="fa-solid fa-circle-exclamation text-rose-600 text-sm shrink-0"></i>
+                <span class="flex-1">{{ session('error') }}</span>
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="max-w-4xl mx-auto mb-4 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium shadow-2xs animate-fade-up">
+                <div class="flex items-center gap-2 font-bold text-rose-900 mb-1.5">
+                    <i class="fa-solid fa-circle-exclamation text-rose-600 text-sm"></i>
+                    <span>Terdapat kendala pada data checkout Anda:</span>
+                </div>
+                <ul class="list-disc list-inside ml-2 space-y-0.5 text-rose-700">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('customer.order.store') }}" method="POST"
+              x-data="{ isSubmitting: false }"
+              @submit="isSubmitting = true"
+              class="max-w-4xl mx-auto space-y-4">
             @csrf
 
             <div class="bg-white rounded-xl border border-slate-200/80 p-5 sm:p-6 shadow-card space-y-4"
@@ -32,6 +56,7 @@
                                 <label class="border rounded-xl p-3.5 cursor-pointer flex items-start gap-3 transition-all relative"
                                        :class="selectedAddressId == {{ $addr->id }} ? 'border-cyan-600 bg-cyan-50/40 ring-1 ring-cyan-600' : 'border-slate-200 hover:border-slate-300 bg-white'">
                                     <input type="radio" name="address_id" value="{{ $addr->id }}"
+                                           :disabled="!useSaved"
                                            x-model="selectedAddressId" class="mt-0.5 text-cyan-600 focus:ring-cyan-500">
                                     <div class="text-xs min-w-0">
                                         <div class="flex items-center gap-1.5 mb-1">
@@ -50,8 +75,12 @@
                             @endforeach
                         </div>
 
+                        @error('address_id')
+                            <p class="text-rose-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+
                         <button type="button" @click="useSaved = false; selectedAddressId = null"
-                                class="text-xs font-semibold text-slate-600 hover:text-cyan-700 flex items-center gap-1.5 pt-1">
+                                class="text-xs font-semibold text-slate-600 hover:text-cyan-700 flex items-center gap-1.5 pt-1 cursor-pointer">
                             <i class="fa-solid fa-plus text-[10px]"></i> Tulis Alamat Baru Lainnya
                         </button>
                     </div>
@@ -62,17 +91,21 @@
                                 <p class="font-bold text-slate-900 text-sm">{{ auth()->user()->name }}</p>
                                 <p class="text-slate-500 mt-0.5">{{ auth()->user()->email }}</p>
                                 <button type="button" @click="useSaved = true; selectedAddressId = {{ $defaultAddress ? $defaultAddress->id : 'null' }}"
-                                        class="mt-3 text-[11px] font-semibold text-cyan-700 hover:underline block">
+                                        class="mt-3 text-[11px] font-semibold text-cyan-700 hover:underline block cursor-pointer">
                                     ← Pilih Dari Alamat Tersimpan
                                 </button>
                             </div>
                             <div class="md:col-span-2">
-                                <label for="shipping_address" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                <label for="shipping_address_new" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                                     Alamat Pengiriman Baru <span class="text-rose-500">*</span>
                                 </label>
-                                <textarea name="shipping_address" id="shipping_address" rows="3"
+                                <textarea name="shipping_address" id="shipping_address_new" rows="3"
+                                          :disabled="useSaved"
                                           class="input text-xs rounded-md"
-                                          placeholder="Nama penerima, no. HP, dan alamat lengkap tujuan..."></textarea>
+                                          placeholder="Nama penerima, no. HP, dan alamat lengkap tujuan...">{{ old('shipping_address') }}</textarea>
+                                @error('shipping_address')
+                                    <p class="text-rose-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
                     </div>
@@ -150,6 +183,7 @@
 
                 @php
                     $subtotal = $carts->sum(fn($c) => $c->product->final_price * $c->quantity);
+                    $finalGrandTotal = $grandTotal ?? max(0, $subtotal - ($voucherDiscount ?? 0));
                 @endphp
 
                 <div class="space-y-2 text-xs">
@@ -157,6 +191,15 @@
                         <span>Total Harga Barang ({{ $carts->sum('quantity') }} unit)</span>
                         <span class="font-medium text-slate-900">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
                     </div>
+                    @if(isset($voucherDiscount) && $voucherDiscount > 0)
+                        <div class="flex items-center justify-between text-emerald-600 font-medium">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-ticket text-xs"></i>
+                                <span>Diskon Voucher ({{ $appliedVoucher->code ?? 'Kode Promo' }})</span>
+                            </span>
+                            <span class="font-bold">-Rp {{ number_format($voucherDiscount, 0, ',', '.') }}</span>
+                        </div>
+                    @endif
                     <div class="flex items-center justify-between text-slate-500">
                         <span>Biaya Pengiriman</span>
                         <span class="font-semibold text-cyan-700">Rp 0 (Gratis)</span>
@@ -167,8 +210,8 @@
                     </div>
                     <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
                         <span class="font-bold text-sm text-slate-900">Total Tagihan Final</span>
-                        <span class="font-extrabold text-base sm:text-lg text-slate-900">
-                            Rp {{ number_format($subtotal, 0, ',', '.') }}
+                        <span class="font-extrabold text-base sm:text-lg text-cyan-900">
+                            Rp {{ number_format($finalGrandTotal, 0, ',', '.') }}
                         </span>
                     </div>
                 </div>
@@ -178,9 +221,17 @@
                         <i class="fa-solid fa-arrow-left text-[10px]"></i>
                         Kembali ke Keranjang
                     </a>
-                    <button type="submit" class="w-full sm:w-auto btn-primary h-10 px-6 text-xs flex items-center justify-center gap-2 bg-cyan-700 hover:bg-cyan-800">
-                        <i class="fa-solid fa-lock text-xs"></i>
-                        <span>Konfirmasi & Buat Pesanan</span>
+                    <button type="submit"
+                            :disabled="isSubmitting"
+                            class="w-full sm:w-auto btn-primary h-10 px-6 text-xs flex items-center justify-center gap-2 bg-cyan-700 hover:bg-cyan-800 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer transition-all">
+                        <span x-show="!isSubmitting" class="flex items-center gap-2">
+                            <i class="fa-solid fa-lock text-xs"></i>
+                            <span>Konfirmasi & Buat Pesanan</span>
+                        </span>
+                        <span x-show="isSubmitting" x-cloak class="flex items-center gap-2">
+                            <i class="fa-solid fa-circle-notch fa-spin text-xs"></i>
+                            <span>Memproses Pesanan...</span>
+                        </span>
                     </button>
                 </div>
             </div>

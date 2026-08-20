@@ -81,27 +81,65 @@ class OrderController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $hasAddressId = $request->filled('address_id');
+
         $request->validate([
-            'address_id' => ['required', 'exists:user_addresses,id'],
+            'address_id'       => [$hasAddressId ? 'required' : 'nullable', 'exists:user_addresses,id'],
+            'shipping_address' => [$hasAddressId ? 'nullable' : 'required', 'string', 'min:5', 'max:1000'],
         ], [
-            'address_id.required' => 'Pilih alamat pengiriman terlebih dahulu.',
+            'address_id.required'       => 'Pilih alamat pengiriman terlebih dahulu.',
+            'shipping_address.required' => 'Masukkan alamat pengiriman tujuan terlebih dahulu.',
+            'shipping_address.min'      => 'Alamat pengiriman minimal 5 karakter.',
         ]);
 
-        $address = UserAddress::where('id', $request->address_id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+        $user = Auth::user();
 
-        $shippingAddress = "{$address->recipient_name} ({$address->phone})\n{$address->full_address}, {$address->city}, {$address->province} {$address->postal_code}";
+        if ($hasAddressId) {
+            $address = UserAddress::where('id', $request->address_id)
+                ->where('user_id', $user->id)
+                ->first();
+
+            if (! $address) {
+                return back()->withErrors(['address_id' => 'Alamat pengiriman yang dipilih tidak valid.'])->withInput();
+            }
+
+            $addressParts = array_filter([$address->city, $address->province, $address->postal_code]);
+            $location = ! empty($addressParts) ? ', ' . implode(', ', $addressParts) : '';
+            $shippingAddress = "{$address->recipient_name} ({$address->phone})\n{$address->full_address}{$location}";
+        } else {
+            $shippingAddress = trim($request->shipping_address);
+
+            // If user's profile address is empty, update it
+            if (empty($user->address)) {
+                $user->update(['address' => $shippingAddress]);
+            }
+
+            // If user has no saved addresses, automatically save this as default address
+            if (UserAddress::where('user_id', $user->id)->count() === 0) {
+                UserAddress::create([
+                    'user_id'        => $user->id,
+                    'label'          => 'Alamat Utama',
+                    'recipient_name' => $user->name,
+                    'phone'          => $user->phone ?? '-',
+                    'full_address'   => $shippingAddress,
+                    'is_default'     => true,
+                ]);
+            }
+        }
 
         $carts = Cart::with(['product.store', 'product.category'])
-            ->where('user_id', Auth::id())
+            ->where('user_id', $user->id)
             ->get();
 
         if ($carts->isEmpty()) {
-            return redirect()->route('customer.cart.index')->with('error', 'Keranjang belanja kosong.');
+            return redirect()->route('customer.cart.index')->with('error', 'Keranjang belanja Anda kosong.');
         }
 
         foreach ($carts as $cart) {
+            if (! $cart->product || ! $cart->product->is_active) {
+                return redirect()->route('customer.cart.index')->with('error', 'Salah satu produk di keranjang Anda tidak lagi tersedia.');
+            }
+
             if ($cart->product->stock < $cart->quantity) {
                 return redirect()->route('customer.cart.index')->with('error', "Stok untuk produk '{$cart->product->name}' tidak mencukupi. Sisa stok: {$cart->product->stock}");
             }
@@ -134,7 +172,7 @@ class OrderController extends Controller
 
         $firstOrderId = null;
 
-        DB::transaction(function () use ($groupedByStore, $shippingAddress, $totalSubtotal, $appliedVoucher, $totalVoucherDiscount, $storeCount, &$firstOrderId) {
+        DB::transaction(function () use ($user, $groupedByStore, $shippingAddress, $totalSubtotal, $appliedVoucher, $totalVoucherDiscount, $storeCount, &$firstOrderId) {
             $remainingVoucherDiscount = $totalVoucherDiscount;
             $processedStores = 0;
 
@@ -166,7 +204,7 @@ class OrderController extends Controller
 
                 $order = Order::create([
                     'invoice_number'   => 'INV-' . strtoupper(Str::random(10)),
-                    'user_id'          => Auth::id(),
+                    'user_id'          => $user->id,
                     'store_id'         => $storeId,
                     'total_amount'     => $storeTotalAmount,
                     'voucher_code'     => $orderVoucherCode,
@@ -175,7 +213,7 @@ class OrderController extends Controller
                     'shipping_address' => $shippingAddress,
                 ]);
 
-                if (!$firstOrderId) {
+                if (! $firstOrderId) {
                     $firstOrderId = $order->id;
                 }
 
@@ -203,11 +241,11 @@ class OrderController extends Controller
             }
 
             if ($appliedVoucher) {
-                $appliedVoucher->increment('used_count');
+                $appliedVoucher->decrement('quota');
                 session()->forget('applied_voucher');
             }
 
-            Cart::where('user_id', Auth::id())->delete();
+            Cart::where('user_id', $user->id)->delete();
         });
 
         $firstOrder = Order::find($firstOrderId);
@@ -252,7 +290,7 @@ class OrderController extends Controller
             );
         }
 
-        return redirect()->route('customer.cart.index')->with('success', 'Bukti pembayaran berhasil diunggah! Penjual akan segera memproses pesanan Anda.');
+        return redirect()->route('customer.dashboard')->with('success', 'Bukti pembayaran berhasil diunggah! Penjual akan segera memproses pesanan Anda.');
     }
 
     public function confirmReceived(Order $order): RedirectResponse
