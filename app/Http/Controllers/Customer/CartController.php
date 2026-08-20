@@ -82,8 +82,19 @@ class CartController extends Controller
         ));
     }
 
-    public function store(Request $request, Product $product): RedirectResponse
+    public function store(Request $request, Product $product): RedirectResponse|\Illuminate\Http\JsonResponse
     {
+        if (! Auth::check()) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'status'    => 'unauthenticated',
+                    'message'   => 'Silakan masuk ke akun Anda terlebih dahulu untuk menambah barang ke keranjang.',
+                    'login_url' => route('login'),
+                ], 401);
+            }
+            return redirect()->route('login')->with('info', 'Silakan login terlebih dahulu untuk menambah produk ke keranjang.');
+        }
+
         $request->validate([
             'quantity' => ['nullable', 'integer', 'min:1'],
             'variant'  => ['nullable', 'string', 'max:100'],
@@ -93,6 +104,12 @@ class CartController extends Controller
         $variant = $request->filled('variant') ? trim($request->input('variant')) : null;
 
         if ($product->stock < $quantity) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Stok produk tidak mencukupi. Sisa stok: ' . $product->stock,
+                ], 422);
+            }
             return back()->with('error', 'Stok produk tidak mencukupi.');
         }
 
@@ -118,7 +135,28 @@ class CartController extends Controller
             ]);
         }
 
-        return redirect()->route('customer.cart.index')->with('success', 'Produk berhasil ditambahkan ke keranjang!');
+        $cartCount = Cart::where('user_id', Auth::id())->count();
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'status'     => 'success',
+                'message'    => 'Produk berhasil dimasukkan ke keranjang!',
+                'cart_count' => $cartCount,
+                'quantity'   => $quantity,
+                'variant'    => $variant,
+                'product'    => [
+                    'name'      => $product->name,
+                    'price'     => $product->final_price,
+                    'image_url' => $product->image_url,
+                ]
+            ]);
+        }
+
+        if ($request->input('action') === 'buy') {
+            return redirect()->route('customer.cart.index');
+        }
+
+        return back()->with('success', 'Produk berhasil ditambahkan ke keranjang!');
     }
 
     public function update(Request $request, Cart $cart): RedirectResponse

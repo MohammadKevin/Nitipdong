@@ -122,6 +122,7 @@
                         qty: 1,
                         stock: {{ $product->stock }},
                         price: {{ $product->final_price }},
+                        isAddingToCart: false,
                         @if($product->variants && count($product->variants) > 0)
                             @foreach($product->variants as $variantIndex => $variant)
                                 selected{{ $variantIndex }}: '{{ $variant['options'][0] ?? '' }}',
@@ -134,10 +135,119 @@
                                     }
                                 @endforeach
                                 return parts.join(', ');
-                            }
+                            },
                         @else
-                            getVariantString() { return ''; }
+                            getVariantString() { return ''; },
                         @endif
+                        async addToCartAnimated(e) {
+                            e.preventDefault();
+                            if (this.isAddingToCart) return;
+                            this.isAddingToCart = true;
+
+                            // Parabolic Fly-to-Cart Animation
+                            const productImg = document.getElementById('main-pdp-img');
+                            const cartBtn = document.getElementById('nav-cart-btn');
+
+                            if (productImg && cartBtn) {
+                                const startRect = productImg.getBoundingClientRect();
+                                const endRect = cartBtn.getBoundingClientRect();
+
+                                const flyer = document.createElement('img');
+                                flyer.src = productImg.src || '{{ $product->image_url }}';
+                                flyer.style.position = 'fixed';
+                                flyer.style.zIndex = '999999';
+                                flyer.style.width = '70px';
+                                flyer.style.height = '70px';
+                                flyer.style.borderRadius = '1rem';
+                                flyer.style.objectFit = 'cover';
+                                flyer.style.boxShadow = '0 20px 25px -5px rgba(8, 145, 178, 0.4)';
+                                flyer.style.border = '2px solid #0891b2';
+                                flyer.style.pointerEvents = 'none';
+                                flyer.style.top = `${startRect.top}px`;
+                                flyer.style.left = `${startRect.left}px`;
+                                document.body.appendChild(flyer);
+
+                                const deltaX = (endRect.left + endRect.width / 2) - (startRect.left + startRect.width / 2);
+                                const deltaY = (endRect.top + endRect.height / 2) - (startRect.top + startRect.height / 2);
+
+                                const anim = flyer.animate([
+                                    {
+                                        top: `${startRect.top}px`,
+                                        left: `${startRect.left}px`,
+                                        width: '70px',
+                                        height: '70px',
+                                        opacity: 1,
+                                        transform: 'scale(1) rotate(0deg)'
+                                    },
+                                    {
+                                        top: `${Math.min(startRect.top, endRect.top) - 50}px`,
+                                        left: `${startRect.left + deltaX * 0.45}px`,
+                                        width: '45px',
+                                        height: '45px',
+                                        opacity: 0.9,
+                                        transform: 'scale(0.8) rotate(-15deg)'
+                                    },
+                                    {
+                                        top: `${endRect.top}px`,
+                                        left: `${endRect.left}px`,
+                                        width: '18px',
+                                        height: '18px',
+                                        opacity: 0.2,
+                                        transform: 'scale(0.3) rotate(25deg)'
+                                    }
+                                ], {
+                                    duration: 750,
+                                    easing: 'cubic-bezier(0.2, 0.8, 0.25, 1)',
+                                    fill: 'forwards'
+                                });
+
+                                anim.onfinish = () => flyer.remove();
+                            }
+
+                            // Submit to Cart via AJAX
+                            try {
+                                const formData = new FormData();
+                                formData.append('_token', '{{ csrf_token() }}');
+                                formData.append('quantity', this.qty);
+                                formData.append('variant', this.getVariantString());
+
+                                const response = await fetch('{{ route('customer.cart.store', $product) }}', {
+                                    method: 'POST',
+                                    body: formData,
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest',
+                                        'Accept': 'application/json'
+                                    }
+                                });
+
+                                if (response.status === 401) {
+                                    const data = await response.json();
+                                    window.dispatchEvent(new CustomEvent('notify', {
+                                        detail: { title: 'Perhatian', message: data.message || 'Silakan login terlebih dahulu.', type: 'error' }
+                                    }));
+                                    setTimeout(() => window.location.href = '{{ route('login') }}', 1200);
+                                    return;
+                                }
+
+                                const data = await response.json();
+                                if (response.ok && data.status === 'success') {
+                                    window.dispatchEvent(new CustomEvent('cart-updated', {
+                                        detail: { count: data.cart_count }
+                                    }));
+                                    window.dispatchEvent(new CustomEvent('notify', {
+                                        detail: { title: 'Berhasil Masuk Keranjang', message: `${this.qty}x {{ addslashes($product->name) }} berhasil ditambahkan!`, type: 'success' }
+                                    }));
+                                } else {
+                                    window.dispatchEvent(new CustomEvent('notify', {
+                                        detail: { title: 'Gagal', message: data.message || 'Gagal menambahkan produk.', type: 'error' }
+                                    }));
+                                }
+                            } catch (err) {
+                                console.error(err);
+                            } finally {
+                                this.isAddingToCart = false;
+                            }
+                        }
                     }" class="space-y-4">
 
                         @if($product->variants && count($product->variants) > 0)
@@ -182,21 +292,18 @@
                             </div>
 
                             <div class="flex gap-3 mt-4">
-                                <form action="{{ route('customer.cart.store', $product) }}" method="POST" class="flex-1">
-                                    @csrf
-                                    <input type="hidden" name="quantity" :value="qty">
-                                    <input type="hidden" name="variant" :value="getVariantString()">
-                                    <button type="submit" class="w-full h-10 rounded-xl border border-cyan-700 text-cyan-800 font-bold text-xs hover:bg-cyan-50/80 transition-all flex items-center justify-center gap-2 shadow-2xs cursor-pointer">
-                                        <i class="fa-solid fa-cart-plus text-xs"></i>
-                                        <span>+ Keranjang</span>
-                                    </button>
-                                </form>
+                                <button type="button" @click="addToCartAnimated($event)"
+                                        :disabled="isAddingToCart"
+                                        class="flex-1 h-10 rounded-xl border border-cyan-700 text-cyan-800 font-bold text-xs hover:bg-cyan-50/80 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-2xs cursor-pointer disabled:opacity-50">
+                                    <i class="fa-solid" :class="isAddingToCart ? 'fa-spinner animate-spin text-xs' : 'fa-cart-plus text-xs'"></i>
+                                    <span x-text="isAddingToCart ? 'Menambahkan...' : '+ Keranjang'"></span>
+                                </button>
                                 <form action="{{ route('customer.cart.store', $product) }}" method="POST" class="flex-1">
                                     @csrf
                                     <input type="hidden" name="quantity" :value="qty">
                                     <input type="hidden" name="variant" :value="getVariantString()">
                                     <input type="hidden" name="action" value="buy">
-                                    <button type="submit" class="w-full h-10 rounded-xl bg-cyan-700 text-white font-bold text-xs hover:bg-cyan-800 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer">
+                                    <button type="submit" class="w-full h-10 rounded-xl bg-cyan-700 text-white font-bold text-xs hover:bg-cyan-800 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer">
                                         <i class="fa-solid fa-bolt text-xs"></i>
                                         <span>Beli Sekarang</span>
                                     </button>

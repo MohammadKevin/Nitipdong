@@ -3,6 +3,8 @@
         userOpen: false,
         notifOpen: false,
         cartOpen: false,
+        cartCount: {{ Auth::check() && Auth::user()->role === 'customer' ? Auth::user()->carts()->count() : 0 }},
+        cartBounce: false,
         searchQuery: '{{ addslashes(request('q', '')) }}',
         searchSuggestions: { products: [], stores: [], categories: [] },
         showSuggestions: false,
@@ -28,6 +30,7 @@
             }
         }
     }"
+    @cart-updated.window="cartCount = $event.detail.count; cartBounce = true; setTimeout(() => cartBounce = false, 1200)"
     class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-xs">
 
     <div class="page-container">
@@ -178,13 +181,16 @@
 
                     {{-- PopUp Mini-Cart Dropdown --}}
                     <div class="relative" @click.outside="cartOpen = false">
-                        <button type="button" @click="cartOpen = !cartOpen" aria-label="Keranjang Belanja" class="btn-icon relative cursor-pointer" title="Keranjang Belanja">
-                            <i class="fa-solid fa-cart-shopping text-sm text-slate-600"></i>
-                            @if($cartCount > 0)
-                                <span class="absolute top-1 right-1 min-w-[15px] h-3.5 px-0.5 rounded-full bg-cyan-600 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
-                                    {{ $cartCount > 99 ? '99+' : $cartCount }}
-                                </span>
-                            @endif
+                        <button type="button" id="nav-cart-btn" @click="cartOpen = !cartOpen" aria-label="Keranjang Belanja"
+                                class="btn-icon relative cursor-pointer transition-transform duration-300"
+                                :class="cartBounce ? 'scale-125 text-cyan-600' : ''"
+                                title="Keranjang Belanja">
+                            <i class="fa-solid fa-cart-shopping text-sm" :class="cartBounce ? 'text-cyan-600' : 'text-slate-600'"></i>
+                            <span x-show="cartCount > 0"
+                                  class="absolute top-1 right-1 min-w-[15px] h-3.5 px-0.5 rounded-full bg-cyan-600 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white transition-all"
+                                  :class="cartBounce ? 'scale-125 ring-cyan-200' : ''"
+                                  x-text="cartCount > 99 ? '99+' : cartCount">
+                            </span>
                         </button>
 
                         {{-- Dropdown Container --}}
