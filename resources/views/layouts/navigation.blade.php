@@ -8,7 +8,7 @@
         'id'            => $c->id,
         'obfuscated_id' => $c->obfuscated_id,
         'name'          => $c->product?->name ?? 'Produk',
-        'image_url'     => $c->product?->image_url ?? asset('img/icon.jpg'),
+        'image_url'     => $c->product?->image_url ?? asset('img/saksershop-logo.png'),
         'product_url'   => $c->product ? route('product.show', $c->product) : '#',
         'price'         => $c->product ? $c->product->final_price : 0,
         'quantity'      => $c->quantity,
@@ -147,7 +147,7 @@
 
             <a href="{{ auth()->check() ? url('/?is_from_login=true') : url('/') }}" class="flex items-center gap-2.5 shrink-0 group" aria-label="SakserShop Home">
                 <div class="w-9 h-9 rounded-xl overflow-hidden border border-cyan-200 bg-cyan-50 flex items-center justify-center shadow-xs">
-                    <img src="{{ asset('img/icon.jpg') }}" alt="SakserShop Logo" class="w-full h-full object-cover">
+                    <img src="{{ asset('img/saksershop-logo.png') }}" alt="SakserShop Logo" class="w-full h-full object-cover">
                 </div>
                 <div>
                     <span class="font-bold text-base tracking-tight text-slate-900 leading-none block">
@@ -226,7 +226,7 @@
                             <div class="space-y-1 mt-1">
                                 <template x-for="p in searchSuggestions.products" :key="p.id">
                                     <a :href="p.url" class="p-2 hover:bg-cyan-50/50 rounded-xl transition-colors flex items-center gap-2.5 block">
-                                        <img :src="p.image_url" class="w-9 h-9 rounded-lg object-cover border border-slate-200 shrink-0" onerror="this.src='/img/icon.jpg'">
+                                        <img :src="p.image_url" class="w-9 h-9 rounded-lg object-cover border border-slate-200 shrink-0" onerror="this.src='/img/saksershop-logo.png'">
                                         <div class="flex-1 min-w-0">
                                             <span class="font-semibold text-slate-800 text-xs truncate block" x-text="p.name"></span>
                                             <div class="flex items-center gap-1.5 mt-0.5">
@@ -329,7 +329,7 @@
                                     <template x-for="item in cartItems" :key="item.id">
                                         <div class="p-2.5 hover:bg-cyan-50/40 rounded-xl transition-colors flex items-center gap-2.5">
                                             <a :href="item.product_url" @click="cartOpen = false" class="shrink-0">
-                                                <img :src="item.image_url" :alt="item.name" class="w-12 h-12 rounded-lg object-cover border border-slate-200" onerror="this.src='/img/icon.jpg'">
+                                                <img :src="item.image_url" :alt="item.name" class="w-12 h-12 rounded-lg object-cover border border-slate-200" onerror="this.src='/img/saksershop-logo.png'">
                                             </a>
                                             <div class="flex-1 min-w-0">
                                                 <div class="flex items-start justify-between gap-1">

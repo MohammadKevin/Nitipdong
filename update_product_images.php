@@ -82,7 +82,7 @@ foreach ($products as $product) {
         } elseif (stripos($categoryName, 'Rumah') !== false) {
             $imagePath = 'img/set-wajan.jpg';
         } else {
-            $imagePath = 'img/icon.jpg'; // default fallback
+            $imagePath = 'img/saksershop-logo.png'; // default fallback
         }
     }
 

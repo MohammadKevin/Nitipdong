@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="icon" type="image/jpeg" href="{{ asset('img/icon.jpg') }}">
+    <link rel="icon" type="image/png" href="{{ asset('img/saksershop-logo.png') }}">
 </head>
 <body class="font-sans text-slate-900 antialiased bg-slate-50 min-h-screen">
     <div class="min-h-screen flex">
@@ -23,7 +23,7 @@
             <div class="relative z-10 flex items-center justify-between">
                 <a href="/" class="flex items-center gap-2.5 group">
                     <div class="w-8 h-8 rounded-lg overflow-hidden border border-cyan-400/40 bg-cyan-950 flex items-center justify-center">
-                        <img src="{{ asset('img/icon.jpg') }}" alt="SakserShop Logo" class="w-full h-full object-cover">
+                        <img src="{{ asset('img/saksershop-logo.png') }}" alt="SakserShop Logo" class="w-full h-full object-cover">
                     </div>
                     <span class="font-bold text-lg tracking-tight text-white leading-tight">
                         Sakser<span class="text-cyan-400 font-extrabold">Shop</span>
@@ -72,7 +72,7 @@
 
             <div class="lg:hidden flex items-center gap-2.5 mb-8">
                 <div class="w-8 h-8 rounded-lg overflow-hidden border border-cyan-200 bg-cyan-50 flex items-center justify-center">
-                    <img src="{{ asset('img/icon.jpg') }}" alt="SakserShop Logo" class="w-full h-full object-cover">
+                    <img src="{{ asset('img/saksershop-logo.png') }}" alt="SakserShop Logo" class="w-full h-full object-cover">
                 </div>
                 <span class="text-xl font-bold text-slate-900 tracking-tight">Sakser<span class="text-cyan-600 font-extrabold">Shop</span></span>
             </div>

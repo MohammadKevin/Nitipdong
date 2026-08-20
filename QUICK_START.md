@@ -1,8 +1,8 @@
-# 🚀 Quick Start Guide - BelanjaIn
+# 🚀 Quick Start Guide - SakserShop
 
 <div align="center">
 
-![BelanjaIn](public/img/icon.jpg)
+![SakserShop](public/img/saksershop-logo.png)
 
 **Get your e-commerce platform up and running in 5 minutes!**
 
@@ -222,7 +222,7 @@ This creates 10 demo products. **Remember to replace with your own photos!**
 
 Replace these files:
 ```
-public/img/icon.jpg    → Your square logo (80x80px+)
+public/img/saksershop-logo.png    → Your square logo (80x80px+)
 ```
 
 ### **2. Change Brand Colors**

@@ -1,8 +1,8 @@
-# 🛍️ BelanjaIn - Platform E-Commerce Modern
+# 🛍️ SakserShop - Platform E-Commerce Modern
 
 <div align="center">
 
-![BelanjaIn Logo](public/img/icon.jpg)
+![SakserShop Logo](public/img/saksershop-logo.png)
 
 **Platform jual beli online yang mudah, aman, dan terpercaya**
 

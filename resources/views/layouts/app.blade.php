@@ -12,7 +12,7 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-        <link rel="icon" type="image/jpeg" href="{{ asset('img/icon.jpg') }}">
+        <link rel="icon" type="image/png" href="{{ asset('img/saksershop-logo.png') }}">
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
@@ -82,7 +82,7 @@
                     <div class="md:col-span-2 space-y-4">
                         <div class="flex items-center gap-2.5">
                             <div class="w-9 h-9 rounded-xl overflow-hidden bg-cyan-50 border border-cyan-200 flex items-center justify-center shadow-xs">
-                                <img src="{{ asset('img/icon.jpg') }}" alt="SakserShop Logo" class="w-full h-full object-cover">
+                                <img src="{{ asset('img/saksershop-logo.png') }}" alt="SakserShop Logo" class="w-full h-full object-cover">
                             </div>
                             <div>
                                 <span class="font-bold text-lg text-slate-900 tracking-tight block leading-none">

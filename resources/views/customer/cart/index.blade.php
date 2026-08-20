@@ -245,7 +245,7 @@
                     <div class="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-card hover:border-cyan-300 transition-all group flex flex-col justify-between">
                         <a href="{{ route('product.show', $prod) }}" class="block">
                             <div class="relative aspect-square overflow-hidden bg-slate-100">
-                                <img src="{{ $prod->image_url }}" alt="{{ $prod->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='/img/icon.jpg'">
+                                <img src="{{ $prod->image_url }}" alt="{{ $prod->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='/img/saksershop-logo.png'">
                                 @if($prod->has_discount)
                                     <div class="absolute top-2 left-2 bg-rose-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-xs">
                                         -{{ $prod->discount_percentage_effective }}%
