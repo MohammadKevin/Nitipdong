@@ -1,7 +1,33 @@
+@php
+    $rawMethod = $order->payment_method ?: 'qris';
+    if (str_starts_with($rawMethod, 'va_')) {
+        $defaultTab = 'va';
+    } elseif ($rawMethod === 'manual_transfer') {
+        $defaultTab = 'manual';
+    } elseif ($rawMethod === 'duitku') {
+        $defaultTab = 'duitku';
+    } else {
+        $defaultTab = 'qris';
+    }
+@endphp
+
 <x-app-layout>
     <div class="page-container py-5"
          x-data="{
-            activeTab: 'duitku',
+            activeTab: '{{ $defaultTab }}',
+            selectedVaBank: '{{ str_starts_with($rawMethod, 'va_') ? $rawMethod : 'va_bca' }}',
+            vaNumbers: {
+                'va_bca': '880199{{ str_pad((string) $order->id, 6, '0', STR_PAD_LEFT) }}',
+                'va_mandiri': '880299{{ str_pad((string) $order->id, 6, '0', STR_PAD_LEFT) }}',
+                'va_bni': '880399{{ str_pad((string) $order->id, 6, '0', STR_PAD_LEFT) }}',
+                'va_bri': '880499{{ str_pad((string) $order->id, 6, '0', STR_PAD_LEFT) }}',
+            },
+            vaBankNames: {
+                'va_bca': 'BCA Virtual Account',
+                'va_mandiri': 'Mandiri Virtual Account',
+                'va_bni': 'BNI Virtual Account',
+                'va_bri': 'BRI Virtual Account (BRIVA)',
+            },
             copied: false,
             isLoadingDuitku: false,
             copyText(text) {
@@ -32,14 +58,13 @@
                 })
                 .catch(err => {
                     this.isLoadingDuitku = false;
-                    // Fallback to direct redirect jika fetch terputus
                     window.location.href = '{{ route('customer.order.duitku_create', $order) }}';
                 });
             }
          }">
         <div class="max-w-2xl mx-auto mb-4">
             <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Selesaikan Pembayaran</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Pilih metode pembayaran resmi di bawah untuk memproses pesanan Anda secara instan</p>
+            <p class="text-xs text-slate-500 mt-0.5">Selesaikan pembayaran sesuai metode yang Anda pilih untuk memproses pesanan secara instan</p>
         </div>
 
         @if(session('success'))
@@ -74,24 +99,24 @@
 
                 {{-- Payment Method Tabs --}}
                 <div class="flex border-b border-slate-200 gap-2 overflow-x-auto">
-                    <button type="button" @click="activeTab = 'duitku'"
-                            :class="activeTab === 'duitku' ? 'border-cyan-600 text-cyan-800 font-bold border-b-2' : 'text-slate-500 hover:text-slate-800 font-medium'"
-                            class="pb-2.5 px-3 text-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer">
-                        <i class="fa-solid fa-wallet text-cyan-600 text-xs"></i>
-                        <span>Payment Gateway Resmi</span>
-                        <span class="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 text-[9px] font-bold rounded">Semua Metode</span>
-                    </button>
                     <button type="button" @click="activeTab = 'qris'"
                             :class="activeTab === 'qris' ? 'border-cyan-600 text-cyan-800 font-bold border-b-2' : 'text-slate-500 hover:text-slate-800 font-medium'"
                             class="pb-2.5 px-3 text-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer">
                         <i class="fa-solid fa-qrcode text-xs"></i>
                         <span>QRIS Instan</span>
+                        <span class="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 text-[9px] font-bold rounded">Otomatis</span>
                     </button>
                     <button type="button" @click="activeTab = 'va'"
-                            :class="activeTab.startsWith('va') || activeTab === 'va' ? 'border-cyan-600 text-cyan-800 font-bold border-b-2' : 'text-slate-500 hover:text-slate-800 font-medium'"
+                            :class="activeTab === 'va' ? 'border-cyan-600 text-cyan-800 font-bold border-b-2' : 'text-slate-500 hover:text-slate-800 font-medium'"
                             class="pb-2.5 px-3 text-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer">
                         <i class="fa-solid fa-building-columns text-xs"></i>
                         <span>Virtual Account</span>
+                    </button>
+                    <button type="button" @click="activeTab = 'duitku'"
+                            :class="activeTab === 'duitku' ? 'border-cyan-600 text-cyan-800 font-bold border-b-2' : 'text-slate-500 hover:text-slate-800 font-medium'"
+                            class="pb-2.5 px-3 text-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer">
+                        <i class="fa-solid fa-wallet text-cyan-600 text-xs"></i>
+                        <span>Payment Gateway</span>
                     </button>
                     <button type="button" @click="activeTab = 'manual'"
                             :class="activeTab === 'manual' ? 'border-cyan-600 text-cyan-800 font-bold border-b-2' : 'text-slate-500 hover:text-slate-800 font-medium'"
@@ -101,7 +126,110 @@
                     </button>
                 </div>
 
-                {{-- 0. TAB PAYMENT GATEWAY RESMI (DUITKU) --}}
+                {{-- 1. TAB QRIS INSTAN (DEFAULT JIKA PILIH QRIS) --}}
+                <div x-show="activeTab === 'qris'" class="space-y-4 pt-1">
+                    <div class="text-center bg-slate-50 border border-slate-200/80 rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
+                        <div class="inline-block p-4 bg-white rounded-2xl shadow-sm border border-slate-200">
+                            <img src="{{ $charge['qr_image_url'] ?? ('https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=' . urlencode('SAKSERSHOP-QRIS-' . $order->invoice_number . '-' . $order->total_amount)) }}"
+                                 alt="QRIS Code" class="w-56 h-56 sm:w-64 sm:h-64 mx-auto rounded-lg">
+                        </div>
+                        
+                        <div class="space-y-1">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-900 rounded-full text-xs font-extrabold">
+                                <i class="fa-solid fa-bolt text-amber-500"></i> QRIS Standar Bank Indonesia (ASPI)
+                            </span>
+                            <p class="text-xs text-slate-500 mt-2 max-w-md mx-auto leading-relaxed">
+                                Pindai QR Code di atas menggunakan aplikasi mobile banking (BCA, Mandiri, BRI, BNI) atau e-wallet (GoPay, OVO, DANA, ShopeePay, LinkAja).
+                            </p>
+                        </div>
+
+                        <div class="p-3.5 bg-white rounded-xl border border-slate-200 max-w-sm mx-auto text-xs space-y-1.5">
+                            <div class="flex justify-between text-slate-500">
+                                <span>Merchant Resmi:</span>
+                                <span class="font-bold text-slate-800">SakserShop Official</span>
+                            </div>
+                            <div class="flex justify-between text-slate-500">
+                                <span>Total Tagihan:</span>
+                                <span class="font-extrabold text-cyan-800 text-sm">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex justify-between text-slate-500 text-[11px] pt-1 border-t border-slate-100">
+                                <span>Status Verifikasi:</span>
+                                <span class="text-emerald-700 font-bold flex items-center gap-1">
+                                    <i class="fa-solid fa-circle-notch fa-spin text-[10px]"></i> Menunggu Pembayaran
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- 2. TAB VIRTUAL ACCOUNT --}}
+                <div x-show="activeTab === 'va'" x-cloak class="space-y-4 pt-1">
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 space-y-4">
+                        {{-- Bank Selector Tabs --}}
+                        <div>
+                            <span class="text-xs font-semibold text-slate-600 block mb-2">Pilih Bank Virtual Account:</span>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                <button type="button" @click="selectedVaBank = 'va_bca'"
+                                        :class="selectedVaBank === 'va_bca' ? 'bg-blue-600 text-white border-blue-600 shadow-xs font-bold' : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 font-medium'"
+                                        class="p-2.5 rounded-xl border text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                    <i class="fa-solid fa-building-columns"></i>
+                                    <span>BCA</span>
+                                </button>
+                                <button type="button" @click="selectedVaBank = 'va_mandiri'"
+                                        :class="selectedVaBank === 'va_mandiri' ? 'bg-amber-600 text-white border-amber-600 shadow-xs font-bold' : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 font-medium'"
+                                        class="p-2.5 rounded-xl border text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                    <i class="fa-solid fa-building-columns"></i>
+                                    <span>Mandiri</span>
+                                </button>
+                                <button type="button" @click="selectedVaBank = 'va_bni'"
+                                        :class="selectedVaBank === 'va_bni' ? 'bg-orange-600 text-white border-orange-600 shadow-xs font-bold' : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 font-medium'"
+                                        class="p-2.5 rounded-xl border text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                    <i class="fa-solid fa-building-columns"></i>
+                                    <span>BNI</span>
+                                </button>
+                                <button type="button" @click="selectedVaBank = 'va_bri'"
+                                        :class="selectedVaBank === 'va_bri' ? 'bg-cyan-700 text-white border-cyan-700 shadow-xs font-bold' : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 font-medium'"
+                                        class="p-2.5 rounded-xl border text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer">
+                                    <i class="fa-solid fa-building-columns"></i>
+                                    <span>BRI</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-200">
+                            <div class="flex items-center justify-between pb-2">
+                                <span class="text-[11px] font-bold text-slate-500 uppercase" x-text="vaBankNames[selectedVaBank]"></span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-100 text-cyan-800">
+                                    Verifikasi Otomatis
+                                </span>
+                            </div>
+
+                            <span class="text-xs font-semibold text-slate-700 block mb-1">Nomor Virtual Account:</span>
+                            <div class="flex items-center gap-2">
+                                <div class="flex-1 bg-white border border-slate-300 rounded-xl px-4 py-2.5 font-mono font-extrabold text-base sm:text-lg text-slate-900 tracking-wider"
+                                     x-text="vaNumbers[selectedVaBank]">
+                                </div>
+                                <button type="button" @click="copyText(vaNumbers[selectedVaBank])"
+                                        class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer">
+                                    <i :class="copied ? 'fa-solid fa-check text-emerald-400' : 'fa-regular fa-copy'"></i>
+                                    <span x-text="copied ? 'Tersalin!' : 'Salin'"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5 text-[11px] text-slate-500 pt-2 border-t border-slate-200">
+                            <p class="font-semibold text-slate-700">Panduan Pembayaran Virtual Account:</p>
+                            <ol class="list-decimal list-inside space-y-0.5 ml-1 leading-relaxed">
+                                <li>Buka Mobile Banking atau ATM bank yang Anda pilih di atas.</li>
+                                <li>Pilih menu <strong>Transfer / Pembayaran</strong> &gt; <strong>Virtual Account</strong>.</li>
+                                <li>Masukkan nomor Virtual Account di atas dan pastikan nominal sesuai (Rp {{ number_format($order->total_amount, 0, ',', '.') }}).</li>
+                                <li>Konfirmasi transaksi. Status pesanan akan otomatis terverifikasi tanpa perlu upload struk!</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- 3. TAB PAYMENT GATEWAY (DUITKU) --}}
                 <div x-show="activeTab === 'duitku'" class="space-y-4 pt-1">
                     <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-cyan-950 text-white rounded-2xl p-5 sm:p-6 space-y-4 shadow-xl border border-cyan-500/30 relative overflow-hidden">
                         <div class="absolute -right-8 -top-8 w-36 h-36 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
@@ -169,77 +297,7 @@
                     </div>
                 </div>
 
-                {{-- 1. TAB QRIS --}}
-                <div x-show="activeTab === 'qris'" class="space-y-4 pt-1">
-                    <div class="text-center bg-slate-50 border border-slate-200/80 rounded-xl p-5 space-y-3">
-                        <div class="inline-block p-3.5 bg-white rounded-2xl shadow-xs border border-slate-200">
-                            <img src="{{ $charge['qr_image_url'] ?? ('https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' . urlencode('SAKSERSHOP-QRIS-' . $order->invoice_number . '-' . $order->total_amount)) }}"
-                                 alt="QRIS Code" class="w-52 h-52 sm:w-56 sm:h-56 mx-auto rounded-lg">
-                        </div>
-                        <div>
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-cyan-100 text-cyan-900 rounded-full text-[11px] font-bold">
-                                <i class="fa-solid fa-bolt text-amber-500"></i> QRIS Standar Bank Indonesia (ASPI)
-                            </span>
-                            <p class="text-xs text-slate-500 mt-2 max-w-md mx-auto">
-                                Buka aplikasi mobile banking (BCA, Mandiri, BRI, BNI, Permata) atau e-wallet (GoPay, OVO, Dana, ShopeePay, LinkAja) Anda lalu scan kode QR di atas.
-                            </p>
-                        </div>
-
-                        <div class="p-3 bg-white rounded-xl border border-slate-200 max-w-sm mx-auto text-xs">
-                            <div class="flex justify-between text-slate-500">
-                                <span>Merchant:</span>
-                                <span class="font-bold text-slate-800">SakserShop Official</span>
-                            </div>
-                            <div class="flex justify-between text-slate-500 mt-1">
-                                <span>Total Tagihan:</span>
-                                <span class="font-bold text-cyan-800 text-sm">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- 2. TAB VIRTUAL ACCOUNT --}}
-                <div x-show="activeTab.startsWith('va') || activeTab === 'va'" x-cloak class="space-y-4 pt-1">
-                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-5 space-y-4">
-                        <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-                            <div>
-                                <span class="text-[10px] text-slate-400 font-bold uppercase block">Bank Tujuan VA</span>
-                                <span class="font-bold text-slate-900 text-sm">
-                                    {{ $charge['bank_name'] ?? 'Virtual Account SakserShop' }}
-                                </span>
-                            </div>
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-100 text-cyan-800">
-                                Verifikasi Otomatis
-                            </span>
-                        </div>
-
-                        <div>
-                            <span class="text-xs font-semibold text-slate-600 block mb-1">Nomor Virtual Account (VA):</span>
-                            <div class="flex items-center gap-2">
-                                <div class="flex-1 bg-white border border-slate-300 rounded-xl px-4 py-2.5 font-mono font-extrabold text-base text-slate-900 tracking-wider">
-                                    {{ $charge['va_number'] ?? ('8800' . str_pad($order->id, 8, '0', STR_PAD_LEFT)) }}
-                                </div>
-                                <button type="button" @click="copyText('{{ $charge['va_number'] ?? ('8800' . str_pad($order->id, 8, '0', STR_PAD_LEFT)) }}')"
-                                        class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer">
-                                    <i :class="copied ? 'fa-solid fa-check text-emerald-400' : 'fa-regular fa-copy'"></i>
-                                    <span x-text="copied ? 'Tersalin!' : 'Salin'"></span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="space-y-1.5 text-[11px] text-slate-500 pt-2">
-                            <p class="font-semibold text-slate-700">Panduan Pembayaran Virtual Account:</p>
-                            <ol class="list-decimal list-inside space-y-0.5 ml-1">
-                                <li>Buka Mobile Banking atau ATM bank Anda.</li>
-                                <li>Pilih menu <strong>Transfer / Pembayaran</strong> &gt; <strong>Virtual Account</strong>.</li>
-                                <li>Masukkan nomor Virtual Account di atas dan pastikan nominal sesuai.</li>
-                                <li>Konfirmasi transaksi. Status pesanan akan otomatis terverifikasi tanpa perlu upload struk!</li>
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- 3. TAB MANUAL TRANSFER & UPLOAD STRUK --}}
+                {{-- 4. TAB MANUAL TRANSFER & UPLOAD STRUK --}}
                 <div x-show="activeTab === 'manual'" x-cloak class="space-y-4 pt-1">
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3"
                          x-data="{

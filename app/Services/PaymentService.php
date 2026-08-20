@@ -85,9 +85,18 @@ class PaymentService
             'va_bri'     => '8804',
         ];
 
+        $bankNames = [
+            'va_bca'     => 'Bank BCA',
+            'va_mandiri' => 'Bank Mandiri',
+            'va_bni'     => 'Bank BNI',
+            'va_bri'     => 'Bank BRI (BRIVA)',
+        ];
+
         $vaNumber = null;
         if (isset($vaPrefixes[$paymentMethod])) {
             $vaNumber = $vaPrefixes[$paymentMethod] . '99' . $orderIdPad;
+        } else {
+            $vaNumber = '880199' . $orderIdPad;
         }
 
         // Generate QR code data payload
@@ -98,6 +107,7 @@ class PaymentService
         return [
             'reference'      => $reference,
             'payment_method' => $paymentMethod,
+            'bank_name'      => $bankNames[$paymentMethod] ?? 'Bank BCA',
             'amount'         => $total,
             'va_number'      => $vaNumber,
             'qris_data'      => $qrisData,
