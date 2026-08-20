@@ -56,7 +56,7 @@
         <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-slate-50/50">
             <div>
                 <h3 class="font-bold text-xs sm:text-sm text-slate-900 uppercase tracking-wider">Daftar Semua Kategori</h3>
-                <p class="text-xs text-slate-400 mt-0.5">Klasifikasi produk yang aktif di marketplace BelanjaIn</p>
+                <p class="text-xs text-slate-400 mt-0.5">Klasifikasi produk yang aktif di marketplace SakserShop</p>
             </div>
             <form action="{{ route('admin.categories.index') }}" method="GET" class="relative">
                 <input type="text" name="search" value="{{ $search }}" class="input text-xs pl-8 pr-4 h-8.5 rounded-md w-full sm:w-64" placeholder="Cari nama atau slug...">

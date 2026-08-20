@@ -29,7 +29,7 @@ class OtpMail extends Mailable
         $subject = $this->type === 'register' ? 'Verifikasi Pendaftaran Akun' : 'Verifikasi Perubahan Email';
         
         return new Envelope(
-            subject: $subject . ' - ' . config('app.name', 'BelanjaIn'),
+            subject: $subject . ' - ' . config('app.name', 'SakserShop'),
         );
     }
 

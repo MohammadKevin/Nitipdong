@@ -22,7 +22,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
             <div class="lg:col-span-8 space-y-4">
                 @php
-                    $groupedCarts = $carts->groupBy(fn($item) => $item->product->store->name ?? 'Official Store BelanjaIn');
+                    $groupedCarts = $carts->groupBy(fn($item) => $item->product->store->name ?? 'Official Store SakserShop');
                 @endphp
 
                 @foreach($groupedCarts as $storeName => $items)

@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="title">
-        Lacak Pengiriman Pesanan #{{ $order->invoice_number }} — BelanjaIn
+        Lacak Pengiriman Pesanan #{{ $order->invoice_number }} — SakserShop
     </x-slot>
 
     {{-- Leaflet Maps CSS & JS --}}

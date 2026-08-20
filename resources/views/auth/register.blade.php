@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
-            Buat Akun BelanjaIn
+            Buat Akun SakserShop
         </h1>
         <p class="text-xs text-slate-500 mt-1">Daftar sekarang untuk mulai berbelanja dan menikmati voucher eksklusif</p>
     </div>

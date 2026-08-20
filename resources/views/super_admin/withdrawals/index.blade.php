@@ -1,6 +1,6 @@
 <x-super-admin-layout>
     <x-slot name="title">
-        Manajemen Payout & Penarikan Dana - {{ config('app.name', 'BelanjaIn') }}
+        Manajemen Payout & Penarikan Dana - {{ config('app.name', 'SakserShop') }}
     </x-slot>
 
     <div class="space-y-6" x-data="{

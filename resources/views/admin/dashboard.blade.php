@@ -1,6 +1,6 @@
 <x-admin-layout>
     <x-slot name="title">
-        Persetujuan Toko - {{ config('app.name', 'BelanjaIn') }}
+        Persetujuan Toko - {{ config('app.name', 'SakserShop') }}
     </x-slot>
 
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-2">
@@ -8,7 +8,7 @@
             <h1 class="text-xl font-bold text-slate-900 tracking-tight">
                 Persetujuan Toko & Moderasi Merchant
             </h1>
-            <p class="text-xs text-slate-500 mt-0.5">Tinjau dan verifikasi permohonan pembukaan toko baru dari pengguna BelanjaIn.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Tinjau dan verifikasi permohonan pembukaan toko baru dari pengguna SakserShop.</p>
         </div>
         
         <div class="flex items-center gap-3">

@@ -30,7 +30,7 @@ class AiAssistantController extends Controller
                 $activeFlashSale = FlashSale::active()->first();
                 $flashSaleInfo = $activeFlashSale ? "Ada sesi Flash Sale aktif bernama '{$activeFlashSale->name}'." : "Saat ini belum ada sesi Flash Sale aktif.";
 
-                $systemPrompt = "Kamu adalah Asisten AI resmi yang ramah dan cerdas untuk platform marketplace e-commerce 'BelanjaIn' (Indonesia).
+                $systemPrompt = "Kamu adalah Asisten AI resmi yang ramah dan cerdas untuk platform marketplace e-commerce 'SakserShop' (Indonesia).
 Informasi Platform:
 - Kategori yang tersedia: {$categories}.
 - Info Promo: {$flashSaleInfo}
@@ -75,11 +75,11 @@ Jawablah dengan bahasa Indonesia yang sopan, ramah, ringkas, dan jelas dalam for
         $lower = strtolower($message);
 
         if (Str::contains($lower, ['halo', 'hai', 'hi', 'pagi', 'siang', 'sore', 'malam', 'assalamualaikum'])) {
-            return "Halo! 👋 Selamat datang di **BelanjaIn**.\n\nAda yang bisa saya bantu hari ini? Anda bisa menanyakan seputar:\n- 🛍️ **Cara Belanja & Checkout**\n- 🏪 **Cara Buka Toko & Jualan**\n- ⚡ **Info Flash Sale & Diskon**\n- 🎟️ **Cara Menggunakan Voucher**\n- 📦 **Cek Pesanan & Pengiriman**";
+            return "Halo! 👋 Selamat datang di **SakserShop**.\n\nAda yang bisa saya bantu hari ini? Anda bisa menanyakan seputar:\n- 🛍️ **Cara Belanja & Checkout**\n- 🏪 **Cara Buka Toko & Jualan**\n- ⚡ **Info Flash Sale & Diskon**\n- 🎟️ **Cara Menggunakan Voucher**\n- 📦 **Cek Pesanan & Pengiriman**";
         }
 
         if (Str::contains($lower, ['buka toko', 'daftar toko', 'jualan', 'seller', 'buat toko'])) {
-            return "Untuk **membuka toko dan mulai berjualan** di BelanjaIn:\n1. Masuk ke menu profil lalu klik **Buka Toko Gratis** (atau akses rute `/customer/store/register`).\n2. Isi nama toko, domain/slug toko, dan deskripsi singkat.\n3. Tunggu persetujuan dari Admin BelanjaIn.\n4. Setelah disetujui, Anda dapat langsung mengakses **Seller Center** untuk mengunggah produk dan mengatur voucher!";
+            return "Untuk **membuka toko dan mulai berjualan** di SakserShop:\n1. Masuk ke menu profil lalu klik **Buka Toko Gratis** (atau akses rute `/customer/store/register`).\n2. Isi nama toko, domain/slug toko, dan deskripsi singkat.\n3. Tunggu persetujuan dari Admin SakserShop.\n4. Setelah disetujui, Anda dapat langsung mengakses **Seller Center** untuk mengunggah produk dan mengatur voucher!";
         }
 
         if (Str::contains($lower, ['flash sale', 'flashsale', 'diskon kilat', 'promo kilat'])) {
@@ -87,7 +87,7 @@ Jawablah dengan bahasa Indonesia yang sopan, ramah, ringkas, dan jelas dalam for
             if ($active) {
                 return "⚡ **Flash Sale Sedang Berlangsung!**\n\nSesi aktif saat ini: **{$active->name}**.\nDapatkan diskon spesial dengan kuota terbatas langsung di halaman beranda atau etalase produk!";
             }
-            return "⚡ Saat ini belum ada sesi Flash Sale yang aktif. Pantau terus halaman utama BelanjaIn untuk jadwal promo Flash Sale berikutnya!";
+            return "⚡ Saat ini belum ada sesi Flash Sale yang aktif. Pantau terus halaman utama SakserShop untuk jadwal promo Flash Sale berikutnya!";
         }
 
         if (Str::contains($lower, ['voucher', 'kupon', 'kode promo', 'diskon'])) {
@@ -98,18 +98,18 @@ Jawablah dengan bahasa Indonesia yang sopan, ramah, ringkas, dan jelas dalam for
                     $val = $v->type === 'percent' ? "{$v->amount}%" : "Rp " . number_format($v->amount, 0, ',', '.');
                     $list .= "- Kode **{$v->code}**: Diskon {$val} (Min. belanja Rp " . number_format($v->min_spend, 0, ',', '.') . ")\n";
                 }
-                return "🎟️ **Voucher Promo BelanjaIn yang Tersedia:**\n\n{$list}\nMasukkan kode kupon di atas saat proses checkout di keranjang belanja Anda!";
+                return "🎟️ **Voucher Promo SakserShop yang Tersedia:**\n\n{$list}\nMasukkan kode kupon di atas saat proses checkout di keranjang belanja Anda!";
             }
             return "🎟️ Voucher promo dapat Anda temukan di halaman utama. Salin kode kupon dan gunakan saat checkout untuk mendapatkan potongan harga!";
         }
 
         if (Str::contains($lower, ['cara belanja', 'checkout', 'beli', 'bayar', 'pembayaran'])) {
-            return "🛒 **Cara Belanja Mudah di BelanjaIn:**\n1. Pilih produk yang Anda inginkan lalu klik **Beli Sekarang** atau **+ Keranjang**.\n2. Masuk ke halaman **Keranjang Belanja** dan klik **Lanjut ke Checkout**.\n3. Masukkan alamat pengiriman lengkap Anda.\n4. Lakukan pembayaran via transfer bank sesuai nominal invoice dan unggah bukti transfer.";
+            return "🛒 **Cara Belanja Mudah di SakserShop:**\n1. Pilih produk yang Anda inginkan lalu klik **Beli Sekarang** atau **+ Keranjang**.\n2. Masuk ke halaman **Keranjang Belanja** dan klik **Lanjut ke Checkout**.\n3. Masukkan alamat pengiriman lengkap Anda.\n4. Lakukan pembayaran via transfer bank sesuai nominal invoice dan unggah bukti transfer.";
         }
 
         if (Str::contains($lower, ['kategori', 'produk apa saja', 'jual apa'])) {
             $categories = Category::pluck('name')->implode(', ');
-            return "📦 **Kategori Produk di BelanjaIn:**\n\n{$categories}.\n\nJelajahi berbagai pilihan produk berkualitas dengan memilih kategori di bagian atas navigasi.";
+            return "📦 **Kategori Produk di SakserShop:**\n\n{$categories}.\n\nJelajahi berbagai pilihan produk berkualitas dengan memilih kategori di bagian atas navigasi.";
         }
 
         if (Str::contains($lower, ['pesanan', 'status', 'resi', 'kirim', 'pengiriman'])) {
@@ -117,9 +117,9 @@ Jawablah dengan bahasa Indonesia yang sopan, ramah, ringkas, dan jelas dalam for
         }
 
         if (Str::contains($lower, ['terima kasih', 'makasih', 'thanks', 'oke', 'ok', 'siap'])) {
-            return "Sama-sama! 😊 Senang bisa membantu Anda. Selamat berbelanja di **BelanjaIn**!";
+            return "Sama-sama! 😊 Senang bisa membantu Anda. Selamat berbelanja di **SakserShop**!";
         }
 
-        return "Terima kasih telah bertanya! 😊\n\nSebagai Asisten AI **BelanjaIn**, saya dapat membantu Anda seputar informasi produk, cara belanja, pembukaan toko, voucher promo, hingga status pesanan.\n\nSilakan ketik pertanyaan spesifik Anda atau pilih topik yang ingin Anda ketahui!";
+        return "Terima kasih telah bertanya! 😊\n\nSebagai Asisten AI **SakserShop**, saya dapat membantu Anda seputar informasi produk, cara belanja, pembukaan toko, voucher promo, hingga status pesanan.\n\nSilakan ketik pertanyaan spesifik Anda atau pilih topik yang ingin Anda ketahui!";
     }
 }

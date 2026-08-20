@@ -90,7 +90,7 @@
                     <span class="w-2.5 h-2.5 rounded-full bg-cyan-600"></span>
                     <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Akun & Riwayat Belanja</h1>
                 </div>
-                <p class="text-xs text-slate-500 mt-1">Pantau status pesanan, kelola alamat pengiriman, dan kelola akun belanja Anda di BelanjaIn</p>
+                <p class="text-xs text-slate-500 mt-1">Pantau status pesanan, kelola alamat pengiriman, dan kelola akun belanja Anda di SakserShop</p>
             </div>
             <div class="flex items-center gap-2 relative z-10 shrink-0">
                 <a href="{{ url('/products') }}" class="btn-primary text-xs h-9 px-4 rounded-xl bg-cyan-700 hover:bg-cyan-800 flex items-center gap-2 shadow-xs transition-all">
@@ -517,7 +517,7 @@
                                             @else
                                                 <div class="flex items-center gap-1.5 font-bold text-slate-800">
                                                     <i class="fa-solid fa-store text-cyan-700 text-xs"></i>
-                                                    <span>{{ $order->store->name ?? 'Official Store BelanjaIn' }}</span>
+                                                    <span>{{ $order->store->name ?? 'Official Store SakserShop' }}</span>
                                                 </div>
                                             @endif
                                             <span class="text-slate-300">|</span>

@@ -69,7 +69,7 @@ class DuitkuPaymentController extends Controller
         $itemDetails = [];
         foreach ($order->orderItems as $item) {
             $itemDetails[] = [
-                'name'     => substr($item->product->name ?? 'Produk BelanjaIn', 0, 50),
+                'name'     => substr($item->product->name ?? 'Produk SakserShop', 0, 50),
                 'price'    => (int) $item->price,
                 'quantity' => (int) $item->quantity,
             ];

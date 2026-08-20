@@ -1,12 +1,12 @@
 <x-admin-layout>
     <x-slot name="title">
-        Moderasi Produk - {{ config('app.name', 'BelanjaIn') }}
+        Moderasi Produk - {{ config('app.name', 'SakserShop') }}
     </x-slot>
 
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-2">
         <div>
             <h1 class="text-xl font-bold text-slate-900 tracking-tight">Moderasi & Kontrol Produk</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Pantau dan kelola seluruh etalase produk toko di platform BelanjaIn.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Pantau dan kelola seluruh etalase produk toko di platform SakserShop.</p>
         </div>
     </div>
 

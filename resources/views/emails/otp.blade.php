@@ -19,15 +19,15 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>BelanjaIn</h1>
+            <h1>SakserShop</h1>
         </div>
         <div class="content">
             <h2>Halo, {{ $name }}!</h2>
             
             @if($type === 'register')
-                <p>Terima kasih telah mendaftar di <strong>BelanjaIn</strong>. Untuk mengamankan akun Anda, silakan gunakan kode OTP berikut untuk menyelesaikan proses pendaftaran.</p>
+                <p>Terima kasih telah mendaftar di <strong>SakserShop</strong>. Untuk mengamankan akun Anda, silakan gunakan kode OTP berikut untuk menyelesaikan proses pendaftaran.</p>
             @else
-                <p>Anda menerima email ini karena ada permintaan untuk mengubah alamat email pada akun <strong>BelanjaIn</strong> Anda. Silakan masukkan kode OTP berikut untuk melanjutkan.</p>
+                <p>Anda menerima email ini karena ada permintaan untuk mengubah alamat email pada akun <strong>SakserShop</strong> Anda. Silakan masukkan kode OTP berikut untuk melanjutkan.</p>
             @endif
 
             <div class="otp-box">
@@ -37,7 +37,7 @@
             <p style="font-size: 13px; color: #b3aca0; margin-bottom: 0;">Kode OTP ini hanya berlaku selama 15 menit. Mohon jangan berikan kode ini kepada siapa pun.</p>
         </div>
         <div class="footer">
-            <p>&copy; {{ date('Y') }} BelanjaIn. Hak Cipta Dilindungi.</p>
+            <p>&copy; {{ date('Y') }} SakserShop. Hak Cipta Dilindungi.</p>
         </div>
     </div>
 </body>

@@ -5,7 +5,7 @@
             <a href="{{ route('customer.cart.index') }}" class="text-slate-500 hover:text-cyan-700">
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
-            <h1 class="text-xl font-bold text-slate-900">Pilih Voucher BelanjaIn</h1>
+            <h1 class="text-xl font-bold text-slate-900">Pilih Voucher SakserShop</h1>
         </div>
 
         @if(session('success'))

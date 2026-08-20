@@ -1,6 +1,6 @@
 <x-seller-layout>
     <x-slot name="title">
-        Dompet Toko & Penarikan Dana - {{ config('app.name', 'BelanjaIn') }}
+        Dompet Toko & Penarikan Dana - {{ config('app.name', 'SakserShop') }}
     </x-slot>
 
     <div class="space-y-6" x-data="{

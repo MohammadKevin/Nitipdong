@@ -83,8 +83,8 @@ class OrderTrackingController extends Controller
 
         // Generate realistic courier data
         $courierDrivers = [
-            ['name' => 'Budi Santoso', 'plate' => 'B 4821 KEV', 'phone' => '0812-8921-3829', 'exp' => 'BelanjaIn Express (Instant)'],
-            ['name' => 'Rian Pratama', 'plate' => 'B 6291 TRZ', 'phone' => '0857-1928-4721', 'exp' => 'BelanjaIn Express (Reguler)'],
+            ['name' => 'Budi Santoso', 'plate' => 'B 4821 KEV', 'phone' => '0812-8921-3829', 'exp' => 'SakserShop Express (Instant)'],
+            ['name' => 'Rian Pratama', 'plate' => 'B 6291 TRZ', 'phone' => '0857-1928-4721', 'exp' => 'SakserShop Express (Reguler)'],
             ['name' => 'Ahmad Fauzi', 'plate' => 'B 3019 WQA', 'phone' => '0878-3921-8840', 'exp' => 'J&T Express Cargo'],
             ['name' => 'Hendra Setiawan', 'plate' => 'B 5512 PLM', 'phone' => '0813-7721-9042', 'exp' => 'SiCepat Reguler'],
         ];
@@ -144,7 +144,7 @@ class OrderTrackingController extends Controller
 
         $checkpoints[] = [
             'title'     => 'Pesanan Berhasil Dibuat & Pembayaran Terkonfirmasi',
-            'location'  => 'Sistem BelanjaIn Marketplace',
+            'location'  => 'Sistem SakserShop Marketplace',
             'time'      => $order->created_at->format('d M Y, H:i'),
             'icon'      => 'fa-receipt',
             'status'    => 'done',

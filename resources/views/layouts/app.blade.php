@@ -5,8 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'BelanjaIn') }} — Belanja Online Mudah, Cepat & Aman</title>
-        <meta name="description" content="BelanjaIn — Marketplace terpercaya di Indonesia. Belanja jutaan produk original, flash sale kilat diskon hingga 70%, dan voucher gratis ongkir Rp0 ke seluruh Indonesia.">
+        <title>{{ config('app.name', 'SakserShop') }} — Belanja Online Mudah, Cepat & Aman</title>
+        <meta name="description" content="SakserShop — Marketplace terpercaya di Indonesia. Belanja jutaan produk original, flash sale kilat diskon hingga 70%, dan voucher gratis ongkir Rp0 ke seluruh Indonesia.">
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,7 +27,7 @@
             <div class="page-container flex items-center justify-between">
                 <div class="flex items-center gap-3 text-slate-400">
                     <a href="{{ route('store.register') }}" class="hover:text-cyan-300 font-medium transition-colors flex items-center gap-1">
-                        <i class="fa-solid fa-store text-[10px] text-cyan-400"></i> Mulai Jual di BelanjaIn
+                        <i class="fa-solid fa-store text-[10px] text-cyan-400"></i> Mulai Jual di SakserShop
                     </a>
                     <span class="text-slate-700">|</span>
                     <a href="#" class="hover:text-cyan-300 transition-colors flex items-center gap-1">
@@ -78,15 +78,15 @@
             <div class="page-container py-12">
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-8 pb-10 border-b border-slate-100">
                     
-                    {{-- Col 1 & 2: About BelanjaIn --}}
+                    {{-- Col 1 & 2: About SakserShop --}}
                     <div class="md:col-span-2 space-y-4">
                         <div class="flex items-center gap-2.5">
                             <div class="w-9 h-9 rounded-xl overflow-hidden bg-cyan-50 border border-cyan-200 flex items-center justify-center shadow-xs">
-                                <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-full h-full object-cover">
+                                <img src="{{ asset('img/icon.jpg') }}" alt="SakserShop Logo" class="w-full h-full object-cover">
                             </div>
                             <div>
                                 <span class="font-bold text-lg text-slate-900 tracking-tight block leading-none">
-                                    Belanja<span class="text-cyan-600 font-black">In</span>
+                                    Sakser<span class="text-cyan-600 font-black">Shop</span>
                                 </span>
                                 <span class="text-[9px] font-bold text-cyan-700 uppercase tracking-wider">Marketplace Indonesia</span>
                             </div>
@@ -122,14 +122,14 @@
                             <li><a href="#" class="hover:text-cyan-700 transition-colors">Cara Membeli</a></li>
                             <li><a href="#" class="hover:text-cyan-700 transition-colors">Pengiriman & Pelacakan</a></li>
                             <li><a href="#" class="hover:text-cyan-700 transition-colors">Pengembalian Barang & Dana</a></li>
-                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Garansi BelanjaIn</a></li>
+                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Garansi SakserShop</a></li>
                             <li><a href="#" class="hover:text-cyan-700 transition-colors">Hubungi Kami 24/7</a></li>
                         </ul>
                     </div>
 
-                    {{-- Col 4: Jelajahi BelanjaIn --}}
+                    {{-- Col 4: Jelajahi SakserShop --}}
                     <div>
-                        <h4 class="font-bold text-slate-900 mb-3.5 text-xs uppercase tracking-wider">Jelajahi BelanjaIn</h4>
+                        <h4 class="font-bold text-slate-900 mb-3.5 text-xs uppercase tracking-wider">Jelajahi SakserShop</h4>
                         <ul class="space-y-2 text-xs">
                             <li><a href="{{ url('/products') }}" class="hover:text-cyan-700 transition-colors">Semua Produk</a></li>
                             <li><a href="{{ url('/products?flash_sale=1') }}" class="hover:text-cyan-700 transition-colors">Flash Sale Kilat</a></li>
@@ -166,7 +166,7 @@
 
                 {{-- Bottom Copyright & Security --}}
                 <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-400">
-                    <p>&copy; {{ date('Y') }} PT BelanjaIn Niaga Nusantara. Hak Cipta Dilindungi.</p>
+                    <p>&copy; {{ date('Y') }} PT SakserShop Niaga Nusantara. Hak Cipta Dilindungi.</p>
                     <div class="flex items-center gap-4">
                         <span class="flex items-center gap-1 text-emerald-600 font-semibold">
                             <i class="fa-solid fa-shield-check text-xs"></i> 100% Verified SSL Secure

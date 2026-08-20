@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'BelanjaIn') }} — Autentikasi Akun</title>
+    <title>{{ config('app.name', 'SakserShop') }} — Autentikasi Akun</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,10 +23,10 @@
             <div class="relative z-10 flex items-center justify-between">
                 <a href="/" class="flex items-center gap-2.5 group">
                     <div class="w-8 h-8 rounded-lg overflow-hidden border border-cyan-400/40 bg-cyan-950 flex items-center justify-center">
-                        <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-full h-full object-cover">
+                        <img src="{{ asset('img/icon.jpg') }}" alt="SakserShop Logo" class="w-full h-full object-cover">
                     </div>
                     <span class="font-bold text-lg tracking-tight text-white leading-tight">
-                        Belanja<span class="text-cyan-400 font-extrabold">In</span>
+                        Sakser<span class="text-cyan-400 font-extrabold">Shop</span>
                     </span>
                 </a>
                 <a href="/" class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors">
@@ -44,7 +44,7 @@
                     Pusat Belanja & Toko Online Masa Depan
                 </h2>
                 <p class="text-sm text-slate-300 mt-3 leading-relaxed">
-                    Akses jutaan produk pilihan, kelola pesanan real-time, atau mulai bisnis digital toko resmi Anda bersama ekosistem BelanjaIn.
+                    Akses jutaan produk pilihan, kelola pesanan real-time, atau mulai bisnis digital toko resmi Anda bersama ekosistem SakserShop.
                 </p>
 
                 <div class="grid grid-cols-2 gap-3.5 mt-8 pt-8 border-t border-slate-800 text-xs">
@@ -60,7 +60,7 @@
             </div>
 
             <div class="relative z-10 text-[11px] text-slate-500">
-                &copy; {{ date('Y') }} BelanjaIn Platform. Hak Cipta Dilindungi.
+                &copy; {{ date('Y') }} SakserShop Platform. Hak Cipta Dilindungi.
             </div>
         </div>
 
@@ -72,9 +72,9 @@
 
             <div class="lg:hidden flex items-center gap-2.5 mb-8">
                 <div class="w-8 h-8 rounded-lg overflow-hidden border border-cyan-200 bg-cyan-50 flex items-center justify-center">
-                    <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-full h-full object-cover">
+                    <img src="{{ asset('img/icon.jpg') }}" alt="SakserShop Logo" class="w-full h-full object-cover">
                 </div>
-                <span class="text-xl font-bold text-slate-900 tracking-tight">Belanja<span class="text-cyan-600 font-extrabold">In</span></span>
+                <span class="text-xl font-bold text-slate-900 tracking-tight">Sakser<span class="text-cyan-600 font-extrabold">Shop</span></span>
             </div>
 
             <div class="w-full max-w-sm">

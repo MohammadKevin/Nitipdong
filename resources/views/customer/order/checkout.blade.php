@@ -381,7 +381,7 @@
                 @foreach($groupedCarts as $storeId => $items)
                     @php
                         $storeObj = $items->first()->product->store ?? null;
-                        $storeName = $storeObj ? $storeObj->name : 'Official Store BelanjaIn';
+                        $storeName = $storeObj ? $storeObj->name : 'Official Store SakserShop';
                         $shippingInfo = $storeShippingData[$storeId] ?? null;
                     @endphp
                     <div class="bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-card">

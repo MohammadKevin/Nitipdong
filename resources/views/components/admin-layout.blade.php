@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'Admin Dashboard - ' . config('app.name', 'BelanjaIn') }}</title>
+    <title>{{ $title ?? 'Admin Dashboard - ' . config('app.name', 'SakserShop') }}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,11 +24,11 @@
                     <div class="flex items-center gap-2.5 px-3 py-1 mb-6">
                         <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2.5 group">
                             <div class="w-8 h-8 rounded-lg overflow-hidden border border-cyan-400/30 bg-slate-950 flex items-center justify-center shrink-0">
-                                <img src="{{ asset('img/icon.jpg') }}" alt="BelanjaIn Logo" class="w-full h-full object-cover">
+                                <img src="{{ asset('img/icon.jpg') }}" alt="SakserShop Logo" class="w-full h-full object-cover">
                             </div>
                             <div class="min-w-0">
                                 <div class="flex items-center gap-2">
-                                    <p class="font-bold text-white text-sm leading-tight tracking-tight">Belanja<span class="text-cyan-400 font-extrabold">In</span></p>
+                                    <p class="font-bold text-white text-sm leading-tight tracking-tight">Sakser<span class="text-cyan-400 font-extrabold">Shop</span></p>
                                     <span class="text-[10px] font-semibold text-cyan-400 bg-cyan-950/60 border border-cyan-800/50 px-1.5 py-0.5 rounded tracking-normal">Admin Panel</span>
                                 </div>
                             </div>

@@ -5,7 +5,7 @@
         <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
             Selamat Datang Kembali
         </h1>
-        <p class="text-xs text-slate-500 mt-1">Masuk ke akun BelanjaIn Anda untuk melanjutkan transaksi</p>
+        <p class="text-xs text-slate-500 mt-1">Masuk ke akun SakserShop Anda untuk melanjutkan transaksi</p>
     </div>
 
     <form method="POST" action="{{ route('login') }}" class="space-y-4">
