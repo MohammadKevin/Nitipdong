@@ -16,6 +16,12 @@
         hoverRating: 0,
         copiedInvoice: null,
         showComplaintModal: false,
+        showCancelModal: false,
+        cancelData: {
+            invoiceNumber: '',
+            reason: 'Ingin mengubah metode pembayaran / salah pesan',
+            actionUrl: ''
+        },
         complaintData: {
             orderId: null,
             invoiceNumber: '',
@@ -23,6 +29,14 @@
             reason: 'Barang Rusak / Cacat',
             description: '',
             actionUrl: ''
+        },
+        openCancelModal(invoice, actionUrl) {
+            this.cancelData = {
+                invoiceNumber: invoice,
+                reason: 'Ingin mengubah metode pembayaran / salah pesan',
+                actionUrl: actionUrl
+            };
+            this.showCancelModal = true;
         },
         copyToClipboard(text) {
             navigator.clipboard.writeText(text);
@@ -111,6 +125,7 @@
             $shippedCount = $orders->where('status', 'shipped')->count();
             $completedCount = $orders->where('status', 'completed')->count();
             $cancelledCount = $orders->where('status', 'cancelled')->count();
+            $complaintCount = $orders->filter(fn($o) => $o->complaint !== null)->count();
             $totalOrdersCount = $orders->count();
 
             $wishlistCount = auth()->user()->wishlists()->count();
@@ -463,6 +478,17 @@
                                     </span>
                                 @endif
                             </button>
+
+                            <button type="button" @click="activeTab = 'complaint'"
+                                    :class="activeTab === 'complaint' ? 'bg-cyan-700 text-white font-semibold shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80 font-medium'"
+                                    class="px-3.5 py-1.5 rounded-xl whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer">
+                                <span>Komplain / Retur</span>
+                                @if($complaintCount > 0)
+                                    <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white font-bold">
+                                        {{ $complaintCount }}
+                                    </span>
+                                @endif
+                            </button>
                         </div>
                     </div>
 
@@ -475,7 +501,7 @@
                                     $itemSearchData = $order->orderItems->map(fn($it) => $it->product?->name ?? '')->join(' ');
                                     $searchBlob = strtolower($order->invoice_number . ' ' . ($order->store->name ?? '') . ' ' . $itemSearchData);
                                 @endphp
-                                <div x-show="(activeTab === 'all' || activeTab === '{{ $order->status }}') && (!searchQuery || '{{ addslashes($searchBlob) }}'.includes(searchQuery.toLowerCase()))"
+                                <div x-show="(activeTab === 'all' || (activeTab === 'complaint' ? {{ $order->complaint ? 'true' : 'false' }} : activeTab === '{{ $order->status }}')) && (!searchQuery || '{{ addslashes($searchBlob) }}'.includes(searchQuery.toLowerCase()))"
                                      class="border border-slate-200/90 rounded-2xl overflow-hidden shadow-xs hover:shadow-card hover:border-cyan-200 transition-all bg-white">
                                     {{-- Order Card Header --}}
                                     <div class="px-4 sm:px-5 py-3.5 bg-slate-50/80 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
@@ -646,6 +672,12 @@
                                             @endif
 
                                             @if($order->status === 'pending')
+                                                <button type="button"
+                                                        @click="openCancelModal('{{ $order->invoice_number }}', '{{ route('customer.order.cancel', $order) }}')"
+                                                        class="h-8 px-3 rounded-xl border border-rose-200 hover:border-rose-300 bg-white hover:bg-rose-50 text-rose-600 font-semibold text-xs flex items-center gap-1.5 transition-colors cursor-pointer" title="Batalkan Pesanan">
+                                                    <i class="fa-solid fa-xmark text-xs"></i>
+                                                    <span>Batalkan</span>
+                                                </button>
                                                 <a href="{{ route('customer.order.payment', $order) }}"
                                                    class="btn-primary text-xs h-8 px-4 rounded-xl flex items-center gap-1.5 bg-cyan-700 hover:bg-cyan-800 text-white font-semibold shadow-xs">
                                                     <i class="fa-solid fa-credit-card text-[11px]"></i>
@@ -845,6 +877,54 @@
                         </button>
                         <button type="submit" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold shadow-xs cursor-pointer">
                             Kirim Komplain
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {{-- Modal Batalkan Pesanan --}}
+        <div x-show="showCancelModal" x-cloak
+             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div @click.outside="showCancelModal = false"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 text-xs">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <h3 class="font-bold text-sm text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-xmark text-rose-600"></i> Batalkan Pesanan
+                    </h3>
+                    <button @click="showCancelModal = false" class="text-slate-400 hover:text-slate-600 w-7 h-7 rounded-lg flex items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer">
+                        <i class="fa-solid fa-xmark text-base"></i>
+                    </button>
+                </div>
+
+                <form :action="cancelData.actionUrl" method="POST" class="mt-4 space-y-4">
+                    @csrf
+                    <div class="p-3 bg-rose-50/60 rounded-xl border border-rose-200/80 text-rose-900 leading-relaxed">
+                        <p class="font-semibold text-xs">Konfirmasi Pembatalan</p>
+                        <p class="text-[11px] text-rose-700 mt-0.5">Apakah Anda yakin ingin membatalkan pesanan <span class="font-mono font-bold" x-text="'#' + cancelData.invoiceNumber"></span>? Stok barang akan segera dipulihkan.</p>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Pilih Alasan Pembatalan</label>
+                        <select name="reason" x-model="cancelData.reason" required class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs focus:border-cyan-600 font-medium">
+                            <option value="Ingin mengubah metode pembayaran / pesanan">Ingin mengubah metode pembayaran / pesanan</option>
+                            <option value="Ingin mengubah alamat pengiriman">Ingin mengubah alamat pengiriman</option>
+                            <option value="Ingin mengganti varian produk (warna/ukuran)">Ingin mengganti varian produk (warna/ukuran)</option>
+                            <option value="Menemukan harga yang lebih murah">Menemukan harga yang lebih murah</option>
+                            <option value="Tidak ingin melanjutkan pembelian">Tidak ingin melanjutkan pembelian</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-2 flex justify-end gap-2">
+                        <button type="button" @click="showCancelModal = false" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium cursor-pointer">
+                            Kembali
+                        </button>
+                        <button type="submit" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold shadow-xs cursor-pointer">
+                            Ya, Batalkan Pesanan
                         </button>
                     </div>
                 </form>

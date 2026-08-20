@@ -2,7 +2,31 @@
         mobileSearch: false,
         userOpen: false,
         notifOpen: false,
-        cartOpen: false
+        cartOpen: false,
+        searchQuery: '{{ addslashes(request('q', '')) }}',
+        searchSuggestions: { products: [], stores: [], categories: [] },
+        showSuggestions: false,
+        isLoadingSuggestions: false,
+        async fetchSuggestions() {
+            const q = this.searchQuery.trim();
+            if (q.length < 2) {
+                this.searchSuggestions = { products: [], stores: [], categories: [] };
+                this.showSuggestions = false;
+                return;
+            }
+            this.isLoadingSuggestions = true;
+            try {
+                const res = await fetch(`{{ route('api.search.suggestions') }}?q=${encodeURIComponent(q)}`);
+                if (res.ok) {
+                    this.searchSuggestions = await res.json();
+                    this.showSuggestions = (this.searchSuggestions.products.length > 0 || this.searchSuggestions.stores.length > 0 || this.searchSuggestions.categories.length > 0);
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.isLoadingSuggestions = false;
+            }
+        }
     }"
     class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-xs">
 
@@ -21,13 +45,16 @@
                 </div>
             </a>
 
-            <div class="flex-1 max-w-xl hidden md:flex flex-col justify-center">
+            {{-- Center Search Bar with Live Suggestions --}}
+            <div class="flex-1 max-w-xl hidden md:flex flex-col justify-center relative" @click.outside="showSuggestions = false">
                 <form action="{{ url('/products') }}" method="GET" class="w-full flex items-center relative">
                     <div class="relative w-full flex items-center">
-                        <input type="text" name="q" value="{{ request('q') }}"
+                        <input type="text" name="q" x-model="searchQuery"
+                               @input.debounce.250ms="fetchSuggestions()"
+                               @focus="if(searchQuery.trim().length >= 2) showSuggestions = true"
                                placeholder="Cari di BelanjaIn (contoh: Laptop, Sepatu, Smartwatch, TWS)..."
                                class="w-full h-10 pl-9 pr-24 rounded-xl border border-slate-200 bg-slate-50/70 text-xs focus:bg-white focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100 transition-all">
-                        <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3 text-xs"></i>
+                        <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3 text-xs" :class="isLoadingSuggestions ? 'animate-spin fa-spinner' : 'fa-magnifying-glass'"></i>
                         <div class="absolute right-1.5 flex items-center gap-1">
                             <span class="text-[10px] text-slate-400 font-mono hidden lg:inline-block px-1.5 py-0.5 bg-slate-200/60 rounded">Ctrl K</span>
                             <button type="submit" class="h-7 px-3.5 bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs rounded-lg shadow-xs transition-colors cursor-pointer">
@@ -36,6 +63,82 @@
                         </div>
                     </div>
                 </form>
+
+                {{-- Live Search Autocomplete PopUp --}}
+                <div x-show="showSuggestions" x-cloak
+                     x-transition:enter="transition ease-out duration-150"
+                     x-transition:enter-start="opacity-0 translate-y-1"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     class="absolute top-11 left-0 right-0 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden text-xs max-h-96 overflow-y-auto">
+                    
+                    {{-- Categories --}}
+                    <template x-if="searchSuggestions.categories && searchSuggestions.categories.length > 0">
+                        <div class="p-2 border-b border-slate-100 bg-slate-50/50">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">Kategori</span>
+                            <div class="flex items-center gap-2 mt-1 flex-wrap px-2">
+                                <template x-for="cat in searchSuggestions.categories" :key="cat.id">
+                                    <a :href="cat.url" class="px-2.5 py-1 bg-white hover:bg-cyan-50 text-slate-700 hover:text-cyan-700 rounded-lg border border-slate-200 text-[11px] font-semibold transition-colors flex items-center gap-1">
+                                        <i class="fa-solid fa-tag text-[9px] text-cyan-600"></i>
+                                        <span x-text="cat.name"></span>
+                                    </a>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    {{-- Stores --}}
+                    <template x-if="searchSuggestions.stores && searchSuggestions.stores.length > 0">
+                        <div class="p-2 border-b border-slate-100">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">Toko Resmi</span>
+                            <div class="space-y-1 mt-1">
+                                <template x-for="st in searchSuggestions.stores" :key="st.id">
+                                    <a :href="st.url" class="p-2 hover:bg-cyan-50/50 rounded-xl transition-colors flex items-center gap-2.5 block">
+                                        <div class="w-7 h-7 rounded-lg bg-cyan-100 text-cyan-700 font-bold flex items-center justify-center text-xs shrink-0">
+                                            <i class="fa-solid fa-store text-xs"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <span class="font-bold text-slate-800 text-xs truncate block" x-text="st.name"></span>
+                                            <span class="text-[10px] text-slate-400 truncate block" x-text="st.city"></span>
+                                        </div>
+                                        <span class="text-[10px] font-bold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-200">Official</span>
+                                    </a>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    {{-- Products --}}
+                    <template x-if="searchSuggestions.products && searchSuggestions.products.length > 0">
+                        <div class="p-2">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">Produk Terkait</span>
+                            <div class="space-y-1 mt-1">
+                                <template x-for="p in searchSuggestions.products" :key="p.id">
+                                    <a :href="p.url" class="p-2 hover:bg-cyan-50/50 rounded-xl transition-colors flex items-center gap-2.5 block">
+                                        <img :src="p.image_url" class="w-9 h-9 rounded-lg object-cover border border-slate-200 shrink-0" onerror="this.src='/img/icon.jpg'">
+                                        <div class="flex-1 min-w-0">
+                                            <span class="font-semibold text-slate-800 text-xs truncate block" x-text="p.name"></span>
+                                            <div class="flex items-center gap-1.5 mt-0.5">
+                                                <span class="font-bold text-cyan-800 text-xs" x-text="'Rp ' + Number(p.price).toLocaleString('id-ID')"></span>
+                                                <template x-if="p.has_discount">
+                                                    <span class="text-[10px] text-rose-500 font-bold bg-rose-50 px-1 rounded" x-text="'-' + p.discount_percentage + '%'"></span>
+                                                </template>
+                                            </div>
+                                        </div>
+                                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                                    </a>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div class="p-2 bg-slate-50 border-t border-slate-100 text-center">
+                        <button type="button" @click="$el.closest('form') ? $el.closest('form').submit() : window.location.href='/products?q=' + encodeURIComponent(searchQuery)"
+                                class="text-[11px] font-bold text-cyan-700 hover:underline">
+                            Lihat Semua Hasil Pencarian &rarr;
+                        </button>
+                    </div>
+                </div>
+
                 <div class="flex items-center gap-2 text-[10px] text-slate-400 mt-1 pl-1 font-medium overflow-hidden whitespace-nowrap">
                     <span class="text-slate-500 font-bold">Populer:</span>
                     <a href="{{ url('/products?q=Laptop') }}" class="hover:text-cyan-700 transition-colors truncate">Laptop Gaming</a>

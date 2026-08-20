@@ -76,4 +76,60 @@ class ProductController extends Controller
 
         return view('product.show', compact('product', 'storeProducts'));
     }
+
+    public function suggestions(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $q = trim($request->get('q', ''));
+        if (strlen($q) < 2) {
+            return response()->json(['products' => [], 'stores' => [], 'categories' => []]);
+        }
+
+        $products = Product::with(['store'])
+            ->where('is_active', true)
+            ->whereHas('store', fn ($sq) => $sq->where('status', 'approved'))
+            ->where(function ($sq) use ($q) {
+                $sq->where('name', 'like', "%{$q}%")
+                   ->orWhere('description', 'like', "%{$q}%");
+            })
+            ->take(5)
+            ->get()
+            ->map(fn ($p) => [
+                'id'                  => $p->id,
+                'name'                => $p->name,
+                'price'               => $p->final_price,
+                'original_price'      => $p->price,
+                'has_discount'        => $p->has_discount,
+                'discount_percentage' => $p->discount_percentage,
+                'image_url'           => $p->image_url,
+                'store_name'          => $p->store->name ?? 'BelanjaIn',
+                'url'                 => route('product.show', $p),
+            ]);
+
+        $stores = \App\Models\Store::where('status', 'approved')
+            ->where('name', 'like', "%{$q}%")
+            ->take(3)
+            ->get()
+            ->map(fn ($s) => [
+                'id'       => $s->id,
+                'name'     => $s->name,
+                'logo_url' => $s->logo_url,
+                'city'     => $s->city ?? 'Indonesia',
+                'url'      => route('store.show', $s),
+            ]);
+
+        $categories = Category::where('name', 'like', "%{$q}%")
+            ->take(3)
+            ->get()
+            ->map(fn ($c) => [
+                'id'   => $c->id,
+                'name' => $c->name,
+                'url'  => route('products.index', ['category' => $c->slug]),
+            ]);
+
+        return response()->json([
+            'products'   => $products,
+            'stores'     => $stores,
+            'categories' => $categories,
+        ]);
+    }
 }

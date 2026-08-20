@@ -431,4 +431,61 @@ class OrderController extends Controller
 
         return redirect()->route('customer.dashboard')->with('success', 'Pesanan berhasil diselesaikan! Silakan berikan ulasan untuk produk yang telah Anda terima.');
     }
+
+    public function cancel(Request $request, Order $order): RedirectResponse
+    {
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'Akses tidak sah.');
+        }
+
+        if (! in_array($order->status, ['pending', 'processing'])) {
+            return redirect()->route('customer.dashboard')->with('error', 'Pesanan yang sudah dikirim atau selesai tidak dapat dibatalkan.');
+        }
+
+        $reason = $request->input('reason', 'Dibatalkan oleh pembeli.');
+
+        DB::transaction(function () use ($order, $reason) {
+            $order->update([
+                'status' => 'cancelled',
+            ]);
+
+            // Restore stocks and adjust sold counts
+            foreach ($order->orderItems as $item) {
+                if ($item->product) {
+                    $item->product->increment('stock', $item->quantity);
+                    $item->product->decrement('sold_count', min($item->product->sold_count, $item->quantity));
+                }
+            }
+
+            // Restore voucher quota if used
+            if ($order->voucher_code) {
+                $voucher = Voucher::where('code', $order->voucher_code)->first();
+                if ($voucher) {
+                    $voucher->increment('quota');
+                }
+            }
+
+            // Send notification to buyer
+            AppNotification::send(
+                $order->user_id,
+                'Pesanan Dibatalkan',
+                "Pesanan #{$order->invoice_number} telah berhasil dibatalkan. Alasan: {$reason}",
+                'order',
+                route('customer.dashboard')
+            );
+
+            // Send notification to seller
+            if ($order->store && $order->store->user_id) {
+                AppNotification::send(
+                    $order->store->user_id,
+                    'Pesanan Dibatalkan Pembeli',
+                    "Pesanan #{$order->invoice_number} dibatalkan oleh pembeli. Alasan: {$reason}",
+                    'order',
+                    route('seller.orders.index')
+                );
+            }
+        });
+
+        return redirect()->route('customer.dashboard')->with('success', 'Pesanan berhasil dibatalkan.');
+    }
 }

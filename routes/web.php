@@ -74,8 +74,9 @@ Route::get('/', function () {
     return view('welcome', compact('products', 'categories', 'activeFlashSale', 'vouchers', 'officialStores'));
 })->name('home');
 
-// Public Product Catalog & Detail
+// Public Product Catalog, Detail & Suggestions
 Route::get('/products', [PublicProductController::class, 'index'])->name('products.index');
+Route::get('/api/search/suggestions', [PublicProductController::class, 'suggestions'])->name('api.search.suggestions');
 Route::get('/product/{product}', [PublicProductController::class, 'show'])->name('product.show');
 
 // Public Storefront (Etalase Toko)
@@ -211,6 +212,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/orders/{order}/duitku/create', [DuitkuPaymentController::class, 'createInvoice'])->name('order.duitku_create');
         Route::post('/orders/{order}/simulate-payment', [PaymentCallbackController::class, 'simulateInstantPayment'])->name('order.simulate_payment');
         Route::post('/orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('order.confirm_received');
+        Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('order.cancel');
 
         // Complaints Route
         Route::post('/orders/{order}/complaints', [CustomerComplaintController::class, 'store'])->name('complaints.store');
