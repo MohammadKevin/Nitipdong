@@ -584,13 +584,47 @@
                 @auth
                     @if(auth()->user()->role === 'customer')
                         @php $isWish = $prod->isWishlistedBy(auth()->user()); @endphp
-                        <form action="{{ route('customer.wishlist.toggle', $prod) }}" method="POST" class="absolute top-2 right-2 z-10">
-                            @csrf
-                            <button type="submit" title="{{ $isWish ? 'Hapus Wishlist' : 'Tambah Wishlist' }}"
-                                    class="w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm border border-slate-200 flex items-center justify-center text-xs transition-colors shadow-2xs {{ $isWish ? 'text-rose-600' : 'text-slate-400 hover:text-rose-600' }}">
-                                <i class="{{ $isWish ? 'fa-solid text-rose-600' : 'fa-regular' }} fa-heart"></i>
+                        <div x-data="{ isWish: {{ $isWish ? 'true' : 'false' }}, isToggling: false, bounce: false }" class="absolute top-2 right-2 z-20">
+                            <button type="button"
+                                    @click.prevent.stop="
+                                        if(isToggling) return;
+                                        isToggling = true;
+                                        bounce = true;
+                                        fetch('{{ route('customer.wishlist.toggle', $prod) }}', {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                'Accept': 'application/json',
+                                                'X-Requested-With': 'XMLHttpRequest'
+                                            }
+                                        })
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            isWish = data.is_wishlisted;
+                                            window.dispatchEvent(new CustomEvent('wishlist-updated', { detail: data }));
+                                            window.dispatchEvent(new CustomEvent('notify', {
+                                                detail: {
+                                                    title: data.is_wishlisted ? 'Ditambahkan ke Wishlist' : 'Dihapus dari Wishlist',
+                                                    message: data.message,
+                                                    type: data.is_wishlisted ? 'success' : 'info'
+                                                }
+                                            }));
+                                        })
+                                        .catch(err => console.error(err))
+                                        .finally(() => {
+                                            isToggling = false;
+                                            setTimeout(() => bounce = false, 600);
+                                        });
+                                    "
+                                    :title="isWish ? 'Hapus Wishlist' : 'Tambah Wishlist'"
+                                    class="w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm border flex items-center justify-center text-xs transition-all shadow-2xs cursor-pointer"
+                                    :class="[
+                                        isWish ? 'text-rose-600 border-rose-200 bg-rose-50/90' : 'text-slate-400 border-slate-200 hover:text-rose-600',
+                                        bounce ? 'scale-125' : ''
+                                    ]">
+                                <i class="fa-heart" :class="isWish ? 'fa-solid text-rose-600' : 'fa-regular'"></i>
                             </button>
-                        </form>
+                        </div>
                     @endif
                 @endauth
 
@@ -685,6 +719,54 @@
                     </div>
                 @endif
 
+                {{-- Wishlist Heart Button Top Right --}}
+                @auth
+                    @if(auth()->user()->role === 'customer')
+                        @php $isWish = $prod->isWishlistedBy(auth()->user()); @endphp
+                        <div x-data="{ isWish: {{ $isWish ? 'true' : 'false' }}, isToggling: false, bounce: false }" class="absolute top-2 right-2 z-20">
+                            <button type="button"
+                                    @click.prevent.stop="
+                                        if(isToggling) return;
+                                        isToggling = true;
+                                        bounce = true;
+                                        fetch('{{ route('customer.wishlist.toggle', $prod) }}', {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                'Accept': 'application/json',
+                                                'X-Requested-With': 'XMLHttpRequest'
+                                            }
+                                        })
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            isWish = data.is_wishlisted;
+                                            window.dispatchEvent(new CustomEvent('wishlist-updated', { detail: data }));
+                                            window.dispatchEvent(new CustomEvent('notify', {
+                                                detail: {
+                                                    title: data.is_wishlisted ? 'Ditambahkan ke Wishlist' : 'Dihapus dari Wishlist',
+                                                    message: data.message,
+                                                    type: data.is_wishlisted ? 'success' : 'info'
+                                                }
+                                            }));
+                                        })
+                                        .catch(err => console.error(err))
+                                        .finally(() => {
+                                            isToggling = false;
+                                            setTimeout(() => bounce = false, 600);
+                                        });
+                                    "
+                                    :title="isWish ? 'Hapus Wishlist' : 'Tambah Wishlist'"
+                                    class="w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm border flex items-center justify-center text-xs transition-all shadow-2xs cursor-pointer"
+                                    :class="[
+                                        isWish ? 'text-rose-600 border-rose-200 bg-rose-50/90' : 'text-slate-400 border-slate-200 hover:text-rose-600',
+                                        bounce ? 'scale-125' : ''
+                                    ]">
+                                <i class="fa-heart" :class="isWish ? 'fa-solid text-rose-600' : 'fa-regular'"></i>
+                            </button>
+                        </div>
+                    @endif
+                @endauth
+
                 {{-- Product Image --}}
                 <a href="{{ route('product.show', $prod) }}" class="relative aspect-square bg-slate-50 overflow-hidden block">
                     @if($prod->image_url)
@@ -759,6 +841,54 @@
                 <div class="absolute top-2 left-2 z-20 px-2 py-0.5 rounded-lg bg-cyan-700 text-white font-extrabold text-[9px] shadow-sm flex items-center gap-1 border border-cyan-500">
                     <i class="fa-solid fa-shield-check text-[8px]"></i> Official
                 </div>
+
+                {{-- Wishlist Heart Button Top Right --}}
+                @auth
+                    @if(auth()->user()->role === 'customer')
+                        @php $isWish = $prod->isWishlistedBy(auth()->user()); @endphp
+                        <div x-data="{ isWish: {{ $isWish ? 'true' : 'false' }}, isToggling: false, bounce: false }" class="absolute top-2 right-2 z-20">
+                            <button type="button"
+                                    @click.prevent.stop="
+                                        if(isToggling) return;
+                                        isToggling = true;
+                                        bounce = true;
+                                        fetch('{{ route('customer.wishlist.toggle', $prod) }}', {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                'Accept': 'application/json',
+                                                'X-Requested-With': 'XMLHttpRequest'
+                                            }
+                                        })
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            isWish = data.is_wishlisted;
+                                            window.dispatchEvent(new CustomEvent('wishlist-updated', { detail: data }));
+                                            window.dispatchEvent(new CustomEvent('notify', {
+                                                detail: {
+                                                    title: data.is_wishlisted ? 'Ditambahkan ke Wishlist' : 'Dihapus dari Wishlist',
+                                                    message: data.message,
+                                                    type: data.is_wishlisted ? 'success' : 'info'
+                                                }
+                                            }));
+                                        })
+                                        .catch(err => console.error(err))
+                                        .finally(() => {
+                                            isToggling = false;
+                                            setTimeout(() => bounce = false, 600);
+                                        });
+                                    "
+                                    :title="isWish ? 'Hapus Wishlist' : 'Tambah Wishlist'"
+                                    class="w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm border flex items-center justify-center text-xs transition-all shadow-2xs cursor-pointer"
+                                    :class="[
+                                        isWish ? 'text-rose-600 border-rose-200 bg-rose-50/90' : 'text-slate-400 border-slate-200 hover:text-rose-600',
+                                        bounce ? 'scale-125' : ''
+                                    ]">
+                                <i class="fa-heart" :class="isWish ? 'fa-solid text-rose-600' : 'fa-regular'"></i>
+                            </button>
+                        </div>
+                    @endif
+                @endauth
 
                 {{-- Product Image --}}
                 <a href="{{ route('product.show', $prod) }}" class="relative aspect-square bg-slate-50 overflow-hidden block">

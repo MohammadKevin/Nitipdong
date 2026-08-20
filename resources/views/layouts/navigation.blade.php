@@ -18,10 +18,34 @@
         'update_url'    => route('customer.cart.update', $c),
         'delete_url'    => route('customer.cart.destroy', $c),
     ])->values();
+
+    $initialWishlistCount = auth()->check() && auth()->user()->role === 'customer' ? auth()->user()->wishlists()->count() : 0;
+    $initialWishlists = auth()->check() && auth()->user()->role === 'customer'
+        ? auth()->user()->wishlists()->with(['product.store'])->latest()->get()
+        : collect();
+    $initialWishlistList = $initialWishlists->map(function($w) {
+        $p = $w->product;
+        if (!$p) return null;
+        return [
+            'id'             => $w->id,
+            'product_id'     => $p->id,
+            'name'           => $p->name,
+            'price'          => (float) $p->final_price,
+            'original_price' => (float) $p->price,
+            'has_discount'   => (bool) $p->has_discount,
+            'discount_percentage' => (int) $p->discount_percentage_effective,
+            'image_url'      => $p->image_url ?? asset('img/saksershop-logo.png'),
+            'product_url'    => route('product.show', $p),
+            'store_name'     => $p->store->name ?? 'Official Store',
+            'delete_url'     => route('customer.wishlist.destroy', $w),
+            'cart_store_url' => route('customer.cart.store', $p),
+        ];
+    })->filter()->values();
 @endphp
 
 <nav x-data="navbarComponent()"
     @cart-updated.window="handleCartUpdated()"
+    @wishlist-updated.window="handleWishlistUpdated($event)"
     class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-xs">
 
     <div class="page-container">
@@ -160,14 +184,93 @@
                     @endphp
 
                     @if(auth()->user()->role === 'customer')
-                    <a href="{{ route('customer.wishlist.index') }}" aria-label="Wishlist" class="btn-icon relative" title="Wishlist & Produk Favorit">
-                        <i class="fa-regular fa-heart text-sm text-slate-600"></i>
-                        @if($wishlistCount > 0)
-                            <span class="absolute top-1 right-1 min-w-[15px] h-3.5 px-0.5 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white">
-                                {{ $wishlistCount > 99 ? '99+' : $wishlistCount }}
+                    {{-- PopUp Mini-Wishlist Dropdown --}}
+                    <div class="relative" @click.outside="wishlistOpen = false">
+                        <button type="button" id="nav-wishlist-btn" @click="wishlistOpen = !wishlistOpen" aria-label="Wishlist Saya"
+                                class="btn-icon relative cursor-pointer transition-transform duration-300"
+                                :class="wishlistBounce ? 'scale-125 text-rose-600' : ''"
+                                title="Wishlist & Produk Favorit">
+                            <i class="fa-solid fa-heart text-sm" :class="wishlistCount > 0 ? 'text-rose-500' : 'text-slate-600'"></i>
+                            <span x-show="wishlistCount > 0"
+                                  class="absolute top-1 right-1 min-w-[15px] h-3.5 px-0.5 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center ring-2 ring-white transition-all"
+                                  :class="wishlistBounce ? 'scale-125 ring-rose-200' : ''"
+                                  x-text="wishlistCount > 99 ? '99+' : wishlistCount">
                             </span>
-                        @endif
-                    </a>
+                        </button>
+
+                        {{-- Dropdown Container --}}
+                        <div x-show="wishlistOpen" x-cloak
+                             x-transition:enter="transition ease-out duration-150"
+                             x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-100"
+                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                             class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200/90 z-50 overflow-hidden text-xs">
+                            
+                            {{-- Header --}}
+                            <div class="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+                                <div class="flex items-center gap-1.5 font-bold text-slate-900">
+                                    <i class="fa-solid fa-heart text-rose-500"></i>
+                                    <span>Wishlist Saya (<span x-text="wishlistCount"></span>)</span>
+                                </div>
+                                <a href="{{ route('customer.wishlist.index') }}" @click="wishlistOpen = false" class="text-[11px] font-semibold text-cyan-700 hover:text-cyan-800 hover:underline">
+                                    Lihat Semua
+                                </a>
+                            </div>
+
+                            {{-- Body List (With Scrollbar if > 1 / multiple items) --}}
+                            <template x-if="wishlistItems.length > 0">
+                                <div class="divide-y divide-slate-100 max-h-80 overflow-y-auto p-1.5 scrollbar-thin">
+                                    <template x-for="item in wishlistItems" :key="item.id">
+                                        <div class="p-2.5 hover:bg-slate-50/80 rounded-xl transition-colors flex items-center gap-2.5">
+                                            <a :href="item.product_url" @click="wishlistOpen = false" class="shrink-0">
+                                                <img :src="item.image_url" :alt="item.name" class="w-12 h-12 rounded-lg object-cover border border-slate-200" onerror="this.src='/img/saksershop-logo.png'">
+                                            </a>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-start justify-between gap-1">
+                                                    <a :href="item.product_url" @click="wishlistOpen = false" class="font-semibold text-slate-800 text-xs truncate hover:text-cyan-700 transition-colors block" x-text="item.name"></a>
+                                                    <button type="button" @click="deleteWishlistItem(item)"
+                                                            class="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-1 rounded-lg transition-colors cursor-pointer" title="Hapus dari wishlist">
+                                                        <i class="fa-regular fa-trash-can text-xs"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="flex items-center justify-between mt-1.5">
+                                                    <span class="font-bold text-cyan-800 text-xs" x-text="'Rp ' + Number(item.price).toLocaleString('id-ID')"></span>
+                                                    <button type="button" @click="addWishlistToCart(item)"
+                                                            class="px-2.5 py-1 rounded-lg bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-[10px] flex items-center gap-1 transition-all shadow-2xs cursor-pointer">
+                                                        <i class="fa-solid fa-cart-plus text-[9px]"></i>
+                                                        <span>+ Keranjang</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template x-if="wishlistItems.length === 0">
+                                <div class="p-6 text-center text-slate-400">
+                                    <i class="fa-regular fa-heart text-3xl mb-2 text-slate-300"></i>
+                                    <p class="font-semibold text-slate-700 text-xs">Wishlist Anda Masih Kosong</p>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">Simpan produk impian Anda dengan menekan ikon hati.</p>
+                                    <a href="{{ url('/products') }}" @click="wishlistOpen = false" class="mt-3 inline-block px-4 py-1.5 rounded-xl bg-cyan-700 text-white font-bold text-xs hover:bg-cyan-800 transition-colors">
+                                        Cari Produk Sekarang
+                                    </a>
+                                </div>
+                            </template>
+
+                            {{-- Footer --}}
+                            <template x-if="wishlistItems.length > 0">
+                                <div class="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                                    <span class="text-[11px] text-slate-500"><span x-text="wishlistCount"></span> Produk disimpan</span>
+                                    <a href="{{ route('customer.wishlist.index') }}" @click="wishlistOpen = false" class="btn-primary h-8 px-4 text-xs font-bold bg-cyan-700 hover:bg-cyan-800 text-white rounded-xl shadow-2xs">
+                                        Buka Wishlist &rarr;
+                                    </a>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
                     @endif
 
                     {{-- PopUp Mini-Cart Dropdown --}}
@@ -470,9 +573,13 @@ function navbarComponent() {
         cartOpen: false,
         cartCount: {{ (int) $initialCartCount }},
         cartItems: @json($initialCartList),
-        cartSubtotal: {{ (float) $initialCartSubtotal }},
         cartBounce: false,
         isUpdatingCart: false,
+        wishlistOpen: false,
+        wishlistCount: {{ (int) $initialWishlistCount }},
+        wishlistItems: @json($initialWishlistList),
+        wishlistBounce: false,
+        isUpdatingWishlist: false,
         searchQuery: @json(request('q', '')),
         searchSuggestions: { products: [], stores: [], categories: [] },
         showSuggestions: false,
@@ -483,6 +590,88 @@ function navbarComponent() {
             this.cartOpen = true;
             setTimeout(() => { this.cartBounce = false; }, 1200);
             setTimeout(() => { this.cartOpen = false; }, 4000);
+        },
+        handleWishlistUpdated(e) {
+            if (e && e.detail) {
+                if (e.detail.total_count !== undefined) this.wishlistCount = e.detail.total_count;
+                else if (e.detail.count !== undefined) this.wishlistCount = e.detail.count;
+                
+                if (e.detail.items !== undefined) this.wishlistItems = e.detail.items;
+                else this.fetchWishlistItems();
+            } else {
+                this.fetchWishlistItems();
+            }
+            this.wishlistBounce = true;
+            this.wishlistOpen = true;
+            setTimeout(() => { this.wishlistBounce = false; }, 1200);
+            setTimeout(() => { this.wishlistOpen = false; }, 4000);
+        },
+        async fetchWishlistItems() {
+            try {
+                const res = await fetch('{{ route('customer.wishlist.items') }}');
+                if (res.ok) {
+                    const data = await res.json();
+                    this.wishlistItems = data.items || [];
+                    this.wishlistCount = data.count || 0;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        },
+        async deleteWishlistItem(item) {
+            if (this.isUpdatingWishlist) return;
+            this.isUpdatingWishlist = true;
+            try {
+                const res = await fetch(item.delete_url, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    this.wishlistItems = data.items || [];
+                    this.wishlistCount = data.total_count || 0;
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { title: 'Wishlist Diperbarui', message: data.message || 'Produk dihapus dari wishlist.', type: 'info' }
+                    }));
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.isUpdatingWishlist = false;
+            }
+        },
+        async addWishlistToCart(item) {
+            try {
+                const formData = new FormData();
+                formData.append('_token', '{{ csrf_token() }}');
+                formData.append('quantity', 1);
+
+                const res = await fetch(item.cart_store_url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    window.dispatchEvent(new CustomEvent('cart-updated', { detail: { count: data.cart_count } }));
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { title: 'Berhasil Masuk Keranjang', message: `1x ${item.name} berhasil ditambahkan!`, type: 'success' }
+                    }));
+                } else {
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { title: 'Gagal', message: data.message || 'Gagal menambahkan ke keranjang.', type: 'error' }
+                    }));
+                }
+            } catch (e) {
+                console.error(e);
+            }
         },
         async fetchSuggestions() {
             const q = this.searchQuery ? this.searchQuery.trim() : '';

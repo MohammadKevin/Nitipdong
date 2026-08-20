@@ -23,6 +23,27 @@ class WishlistController extends Controller
         return view('customer.wishlist.index', compact('wishlists'));
     }
 
+    public function items(): JsonResponse
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['status' => 'success', 'count' => 0, 'items' => []]);
+        }
+
+        $wishlists = Wishlist::with(['product.store'])
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
+
+        $items = $this->formatWishlistItems($wishlists);
+
+        return response()->json([
+            'status' => 'success',
+            'count'  => $items->count(),
+            'items'  => $items,
+        ]);
+    }
+
     public function toggle(Request $request, Product $product): JsonResponse|RedirectResponse
     {
         $user = Auth::user();
@@ -46,18 +67,26 @@ class WishlistController extends Controller
         }
 
         if ($request->wantsJson() || $request->ajax()) {
+            $wishlists = Wishlist::with(['product.store'])
+                ->where('user_id', $user->id)
+                ->latest()
+                ->get();
+
             return response()->json([
                 'status'        => $status,
                 'message'       => $message,
                 'is_wishlisted' => $isWishlisted,
-                'total_count'   => Wishlist::where('user_id', $user->id)->count(),
+                'product_id'    => $product->id,
+                'product_name'  => $product->name,
+                'total_count'   => $wishlists->count(),
+                'items'         => $this->formatWishlistItems($wishlists),
             ]);
         }
 
         return back()->with('success', $message);
     }
 
-    public function destroy(Wishlist $wishlist): RedirectResponse
+    public function destroy(Request $request, Wishlist $wishlist): JsonResponse|RedirectResponse
     {
         if ($wishlist->user_id !== Auth::id()) {
             abort(403, 'Akses tidak sah.');
@@ -65,6 +94,43 @@ class WishlistController extends Controller
 
         $wishlist->delete();
 
+        if ($request->wantsJson() || $request->ajax()) {
+            $wishlists = Wishlist::with(['product.store'])
+                ->where('user_id', Auth::id())
+                ->latest()
+                ->get();
+
+            return response()->json([
+                'status'      => 'success',
+                'message'     => 'Produk berhasil dihapus dari wishlist.',
+                'total_count' => $wishlists->count(),
+                'items'       => $this->formatWishlistItems($wishlists),
+            ]);
+        }
+
         return back()->with('success', 'Produk berhasil dihapus dari wishlist.');
+    }
+
+    private function formatWishlistItems($wishlists)
+    {
+        return $wishlists->map(function ($w) {
+            $p = $w->product;
+            if (!$p) return null;
+
+            return [
+                'id'             => $w->id,
+                'product_id'     => $p->id,
+                'name'           => $p->name,
+                'price'          => (float) $p->final_price,
+                'original_price' => (float) $p->price,
+                'has_discount'   => (bool) $p->has_discount,
+                'discount_percentage' => (int) $p->discount_percentage_effective,
+                'image_url'      => $p->image_url ?? asset('img/saksershop-logo.png'),
+                'product_url'    => route('product.show', $p),
+                'store_name'     => $p->store->name ?? 'Official Store',
+                'delete_url'     => route('customer.wishlist.destroy', $w),
+                'cart_store_url' => route('customer.cart.store', $p),
+            ];
+        })->filter()->values();
     }
 }

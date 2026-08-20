@@ -295,7 +295,55 @@
                                 </span>
                             </div>
 
-                            <div class="flex gap-3 mt-4">
+                            <div class="flex items-center gap-2.5 mt-4">
+                                {{-- Wishlist Toggle Button --}}
+                                @auth
+                                    @if(auth()->user()->role === 'customer')
+                                        @php $isWish = $product->isWishlistedBy(auth()->user()); @endphp
+                                        <div x-data="{ isWish: {{ $isWish ? 'true' : 'false' }}, isToggling: false, bounce: false }" class="shrink-0">
+                                            <button type="button"
+                                                    @click.prevent.stop="
+                                                        if(isToggling) return;
+                                                        isToggling = true;
+                                                        bounce = true;
+                                                        fetch('{{ route('customer.wishlist.toggle', $product) }}', {
+                                                            method: 'POST',
+                                                            headers: {
+                                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                                'Accept': 'application/json',
+                                                                'X-Requested-With': 'XMLHttpRequest'
+                                                            }
+                                                        })
+                                                        .then(res => res.json())
+                                                        .then(data => {
+                                                            isWish = data.is_wishlisted;
+                                                            window.dispatchEvent(new CustomEvent('wishlist-updated', { detail: data }));
+                                                            window.dispatchEvent(new CustomEvent('notify', {
+                                                                detail: {
+                                                                    title: data.is_wishlisted ? 'Ditambahkan ke Wishlist' : 'Dihapus dari Wishlist',
+                                                                    message: data.message,
+                                                                    type: data.is_wishlisted ? 'success' : 'info'
+                                                                }
+                                                            }));
+                                                        })
+                                                        .catch(err => console.error(err))
+                                                        .finally(() => {
+                                                            isToggling = false;
+                                                            setTimeout(() => bounce = false, 600);
+                                                        });
+                                                    "
+                                                    :title="isWish ? 'Hapus dari Wishlist' : 'Tambah ke Wishlist'"
+                                                    class="w-11 h-11 rounded-xl border flex items-center justify-center text-sm transition-all shadow-2xs cursor-pointer"
+                                                    :class="[
+                                                        isWish ? 'border-rose-300 bg-rose-50 text-rose-600 shadow-rose-100' : 'border-slate-300 text-slate-500 hover:text-rose-600 hover:border-rose-300 hover:bg-rose-50/40',
+                                                        bounce ? 'scale-125 ring-2 ring-rose-200' : ''
+                                                    ]">
+                                                <i class="fa-heart text-base" :class="isWish ? 'fa-solid text-rose-600' : 'fa-regular'"></i>
+                                            </button>
+                                        </div>
+                                    @endif
+                                @endauth
+
                                 <button type="button"
                                         @click.prevent.stop="addToCartAnimated($event)"
                                         onclick="event.preventDefault(); event.stopPropagation();"
@@ -309,7 +357,7 @@
                                     <input type="hidden" name="quantity" :value="qty">
                                     <input type="hidden" name="variant" :value="getVariantString()">
                                     <input type="hidden" name="action" value="buy">
-                                    <button type="submit" class="w-full h-10 rounded-xl bg-cyan-700 text-white font-bold text-xs hover:bg-cyan-800 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer">
+                                    <button type="submit" class="w-full h-11 rounded-xl bg-cyan-700 text-white font-bold text-xs hover:bg-cyan-800 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer">
                                         <i class="fa-solid fa-bolt text-xs"></i>
                                         <span>Beli Sekarang</span>
                                     </button>

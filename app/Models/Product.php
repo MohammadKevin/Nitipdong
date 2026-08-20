@@ -199,14 +199,11 @@ class Product extends Model
 
     public function getSoldCountAttribute(): int
     {
-        $base = (int) ($this->attributes['sold_count'] ?? 0);
-        $fromOrders = (int) $this->orderItems()
+        return (int) $this->orderItems()
             ->whereHas('order', function ($q) {
-                $q->where('status', '!=', 'cancelled');
+                $q->whereIn('status', ['paid', 'processing', 'shipped', 'delivered', 'completed']);
             })
             ->sum('quantity');
-
-        return max($base, $fromOrders);
     }
 
     public function getFormattedSoldCountAttribute(): string
