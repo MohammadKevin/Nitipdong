@@ -16,21 +16,24 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 })
                 .then(res => res.json())
                 .then(data => {
                     this.isLoadingDuitku = false;
-                    if (data.status === 'success' && data.payment_url) {
-                        window.location.href = data.payment_url;
+                    const url = data.paymentUrl || data.payment_url;
+                    if (data.status === 'success' && url) {
+                        window.location.href = url;
                     } else {
                         alert(data.message || 'Gagal memproses transaksi Payment Gateway.');
                     }
                 })
                 .catch(err => {
                     this.isLoadingDuitku = false;
-                    alert('Terjadi kesalahan jaringan: ' + err.message);
+                    // Fallback to direct redirect jika fetch terputus
+                    window.location.href = '{{ route('customer.order.duitku_create', $order) }}';
                 });
             }
          }">
@@ -147,18 +150,21 @@
                                 <span class="font-black text-xl text-cyan-300">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
                             </div>
 
-                            <button type="button" @click="payWithDuitku()"
-                                    :disabled="isLoadingDuitku"
-                                    class="w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-cyan-900/40 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-98">
-                                <span x-show="!isLoadingDuitku" class="flex items-center gap-2">
-                                    <i class="fa-solid fa-lock"></i>
-                                    <span>Bayar Sekarang via Payment Gateway</span>
-                                </span>
-                                <span x-show="isLoadingDuitku" x-cloak class="flex items-center gap-2">
-                                    <i class="fa-solid fa-circle-notch fa-spin"></i>
-                                    <span>Menghubungkan ke Gateway...</span>
-                                </span>
-                            </button>
+                            <form action="{{ route('customer.order.duitku_create', $order) }}" method="POST" @submit.prevent="payWithDuitku()">
+                                @csrf
+                                <button type="submit"
+                                        :disabled="isLoadingDuitku"
+                                        class="w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-cyan-900/40 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-98">
+                                    <span x-show="!isLoadingDuitku" class="flex items-center gap-2">
+                                        <i class="fa-solid fa-lock"></i>
+                                        <span>Bayar Sekarang via Payment Gateway</span>
+                                    </span>
+                                    <span x-show="isLoadingDuitku" x-cloak class="flex items-center gap-2">
+                                        <i class="fa-solid fa-circle-notch fa-spin"></i>
+                                        <span>Menghubungkan ke Gateway...</span>
+                                    </span>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

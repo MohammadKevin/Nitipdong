@@ -215,7 +215,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/orders/{order}/payment', [OrderController::class, 'payment'])->name('order.payment');
         Route::post('/orders/{order}/payment', [OrderController::class, 'confirmPayment'])->name('order.confirm_payment');
-        Route::post('/orders/{order}/duitku/create', [DuitkuPaymentController::class, 'createInvoice'])->name('order.duitku_create');
+        Route::match(['get', 'post'], '/orders/{order}/duitku/create', [DuitkuPaymentController::class, 'createInvoice'])->name('order.duitku_create');
         Route::post('/orders/{order}/simulate-payment', [PaymentCallbackController::class, 'simulateInstantPayment'])->name('order.simulate_payment');
         Route::post('/orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('order.confirm_received');
         Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('order.cancel');

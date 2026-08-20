@@ -46,26 +46,27 @@ class DuitkuPaymentController extends Controller
         }
 
         if ($order->status !== 'pending') {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Pesanan ini sudah dibayar atau dibatalkan.',
-            ], 422);
+            if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Pesanan ini sudah dibayar atau dibatalkan.',
+                ], 422);
+            }
+            return redirect()->route('customer.dashboard')->with('info', 'Pesanan ini sudah dibayar atau dibatalkan.');
         }
 
         $order->load(['user', 'orderItems.product']);
 
-        $rawAmount       = (int) $order->total_amount;
-        // Duitku Payment Gateway membutuhkan minimal Rp 10.000 untuk inisiasi semua channel
-        $paymentAmount   = max(10000, $rawAmount);
+        $paymentAmount   = (int) $order->total_amount;
         // Duitku mengharuskan merchantOrderId alfanumerik tanpa tanda hubung (-)
         $merchantOrderId = preg_replace('/[^a-zA-Z0-9]/', '', $order->invoice_number);
-        $paymentMethod   = $request->input('payment_method', ''); // Kosongkan jika ingin popup menampilkan semua channel
+        $paymentMethod   = $request->input('payment_method', ''); // Kosongkan untuk menampilkan semua channel
         $productDetails  = 'Pesanan ' . $merchantOrderId;
         $customerEmail   = filter_var($order->user->email ?? Auth::user()->email ?? 'customer@example.com', FILTER_VALIDATE_EMAIL) ?: 'customer@example.com';
         $customerPhone   = preg_replace('/[^0-9]/', '', $order->user->phone ?? Auth::user()->phone ?? '081234567890') ?: '081234567890';
         $customerName    = preg_replace('/[^a-zA-Z0-9\s]/', '', $order->user->name ?? Auth::user()->name ?? 'Customer') ?: 'Customer';
 
-        // Perhitungan Signature MD5 Inquiry: md5(merchantCode + merchantOrderId + paymentAmount + apiKey)
+        // Perhitungan Signature MD5 Inquiry sesuai dokumentasi Duitku: md5(merchantCode + merchantOrderId + paymentAmount + apiKey)
         $signature = md5($this->merchantCode . $merchantOrderId . $paymentAmount . $this->apiKey);
 
         // Siapkan Item Details yang selalu sesuai dengan total paymentAmount
@@ -114,39 +115,40 @@ class DuitkuPaymentController extends Controller
                     'payment_reference' => $result['reference'] ?? null,
                 ]);
 
-                if ($request->wantsJson()) {
+                if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
                     return response()->json([
                         'status'         => 'success',
-                        'reference'      => $result['reference'] ?? null,
+                        'paymentUrl'     => $result['paymentUrl'],
                         'payment_url'    => $result['paymentUrl'],
+                        'reference'      => $result['reference'] ?? null,
                         'merchant_code'  => $this->merchantCode,
                         'merchant_order' => $merchantOrderId,
                         'amount'         => $paymentAmount,
                     ]);
                 }
 
-                // Redirect user ke Duitku Payment Page
+                // Redirect user langsung ke Duitku Payment Page
                 return redirect()->away($result['paymentUrl']);
             }
 
-            $errorMessage = $result['statusMessage'] ?? 'Gagal menghubungi gateway Duitku Sandbox. Silakan gunakan tab QRIS Instan / Virtual Account.';
-            Log::error('Duitku Inquiry Error:', ['error' => $result]);
+            $errorMessage = $result['statusMessage'] ?? $result['message'] ?? 'Gagal membuat tagihan gateway Duitku.';
+            Log::error('Duitku Inquiry Error:', ['order' => $merchantOrderId, 'error' => $result, 'http_status' => $response->status()]);
 
-            if ($request->wantsJson()) {
+            if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
                 return response()->json(['status' => 'error', 'message' => $errorMessage], 400);
             }
 
-            return back()->with('error', 'Pembayaran Duitku Gagal: ' . $errorMessage);
+            return redirect()->route('customer.order.payment', $order)->with('error', 'Pembayaran Duitku Gagal: ' . $errorMessage);
 
         } catch (\Exception $e) {
-            Log::error('Duitku Exception:', ['message' => $e->getMessage()]);
+            Log::error('Duitku Exception:', ['order' => $merchantOrderId, 'message' => $e->getMessage()]);
 
-            $errorMsg = 'Koneksi ke gateway Duitku Sandbox timeout atau sedang offline. Silakan gunakan tab QRIS Instan / Simulasi Bayar.';
-            if ($request->wantsJson()) {
+            $errorMsg = 'Koneksi ke gateway Duitku Sandbox terjadi kendala. Silakan coba kembali.';
+            if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
                 return response()->json(['status' => 'error', 'message' => $errorMsg], 500);
             }
 
-            return back()->with('error', $errorMsg);
+            return redirect()->route('customer.order.payment', $order)->with('error', $errorMsg);
         }
     }
 
