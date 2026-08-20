@@ -193,6 +193,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Cart, Checkout, Orders, Complaints, Reviews, Wishlist & Addresses
     Route::prefix('customer')->name('customer.')->group(function () {
         Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+        Route::get('/cart/items', [CartController::class, 'getItems'])->name('cart.items');
         Route::post('/cart/add/{product}', [CartController::class, 'store'])->name('cart.store');
         Route::patch('/cart/{cart}', [CartController::class, 'update'])->name('cart.update');
         Route::delete('/cart/{cart}', [CartController::class, 'destroy'])->name('cart.destroy');

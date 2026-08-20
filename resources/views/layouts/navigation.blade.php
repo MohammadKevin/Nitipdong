@@ -1,10 +1,35 @@
+@php
+    $initialCartCount = auth()->check() && auth()->user()->role === 'customer' ? auth()->user()->carts()->count() : 0;
+    $initialCarts = auth()->check() && auth()->user()->role === 'customer'
+        ? auth()->user()->carts()->with(['product.store'])->latest()->take(10)->get()
+        : collect();
+    $initialCartSubtotal = $initialCarts->sum(fn($c) => ($c->product ? $c->product->final_price : 0) * $c->quantity);
+    $initialCartList = $initialCarts->map(fn($c) => [
+        'id'            => $c->id,
+        'obfuscated_id' => $c->obfuscated_id,
+        'name'          => $c->product?->name ?? 'Produk',
+        'image_url'     => $c->product?->image_url ?? asset('img/icon.jpg'),
+        'product_url'   => $c->product ? route('product.show', $c->product) : '#',
+        'price'         => $c->product ? $c->product->final_price : 0,
+        'quantity'      => $c->quantity,
+        'stock'         => $c->product?->stock ?? 99,
+        'variant'       => $c->variant,
+        'subtotal'      => ($c->product ? $c->product->final_price : 0) * $c->quantity,
+        'update_url'    => route('customer.cart.update', $c),
+        'delete_url'    => route('customer.cart.destroy', $c),
+    ])->values();
+@endphp
+
 <nav x-data="{
         mobileSearch: false,
         userOpen: false,
         notifOpen: false,
         cartOpen: false,
-        cartCount: {{ Auth::check() && Auth::user()->role === 'customer' ? Auth::user()->carts()->count() : 0 }},
+        cartCount: {{ $initialCartCount }},
+        cartItems: @json($initialCartList),
+        cartSubtotal: {{ $initialCartSubtotal }},
         cartBounce: false,
+        isUpdatingCart: false,
         searchQuery: '{{ addslashes(request('q', '')) }}',
         searchSuggestions: { products: [], stores: [], categories: [] },
         showSuggestions: false,
@@ -28,9 +53,93 @@
             } finally {
                 this.isLoadingSuggestions = false;
             }
+        },
+        async fetchCartItems() {
+            try {
+                const res = await fetch('{{ route('customer.cart.items') }}');
+                if (res.ok) {
+                    const data = await res.json();
+                    this.cartItems = data.items;
+                    this.cartCount = data.count;
+                    this.cartSubtotal = data.subtotal;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        },
+        async updateCartQty(item, newQty) {
+            if (this.isUpdatingCart) return;
+            if (newQty < 1) {
+                this.deleteCartItem(item);
+                return;
+            }
+            if (newQty > item.stock) {
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: { title: 'Maksimum Stok', message: `Stok produk hanya tersedia ${item.stock} unit.`, type: 'error' }
+                }));
+                return;
+            }
+            this.isUpdatingCart = true;
+            try {
+                const res = await fetch(item.update_url, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ quantity: newQty })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    this.cartItems = data.items;
+                    this.cartCount = data.count;
+                    this.cartSubtotal = data.subtotal;
+                } else {
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { title: 'Gagal', message: data.message || 'Gagal mengubah jumlah barang.', type: 'error' }
+                    }));
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.isUpdatingCart = false;
+            }
+        },
+        async deleteCartItem(item) {
+            if (this.isUpdatingCart) return;
+            this.isUpdatingCart = true;
+            try {
+                const res = await fetch(item.delete_url, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    this.cartItems = data.items;
+                    this.cartCount = data.count;
+                    this.cartSubtotal = data.subtotal;
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { title: 'Dihapus', message: 'Barang berhasil dihapus dari keranjang.', type: 'success' }
+                    }));
+                } else {
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { title: 'Gagal', message: data.message || 'Gagal menghapus barang.', type: 'error' }
+                    }));
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.isUpdatingCart = false;
+            }
         }
     }"
-    @cart-updated.window="cartCount = $event.detail.count; cartBounce = true; setTimeout(() => cartBounce = false, 1200)"
+    @cart-updated.window="fetchCartItems(); cartBounce = true; setTimeout(() => cartBounce = false, 1200)"
     class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-xs">
 
     <div class="page-container">
@@ -207,7 +316,7 @@
                             <div class="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
                                 <div class="flex items-center gap-1.5 font-bold text-slate-900">
                                     <i class="fa-solid fa-cart-shopping text-cyan-600"></i>
-                                    <span>Keranjang Belanja ({{ $cartCount }})</span>
+                                    <span>Keranjang Belanja (<span x-text="cartCount"></span>)</span>
                                 </div>
                                 <a href="{{ route('customer.cart.index') }}" @click="cartOpen = false" class="text-[11px] font-semibold text-cyan-700 hover:text-cyan-800 hover:underline">
                                     Lihat Semua
@@ -215,48 +324,49 @@
                             </div>
 
                             {{-- Body List --}}
-                            @if($userCarts->count() > 0)
-                                <div class="divide-y divide-slate-100 max-h-72 overflow-y-auto p-1">
-                                    @foreach($userCarts as $cItem)
-                                        @if($cItem->product)
-                                            <a href="{{ route('product.show', $cItem->product) }}" @click="cartOpen = false"
-                                               class="p-2.5 hover:bg-cyan-50/40 rounded-xl transition-colors flex items-center gap-3 block group">
-                                                <img src="{{ $cItem->product->image_url }}" alt="{{ $cItem->product->name }}" class="w-12 h-12 rounded-lg object-cover border border-slate-200 shrink-0">
-                                                <div class="flex-1 min-w-0">
-                                                    <h4 class="font-semibold text-slate-800 text-xs truncate group-hover:text-cyan-700 transition-colors">{{ $cItem->product->name }}</h4>
-                                                    @if($cItem->variant)
-                                                        <span class="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.2 rounded inline-block mt-0.5">{{ $cItem->variant }}</span>
-                                                    @endif
-                                                    <div class="flex items-center justify-between mt-1">
-                                                        <span class="text-[11px] text-slate-500 font-medium">{{ $cItem->quantity }} &times; Rp {{ number_format($cItem->product->final_price, 0, ',', '.') }}</span>
-                                                        <span class="font-bold text-cyan-800 text-xs">Rp {{ number_format($cItem->product->final_price * $cItem->quantity, 0, ',', '.') }}</span>
-                                                    </div>
-                                                </div>
+                            <template x-if="cartItems.length > 0">
+                                <div class="divide-y divide-slate-100 max-h-80 overflow-y-auto p-1">
+                                    <template x-for="item in cartItems" :key="item.id">
+                                        <div class="p-2.5 hover:bg-cyan-50/40 rounded-xl transition-colors flex items-center gap-2.5">
+                                            <a :href="item.product_url" @click="cartOpen = false" class="shrink-0">
+                                                <img :src="item.image_url" :alt="item.name" class="w-12 h-12 rounded-lg object-cover border border-slate-200" onerror="this.src='/img/icon.jpg'">
                                             </a>
-                                        @endif
-                                    @endforeach
+                                            <div class="flex-1 min-w-0">
+                                                <div class="flex items-start justify-between gap-1">
+                                                    <a :href="item.product_url" @click="cartOpen = false" class="font-semibold text-slate-800 text-xs truncate hover:text-cyan-700 transition-colors block" x-text="item.name"></a>
+                                                    <button type="button" @click="deleteCartItem(item)"
+                                                            :disabled="isUpdatingCart"
+                                                            class="text-slate-400 hover:text-rose-600 hover:bg-rose-50 p-1 rounded-lg transition-colors cursor-pointer disabled:opacity-50" title="Hapus dari keranjang">
+                                                        <i class="fa-regular fa-trash-can text-xs"></i>
+                                                    </button>
+                                                </div>
+                                                <template x-if="item.variant">
+                                                    <span class="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded inline-block mt-0.5" x-text="item.variant"></span>
+                                                </template>
+                                                <div class="flex items-center justify-between mt-1.5">
+                                                    {{-- Quantity Stepper --}}
+                                                    <div class="flex items-center rounded-lg border border-slate-200 bg-white overflow-hidden shadow-2xs">
+                                                        <button type="button" @click="updateCartQty(item, item.quantity - 1)"
+                                                                :disabled="isUpdatingCart"
+                                                                class="w-6 h-6 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer disabled:opacity-50">
+                                                            <i class="fa-solid fa-minus text-[9px]"></i>
+                                                        </button>
+                                                        <span class="w-7 text-center text-xs font-bold text-slate-800 select-none" x-text="item.quantity"></span>
+                                                        <button type="button" @click="updateCartQty(item, item.quantity + 1)"
+                                                                :disabled="isUpdatingCart || item.quantity >= item.stock"
+                                                                class="w-6 h-6 flex items-center justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer disabled:opacity-50">
+                                                            <i class="fa-solid fa-plus text-[9px]"></i>
+                                                        </button>
+                                                    </div>
+                                                    <span class="font-bold text-cyan-800 text-xs" x-text="'Rp ' + Number(item.subtotal).toLocaleString('id-ID')"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
                                 </div>
+                            </template>
 
-                                {{-- Footer Checkout Buttons --}}
-                                <div class="p-3.5 border-t border-slate-100 bg-slate-50/50 space-y-2.5">
-                                    <div class="flex items-center justify-between">
-                                        <span class="text-[11px] text-slate-500 font-medium">Total Perkiraan:</span>
-                                        <span class="font-black text-sm text-cyan-800">
-                                            Rp {{ number_format($cartSubtotal, 0, ',', '.') }}
-                                        </span>
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <a href="{{ route('customer.cart.index') }}" @click="cartOpen = false"
-                                           class="h-8 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs flex items-center justify-center transition-colors">
-                                            Buka Keranjang
-                                        </a>
-                                        <a href="{{ route('customer.order.checkout') }}" @click="cartOpen = false"
-                                           class="h-8 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs flex items-center justify-center shadow-xs transition-colors">
-                                            Checkout ({{ $cartCount }})
-                                        </a>
-                                    </div>
-                                </div>
-                            @else
+                            <template x-if="cartItems.length === 0">
                                 <div class="py-8 px-4 text-center space-y-2">
                                     <div class="w-12 h-12 rounded-full bg-cyan-50 text-cyan-600 flex items-center justify-center mx-auto text-lg">
                                         <i class="fa-solid fa-cart-shopping"></i>
@@ -269,7 +379,27 @@
                                         </a>
                                     </div>
                                 </div>
-                            @endif
+                            </template>
+
+                            {{-- Footer Checkout Buttons --}}
+                            <template x-if="cartItems.length > 0">
+                                <div class="p-3.5 border-t border-slate-100 bg-slate-50/50 space-y-2.5">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[11px] text-slate-500 font-medium">Total Perkiraan:</span>
+                                        <span class="font-black text-sm text-cyan-800" x-text="'Rp ' + Number(cartSubtotal).toLocaleString('id-ID')"></span>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <a href="{{ route('customer.cart.index') }}" @click="cartOpen = false"
+                                           class="h-8 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-xs flex items-center justify-center transition-colors">
+                                            Buka Keranjang
+                                        </a>
+                                        <a href="{{ route('customer.order.checkout') }}" @click="cartOpen = false"
+                                           class="h-8 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs flex items-center justify-center shadow-xs transition-colors">
+                                            <span>Checkout (</span><span x-text="cartCount"></span><span>)</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                     </div>
 

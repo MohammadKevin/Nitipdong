@@ -159,7 +159,48 @@ class CartController extends Controller
         return back()->with('success', 'Produk berhasil ditambahkan ke keranjang!');
     }
 
-    public function update(Request $request, Cart $cart): RedirectResponse
+    public function getItems(Request $request): \Illuminate\Http\JsonResponse
+    {
+        if (! Auth::check()) {
+            return response()->json(['items' => [], 'count' => 0, 'subtotal' => 0, 'formatted_subtotal' => 'Rp 0']);
+        }
+
+        $carts = Cart::with(['product.store'])
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->get();
+
+        $items = $carts->map(fn ($c) => [
+            'id'              => $c->id,
+            'obfuscated_id'   => $c->obfuscated_id,
+            'product_id'      => $c->product_id,
+            'name'            => $c->product?->name ?? 'Produk',
+            'price'           => $c->product ? $c->product->final_price : 0,
+            'formatted_price' => 'Rp ' . number_format($c->product ? $c->product->final_price : 0, 0, ',', '.'),
+            'image_url'       => $c->product?->image_url ?? asset('img/icon.jpg'),
+            'product_url'     => $c->product ? route('product.show', $c->product) : '#',
+            'quantity'        => $c->quantity,
+            'stock'           => $c->product?->stock ?? 99,
+            'variant'         => $c->variant,
+            'store_name'      => $c->product?->store?->name ?? 'BelanjaIn',
+            'subtotal'        => ($c->product ? $c->product->final_price : 0) * $c->quantity,
+            'formatted_subtotal' => 'Rp ' . number_format(($c->product ? $c->product->final_price : 0) * $c->quantity, 0, ',', '.'),
+            'update_url'      => route('customer.cart.update', $c),
+            'delete_url'      => route('customer.cart.destroy', $c),
+        ]);
+
+        $subtotal = $items->sum('subtotal');
+
+        return response()->json([
+            'status'             => 'success',
+            'items'              => $items,
+            'count'              => $carts->count(),
+            'subtotal'           => $subtotal,
+            'formatted_subtotal' => 'Rp ' . number_format($subtotal, 0, ',', '.'),
+        ]);
+    }
+
+    public function update(Request $request, Cart $cart): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         if ($cart->user_id !== Auth::id()) {
             abort(403);
@@ -169,22 +210,36 @@ class CartController extends Controller
             'quantity' => ['required', 'integer', 'min:1'],
         ]);
 
-        if ($cart->product->stock < $request->quantity) {
+        if ($cart->product && $cart->product->stock < $request->quantity) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Jumlah melebihi stok yang tersedia (sisa: ' . $cart->product->stock . ')',
+                ], 422);
+            }
             return back()->with('error', 'Jumlah melebihi stok yang tersedia.');
         }
 
         $cart->update(['quantity' => $request->quantity]);
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return $this->getItems($request);
+        }
+
         return back()->with('success', 'Jumlah barang berhasil diperbarui.');
     }
 
-    public function destroy(Cart $cart): RedirectResponse
+    public function destroy(Request $request, Cart $cart): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         if ($cart->user_id !== Auth::id()) {
             abort(403);
         }
 
         $cart->delete();
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return $this->getItems($request);
+        }
 
         return back()->with('success', 'Barang berhasil dihapus dari keranjang.');
     }
