@@ -45,25 +45,125 @@
                 </div>
 
                 {{-- Payment Method Tabs --}}
-                <div class="flex border-b border-slate-200 gap-2">
+                <div class="flex border-b border-slate-200 gap-2 overflow-x-auto">
+                    <button type="button" @click="activeTab = 'duitku'"
+                            :class="activeTab === 'duitku' ? 'border-cyan-600 text-cyan-800 font-bold border-b-2' : 'text-slate-500 hover:text-slate-800 font-medium'"
+                            class="pb-2.5 px-3 text-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer">
+                        <i class="fa-solid fa-wallet text-cyan-600 text-xs"></i>
+                        <span>Duitku Gateway (Sandbox)</span>
+                        <span class="px-1.5 py-0.2 bg-cyan-100 text-cyan-800 text-[9px] font-bold rounded">Live API</span>
+                    </button>
                     <button type="button" @click="activeTab = 'qris'"
                             :class="activeTab === 'qris' ? 'border-cyan-600 text-cyan-800 font-bold border-b-2' : 'text-slate-500 hover:text-slate-800 font-medium'"
-                            class="pb-2.5 px-3 text-xs flex items-center gap-1.5 transition-all cursor-pointer">
+                            class="pb-2.5 px-3 text-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer">
                         <i class="fa-solid fa-qrcode text-xs"></i>
                         <span>QRIS Instan</span>
                     </button>
                     <button type="button" @click="activeTab = 'va'"
                             :class="activeTab.startsWith('va') || activeTab === 'va' ? 'border-cyan-600 text-cyan-800 font-bold border-b-2' : 'text-slate-500 hover:text-slate-800 font-medium'"
-                            class="pb-2.5 px-3 text-xs flex items-center gap-1.5 transition-all cursor-pointer">
+                            class="pb-2.5 px-3 text-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer">
                         <i class="fa-solid fa-building-columns text-xs"></i>
                         <span>Virtual Account</span>
                     </button>
                     <button type="button" @click="activeTab = 'manual'"
                             :class="activeTab === 'manual' ? 'border-cyan-600 text-cyan-800 font-bold border-b-2' : 'text-slate-500 hover:text-slate-800 font-medium'"
-                            class="pb-2.5 px-3 text-xs flex items-center gap-1.5 transition-all cursor-pointer">
+                            class="pb-2.5 px-3 text-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer">
                         <i class="fa-solid fa-receipt text-xs"></i>
                         <span>Transfer Manual</span>
                     </button>
+                </div>
+
+                {{-- 0. TAB DUITKU PAYMENT GATEWAY (SANDBOX) --}}
+                <div x-show="activeTab === 'duitku'" class="space-y-4 pt-1"
+                     x-data="{
+                        isLoadingDuitku: false,
+                        payWithDuitku() {
+                            this.isLoadingDuitku = true;
+                            fetch('{{ route('customer.order.duitku_create', $order) }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                this.isLoadingDuitku = false;
+                                if (data.status === 'success' && data.payment_url) {
+                                    // Redirect ke Payment Page Duitku
+                                    window.location.href = data.payment_url;
+                                } else {
+                                    alert(data.message || 'Gagal memproses transaksi Duitku Sandbox.');
+                                }
+                            })
+                            .catch(err => {
+                                this.isLoadingDuitku = false;
+                                alert('Terjadi kesalahan jaringan: ' + err.message);
+                            });
+                        }
+                     }">
+                    <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-cyan-950 text-white rounded-2xl p-5 sm:p-6 space-y-4 shadow-xl border border-cyan-500/30 relative overflow-hidden">
+                        <div class="absolute -right-8 -top-8 w-36 h-36 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                        <div class="flex items-center justify-between gap-3 flex-wrap">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 flex items-center justify-center text-lg shadow-inner">
+                                    <i class="fa-solid fa-wallet"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-sm text-white">Duitku Payment Gateway</h3>
+                                    <p class="text-[11px] text-cyan-200/80">Sandbox Mode Testing (Merchant: DS34393)</p>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                                Official Gateway
+                            </span>
+                        </div>
+
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Bayar dengan mudah menggunakan puluhan metode pembayaran terverifikasi otomatis:
+                        </p>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                            <div class="p-2.5 bg-white/10 backdrop-blur-xs rounded-xl border border-white/10 flex items-center gap-2">
+                                <i class="fa-solid fa-qrcode text-cyan-400"></i>
+                                <span class="font-medium text-slate-200">QRIS (Semua E-Wallet)</span>
+                            </div>
+                            <div class="p-2.5 bg-white/10 backdrop-blur-xs rounded-xl border border-white/10 flex items-center gap-2">
+                                <i class="fa-solid fa-building-columns text-blue-400"></i>
+                                <span class="font-medium text-slate-200">BCA, Mandiri, BRI, BNI</span>
+                            </div>
+                            <div class="p-2.5 bg-white/10 backdrop-blur-xs rounded-xl border border-white/10 flex items-center gap-2">
+                                <i class="fa-solid fa-mobile-screen-button text-emerald-400"></i>
+                                <span class="font-medium text-slate-200">OVO, Dana, ShopeePay</span>
+                            </div>
+                            <div class="p-2.5 bg-white/10 backdrop-blur-xs rounded-xl border border-white/10 flex items-center gap-2">
+                                <i class="fa-solid fa-store text-amber-400"></i>
+                                <span class="font-medium text-slate-200">Indomaret & Alfamart</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+                            <div>
+                                <span class="text-[10px] text-slate-400 block uppercase">Total yang Akan Dibayar:</span>
+                                <span class="font-black text-lg text-cyan-300">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
+                            </div>
+
+                            <button type="button" @click="payWithDuitku()"
+                                    :disabled="isLoadingDuitku"
+                                    class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-cyan-900/40 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
+                                <span x-show="!isLoadingDuitku" class="flex items-center gap-2">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                    <span>Buka Halaman Pembayaran Duitku</span>
+                                </span>
+                                <span x-show="isLoadingDuitku" x-cloak class="flex items-center gap-2">
+                                    <i class="fa-solid fa-circle-notch fa-spin"></i>
+                                    <span>Menghubungkan ke Duitku...</span>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 {{-- 1. TAB QRIS --}}

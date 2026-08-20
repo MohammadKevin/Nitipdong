@@ -13,6 +13,7 @@ use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\ReviewController as CustomerReviewController;
 use App\Http\Controllers\Customer\StoreRegistrationController;
 use App\Http\Controllers\Customer\WishlistController;
+use App\Http\Controllers\DuitkuPaymentController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\NotificationController;
@@ -38,8 +39,12 @@ use App\Models\Voucher;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-// Public Webhook Payment Callback (Exempt from CSRF)
+// Public Webhook Payment Callbacks (Exempt from CSRF)
 Route::post('/api/payment/notification', [PaymentCallbackController::class, 'handleWebhook'])->name('payment.webhook');
+Route::post('/api/duitku/callback', [DuitkuPaymentController::class, 'handleCallback'])->name('duitku.callback');
+
+// Return URL Redirect after Duitku Payment
+Route::get('/payment/finish', [DuitkuPaymentController::class, 'handleReturn'])->name('duitku.return');
 
 // Public Home
 Route::get('/', function () {
@@ -197,6 +202,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('/orders/{order}/payment', [OrderController::class, 'payment'])->name('order.payment');
         Route::post('/orders/{order}/payment', [OrderController::class, 'confirmPayment'])->name('order.confirm_payment');
+        Route::post('/orders/{order}/duitku/create', [DuitkuPaymentController::class, 'createInvoice'])->name('order.duitku_create');
         Route::post('/orders/{order}/simulate-payment', [PaymentCallbackController::class, 'simulateInstantPayment'])->name('order.simulate_payment');
         Route::post('/orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('order.confirm_received');
 

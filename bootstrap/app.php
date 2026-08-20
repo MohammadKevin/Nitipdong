@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->validateCsrfTokens(except: [
             '/api/payment/notification',
+            '/api/duitku/callback',
         ]);
 
         $middleware->redirectUsersTo(function (Request $request) {

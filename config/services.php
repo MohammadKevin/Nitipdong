@@ -41,4 +41,12 @@ return [
         'api_secret' => env('CLOUDINARY_API_SECRET'),
     ],
 
+    'duitku' => [
+        'merchant_code' => env('DUITKU_MERCHANT_CODE', 'DS34393'),
+        'api_key'       => env('DUITKU_API_KEY', '72cf764c6dd4fbf92f134f39bde5dbe3'),
+        'callback_url'  => env('DUITKU_CALLBACK_URL', 'https://budayakita.com/api/duitku/callback'),
+        'return_url'    => env('DUITKU_RETURN_URL', 'https://budayakita.com/payment/finish'),
+        'env'           => env('DUITKU_ENV', 'sandbox'),
+    ],
+
 ];
