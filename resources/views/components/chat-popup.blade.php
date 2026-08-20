@@ -333,10 +333,23 @@
             async handleOpenChat(event) {
                 this.isOpen = true;
                 window.dispatchEvent(new CustomEvent('close-ai-chat'));
+
                 if (event.detail && event.detail.receiver_id) {
-                    // Start or open conversation with receiver
+                    // Set active conversation immediately so user is taken straight into the seller chat room
+                    this.activeConversation = {
+                        id: null,
+                        full_url: '{{ route('chat.index') }}',
+                        partner: {
+                            name: event.detail.receiver_name || 'Penjual',
+                            avatar: event.detail.receiver_avatar || '/img/saksershop-logo.png',
+                            is_online: true
+                        }
+                    };
+                    this.messages = [];
+                    this.isLoadingMessages = true;
+
                     try {
-                        const res = await fetch(`/chat/api/start/${event.detail.receiver_id}`, {
+                        const res = await fetch(`/chat/api/start/${encodeURIComponent(event.detail.receiver_id)}`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -347,18 +360,28 @@
                         });
                         const data = await res.json();
                         if (res.ok && data.status === 'success') {
-                            await this.fetchConversations(false);
-                            const conv = this.conversations.find(c => c.id === data.conversation_id);
-                            if (conv) {
-                                this.openConversation(conv);
-                            } else {
-                                this.openConversation({ id: data.conversation_id, full_url: data.full_url, partner: { name: event.detail.receiver_name || 'Penjual', avatar: '/img/saksershop-logo.png' } });
+                            this.activeConversation = {
+                                id: data.conversation_id,
+                                full_url: data.full_url,
+                                partner: data.partner || this.activeConversation.partner
+                            };
+                            await this.fetchMessages(data.conversation_id);
+                            this.startPolling(data.conversation_id);
+                            this.fetchConversations(false);
+                        } else {
+                            if (window.toast) {
+                                window.toast.error(data.message || 'Gagal memulai percakapan.');
                             }
+                            this.backToList();
                         }
                     } catch (e) {
                         console.error(e);
+                        this.backToList();
+                    } finally {
+                        this.isLoadingMessages = false;
                     }
                 } else {
+                    this.activeConversation = null;
                     this.fetchConversations();
                 }
             }

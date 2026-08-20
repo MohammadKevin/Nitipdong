@@ -285,32 +285,60 @@ class ChatController extends Controller
         ]);
     }
 
-    public function apiStartConversation(User $receiver): \Illuminate\Http\JsonResponse
+    public function apiStartConversation($receiver): \Illuminate\Http\JsonResponse
     {
         $sender = Auth::user();
         $senderId = $sender->id;
 
-        if ($senderId === $receiver->id) {
+        $targetUser = null;
+        if ($receiver instanceof User) {
+            $targetUser = $receiver;
+        } elseif (is_numeric($receiver)) {
+            $targetUser = User::find($receiver);
+        } else {
+            $targetUser = User::findByObfuscatedId((string) $receiver) ?: User::find($receiver);
+        }
+
+        if (!$targetUser) {
+            $store = \App\Models\Store::where('id', $receiver)->orWhere('slug', $receiver)->first();
+            if ($store) {
+                $targetUser = $store->user;
+            }
+        }
+
+        if (!$targetUser) {
+            return response()->json(['status' => 'error', 'message' => 'Penjual tidak ditemukan.'], 404);
+        }
+
+        if ($senderId === $targetUser->id) {
             return response()->json(['status' => 'error', 'message' => 'Tidak dapat chat dengan diri sendiri.'], 422);
         }
 
-        $conversation = Conversation::where(function ($q) use ($senderId, $receiver) {
-            $q->where('user_one_id', $senderId)->where('user_two_id', $receiver->id);
-        })->orWhere(function ($q) use ($senderId, $receiver) {
-            $q->where('user_one_id', $receiver->id)->where('user_two_id', $senderId);
+        $conversation = Conversation::where(function ($q) use ($senderId, $targetUser) {
+            $q->where('user_one_id', $senderId)->where('user_two_id', $targetUser->id);
+        })->orWhere(function ($q) use ($senderId, $targetUser) {
+            $q->where('user_one_id', $targetUser->id)->where('user_two_id', $senderId);
         })->first();
 
         if (!$conversation) {
             $conversation = Conversation::create([
                 'user_one_id' => $senderId,
-                'user_two_id' => $receiver->id,
+                'user_two_id' => $targetUser->id,
             ]);
         }
+
+        $partnerName = $targetUser->role === 'seller' && $targetUser->store ? $targetUser->store->name : $targetUser->name;
 
         return response()->json([
             'status'          => 'success',
             'conversation_id' => $conversation->id,
             'full_url'        => route('chat.show', $conversation),
+            'partner'         => [
+                'id'     => $targetUser->id,
+                'name'   => $partnerName,
+                'avatar' => $targetUser->avatar_url,
+                'role'   => $targetUser->role,
+            ],
         ]);
     }
 }
