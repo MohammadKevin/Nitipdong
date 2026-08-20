@@ -388,9 +388,9 @@
                         </div>
                     </div>
 
-                    <a href="{{ route('chat.index') }}" aria-label="Pesan Chat" class="btn-icon relative" title="Pesan & Chat">
+                    <button type="button" @click="$dispatch('open-chat')" aria-label="Pesan Chat" class="btn-icon relative cursor-pointer" title="Pesan & Chat">
                         <i class="fa-regular fa-comment-dots text-sm text-slate-600"></i>
-                    </a>
+                    </button>
 
                     <x-notification-dropdown />
 

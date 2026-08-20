@@ -396,9 +396,24 @@
                             </div>
                         </div>
                         @if($product->store)
-                            <a href="{{ route('store.show', $product->store->slug) }}" class="btn-secondary text-xs h-8.5 px-3.5 rounded-xl border-slate-300 hover:border-cyan-600 hover:text-cyan-700 font-semibold flex items-center gap-1.5 shadow-2xs">
-                                <i class="fa-solid fa-store text-xs"></i> Kunjungi Toko
-                            </a>
+                            <div class="flex items-center gap-2">
+                                @auth
+                                    <button type="button"
+                                            @click="$dispatch('open-chat', { receiver_id: {{ $product->store->user_id ?? 1 }}, receiver_name: '{{ addslashes($product->store->name) }}' })"
+                                            class="btn-secondary text-xs h-8.5 px-3 rounded-xl border-cyan-200 text-cyan-800 bg-cyan-50/80 hover:bg-cyan-100 hover:border-cyan-400 font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                                        <i class="fa-regular fa-comment-dots text-xs text-cyan-700"></i>
+                                        <span>Chat Penjual</span>
+                                    </button>
+                                @else
+                                    <a href="{{ route('login') }}" class="btn-secondary text-xs h-8.5 px-3 rounded-xl border-cyan-200 text-cyan-800 bg-cyan-50/80 hover:bg-cyan-100 hover:border-cyan-400 font-bold flex items-center gap-1.5 shadow-2xs">
+                                        <i class="fa-regular fa-comment-dots text-xs text-cyan-700"></i>
+                                        <span>Chat Penjual</span>
+                                    </a>
+                                @endauth
+                                <a href="{{ route('store.show', $product->store->slug) }}" class="btn-secondary text-xs h-8.5 px-3.5 rounded-xl border-slate-300 hover:border-cyan-600 hover:text-cyan-700 font-semibold flex items-center gap-1.5 shadow-2xs">
+                                    <i class="fa-solid fa-store text-xs"></i> Kunjungi Toko
+                                </a>
+                            </div>
                         @endif
                     </div>
                 </div>

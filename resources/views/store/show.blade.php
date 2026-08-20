@@ -63,13 +63,12 @@
                     <div class="flex items-center gap-3 shrink-0">
                         @auth
                             @if(Auth::id() !== $store->user_id)
-                                <form action="{{ route('chat.start', $store->user_id) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn-primary text-xs h-9.5 px-4.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold flex items-center gap-2 shadow-xs transition-all cursor-pointer">
-                                        <i class="fa-solid fa-comments text-xs"></i>
-                                        <span>Chat Penjual</span>
-                                    </button>
-                                </form>
+                                <button type="button"
+                                        @click="$dispatch('open-chat', { receiver_id: {{ $store->user_id }}, receiver_name: '{{ addslashes($store->name) }}' })"
+                                        class="btn-primary text-xs h-9.5 px-4.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold flex items-center gap-2 shadow-xs transition-all cursor-pointer">
+                                    <i class="fa-solid fa-comments text-xs"></i>
+                                    <span>Chat Penjual</span>
+                                </button>
                             @endif
                         @else
                             <a href="{{ route('login') }}" class="btn-primary text-xs h-9.5 px-4.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold flex items-center gap-2 shadow-xs transition-all">

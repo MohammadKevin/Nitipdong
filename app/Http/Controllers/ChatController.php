@@ -151,6 +151,166 @@ class ChatController extends Controller
 
         $conversation->touch();
 
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Pesan berhasil dikirim.',
+            ]);
+        }
+
         return redirect()->route('chat.show', $conversation);
+    }
+
+    public function apiConversations(): \Illuminate\Http\JsonResponse
+    {
+        $userId = Auth::id();
+        if (!$userId) {
+            return response()->json(['status' => 'error', 'conversations' => []], 401);
+        }
+
+        $conversations = Conversation::where('user_one_id', $userId)
+            ->orWhere('user_two_id', $userId)
+            ->with(['userOne.store', 'userTwo.store', 'messages' => fn ($q) => $q->latest()])
+            ->latest('updated_at')
+            ->get();
+
+        $data = $conversations->map(function ($conv) use ($userId) {
+            $partner = $conv->user_one_id === $userId ? $conv->userTwo : $conv->userOne;
+            if (!$partner) return null;
+
+            $lastMsg = $conv->messages->first();
+            $unreadCount = $conv->messages->where('sender_id', '!=', $userId)->where('is_read', false)->count();
+
+            $partnerName = $partner->role === 'seller' && $partner->store ? $partner->store->name : $partner->name;
+            $partnerAvatar = $partner->avatar_url;
+
+            return [
+                'id'            => $conv->id,
+                'obfuscated_id' => $conv->obfuscated_id,
+                'partner'       => [
+                    'id'     => $partner->id,
+                    'name'   => $partnerName,
+                    'avatar' => $partnerAvatar,
+                    'role'   => $partner->role,
+                    'is_online' => true,
+                ],
+                'last_message'      => $lastMsg ? $lastMsg->message : 'Belum ada pesan',
+                'last_message_time' => $lastMsg ? $lastMsg->created_at->diffForHumans(null, true) : '',
+                'unread_count'      => $unreadCount,
+                'full_url'          => route('chat.show', $conv),
+            ];
+        })->filter()->values();
+
+        $totalUnread = $data->sum('unread_count');
+
+        return response()->json([
+            'status'        => 'success',
+            'total_unread'  => $totalUnread,
+            'conversations' => $data,
+        ]);
+    }
+
+    public function apiMessages(Conversation $conversation): \Illuminate\Http\JsonResponse
+    {
+        $userId = Auth::id();
+        if ($conversation->user_one_id !== $userId && $conversation->user_two_id !== $userId) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+        }
+
+        // Mark as read
+        Message::where('conversation_id', $conversation->id)
+            ->where('sender_id', '!=', $userId)
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        $partner = $conversation->user_one_id === $userId ? $conversation->userTwo : $conversation->userOne;
+        $partnerName = $partner->role === 'seller' && $partner->store ? $partner->store->name : $partner->name;
+
+        $messages = $conversation->messages()->oldest()->get()->map(function ($msg) use ($userId) {
+            return [
+                'id'         => $msg->id,
+                'sender_id'  => $msg->sender_id,
+                'is_me'      => $msg->sender_id === $userId,
+                'message'    => $msg->message,
+                'time'       => $msg->created_at->format('H:i'),
+                'created_at' => $msg->created_at->toIso8601String(),
+            ];
+        });
+
+        return response()->json([
+            'status'       => 'success',
+            'conversation' => [
+                'id'       => $conversation->id,
+                'full_url' => route('chat.show', $conversation),
+            ],
+            'partner'      => [
+                'id'     => $partner->id,
+                'name'   => $partnerName,
+                'avatar' => $partner->avatar_url,
+                'role'   => $partner->role,
+            ],
+            'messages'     => $messages,
+        ]);
+    }
+
+    public function apiSendMessage(Request $request, Conversation $conversation): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'message' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $userId = Auth::id();
+        if ($conversation->user_one_id !== $userId && $conversation->user_two_id !== $userId) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+        }
+
+        $msg = Message::create([
+            'conversation_id' => $conversation->id,
+            'sender_id'       => $userId,
+            'message'         => $request->message,
+            'is_read'         => false,
+        ]);
+
+        $conversation->touch();
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => [
+                'id'        => $msg->id,
+                'sender_id' => $msg->sender_id,
+                'is_me'     => true,
+                'message'   => $msg->message,
+                'time'      => $msg->created_at->format('H:i'),
+            ],
+        ]);
+    }
+
+    public function apiStartConversation(User $receiver): \Illuminate\Http\JsonResponse
+    {
+        $sender = Auth::user();
+        $senderId = $sender->id;
+
+        if ($senderId === $receiver->id) {
+            return response()->json(['status' => 'error', 'message' => 'Tidak dapat chat dengan diri sendiri.'], 422);
+        }
+
+        $conversation = Conversation::where(function ($q) use ($senderId, $receiver) {
+            $q->where('user_one_id', $senderId)->where('user_two_id', $receiver->id);
+        })->orWhere(function ($q) use ($senderId, $receiver) {
+            $q->where('user_one_id', $receiver->id)->where('user_two_id', $senderId);
+        })->first();
+
+        if (!$conversation) {
+            $conversation = Conversation::create([
+                'user_one_id' => $senderId,
+                'user_two_id' => $receiver->id,
+            ]);
+        }
+
+        return response()->json([
+            'status'          => 'success',
+            'conversation_id' => $conversation->id,
+            'full_url'        => route('chat.show', $conversation),
+        ]);
     }
 }

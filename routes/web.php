@@ -281,6 +281,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Real-time Chat
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::get('/chat/api/conversations', [ChatController::class, 'apiConversations'])->name('chat.api.conversations');
+    Route::get('/chat/api/{conversation}/messages', [ChatController::class, 'apiMessages'])->name('chat.api.messages');
+    Route::post('/chat/api/{conversation}/send', [ChatController::class, 'apiSendMessage'])->name('chat.api.send');
+    Route::post('/chat/api/start/{receiver}', [ChatController::class, 'apiStartConversation'])->name('chat.api.start');
     Route::post('/chat/start/{receiver}', [ChatController::class, 'startConversation'])->name('chat.start');
     Route::get('/chat/{conversation}', [ChatController::class, 'show'])->name('chat.show');
     Route::post('/chat/{conversation}/send', [ChatController::class, 'sendMessage'])->name('chat.send');

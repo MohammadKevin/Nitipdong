@@ -180,6 +180,7 @@
             </div>
         </footer>
 
+        <x-chat-popup />
         <x-chat-widget />
         <x-toast-notifier />
 
