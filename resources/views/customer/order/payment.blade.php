@@ -10,10 +10,10 @@
 @endphp
 
 <x-app-layout>
-    {{-- Midtrans Snap Script --}}
+    {{-- Midtrans Snap Script (Sandbox) --}}
     @push('scripts')
-        <script src="{{ config('services.midtrans.is_production', false) ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
-                data-client-key="{{ config('services.midtrans.client_key', env('MIDTRANS_CLIENT_KEY', 'Mid-client-nNuy0AuFjI35ym6k')) }}">
+        <script src="https://app.sandbox.midtrans.com/snap/snap.js"
+                data-client-key="{{ config('services.midtrans.client_key') ?? 'Mid-client-nNuy0AuFjI35ym6k' }}">
         </script>
     @endpush
 

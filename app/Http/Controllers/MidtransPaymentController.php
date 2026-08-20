@@ -19,19 +19,17 @@ class MidtransPaymentController extends Controller
 
     public function __construct()
     {
-        $this->serverKey    = config('services.midtrans.server_key', env('MIDTRANS_SERVER_KEY', 'Mid-server-ORIG4umIOjT0Q4w1JDxzlc0c'));
-        $this->clientKey    = config('services.midtrans.client_key', env('MIDTRANS_CLIENT_KEY', 'Mid-client-nNuy0AuFjI35ym6k'));
-        $this->isProduction = (bool) config('services.midtrans.is_production', env('MIDTRANS_IS_PRODUCTION', false));
-        $this->snapApiUrl   = $this->isProduction
-            ? 'https://app.midtrans.com/snap/v1/transactions'
-            : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
+        $this->serverKey    = config('services.midtrans.server_key') ?: env('MIDTRANS_SERVER_KEY', 'Mid-server-ORIG4umIOjT0Q4w1JDxzlc0c');
+        $this->clientKey    = config('services.midtrans.client_key') ?: env('MIDTRANS_CLIENT_KEY', 'Mid-client-nNuy0AuFjI35ym6k');
+        $this->isProduction = false; // Kunci ke Sandbox
+        $this->snapApiUrl   = 'https://app.sandbox.midtrans.com/snap/v1/transactions';
 
         // Konfigurasi Midtrans SDK jika kelas tersedia
         if (class_exists(\Midtrans\Config::class)) {
             \Midtrans\Config::$serverKey    = $this->serverKey;
-            \Midtrans\Config::$isProduction = $this->isProduction;
-            \Midtrans\Config::$isSanitized  = (bool) config('services.midtrans.is_sanitized', true);
-            \Midtrans\Config::$is3ds        = (bool) config('services.midtrans.is_3ds', true);
+            \Midtrans\Config::$isProduction = false;
+            \Midtrans\Config::$isSanitized  = true;
+            \Midtrans\Config::$is3ds        = true;
         }
     }
 
@@ -51,8 +49,21 @@ class MidtransPaymentController extends Controller
 
         $order->load(['user', 'orderItems.product']);
 
+        $serverKey = config('services.midtrans.server_key') ?: env('MIDTRANS_SERVER_KEY', 'Mid-server-ORIG4umIOjT0Q4w1JDxzlc0c');
+        $clientKey = config('services.midtrans.client_key') ?: env('MIDTRANS_CLIENT_KEY', 'Mid-client-nNuy0AuFjI35ym6k');
+
+        // Setup ulang config Midtrans memastikan tidak null
+        if (class_exists(\Midtrans\Config::class)) {
+            \Midtrans\Config::$serverKey    = $serverKey;
+            \Midtrans\Config::$isProduction = false;
+            \Midtrans\Config::$isSanitized  = true;
+            \Midtrans\Config::$is3ds        = true;
+        }
+
         $grossAmount = (int) round($order->total_amount);
-        $orderId     = $order->invoice_number ?: ('ORDER-' . $order->id . '-' . time());
+        // Pastikan order_id unik dengan menambahkan timestamp agar tidak ditolak Midtrans jika sudah pernah dicoba
+        $orderNumber = $order->invoice_number ?: ('ORDER-' . $order->id);
+        $orderId     = $orderNumber . '-' . time();
 
         $customer = $order->user ?? Auth::user();
         $customerDetails = [
@@ -97,7 +108,7 @@ class MidtransPaymentController extends Controller
                     'id'       => 'ORDER-' . $order->id,
                     'price'    => $grossAmount,
                     'quantity' => 1,
-                    'name'     => substr('Pembayaran Pesanan #' . $orderId, 0, 50),
+                    'name'     => substr('Pembayaran Pesanan #' . $orderNumber, 0, 50),
                 ]
             ];
         }
@@ -119,13 +130,13 @@ class MidtransPaymentController extends Controller
                 try {
                     $snapToken = \Midtrans\Snap::getSnapToken($params);
                 } catch (\Exception $sdkEx) {
-                    Log::warning('Midtrans SDK getSnapToken fallback to HTTP API:', ['message' => $sdkEx->getMessage()]);
+                    Log::warning('Midtrans SDK getSnapToken exception, trying direct HTTP:', ['message' => $sdkEx->getMessage()]);
                 }
             }
 
             // Fallback direct HTTP API ke Midtrans Snap endpoint
             if (empty($snapToken)) {
-                $response = Http::withBasicAuth($this->serverKey, '')
+                $response = Http::withBasicAuth($serverKey, '')
                     ->withoutVerifying()
                     ->timeout(20)
                     ->withHeaders([
@@ -147,7 +158,7 @@ class MidtransPaymentController extends Controller
 
                     return response()->json([
                         'status'  => 'error',
-                        'message' => $response->json('error_messages.0') ?? 'Gagal membuat Snap Token Midtrans.'
+                        'message' => $response->json('error_messages.0') ?? 'Gagal membuat Snap Token Midtrans: ' . $response->body()
                     ], 400);
                 }
             }
@@ -161,7 +172,7 @@ class MidtransPaymentController extends Controller
                     'status'     => 'success',
                     'snap_token' => $snapToken,
                     'token'      => $snapToken,
-                    'client_key' => $this->clientKey,
+                    'client_key' => $clientKey,
                     'order_id'   => $orderId,
                     'amount'     => $grossAmount,
                 ]);
@@ -229,10 +240,15 @@ class MidtransPaymentController extends Controller
                 }
             }
 
-            // Cari pesanan berdasarkan invoice_number / order_id
+            // Cari pesanan asli jika orderId memiliki suffix timestamp
+            $cleanOrderId = preg_replace('/-\d{10,}$/', '', $orderId);
+
             $order = Order::where('invoice_number', $orderId)
+                ->orWhere('invoice_number', $cleanOrderId)
                 ->orWhere('id', $orderId)
+                ->orWhere('id', $cleanOrderId)
                 ->orWhereRaw("REPLACE(invoice_number, '-', '') = ?", [$orderId])
+                ->orWhereRaw("REPLACE(invoice_number, '-', '') = ?", [$cleanOrderId])
                 ->first();
 
             if (!$order) {
