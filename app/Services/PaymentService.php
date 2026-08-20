@@ -13,13 +13,6 @@ class PaymentService
      * Daftar channel pembayaran otomatis.
      */
     public const PAYMENT_CHANNELS = [
-        'duitku' => [
-            'name'     => 'Payment Gateway (QRIS, VA, E-Wallet)',
-            'icon'     => 'fa-solid fa-shield-halved',
-            'type'     => 'duitku',
-            'badge'    => 'Rekomendasi Utama',
-            'badge_bg' => 'bg-cyan-50 text-cyan-800 border-cyan-300 font-extrabold',
-        ],
         'qris' => [
             'name'     => 'QRIS (Semua E-Wallet & M-Banking)',
             'icon'     => 'fa-solid fa-qrcode',

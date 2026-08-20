@@ -2,10 +2,8 @@
     $rawMethod = $order->payment_method ?: 'qris';
     if (str_starts_with($rawMethod, 'va_')) {
         $defaultTab = 'va';
-    } elseif ($rawMethod === 'manual_transfer') {
+    } elseif ($rawMethod === 'manual_transfer' || $rawMethod === 'manual') {
         $defaultTab = 'manual';
-    } elseif ($rawMethod === 'duitku') {
-        $defaultTab = 'duitku';
     } else {
         $defaultTab = 'qris';
     }
@@ -23,43 +21,16 @@
                 'va_bri': '880499{{ str_pad((string) $order->id, 6, '0', STR_PAD_LEFT) }}',
             },
             vaBankNames: {
-                'va_bca': 'BCA Virtual Account',
-                'va_mandiri': 'Mandiri Virtual Account',
-                'va_bni': 'BNI Virtual Account',
-                'va_bri': 'BRI Virtual Account (BRIVA)',
+                'va_bca': 'Bank Central Asia (BCA)',
+                'va_mandiri': 'Bank Mandiri',
+                'va_bni': 'Bank Negara Indonesia (BNI)',
+                'va_bri': 'Bank Rakyat Indonesia (BRI / BRIVA)',
             },
             copied: false,
-            isLoadingDuitku: false,
             copyText(text) {
                 navigator.clipboard.writeText(text);
                 this.copied = true;
                 setTimeout(() => this.copied = false, 2500);
-            },
-            payWithDuitku() {
-                this.isLoadingDuitku = true;
-                fetch('{{ route('customer.order.duitku_create', $order) }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(res => res.json())
-                .then(data => {
-                    this.isLoadingDuitku = false;
-                    const url = data.paymentUrl || data.payment_url;
-                    if (data.status === 'success' && url) {
-                        window.location.href = url;
-                    } else {
-                        alert(data.message || 'Gagal memproses transaksi Payment Gateway.');
-                    }
-                })
-                .catch(err => {
-                    this.isLoadingDuitku = false;
-                    window.location.href = '{{ route('customer.order.duitku_create', $order) }}';
-                });
             }
          }">
         <div class="max-w-2xl mx-auto mb-4">
@@ -110,23 +81,17 @@
                             :class="activeTab === 'va' ? 'border-cyan-600 text-cyan-800 font-bold border-b-2' : 'text-slate-500 hover:text-slate-800 font-medium'"
                             class="pb-2.5 px-3 text-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer">
                         <i class="fa-solid fa-building-columns text-xs"></i>
-                        <span>Virtual Account</span>
-                    </button>
-                    <button type="button" @click="activeTab = 'duitku'"
-                            :class="activeTab === 'duitku' ? 'border-cyan-600 text-cyan-800 font-bold border-b-2' : 'text-slate-500 hover:text-slate-800 font-medium'"
-                            class="pb-2.5 px-3 text-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer">
-                        <i class="fa-solid fa-wallet text-cyan-600 text-xs"></i>
-                        <span>Payment Gateway</span>
+                        <span>Virtual Account (BCA, Mandiri, BNI, BRI)</span>
                     </button>
                     <button type="button" @click="activeTab = 'manual'"
                             :class="activeTab === 'manual' ? 'border-cyan-600 text-cyan-800 font-bold border-b-2' : 'text-slate-500 hover:text-slate-800 font-medium'"
                             class="pb-2.5 px-3 text-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer">
                         <i class="fa-solid fa-receipt text-xs"></i>
-                        <span>Transfer Manual</span>
+                        <span>Transfer Bank Manual</span>
                     </button>
                 </div>
 
-                {{-- 1. TAB QRIS INSTAN (DEFAULT JIKA PILIH QRIS) --}}
+                {{-- 1. TAB QRIS INSTAN (LANGSUNG MUNCUL JIKA PILIH QRIS) --}}
                 <div x-show="activeTab === 'qris'" class="space-y-4 pt-1">
                     <div class="text-center bg-slate-50 border border-slate-200/80 rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
                         <div class="inline-block p-4 bg-white rounded-2xl shadow-sm border border-slate-200">
@@ -143,7 +108,7 @@
                             </p>
                         </div>
 
-                        <div class="p-3.5 bg-white rounded-xl border border-slate-200 max-w-sm mx-auto text-xs space-y-1.5">
+                        <div class="p-3.5 bg-white rounded-xl border border-slate-200 max-w-sm mx-auto text-xs space-y-1.5 text-left">
                             <div class="flex justify-between text-slate-500">
                                 <span>Merchant Resmi:</span>
                                 <span class="font-bold text-slate-800">SakserShop Official</span>
@@ -152,7 +117,7 @@
                                 <span>Total Tagihan:</span>
                                 <span class="font-extrabold text-cyan-800 text-sm">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
                             </div>
-                            <div class="flex justify-between text-slate-500 text-[11px] pt-1 border-t border-slate-100">
+                            <div class="flex justify-between text-slate-500 text-[11px] pt-1.5 border-t border-slate-100">
                                 <span>Status Verifikasi:</span>
                                 <span class="text-emerald-700 font-bold flex items-center gap-1">
                                     <i class="fa-solid fa-circle-notch fa-spin text-[10px]"></i> Menunggu Pembayaran
@@ -162,7 +127,7 @@
                     </div>
                 </div>
 
-                {{-- 2. TAB VIRTUAL ACCOUNT --}}
+                {{-- 2. TAB VIRTUAL ACCOUNT (LANGSUNG MUNCUL DENGAN BANK TERPILIH) --}}
                 <div x-show="activeTab === 'va'" x-cloak class="space-y-4 pt-1">
                     <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 space-y-4">
                         {{-- Bank Selector Tabs --}}
@@ -198,7 +163,7 @@
 
                         <div class="pt-2 border-t border-slate-200">
                             <div class="flex items-center justify-between pb-2">
-                                <span class="text-[11px] font-bold text-slate-500 uppercase" x-text="vaBankNames[selectedVaBank]"></span>
+                                <span class="text-xs font-bold text-slate-800" x-text="vaBankNames[selectedVaBank]"></span>
                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-100 text-cyan-800">
                                     Verifikasi Otomatis
                                 </span>
@@ -229,75 +194,7 @@
                     </div>
                 </div>
 
-                {{-- 3. TAB PAYMENT GATEWAY (DUITKU) --}}
-                <div x-show="activeTab === 'duitku'" class="space-y-4 pt-1">
-                    <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-cyan-950 text-white rounded-2xl p-5 sm:p-6 space-y-4 shadow-xl border border-cyan-500/30 relative overflow-hidden">
-                        <div class="absolute -right-8 -top-8 w-36 h-36 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
-
-                        <div class="flex items-center justify-between gap-3 flex-wrap">
-                            <div class="flex items-center gap-2.5">
-                                <div class="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 flex items-center justify-center text-lg shadow-inner">
-                                    <i class="fa-solid fa-shield-halved"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-sm text-white">SakserShop Payment Gateway</h3>
-                                    <p class="text-[11px] text-cyan-200/80">Pembayaran Terverifikasi Otomatis & Instan 24 Jam</p>
-                                </div>
-                            </div>
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1">
-                                <i class="fa-solid fa-check"></i> Official Gateway
-                            </span>
-                        </div>
-
-                        <p class="text-xs text-slate-300 leading-relaxed">
-                            Bayar dengan mudah dan aman menggunakan puluhan metode pembayaran resmi:
-                        </p>
-
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
-                            <div class="p-2.5 bg-white/10 backdrop-blur-xs rounded-xl border border-white/10 flex items-center gap-2">
-                                <i class="fa-solid fa-qrcode text-cyan-400"></i>
-                                <span class="font-medium text-slate-200">QRIS (Semua E-Wallet)</span>
-                            </div>
-                            <div class="p-2.5 bg-white/10 backdrop-blur-xs rounded-xl border border-white/10 flex items-center gap-2">
-                                <i class="fa-solid fa-building-columns text-blue-400"></i>
-                                <span class="font-medium text-slate-200">BCA, Mandiri, BRI, BNI</span>
-                            </div>
-                            <div class="p-2.5 bg-white/10 backdrop-blur-xs rounded-xl border border-white/10 flex items-center gap-2">
-                                <i class="fa-solid fa-mobile-screen-button text-emerald-400"></i>
-                                <span class="font-medium text-slate-200">OVO, Dana, ShopeePay</span>
-                            </div>
-                            <div class="p-2.5 bg-white/10 backdrop-blur-xs rounded-xl border border-white/10 flex items-center gap-2">
-                                <i class="fa-solid fa-store text-amber-400"></i>
-                                <span class="font-medium text-slate-200">Indomaret & Alfamart</span>
-                            </div>
-                        </div>
-
-                        <div class="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-white/10">
-                            <div>
-                                <span class="text-[10px] text-slate-400 block uppercase font-medium">Total Tagihan:</span>
-                                <span class="font-black text-xl text-cyan-300">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
-                            </div>
-
-                            <form action="{{ route('customer.order.duitku_create', $order) }}" method="POST" @submit.prevent="payWithDuitku()">
-                                @csrf
-                                <button type="submit"
-                                        :disabled="isLoadingDuitku"
-                                        class="w-full sm:w-auto px-7 py-3.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-cyan-900/40 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-98">
-                                    <span x-show="!isLoadingDuitku" class="flex items-center gap-2">
-                                        <i class="fa-solid fa-lock"></i>
-                                        <span>Bayar Sekarang via Payment Gateway</span>
-                                    </span>
-                                    <span x-show="isLoadingDuitku" x-cloak class="flex items-center gap-2">
-                                        <i class="fa-solid fa-circle-notch fa-spin"></i>
-                                        <span>Menghubungkan ke Gateway...</span>
-                                    </span>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- 4. TAB MANUAL TRANSFER & UPLOAD STRUK --}}
+                {{-- 3. TAB MANUAL TRANSFER & UPLOAD STRUK --}}
                 <div x-show="activeTab === 'manual'" x-cloak class="space-y-4 pt-1">
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3"
                          x-data="{
