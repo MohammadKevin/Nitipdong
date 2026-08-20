@@ -63,22 +63,42 @@
                                     window.location.href = '{{ route('customer.dashboard') }}?payment=pending';
                                 },
                                 onError: function(result) {
-                                    alert('Pembayaran gagal atau dibatalkan!');
+                                    if (window.toast) {
+                                        window.toast.error('Pembayaran gagal atau dibatalkan.');
+                                    } else {
+                                        alert('Pembayaran gagal atau dibatalkan!');
+                                    }
                                 },
                                 onClose: function() {
-                                    console.log('Customer closed popup without finishing payment');
+                                    if (window.toast) {
+                                        window.toast.info('Popup pembayaran ditutup. Anda dapat melanjutkan pembayaran nanti.');
+                                    }
                                 }
                             });
                         } else {
-                            alert('Midtrans Snap SDK gagal dimuat. Silakan periksa koneksi internet Anda.');
+                            if (window.toast) {
+                                window.toast.error('Midtrans Snap SDK gagal dimuat. Silakan periksa koneksi internet Anda.');
+                            } else {
+                                alert('Midtrans Snap SDK gagal dimuat. Silakan periksa koneksi internet Anda.');
+                            }
                         }
                     } else {
-                        alert(data.message || 'Gagal memproses transaksi Midtrans Snap.');
+                        const errMsg = data.message || 'Gagal memproses transaksi Midtrans Snap.';
+                        if (window.toast) {
+                            window.toast.error(errMsg);
+                        } else {
+                            alert(errMsg);
+                        }
                     }
                 })
                 .catch(err => {
                     this.isLoadingMidtrans = false;
-                    alert('Terjadi kesalahan jaringan: ' + err.message);
+                    const errText = 'Terjadi kesalahan jaringan: ' + err.message;
+                    if (window.toast) {
+                        window.toast.error(errText);
+                    } else {
+                        alert(errText);
+                    }
                 });
             }
          }">

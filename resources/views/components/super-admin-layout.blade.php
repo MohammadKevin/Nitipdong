@@ -108,5 +108,7 @@
             </main>
         </div>
     </div>
+    <x-toast-notifier />
+    @stack('scripts')
 </body>
 </html>

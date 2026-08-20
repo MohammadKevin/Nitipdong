@@ -235,13 +235,13 @@
                     <div class="pt-3 border-t border-slate-100">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">Pengaturan Akun</p>
                         <div class="space-y-1 text-xs">
-                            <a href="{{ route('customer.vouchers.index') }}"
+                            <a href="{{ route('chat.index') }}"
                                class="flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-slate-700 hover:bg-slate-50 hover:text-cyan-700 transition-colors">
                                 <div class="flex items-center gap-2.5">
-                                    <div class="w-6 h-6 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center text-xs">
-                                        <i class="fa-solid fa-ticket"></i>
+                                    <div class="w-6 h-6 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center text-xs">
+                                        <i class="fa-regular fa-comment-dots"></i>
                                     </div>
-                                    <span>Voucher Saya</span>
+                                    <span>Pesan & Chat Toko</span>
                                 </div>
                                 <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
                             </a>

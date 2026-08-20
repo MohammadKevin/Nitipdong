@@ -111,5 +111,7 @@
     </div>
 
     <x-chat-widget />
+    <x-toast-notifier />
+    @stack('scripts')
 </body>
 </html>
