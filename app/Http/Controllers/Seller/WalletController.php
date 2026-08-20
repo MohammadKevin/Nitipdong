@@ -73,11 +73,16 @@ class WalletController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $store) {
+            $lockedStore = \App\Models\Store::where('id', $store->id)->lockForUpdate()->first();
+            if (!$lockedStore || $lockedStore->balance < $request->amount) {
+                throw new \Exception('Saldo dompet tidak mencukupi untuk penarikan ini.');
+            }
+
             // Deduct store balance
-            $store->decrement('balance', $request->amount);
+            $lockedStore->decrement('balance', $request->amount);
 
             // Update default bank info on store
-            $store->update([
+            $lockedStore->update([
                 'bank_name'           => $request->bank_name,
                 'bank_account_number' => $request->account_number,
                 'bank_account_holder' => $request->account_holder,

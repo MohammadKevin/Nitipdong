@@ -40,9 +40,21 @@ class OrderManagementController extends Controller
         $newStatus = $request->status;
 
         DB::transaction(function () use ($order, $request, $oldStatus, $newStatus) {
+            $trackingNo = $request->tracking_number ?: $order->tracking_number;
+            if ($newStatus === 'shipped' && empty($trackingNo)) {
+                $prefix = match (strtoupper($order->courier_code ?? 'EXP')) {
+                    'JNE'     => 'JNE',
+                    'JNT'     => 'JNT',
+                    'SICEPAT' => 'SC',
+                    'POS'     => 'POS',
+                    default   => 'EXP',
+                };
+                $trackingNo = $prefix . '-' . date('ymd') . rand(10000, 99999);
+            }
+
             $updates = [
                 'status'          => $newStatus,
-                'tracking_number' => $request->tracking_number ?: $order->tracking_number,
+                'tracking_number' => $trackingNo,
             ];
 
             if ($newStatus === 'completed' && !$order->completed_at) {

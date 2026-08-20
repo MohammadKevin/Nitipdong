@@ -178,9 +178,10 @@ class OrderController extends Controller
                 return back()->withErrors(['address_id' => 'Alamat pengiriman yang dipilih tidak valid.'])->withInput();
             }
 
-            $addressParts = array_filter([$address->city, $address->province, $address->postal_code]);
+            $addressParts = array_filter([$address->district, $address->city, $address->province, $address->postal_code]);
             $location = ! empty($addressParts) ? ', ' . implode(', ', $addressParts) : '';
-            $shippingAddress = "{$address->recipient_name} ({$address->phone})\n{$address->full_address}{$location}";
+            $notesPart = ! empty($address->notes) ? "\n(Patokan: {$address->notes})" : '';
+            $shippingAddress = "{$address->recipient_name} ({$address->phone})\n{$address->full_address}{$location}{$notesPart}";
             $destinationCity = $address->city;
         } else {
             $shippingAddress = trim($request->shipping_address);
