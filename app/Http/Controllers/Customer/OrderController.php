@@ -73,15 +73,19 @@ class OrderController extends Controller
         $totalInitialShipping = 0;
 
         foreach ($groupedByStore as $storeId => $items) {
+            $firstStore = $items->first()->product->store ?? null;
             $storeWeight = $items->sum(fn ($it) => max(0.2, (float) ($it->product->weight ?? 0.5)) * $it->quantity);
-            $options = ShippingService::getAvailableOptions($storeWeight, $defaultAddress?->city);
-            $defaultOption = $options[0] ?? ShippingService::getDefaultOption($storeWeight);
+            $options = ShippingService::getAvailableOptions($storeWeight, $defaultAddress?->city, null, $firstStore);
+            $defaultOption = $options[0] ?? ShippingService::getDefaultOption($storeWeight, $defaultAddress?->city, null, $firstStore);
 
             $storeShippingData[$storeId] = [
+                'store_name'     => $firstStore->name ?? 'Official Store',
+                'origin_city'    => $firstStore?->effective_city ?? 'Jakarta Pusat',
                 'weight'         => $storeWeight,
                 'options'        => $options,
                 'selected_id'    => $defaultOption['id'] ?? 'JNE_REG',
                 'selected_cost'  => $defaultOption['cost'],
+                'is_same_city'   => $defaultOption['is_same_city'] ?? false,
             ];
 
             $totalInitialShipping += $defaultOption['cost'];
@@ -131,15 +135,19 @@ class OrderController extends Controller
         $totalShipping = 0;
 
         foreach ($groupedByStore as $storeId => $items) {
+            $firstStore = $items->first()->product->store ?? null;
             $storeWeight = $items->sum(fn ($it) => max(0.2, (float) ($it->product->weight ?? 0.5)) * $it->quantity);
-            $options = ShippingService::getAvailableOptions($storeWeight, $city);
-            $defaultOption = $options[0] ?? ShippingService::getDefaultOption($storeWeight);
+            $options = ShippingService::getAvailableOptions($storeWeight, $city, null, $firstStore);
+            $defaultOption = $options[0] ?? ShippingService::getDefaultOption($storeWeight, $city, null, $firstStore);
 
             $storeShippingData[$storeId] = [
+                'store_name'     => $firstStore->name ?? 'Official Store',
+                'origin_city'    => $firstStore?->effective_city ?? 'Jakarta Pusat',
                 'weight'         => $storeWeight,
                 'options'        => $options,
                 'selected_id'    => $defaultOption['id'] ?? 'JNE_REG',
                 'selected_cost'  => $defaultOption['cost'],
+                'is_same_city'   => $defaultOption['is_same_city'] ?? false,
             ];
 
             $totalShipping += $defaultOption['cost'];
@@ -258,7 +266,8 @@ class OrderController extends Controller
                     $cCode = $parts[0] ?? 'JNE';
                     $sCode = $parts[1] ?? 'REG';
 
-                    $shippingRate = ShippingService::calculateRate($cCode, $sCode, $storeWeight, $destinationCity);
+                    $firstStore = $items->first()->product->store ?? null;
+                    $shippingRate = ShippingService::calculateRate($cCode, $sCode, $storeWeight, $destinationCity, null, $firstStore);
 
                     $storeDiscount = 0;
                     $orderVoucherCode = null;

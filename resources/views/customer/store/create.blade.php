@@ -49,16 +49,79 @@
                         @enderror
                     </div>
 
-                    <div>
-                        <label for="address" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Alamat Operasional & Pengiriman Toko <span class="text-rose-500">*</span>
-                        </label>
-                        <textarea id="address" name="address" rows="3" required
-                            placeholder="Tuliskan alamat lengkap gudang / toko asal pengiriman paket..."
-                            class="input text-xs rounded-md">{{ old('address') }}</textarea>
-                        @error('address')
-                            <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
-                        @enderror
+                    @php
+                        $provincesData = \App\Services\IndonesianRegionService::PROVINCES_DATA;
+                    @endphp
+
+                    <div x-data="{
+                        provinces: {{ json_encode($provincesData) }},
+                        selectedProvince: 'DKI Jakarta',
+                        selectedCity: 'Jakarta Pusat',
+                        cities: [],
+                        init() {
+                            this.updateCities();
+                        },
+                        updateCities() {
+                            if (this.provinces[this.selectedProvince]) {
+                                this.cities = Object.keys(this.provinces[this.selectedProvince].cities);
+                                if (!this.cities.includes(this.selectedCity)) {
+                                    this.selectedCity = this.cities[0] || '';
+                                }
+                            } else {
+                                this.cities = [];
+                                this.selectedCity = '';
+                            }
+                        }
+                    }" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <div>
+                                <label for="province" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                    Provinsi Asal Toko <span class="text-rose-500">*</span>
+                                </label>
+                                <select id="province" name="province" x-model="selectedProvince" @change="updateCities()" required
+                                    class="input text-xs rounded-md">
+                                    @foreach(array_keys($provincesData) as $prov)
+                                        <option value="{{ $prov }}" {{ old('province', 'DKI Jakarta') === $prov ? 'selected' : '' }}>{{ $prov }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="city" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                    Kota / Kabupaten Asal Toko <span class="text-rose-500">*</span>
+                                </label>
+                                <select id="city" name="city" x-model="selectedCity" required
+                                    class="input text-xs rounded-md">
+                                    <template x-for="c in cities" :key="c">
+                                        <option :value="c" x-text="c"></option>
+                                    </template>
+                                </select>
+                                <p class="text-[10px] text-cyan-700 font-semibold mt-1">
+                                    💡 Pelanggan di kota ini otomatis mendapatkan <strong>Gratis Ongkir Rp0</strong>.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="address" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Alamat Lengkap Toko / Gudang <span class="text-rose-500">*</span>
+                            </label>
+                            <textarea id="address" name="address" rows="3" required
+                                placeholder="Jalan, nomor ruko/gedung, RT/RW, kecamatan, dan detail lokasi gudang asal barang..."
+                                class="input text-xs rounded-md">{{ old('address') }}</textarea>
+                            @error('address')
+                                <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="postal_code" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Kode Pos Toko
+                            </label>
+                            <input type="text" id="postal_code" name="postal_code" value="{{ old('postal_code', '10110') }}"
+                                placeholder="Contoh: 10110" maxlength="10"
+                                class="input text-xs rounded-md sm:w-48">
+                        </div>
                     </div>
 
                     <div class="p-3 bg-cyan-50 border border-cyan-200 rounded-md text-xs text-cyan-900 flex items-start gap-2.5">

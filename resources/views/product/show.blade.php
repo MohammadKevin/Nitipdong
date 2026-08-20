@@ -317,30 +317,37 @@
 
                 {{-- Store Profile --}}
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-                    <div class="flex items-center gap-4">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode($product->store->name ?? 'Official Store') }}&background=0891b2&color=fff"
-                             class="w-14 h-14 rounded-lg border-2 border-slate-200" alt="Store">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-sm font-bold text-slate-900">{{ $product->store->name ?? 'Official Store' }}</h3>
-                                <i class="fa-solid fa-certificate text-xs text-cyan-600" title="Verified"></i>
-                            </div>
-                            <div class="flex items-center gap-3 text-xs text-slate-500 mt-1">
-                                <div class="flex items-center gap-1">
-                                    <i class="fa-solid fa-star text-amber-400 text-[10px]"></i>
-                                    <span class="font-semibold">4.8</span>
-                                    <span>(37,2 rb)</span>
+                    <div class="flex items-center justify-between gap-4 flex-wrap">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <a href="{{ $product->store ? route('store.show', $product->store->slug) : '#' }}" class="relative block shrink-0">
+                                <img src="{{ $product->store ? $product->store->logo_url : 'https://ui-avatars.com/api/?name=Store&background=0891b2&color=fff' }}"
+                                     class="w-12 h-12 rounded-xl border border-slate-200 object-cover shadow-2xs" alt="Store">
+                            </a>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <a href="{{ $product->store ? route('store.show', $product->store->slug) : '#' }}" class="text-xs font-extrabold text-slate-900 hover:text-cyan-700 truncate">
+                                        {{ $product->store->name ?? 'Official Store' }}
+                                    </a>
+                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.2 bg-cyan-50 text-cyan-800 text-[9px] font-bold rounded border border-cyan-200">
+                                        <i class="fa-solid fa-certificate text-[8px] text-cyan-600"></i> Official
+                                    </span>
                                 </div>
-                                <span class="text-slate-300">•</span>
-                                <span class="flex items-center gap-1">
-                                    <i class="fa-solid fa-box text-slate-400 text-[10px]"></i>
-                                    100 total barang
-                                </span>
+                                <div class="flex items-center gap-2.5 text-[11px] text-slate-500 mt-1 flex-wrap">
+                                    <span class="flex items-center gap-1 font-medium text-slate-700">
+                                        <i class="fa-solid fa-location-dot text-cyan-600 text-[10px]"></i>
+                                        <span>Dikirim dari: <strong>{{ $product->store->city ?: ($product->store->effective_city ?: 'Jakarta Pusat') }}</strong></span>
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200">
+                                        <i class="fa-solid fa-truck-fast text-[9px] text-emerald-600"></i> Gratis Ongkir 1 Kota
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                        <button class="px-4 py-2 rounded-lg border-2 border-emerald-500 text-emerald-700 font-semibold text-sm hover:bg-emerald-50 transition-colors">
-                            Follow
-                        </button>
+                        @if($product->store)
+                            <a href="{{ route('store.show', $product->store->slug) }}" class="btn-secondary text-xs h-8.5 px-3.5 rounded-xl border-slate-300 hover:border-cyan-600 hover:text-cyan-700 font-semibold flex items-center gap-1.5 shadow-2xs">
+                                <i class="fa-solid fa-store text-xs"></i> Kunjungi Toko
+                            </a>
+                        @endif
                     </div>
                 </div>
 

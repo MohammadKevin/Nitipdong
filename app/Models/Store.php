@@ -20,6 +20,12 @@ class Store extends Model
         'logo',
         'banner',
         'address',
+        'city',
+        'province',
+        'district',
+        'postal_code',
+        'latitude',
+        'longitude',
         'status',
         'balance',
         'bank_name',
@@ -35,7 +41,35 @@ class Store extends Model
         'obfuscated_id',
         'logo_url',
         'banner_url',
+        'effective_city',
     ];
+
+    public function getEffectiveCityAttribute(): string
+    {
+        if (!empty($this->city)) {
+            return $this->city;
+        }
+
+        // Coba deteksi nama kota dari kolom address
+        if (!empty($this->address)) {
+            $addr = $this->address;
+            $knownCities = [
+                'Jakarta Pusat', 'Jakarta Selatan', 'Jakarta Barat', 'Jakarta Timur', 'Jakarta Utara',
+                'Bandung', 'Kota Bandung', 'Bekasi', 'Kota Bekasi', 'Depok', 'Kota Depok', 'Bogor', 'Kota Bogor',
+                'Surabaya', 'Kota Surabaya', 'Semarang', 'Kota Semarang', 'Yogyakarta', 'Kota Yogyakarta',
+                'Malang', 'Kota Malang', 'Surakarta', 'Solo', 'Medan', 'Kota Medan', 'Makassar', 'Kota Makassar',
+                'Denpasar', 'Kota Denpasar', 'Palembang', 'Kota Palembang', 'Tangerang', 'Kota Tangerang',
+                'Tangerang Selatan', 'Batam', 'Kota Batam', 'Pekanbaru', 'Kota Pekanbaru'
+            ];
+            foreach ($knownCities as $kCity) {
+                if (stripos($addr, $kCity) !== false) {
+                    return $kCity;
+                }
+            }
+        }
+
+        return 'Jakarta Pusat';
+    }
 
     public function getLogoUrlAttribute(): string
     {

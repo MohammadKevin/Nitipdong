@@ -29,6 +29,10 @@ class StoreRegistrationController extends Controller
             'name'        => ['required', 'string', 'max:255', 'unique:stores,name'],
             'description' => ['required', 'string', 'min:15'],
             'address'     => ['required', 'string', 'min:10'],
+            'city'        => ['nullable', 'string', 'max:100'],
+            'province'    => ['nullable', 'string', 'max:100'],
+            'district'    => ['nullable', 'string', 'max:100'],
+            'postal_code' => ['nullable', 'string', 'max:10'],
         ]);
 
         $user = Auth::user();
@@ -43,6 +47,10 @@ class StoreRegistrationController extends Controller
             'slug'        => Str::slug($request->name),
             'description' => $request->description,
             'address'     => $request->address,
+            'city'        => $request->city ?: 'Jakarta Pusat',
+            'province'    => $request->province ?: 'DKI Jakarta',
+            'district'    => $request->district,
+            'postal_code' => $request->postal_code,
             'status'      => 'pending',
         ]);
 

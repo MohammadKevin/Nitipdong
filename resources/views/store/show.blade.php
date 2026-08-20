@@ -47,11 +47,15 @@
                                 </span>
                             </div>
                             <p class="text-xs text-slate-500 mt-1 max-w-xl line-clamp-2">{{ $store->description ?? 'Selamat datang di toko resmi ' . $store->name . ' di SakserShop. Temukan berbagai produk original berkualitas!' }}</p>
-                            @if($store->address)
-                                <p class="text-[11px] text-slate-400 mt-1 flex items-center gap-1.5">
-                                    <i class="fa-solid fa-location-dot text-slate-400"></i> {{ $store->address }}
+                            <div class="flex items-center gap-3 mt-1.5 flex-wrap">
+                                <p class="text-[11px] text-slate-600 flex items-center gap-1.5 font-medium">
+                                    <i class="fa-solid fa-location-dot text-cyan-600"></i>
+                                    <span>Dikirim dari: <strong class="text-slate-800">{{ $store->city ?: ($store->effective_city ?: 'Jakarta Pusat') }}</strong></span>
                                 </p>
-                            @endif
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200">
+                                    <i class="fa-solid fa-truck-fast text-emerald-600"></i> Gratis Ongkir 1 Kota
+                                </span>
+                            </div>
                         </div>
                     </div>
 

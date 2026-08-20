@@ -383,13 +383,18 @@
                         $storeObj = $items->first()->product->store ?? null;
                         $storeName = $storeObj ? $storeObj->name : 'Official Store SakserShop';
                         $shippingInfo = $storeShippingData[$storeId] ?? null;
+                        $storeOriginCity = $shippingInfo['origin_city'] ?? ($storeObj?->effective_city ?? 'Jakarta Pusat');
                     @endphp
                     <div class="bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-card">
-                        {{-- Store Header --}}
+                        {{-- Store Header with Origin Location --}}
                         <div class="px-4 py-3 bg-slate-50/70 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
                                 <i class="fa-solid fa-store text-cyan-700 text-xs"></i>
                                 <span class="font-bold text-slate-800 text-xs">{{ $storeName }}</span>
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-slate-200 text-[10px] font-semibold text-slate-600 shadow-2xs">
+                                    <i class="fa-solid fa-location-dot text-cyan-600 text-[9px]"></i>
+                                    <span>Dikirim dari: <strong class="text-slate-800">{{ $storeOriginCity }}</strong></span>
+                                </span>
                             </div>
                             <div class="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
                                 <span class="bg-slate-200/70 text-slate-700 px-2 py-0.5 rounded text-[10px] font-semibold">
@@ -397,6 +402,24 @@
                                 </span>
                             </div>
                         </div>
+
+                        {{-- Same City Free Shipping Notice Banner --}}
+                        <template x-if="storeShippingOptions['{{ $storeId }}'] && storeShippingOptions['{{ $storeId }}'][0] && storeShippingOptions['{{ $storeId }}'][0].is_same_city">
+                            <div class="mx-4 mt-3 p-3 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 border border-emerald-300 text-emerald-900 rounded-xl text-xs flex items-center justify-between gap-3 shadow-2xs">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs shrink-0 shadow-xs">
+                                        <i class="fa-solid fa-gift"></i>
+                                    </div>
+                                    <div>
+                                        <span class="font-black text-slate-900 block">🎉 Promo Gratis Ongkir 1 Kota Aktif!</span>
+                                        <span class="text-[11px] text-slate-600">Alamat tujuan dan toko berada dalam 1 kota. Seluruh kurir otomatis <strong>Rp 0</strong>.</span>
+                                    </div>
+                                </div>
+                                <span class="px-2.5 py-1 bg-emerald-600 text-white font-extrabold text-[10px] rounded-lg shrink-0 shadow-xs tracking-wider uppercase">
+                                    GRATIS ONGKIR Rp0
+                                </span>
+                            </div>
+                        </template>
 
                         {{-- Product Items in Store --}}
                         <div class="divide-y divide-slate-100">
@@ -444,22 +467,22 @@
                                             <i class="fa-solid fa-circle-notch fa-spin text-[9px]"></i> Menghitung ulang tarif...
                                         </span>
                                     </div>
-                                    <span class="text-[10px] text-slate-400">Tarif otomatis dihitung sesuai berat dan kota alamat tujuan</span>
+                                    <span class="text-[10px] text-slate-400">Tarif dihitung otomatis sesuai berat dan lokasi asal toko & tujuan</span>
                                 </div>
                             </div>
 
-                            <div class="sm:w-80">
+                            <div class="sm:w-88">
                                 <select name="couriers[{{ $storeId }}]"
                                         @change="
                                             const opt = $event.target.selectedOptions[0];
                                             updateCourierCost('{{ $storeId }}', opt.dataset.cost, opt.value);
                                         "
-                                        class="w-full text-xs font-semibold text-slate-800 bg-white border border-slate-300 rounded-xl px-3 py-2 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500 shadow-2xs cursor-pointer">
+                                        class="w-full text-xs font-semibold text-slate-800 bg-white border border-slate-300 rounded-xl px-3 py-2.5 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500 shadow-2xs cursor-pointer">
                                     <template x-for="cOpt in storeShippingOptions['{{ $storeId }}'] || []" :key="cOpt.id">
                                         <option :value="cOpt.id"
                                                 :data-cost="cOpt.cost"
                                                 :selected="selectedCouriers['{{ $storeId }}'] === cOpt.id"
-                                                x-text="cOpt.courier_name + ' - ' + cOpt.service_name + ' (' + cOpt.etd + ') : ' + cOpt.formatted_cost">
+                                                x-text="cOpt.courier_name + ' - ' + cOpt.service_name + ' (' + cOpt.etd + ') : ' + (cOpt.is_free_shipping ? 'Rp 0 (GRATIS ONGKIR 1 KOTA)' : cOpt.formatted_cost)">
                                         </option>
                                     </template>
                                 </select>

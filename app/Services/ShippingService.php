@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Store;
-use App\Models\UserAddress;
 
 class ShippingService
 {
@@ -61,47 +60,124 @@ class ShippingService
     ];
 
     /**
-     * Hitung ongkos kirim berdasarkan berat (kg) dan kota tujuan.
+     * Helper untuk memeriksa apakah dua kota berada di dalam 1 kota yang sama (Same City).
      */
-    public static function calculateRate(string $courierCode, string $serviceCode, float $weightInKg = 1.0, ?string $destinationCity = null): array
+    public static function isSameCity(?string $cityA, ?string $cityB): bool
     {
+        if (empty($cityA) || empty($cityB)) {
+            return false;
+        }
+
+        $clean = function (string $c): string {
+            $c = strtolower($c);
+            $c = str_replace([
+                'kota ', 'kabupaten ', 'kab. ', 'adm. ', 'administratif ',
+                'dki ', 'daerah khusus ibukota ', 'wilayah '
+            ], '', $c);
+            // Standarisasi Jakarta (Semua wilayah Jakarta dihitung 1 kota aglomerasi gratis ongkir)
+            if (str_contains($c, 'jakarta')) {
+                return 'jakarta';
+            }
+            return trim($c);
+        };
+
+        $normA = $clean($cityA);
+        $normB = $clean($cityB);
+
+        if ($normA === $normB) {
+            return true;
+        }
+
+        // Substring check (e.g. "Bandung" matches "Kota Bandung" or "Kabupaten Bandung")
+        if (strlen($normA) >= 4 && strlen($normB) >= 4) {
+            if (str_contains($normA, $normB) || str_contains($normB, $normA)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Hitung ongkos kirim berdasarkan berat (kg), kota asal toko, dan kota tujuan pelanggan.
+     * Jika DALAM 1 KOTA (Same City), maka GRATIS ONGKIR (Rp 0)!
+     */
+    public static function calculateRate(
+        string $courierCode,
+        string $serviceCode,
+        float $weightInKg = 1.0,
+        ?string $destinationCity = null,
+        ?string $originCity = null,
+        ?Store $store = null
+    ): array {
         $courierKey = strtolower($courierCode);
         $serviceKey = strtoupper($serviceCode);
 
         $courier = self::COURIERS[$courierKey] ?? self::COURIERS['jne'];
         $service = $courier['services'][$serviceKey] ?? reset($courier['services']);
-        $serviceNameKey = key($courier['services']);
+
+        // Tentukan kota asal dari Toko atau default
+        $origin = $originCity ?: ($store?->effective_city ?: 'Jakarta Pusat');
+        $destination = $destinationCity ?: 'Jakarta Pusat';
 
         // Berat minimal dihitung 1 kg
         $chargeableWeight = max(1.0, ceil($weightInKg));
 
-        $baseCost = $service['base_cost'];
-        $additionalWeightCost = ($chargeableWeight - 1) * $service['cost_per_kg'];
-        $totalCost = $baseCost + $additionalWeightCost;
+        // Cek apakah Toko dan Pembeli berada DALAM 1 KOTA
+        $isSameCity = self::isSameCity($origin, $destination);
+
+        $normalBaseCost = $service['base_cost'];
+        $normalAdditionalWeightCost = ($chargeableWeight - 1) * $service['cost_per_kg'];
+        $normalTotalCost = $normalBaseCost + $normalAdditionalWeightCost;
+
+        if ($isSameCity) {
+            // GRATIS ONGKIR Rp 0 dalam 1 kota untuk semua kurir reguler dan same-day/instant
+            $finalCost = 0;
+            $isFree = true;
+            $etd = in_array($courierKey, ['instant']) ? '1-3 Jam' : '1 Hari (Dalam Kota)';
+            $badge = 'Gratis Ongkir (1 Kota)';
+        } else {
+            $finalCost = (int) $normalTotalCost;
+            $isFree = false;
+            $etd = $service['etd'];
+            $badge = null;
+        }
 
         return [
             'courier_code'    => $courier['code'],
             'courier_name'    => $courier['name'],
             'service_code'    => $serviceKey,
             'service_name'    => $service['name'],
-            'etd'             => $service['etd'],
+            'etd'             => $etd,
             'weight'          => $chargeableWeight,
-            'cost'            => (int) $totalCost,
-            'formatted_cost'  => 'Rp ' . number_format($totalCost, 0, ',', '.'),
+            'origin_city'     => $origin,
+            'destination_city'=> $destination,
+            'is_same_city'    => $isSameCity,
+            'is_free_shipping'=> $isFree,
+            'badge'           => $badge,
+            'original_cost'   => (int) $normalTotalCost,
+            'formatted_original_cost' => 'Rp ' . number_format($normalTotalCost, 0, ',', '.'),
+            'cost'            => $finalCost,
+            'formatted_cost'  => $isFree ? 'Rp 0' : ('Rp ' . number_format($finalCost, 0, ',', '.')),
         ];
     }
 
     /**
      * Dapatkan semua opsi pengiriman yang tersedia untuk sebuah toko/keranjang.
      */
-    public static function getAvailableOptions(float $totalWeight = 1.0, ?string $destinationCity = null): array
-    {
+    public static function getAvailableOptions(
+        float $totalWeight = 1.0,
+        ?string $destinationCity = null,
+        ?string $originCity = null,
+        ?Store $store = null
+    ): array {
         $options = [];
         $weight = max(1.0, $totalWeight);
+        $origin = $originCity ?: ($store?->effective_city ?: 'Jakarta Pusat');
 
         foreach (self::COURIERS as $cKey => $courier) {
             foreach ($courier['services'] as $sKey => $service) {
-                $rate = self::calculateRate($cKey, $sKey, $weight, $destinationCity);
+                $rate = self::calculateRate($cKey, $sKey, $weight, $destinationCity, $origin, $store);
                 $options[] = [
                     'id'              => "{$courier['code']}_{$sKey}",
                     'courier_code'    => $courier['code'],
@@ -109,9 +185,14 @@ class ShippingService
                     'courier_icon'    => $courier['icon'],
                     'service_code'    => $sKey,
                     'service_name'    => $service['name'],
-                    'etd'             => $service['etd'],
+                    'etd'             => $rate['etd'],
                     'cost'            => $rate['cost'],
+                    'original_cost'   => $rate['original_cost'],
+                    'is_same_city'    => $rate['is_same_city'],
+                    'is_free_shipping'=> $rate['is_free_shipping'],
+                    'badge'           => $rate['badge'],
                     'formatted_cost'  => $rate['formatted_cost'],
+                    'formatted_original_cost' => $rate['formatted_original_cost'],
                 ];
             }
         }
@@ -120,10 +201,14 @@ class ShippingService
     }
 
     /**
-     * Default default courier option (JNE Reguler).
+     * Default courier option (JNE Reguler / Gratis Ongkir).
      */
-    public static function getDefaultOption(float $totalWeight = 1.0): array
-    {
-        return self::calculateRate('jne', 'REG', $totalWeight);
+    public static function getDefaultOption(
+        float $totalWeight = 1.0,
+        ?string $destinationCity = null,
+        ?string $originCity = null,
+        ?Store $store = null
+    ): array {
+        return self::calculateRate('jne', 'REG', $totalWeight, $destinationCity, $originCity, $store);
     }
 }
