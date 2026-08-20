@@ -20,126 +20,8 @@
     ])->values();
 @endphp
 
-<nav x-data="{
-        mobileSearch: false,
-        userOpen: false,
-        notifOpen: false,
-        cartOpen: false,
-        cartCount: {{ $initialCartCount }},
-        cartItems: @json($initialCartList),
-        cartSubtotal: {{ $initialCartSubtotal }},
-        cartBounce: false,
-        isUpdatingCart: false,
-        searchQuery: '{{ addslashes(request('q', '')) }}',
-        searchSuggestions: { products: [], stores: [], categories: [] },
-        showSuggestions: false,
-        isLoadingSuggestions: false,
-        async fetchSuggestions() {
-            const q = this.searchQuery.trim();
-            if (q.length < 2) {
-                this.searchSuggestions = { products: [], stores: [], categories: [] };
-                this.showSuggestions = false;
-                return;
-            }
-            this.isLoadingSuggestions = true;
-            try {
-                const res = await fetch(`{{ route('api.search.suggestions') }}?q=${encodeURIComponent(q)}`);
-                if (res.ok) {
-                    this.searchSuggestions = await res.json();
-                    this.showSuggestions = (this.searchSuggestions.products.length > 0 || this.searchSuggestions.stores.length > 0 || this.searchSuggestions.categories.length > 0);
-                }
-            } catch (e) {
-                console.error(e);
-            } finally {
-                this.isLoadingSuggestions = false;
-            }
-        },
-        async fetchCartItems() {
-            try {
-                const res = await fetch('{{ route('customer.cart.items') }}');
-                if (res.ok) {
-                    const data = await res.json();
-                    this.cartItems = data.items;
-                    this.cartCount = data.count;
-                    this.cartSubtotal = data.subtotal;
-                }
-            } catch (e) {
-                console.error(e);
-            }
-        },
-        async updateCartQty(item, newQty) {
-            if (this.isUpdatingCart) return;
-            if (newQty < 1) {
-                this.deleteCartItem(item);
-                return;
-            }
-            if (newQty > item.stock) {
-                window.dispatchEvent(new CustomEvent('notify', {
-                    detail: { title: 'Maksimum Stok', message: `Stok produk hanya tersedia ${item.stock} unit.`, type: 'error' }
-                }));
-                return;
-            }
-            this.isUpdatingCart = true;
-            try {
-                const res = await fetch(item.update_url, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({ quantity: newQty })
-                });
-                const data = await res.json();
-                if (res.ok && data.status === 'success') {
-                    this.cartItems = data.items;
-                    this.cartCount = data.count;
-                    this.cartSubtotal = data.subtotal;
-                } else {
-                    window.dispatchEvent(new CustomEvent('notify', {
-                        detail: { title: 'Gagal', message: data.message || 'Gagal mengubah jumlah barang.', type: 'error' }
-                    }));
-                }
-            } catch (e) {
-                console.error(e);
-            } finally {
-                this.isUpdatingCart = false;
-            }
-        },
-        async deleteCartItem(item) {
-            if (this.isUpdatingCart) return;
-            this.isUpdatingCart = true;
-            try {
-                const res = await fetch(item.delete_url, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-                const data = await res.json();
-                if (res.ok && data.status === 'success') {
-                    this.cartItems = data.items;
-                    this.cartCount = data.count;
-                    this.cartSubtotal = data.subtotal;
-                    window.dispatchEvent(new CustomEvent('notify', {
-                        detail: { title: 'Dihapus', message: 'Barang berhasil dihapus dari keranjang.', type: 'success' }
-                    }));
-                } else {
-                    window.dispatchEvent(new CustomEvent('notify', {
-                        detail: { title: 'Gagal', message: data.message || 'Gagal menghapus barang.', type: 'error' }
-                    }));
-                }
-            } catch (e) {
-                console.error(e);
-            } finally {
-                this.isUpdatingCart = false;
-            }
-        }
-    }"
-    @cart-updated.window="fetchCartItems(); cartBounce = true; cartOpen = true; setTimeout(() => { cartBounce = false; }, 1200); setTimeout(() => { cartOpen = false; }, 4000)"
+<nav x-data="navbarComponent()"
+    @cart-updated.window="handleCartUpdated()"
     class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/80 shadow-xs">
 
     <div class="page-container">
@@ -578,3 +460,137 @@
         </div>
     </div>
 </nav>
+
+<script>
+function navbarComponent() {
+    return {
+        mobileSearch: false,
+        userOpen: false,
+        notifOpen: false,
+        cartOpen: false,
+        cartCount: {{ (int) $initialCartCount }},
+        cartItems: @json($initialCartList),
+        cartSubtotal: {{ (float) $initialCartSubtotal }},
+        cartBounce: false,
+        isUpdatingCart: false,
+        searchQuery: @json(request('q', '')),
+        searchSuggestions: { products: [], stores: [], categories: [] },
+        showSuggestions: false,
+        isLoadingSuggestions: false,
+        handleCartUpdated() {
+            this.fetchCartItems();
+            this.cartBounce = true;
+            this.cartOpen = true;
+            setTimeout(() => { this.cartBounce = false; }, 1200);
+            setTimeout(() => { this.cartOpen = false; }, 4000);
+        },
+        async fetchSuggestions() {
+            const q = this.searchQuery ? this.searchQuery.trim() : '';
+            if (q.length < 2) {
+                this.searchSuggestions = { products: [], stores: [], categories: [] };
+                this.showSuggestions = false;
+                return;
+            }
+            this.isLoadingSuggestions = true;
+            try {
+                const res = await fetch(`{{ route('api.search.suggestions') }}?q=${encodeURIComponent(q)}`);
+                if (res.ok) {
+                    this.searchSuggestions = await res.json();
+                    const hasProducts = Array.isArray(this.searchSuggestions.products) && this.searchSuggestions.products.length > 0;
+                    const hasStores = Array.isArray(this.searchSuggestions.stores) && this.searchSuggestions.stores.length > 0;
+                    const hasCategories = Array.isArray(this.searchSuggestions.categories) && this.searchSuggestions.categories.length > 0;
+                    this.showSuggestions = hasProducts || hasStores || hasCategories;
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.isLoadingSuggestions = false;
+            }
+        },
+        async fetchCartItems() {
+            try {
+                const res = await fetch('{{ route('customer.cart.items') }}');
+                if (res.ok) {
+                    const data = await res.json();
+                    this.cartItems = data.items || [];
+                    this.cartCount = data.count || 0;
+                    this.cartSubtotal = data.subtotal || 0;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        },
+        async updateCartQty(item, newQty) {
+            if (this.isUpdatingCart) return;
+            if (newQty < 1) {
+                this.deleteCartItem(item);
+                return;
+            }
+            if (item.stock && newQty > item.stock) {
+                window.dispatchEvent(new CustomEvent('notify', {
+                    detail: { title: 'Maksimum Stok', message: `Stok produk hanya tersedia ${item.stock} unit.`, type: 'error' }
+                }));
+                return;
+            }
+            this.isUpdatingCart = true;
+            try {
+                const res = await fetch(item.update_url, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ quantity: newQty })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    this.cartItems = data.items;
+                    this.cartCount = data.count;
+                    this.cartSubtotal = data.subtotal;
+                } else {
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { title: 'Gagal', message: data.message || 'Gagal mengubah jumlah barang.', type: 'error' }
+                    }));
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.isUpdatingCart = false;
+            }
+        },
+        async deleteCartItem(item) {
+            if (this.isUpdatingCart) return;
+            this.isUpdatingCart = true;
+            try {
+                const res = await fetch(item.delete_url, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    this.cartItems = data.items;
+                    this.cartCount = data.count;
+                    this.cartSubtotal = data.subtotal;
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { title: 'Dihapus', message: 'Barang berhasil dihapus dari keranjang.', type: 'success' }
+                    }));
+                } else {
+                    window.dispatchEvent(new CustomEvent('notify', {
+                        detail: { title: 'Gagal', message: data.message || 'Gagal menghapus barang.', type: 'error' }
+                    }));
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                this.isUpdatingCart = false;
+            }
+        }
+    };
+}
+</script>
