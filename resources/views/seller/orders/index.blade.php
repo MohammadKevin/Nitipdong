@@ -174,7 +174,7 @@
                             <form action="{{ route('seller.orders.update_status', $order) }}" method="POST" class="inline-flex items-center gap-1">
                                 @csrf
                                 @method('PATCH')
-                                <select name="status" onchange="this.form.submit()" class="input text-xs py-1 px-2 rounded-md font-semibold text-slate-800 h-7.5">
+                                <select name="status" onchange="this.form.submit()" class="input text-xs py-1 px-2 rounded-md font-semibold text-slate-800 h-8 w-28 min-w-[110px] bg-white border border-slate-300 shadow-xs cursor-pointer focus:border-cyan-600 focus:ring-cyan-200">
                                     <option value="pending" {{ $order->status === 'pending' ? 'selected' : '' }}>Pending</option>
                                     <option value="processing" {{ $order->status === 'processing' ? 'selected' : '' }}>Proses</option>
                                     <option value="shipped" {{ $order->status === 'shipped' ? 'selected' : '' }}>Kirim</option>

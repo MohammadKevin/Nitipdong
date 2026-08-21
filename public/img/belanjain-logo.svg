@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Outer circle background -->
+  <circle cx="100" cy="100" r="98" fill="#DBEAFE" stroke="#2563EB" stroke-width="2.5"/>
+  <!-- Inner circle -->
+  <circle cx="100" cy="100" r="72" fill="none" stroke="#2563EB" stroke-width="2"/>
+  <!-- Spiral -->
+  <path d="M100 100 C100 85, 118 78, 125 90 C132 102, 122 118, 108 122 C90 127, 72 114, 70 96 C68 75, 84 56, 108 52 C135 47, 155 68, 157 96"
+        fill="none" stroke="#1E3A8A" stroke-width="3" stroke-linecap="round"/>
+  <!-- BELANJAIN text arc top -->
+  <path id="topArc" d="M 30,100 A 70,70 0 0,1 170,100" fill="none"/>
+  <text font-family="Arial Black, sans-serif" font-weight="900" font-size="22" fill="#1E3A8A" letter-spacing="3">
+    <textPath href="#topArc" startOffset="8%">BELANJAIN</textPath>
+  </text>
+  <!-- Bottom text arc -->
+  <path id="botArc" d="M 28,108 A 72,72 0 0,0 172,108" fill="none"/>
+  <text font-family="Arial, sans-serif" font-weight="600" font-size="10.5" fill="#2563EB" letter-spacing="2">
+    <textPath href="#botArc" startOffset="5%">• ELEVATE YOUR DAILY SHOPPING •</textPath>
+  </text>
+</svg>

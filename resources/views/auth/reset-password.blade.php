@@ -1,4 +1,12 @@
 <x-guest-layout>
+    {{-- Brand Logo (Desktop only) --}}
+    <div class="hidden lg:flex items-center justify-center gap-2.5 mb-8">
+        <img src="{{ asset('img/belanjain-logo.svg') }}" alt="BelanjaIn" class="w-8 h-8 object-contain">
+        <span class="font-extrabold text-xl tracking-tight text-slate-900">
+            Belanja<span style="color:#0891b2;">In</span>
+        </span>
+    </div>
+
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
             Atur Ulang Kata Sandi

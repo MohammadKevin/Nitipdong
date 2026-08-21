@@ -51,10 +51,8 @@
     <div class="page-container">
         <div class="flex items-center justify-between h-16 gap-4">
 
-            <a href="{{ auth()->check() ? url('/?is_from_login=true') : url('/') }}" class="flex items-center gap-2.5 shrink-0 group" aria-label="SakserShop Home">
-                <div class="w-9 h-9 rounded-xl overflow-hidden border border-cyan-200 bg-cyan-50 flex items-center justify-center shadow-xs">
-                    <img src="{{ asset('img/saksershop-logo.png') }}" alt="SakserShop Logo" class="w-full h-full object-cover">
-                </div>
+            <a href="{{ auth()->check() ? url('/?is_from_login=true') : url('/') }}" class="flex items-center gap-2.5 shrink-0 group" aria-label="BelanjaIn Home">
+                <img src="{{ asset('img/belanjain-logo.svg') }}" alt="BelanjaIn Logo" class="w-9 h-9 object-contain">
                 <div>
                     <span class="font-bold text-base tracking-tight text-slate-900 leading-none block">
                         Sakser<span class="text-cyan-600 font-black">Shop</span>

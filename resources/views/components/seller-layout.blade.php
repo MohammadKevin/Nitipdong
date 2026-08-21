@@ -13,7 +13,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="icon" type="image/png" href="{{ asset('img/saksershop-logo.png') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('img/belanjain-logo.svg') }}">
 </head>
 <body class="font-sans antialiased bg-slate-50 text-slate-900">
     @php
@@ -29,9 +29,7 @@
                 <div>
                     <div class="flex items-center gap-2.5 px-3 py-1 mb-5">
                         <a href="{{ route('seller.dashboard') }}" class="flex items-center gap-2.5 group">
-                            <div class="w-8 h-8 rounded-lg overflow-hidden border border-cyan-400/30 bg-slate-950 flex items-center justify-center shrink-0">
-                                <img src="{{ asset('img/saksershop-logo.png') }}" alt="SakserShop Logo" class="w-full h-full object-cover">
-                            </div>
+                            <img src="{{ asset('img/belanjain-logo.svg') }}" alt="BelanjaIn Logo" class="w-8 h-8 object-contain shrink-0">
                             <div class="min-w-0">
                                 <div class="flex items-center gap-2">
                                     <p class="font-bold text-white text-sm leading-tight tracking-tight">Sakser<span class="text-cyan-400 font-extrabold">Shop</span></p>
@@ -155,7 +153,7 @@
                 </div>
             </aside>
 
-            <main class="flex-1 p-5 sm:p-6 lg:p-8 pb-28 sm:pb-36 flex flex-col gap-6 overflow-y-auto relative scroll-smooth">
+            <main class="flex-1 p-5 sm:p-6 lg:p-8 pb-28 sm:pb-36 space-y-6 overflow-y-auto relative scroll-smooth animate-fade-up">
                 @if(session('success'))
                     <div class="bg-cyan-50 border border-cyan-200 text-cyan-900 rounded-lg p-3.5 flex gap-2.5 shadow-xs text-xs font-semibold" role="alert">
                         <i class="fa-solid fa-circle-check text-cyan-600 text-sm mt-0.5"></i>

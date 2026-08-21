@@ -15,7 +15,7 @@
             <div class="flex items-center gap-4">
                 <div class="relative shrink-0">
                     <img src="{{ Auth::user()->avatar_url }}" alt="{{ Auth::user()->name }}" class="w-14 h-14 rounded-2xl object-cover border-2 border-cyan-200 shadow-2xs">
-                    <span class="absolute -bottom-1 -right-1 w-4.5 h-4.5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-[9px] text-white shadow-2xs" title="Toko Aktif">
+                    <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-[9px] text-white shadow-2xs" title="Toko Aktif">
                         <i class="fa-solid fa-check"></i>
                     </span>
                 </div>
@@ -36,11 +36,11 @@
             </div>
 
             <div class="flex items-center gap-2.5 shrink-0 flex-wrap">
-                <a href="{{ route('seller.products.create') }}" class="btn-primary text-xs h-9.5 px-4.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold flex items-center gap-2 shadow-xs transition-all">
+                <a href="{{ route('seller.products.create') }}" class="btn-primary text-xs h-10 px-4 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold flex items-center gap-2 shadow-xs transition-all">
                     <i class="fa-solid fa-plus text-[11px]"></i>
                     <span>Tambah Produk</span>
                 </a>
-                <a href="{{ route('seller.orders.index') }}" class="btn-secondary text-xs h-9.5 px-4 rounded-xl border border-slate-200 hover:border-slate-300 font-semibold flex items-center gap-2 text-slate-700 transition-all">
+                <a href="{{ route('seller.orders.index') }}" class="btn-secondary text-xs h-10 px-4 rounded-xl border border-slate-200 hover:border-slate-300 font-semibold flex items-center gap-2 text-slate-700 transition-all">
                     <i class="fa-solid fa-box text-[11px] text-slate-500"></i>
                     <span>Pesanan Masuk</span>
                     @if($pendingCount > 0)
@@ -116,49 +116,49 @@
                 </p>
             </div>
         </div>
-        <a href="{{ route('seller.settings.edit') }}" class="btn-primary text-xs h-9.5 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold flex items-center justify-center gap-2 shadow-xs shrink-0 cursor-pointer">
+        <a href="{{ route('seller.settings.edit') }}" class="btn-primary text-xs h-10 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold flex items-center justify-center gap-2 shadow-xs shrink-0 cursor-pointer">
             <i class="fa-solid fa-pen-to-square text-xs"></i>
             <span>Ubah Alamat & Pinpoint Toko</span>
         </a>
     </div>
 
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-        <a href="{{ route('seller.products.create') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 hover:border-cyan-600 shadow-card hover:shadow-card-hover transition-all group flex items-center gap-3">
+        <a href="{{ route('seller.products.create') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 hover:border-cyan-600 shadow-card hover:shadow-card-hover transition-all group flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-700 flex items-center justify-center text-sm border border-cyan-200 shrink-0">
                 <i class="fa-solid fa-plus"></i>
             </div>
-            <div>
-                <p class="text-xs font-bold text-slate-900 group-hover:text-cyan-700 transition-colors">Tambah Produk</p>
+            <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-slate-900 group-hover:text-cyan-700 transition-colors whitespace-normal">Tambah Produk</p>
                 <p class="text-[10px] text-slate-400">Listing baru</p>
             </div>
         </a>
 
-        <a href="{{ route('seller.products.index') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 hover:border-cyan-600 shadow-card hover:shadow-card-hover transition-all group flex items-center gap-3">
+        <a href="{{ route('seller.products.index') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 hover:border-cyan-600 shadow-card hover:shadow-card-hover transition-all group flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-700 flex items-center justify-center text-sm border border-slate-200 shrink-0">
                 <i class="fa-solid fa-boxes-stacked"></i>
             </div>
-            <div>
-                <p class="text-xs font-bold text-slate-900 group-hover:text-cyan-700 transition-colors">Katalog Toko</p>
+            <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-slate-900 group-hover:text-cyan-700 transition-colors whitespace-normal">Katalog Toko</p>
                 <p class="text-[10px] text-slate-400">Stok & harga</p>
             </div>
         </a>
 
-        <a href="{{ route('seller.orders.index') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 hover:border-cyan-600 shadow-card hover:shadow-card-hover transition-all group flex items-center gap-3">
+        <a href="{{ route('seller.orders.index') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 hover:border-cyan-600 shadow-card hover:shadow-card-hover transition-all group flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center text-sm border border-amber-200 shrink-0">
                 <i class="fa-solid fa-truck-fast"></i>
             </div>
-            <div>
-                <p class="text-xs font-bold text-slate-900 group-hover:text-cyan-700 transition-colors">Pesanan Masuk</p>
+            <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-slate-900 group-hover:text-cyan-700 transition-colors whitespace-normal">Pesanan Masuk</p>
                 <p class="text-[10px] text-slate-400">Kirim produk</p>
             </div>
         </a>
 
-        <a href="{{ route('seller.settings.edit') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 hover:border-cyan-600 shadow-card hover:shadow-card-hover transition-all group flex items-center gap-3">
+        <a href="{{ route('seller.settings.edit') }}" class="bg-white p-4 rounded-2xl border border-slate-200/80 hover:border-cyan-600 shadow-card hover:shadow-card-hover transition-all group flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-700 flex items-center justify-center text-sm border border-cyan-200 shrink-0">
                 <i class="fa-solid fa-shop"></i>
             </div>
-            <div>
-                <p class="text-xs font-bold text-slate-900 group-hover:text-cyan-700 transition-colors">Pengaturan Toko</p>
+            <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-slate-900 group-hover:text-cyan-700 transition-colors whitespace-normal">Pengaturan Toko</p>
                 <p class="text-[10px] text-slate-400">Alamat & profil</p>
             </div>
         </a>
