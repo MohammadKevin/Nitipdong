@@ -403,7 +403,10 @@
                         <div>
                             <div class="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-50 mb-2 border border-slate-100">
                                 @if($product->image_url)
-                                    <img src="{{ $product->image_url }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" alt="{{ $product->name }}">
+                                    <img src="{{ $product->image_url }}"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                         alt="{{ $product->name }}"
+                                         onerror="this.src='{{ asset('img/saksershop-logo.png') }}'">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center text-slate-300 text-xl">
                                         <i class="fa-solid fa-box"></i>

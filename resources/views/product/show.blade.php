@@ -28,12 +28,15 @@
                             @php
                                 $firstImageUrl = str_starts_with($allImages[0], 'img/')
                                     ? asset($allImages[0])
-                                    : asset('storage/' . $allImages[0]);
+                                    : (str_starts_with($allImages[0], 'http')
+                                        ? $allImages[0]
+                                        : asset('storage/' . $allImages[0]));
                             @endphp
                             <img src="{{ $firstImageUrl }}"
                                  class="w-full h-full object-cover"
                                  alt="{{ $product->name }}"
-                                 id="main-pdp-img">
+                                 id="main-pdp-img"
+                                 onerror="this.src='{{ asset('img/saksershop-logo.png') }}'">
                         @else
                             <div class="w-full h-full flex items-center justify-center text-slate-300 text-4xl">
                                 <i class="fa-solid fa-box"></i>
@@ -60,12 +63,17 @@
                         @php
                             $thumbUrl = str_starts_with($imgPath, 'img/')
                                 ? asset($imgPath)
-                                : asset('storage/' . $imgPath);
+                                : (str_starts_with($imgPath, 'http')
+                                    ? $imgPath
+                                    : asset('storage/' . $imgPath));
                         @endphp
                         <button type="button"
                             onclick="document.getElementById('main-pdp-img').src='{{ $thumbUrl }}'; document.querySelectorAll('.pdp-thumb').forEach(el => el.classList.remove('ring-2','ring-cyan-600')); this.classList.add('ring-2','ring-cyan-600');"
-                            class="pdp-thumb shrink-0 w-14 h-14 rounded-md overflow-hidden border border-slate-200 bg-white {{ $i === 0 ? 'ring-2 ring-cyan-600' : '' }}">
-                            <img src="{{ $thumbUrl }}" class="w-full h-full object-cover" alt="Foto {{ $i+1 }}">
+                            class="pdp-thumb shrink-0 w-14 h-14 rounded-md overflow-hidden border border-slate-200 bg-white {{ $i === 0 ? 'ring-2 ring-cyan-600' : '' }} hover:ring-2 hover:ring-cyan-400 transition-all">
+                            <img src="{{ $thumbUrl }}"
+                                 class="w-full h-full object-cover"
+                                 alt="Foto {{ $i+1 }}"
+                                 onerror="this.src='{{ asset('img/saksershop-logo.png') }}'">
                         </button>
                         @endforeach
                     </div>

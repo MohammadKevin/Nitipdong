@@ -145,7 +145,9 @@
                         </div>
                     </div>
 
-                    <a href="{{ route('customer.order.checkout') }}" class="w-full h-10 text-xs flex items-center justify-center gap-2 bg-cyan-700 hover:bg-cyan-800 text-white rounded-lg font-semibold transition-colors">
+                    <a href="{{ route('customer.order.checkout') }}"
+                       id="checkout-button"
+                       class="w-full h-10 text-xs flex items-center justify-center gap-2 bg-cyan-700 hover:bg-cyan-800 text-white rounded-lg font-semibold transition-colors">
                         <span>Konfirmasi & Buat Pesanan</span>
                         <i class="fa-solid fa-arrow-right text-[10px]"></i>
                     </a>
@@ -295,5 +297,38 @@
         @endif
     </div>
 </x-app-layout>
+
+{{-- Stock Validation Script --}}
+@if($carts->count() > 0)
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkoutBtn = document.getElementById('checkout-button');
+    const cartItems = @json($carts->map(function($item) {
+        return [
+            'name' => $item->product->name,
+            'stock' => $item->product->stock,
+            'quantity' => $item->quantity
+        ];
+    }));
+
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', function(e) {
+            // Check for out of stock items
+            const outOfStock = cartItems.filter(item => item.stock < item.quantity);
+
+            if (outOfStock.length > 0) {
+                e.preventDefault();
+                const productNames = outOfStock.map(item =>
+                    `• ${item.name}\n  Stok Tersedia: ${item.stock} | Di Keranjang: ${item.quantity}`
+                ).join('\n\n');
+
+                alert(`❌ Stok Tidak Mencukupi!\n\nProduk berikut memiliki stok kurang dari jumlah di keranjang Anda:\n\n${productNames}\n\nSilakan kurangi jumlah atau hapus dari keranjang sebelum melanjutkan.`);
+                return false;
+            }
+        });
+    }
+});
+</script>
+@endif
 
 {{-- Cache bust: 20260820113027 --}}

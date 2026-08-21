@@ -255,6 +255,15 @@ class OrderController extends Controller
                 $remainingVoucherDiscount = $totalVoucherDiscount;
                 $processedStores = 0;
 
+                // Validate stock availability BEFORE creating any orders
+                foreach ($groupedByStore as $storeId => $items) {
+                    foreach ($items as $cartItem) {
+                        if ($cartItem->product->stock < $cartItem->quantity) {
+                            throw new \Exception("Stok produk {$cartItem->product->name} tidak mencukupi. Stok tersedia: {$cartItem->product->stock}");
+                        }
+                    }
+                }
+
                 foreach ($groupedByStore as $storeId => $items) {
                     $processedStores++;
                     $storeSubtotal = $items->sum(fn ($i) => $i->product->final_price * $i->quantity);

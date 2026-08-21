@@ -20,7 +20,7 @@ class CartController extends Controller
             ->get();
 
         $itemsTotal = $carts->sum(function ($item) {
-            return $item->product->price * $item->quantity;
+            return $item->product->customer_base_price * $item->quantity;
         });
 
         $subtotal = $carts->sum(function ($item) {

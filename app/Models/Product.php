@@ -59,7 +59,7 @@ class Product extends Model
     public function getImageUrlAttribute(): ?string
     {
         if (! $this->image) {
-            return null;
+            return asset('img/saksershop-logo.png');
         }
 
         // Direct Cloudinary or external URL
@@ -69,11 +69,20 @@ class Product extends Model
 
         // Local public folder
         if (str_starts_with($this->image, 'img/')) {
-            return asset($this->image);
+            $fullPath = public_path($this->image);
+            if (file_exists($fullPath)) {
+                return asset($this->image);
+            }
+            return asset('img/saksershop-logo.png');
         }
 
         // Local storage folder
-        return asset('storage/' . $this->image);
+        $storagePath = storage_path('app/public/' . $this->image);
+        if (file_exists($storagePath)) {
+            return asset('storage/' . $this->image);
+        }
+
+        return asset('img/saksershop-logo.png');
     }
 
     public function getImagesUrlsAttribute(): array

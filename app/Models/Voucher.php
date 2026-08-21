@@ -108,15 +108,18 @@ class Voucher extends Model
         }
 
         if ($this->type === 'fixed') {
-            return min($this->amount, $subtotal);
+            $discount = min($this->amount, $subtotal);
+        } else {
+            // Percentage discount
+            $discount = ($this->amount / 100) * $subtotal;
         }
 
-        $discount = ($this->amount / 100) * $subtotal;
-
-        if ($this->max_discount && $this->max_discount > 0) {
+        // Apply max_discount cap if exists
+        if ($this->max_discount > 0) {
             $discount = min($discount, $this->max_discount);
         }
 
-        return round(min($discount, $subtotal));
+        // Ensure discount doesn't exceed subtotal
+        return min($discount, $subtotal);
     }
 }
