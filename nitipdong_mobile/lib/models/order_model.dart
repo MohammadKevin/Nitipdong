@@ -33,6 +33,29 @@ class OrderItemModel {
   }
 }
 
+class FirstProductPreview {
+  final String name;
+  final String imageUrl;
+  final int quantity;
+  final double price;
+
+  FirstProductPreview({
+    required this.name,
+    required this.imageUrl,
+    required this.quantity,
+    required this.price,
+  });
+
+  factory FirstProductPreview.fromJson(Map<String, dynamic> json) {
+    return FirstProductPreview(
+      name: json['name'] ?? '',
+      imageUrl: json['image_url'] ?? '',
+      quantity: json['quantity'] ?? 1,
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+}
+
 class OrderModel {
   final int id;
   final String orderNumber;
@@ -42,6 +65,7 @@ class OrderModel {
   final String paymentStatus;
   final String createdAt;
   final int itemsCount;
+  final FirstProductPreview? firstProduct;
   final List<OrderItemModel> items;
 
   OrderModel({
@@ -53,6 +77,7 @@ class OrderModel {
     required this.paymentStatus,
     required this.createdAt,
     this.itemsCount = 0,
+    this.firstProduct,
     this.items = const [],
   });
 
@@ -60,6 +85,18 @@ class OrderModel {
     List<OrderItemModel> itemList = [];
     if (json['items'] != null && json['items'] is List) {
       itemList = (json['items'] as List).map((i) => OrderItemModel.fromJson(i)).toList();
+    }
+
+    FirstProductPreview? fp;
+    if (json['first_product'] != null && json['first_product'] is Map<String, dynamic>) {
+      fp = FirstProductPreview.fromJson(json['first_product']);
+    } else if (itemList.isNotEmpty) {
+      fp = FirstProductPreview(
+        name: itemList.first.name,
+        imageUrl: itemList.first.imageUrl,
+        quantity: itemList.first.quantity,
+        price: itemList.first.price,
+      );
     }
 
     return OrderModel(
@@ -70,7 +107,8 @@ class OrderModel {
       statusLabel: json['status_label'] ?? 'Menunggu',
       paymentStatus: json['payment_status'] ?? 'pending',
       createdAt: json['created_at'] ?? '',
-      itemsCount: json['items_count'] ?? itemList.length,
+      itemsCount: json['items_count'] ?? (itemList.isNotEmpty ? itemList.length : 1),
+      firstProduct: fp,
       items: itemList,
     );
   }
