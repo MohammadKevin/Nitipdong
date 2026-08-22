@@ -105,6 +105,7 @@ class OrderController extends Controller
             'shipping_address' => ['required', 'string'],
             'payment_method'   => ['required', 'string'],
             'cart_ids'         => ['nullable', 'array'],
+            'voucher_code'     => ['nullable', 'string'],
         ]);
 
         $user = $request->user();
@@ -132,12 +133,50 @@ class OrderController extends Controller
                 $totalAmount += ($cart->product->final_price * $cart->quantity);
             }
 
+            // Apply Voucher
+            $discountAmount = 0;
+            $appliedVoucher = null;
+            if ($request->filled('voucher_code')) {
+                $appliedVoucher = \App\Models\Voucher::active()->where('code', $request->voucher_code)->first();
+                if (!$appliedVoucher) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Voucher tidak valid atau sudah kadaluarsa.',
+                    ], 422);
+                }
+
+                if ($appliedVoucher->is_store_voucher) {
+                    $applicableCarts = $carts->filter(fn($c) => $c->product->store_id == $appliedVoucher->store_id);
+                } else {
+                    $applicableCarts = $carts;
+                }
+
+                $applicableSubtotal = 0;
+                foreach ($applicableCarts as $c) {
+                    $applicableSubtotal += ($c->product->final_price * $c->quantity);
+                }
+
+                $validation = $appliedVoucher->validateForSubtotal($applicableSubtotal);
+                if (!$validation['valid']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $validation['message'],
+                    ], 422);
+                }
+
+                $discountAmount = $appliedVoucher->calculateDiscount($applicableSubtotal);
+            }
+
+            $finalAmount = max(0, $totalAmount - $discountAmount);
+
             // Create Order
             $order = Order::create([
                 'user_id'          => $user->id,
                 'store_id'         => $firstStoreId,
                 'order_number'     => 'NTD-' . strtoupper(Str::random(8)),
-                'total_amount'     => $totalAmount,
+                'total_amount'     => $finalAmount,
+                'voucher_code'     => $appliedVoucher ? $appliedVoucher->code : null,
+                'discount_amount'  => $discountAmount,
                 'status'           => 'pending',
                 'payment_status'   => 'pending',
                 'payment_method'   => $request->payment_method,
@@ -164,6 +203,10 @@ class OrderController extends Controller
             // Clear checked-out cart items
             $carts->each->delete();
 
+            if ($appliedVoucher) {
+                $appliedVoucher->decrement('quota');
+            }
+
             DB::commit();
 
             return response()->json([
@@ -171,7 +214,7 @@ class OrderController extends Controller
                 'message'      => 'Pesanan berhasil dibuat!',
                 'order_id'     => $order->id,
                 'order_number' => $order->order_number,
-                'total_amount' => (float) $totalAmount,
+                'total_amount' => (float) $finalAmount,
             ], 201);
 
         } catch (\Exception $e) {
@@ -203,5 +246,63 @@ class OrderController extends Controller
             'success' => false,
             'message' => 'Pesanan tidak dalam status menunggu pembayaran.',
         ], 422);
+    }
+
+    /**
+     * Validate a promo voucher coupon before checkout.
+     */
+    public function validateVoucher(Request $request): JsonResponse
+    {
+        $request->validate([
+            'voucher_code' => ['required', 'string'],
+        ]);
+
+        $voucher = \App\Models\Voucher::active()->where('code', $request->voucher_code)->first();
+        if (!$voucher) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Voucher tidak valid atau sudah kadaluarsa.',
+            ], 422);
+        }
+
+        // Calculate subtotal from cart
+        $carts = $request->user()->carts()->with('product.store')->get();
+        if ($carts->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Keranjang belanja Anda kosong.',
+            ], 422);
+        }
+
+        if ($voucher->is_store_voucher) {
+            $applicableCarts = $carts->filter(fn($c) => $c->product->store_id == $voucher->store_id);
+        } else {
+            $applicableCarts = $carts;
+        }
+
+        $applicableSubtotal = 0;
+        foreach ($applicableCarts as $c) {
+            $applicableSubtotal += ($c->product->final_price * $c->quantity);
+        }
+
+        $validation = $voucher->validateForSubtotal($applicableSubtotal);
+        if (!$validation['valid']) {
+            return response()->json([
+                'success' => false,
+                'message' => $validation['message'],
+            ], 422);
+        }
+
+        $discount = $voucher->calculateDiscount($applicableSubtotal);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Voucher berhasil diterapkan!',
+            'data'    => [
+                'code'            => $voucher->code,
+                'discount_amount' => (float) $discount,
+                'min_spend'       => (float) $voucher->min_spend,
+            ],
+        ]);
     }
 }

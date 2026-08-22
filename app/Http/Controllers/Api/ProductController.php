@@ -131,7 +131,7 @@ class ProductController extends Controller
      */
     public function show($id): JsonResponse
     {
-        $product = Product::with(['category', 'store', 'discussions.replies', 'discussions.user'])
+        $product = Product::with(['category', 'store', 'discussions.replies.user', 'discussions.user'])
             ->where('id', $id)
             ->orWhere('slug', $id)
             ->firstOrFail();
@@ -181,6 +181,24 @@ class ProductController extends Controller
                     'is_official' => true,
                     'logo_url'    => $product->store->logo ? asset('storage/' . $product->store->logo) : asset('img/saksershop-logo.png'),
                 ],
+                'discussions'         => $product->discussions->map(function ($disc) {
+                    return [
+                        'id'         => $disc->id,
+                        'body'       => $disc->body,
+                        'user_name'  => $disc->user?->name ?? 'Pembeli',
+                        'is_seller'  => (bool) $disc->is_seller,
+                        'created_at' => $disc->created_at->format('d M Y, H:i'),
+                        'replies'    => $disc->replies->map(function ($reply) {
+                            return [
+                                'id'         => $reply->id,
+                                'body'       => $reply->body,
+                                'user_name'  => $reply->user?->name ?? 'Penjual',
+                                'is_seller'  => (bool) $reply->is_seller,
+                                'created_at' => $reply->created_at->format('d M Y, H:i'),
+                            ];
+                        }),
+                    ];
+                })->values(),
             ],
         ]);
     }
@@ -207,5 +225,83 @@ class ProductController extends Controller
             'store_name'          => $product->store->name ?? 'NitipDong',
             'city'                => $product->store->city ?? 'Jakarta',
         ];
+    }
+
+    /**
+     * Post a new discussion question on a product.
+     */
+    public function storeDiscussion(Request $request, $id): JsonResponse
+    {
+        $request->validate([
+            'body' => ['required', 'string', 'min:3', 'max:1000'],
+        ]);
+
+        $product = Product::findOrFail($id);
+        $user = $request->user();
+        $isSeller = $user->store && $user->store->id === $product->store_id;
+
+        $discussion = \App\Models\ProductDiscussion::create([
+            'product_id' => $product->id,
+            'user_id'    => $user->id,
+            'parent_id'  => null,
+            'body'       => $request->body,
+            'is_seller'  => $isSeller,
+        ]);
+
+        if (!$isSeller && $product->store && $product->store->user_id) {
+            \App\Models\AppNotification::create([
+                'user_id' => $product->store->user_id,
+                'title'   => 'Pertanyaan Baru di Produk Anda',
+                'message' => "{$user->name} menanyakan: \"" . \Illuminate\Support\Str::limit($request->body, 60) . "\" pada produk {$product->name}",
+                'link'    => route('product.show', $product) . '#discussion-' . $discussion->id,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pertanyaan Anda berhasil dikirim ke diskusi produk!',
+            'data'    => $discussion,
+        ], 201);
+    }
+
+    /**
+     * Reply to an existing discussion question.
+     */
+    public function replyDiscussion(Request $request, $id, $discussionId): JsonResponse
+    {
+        $request->validate([
+            'body' => ['required', 'string', 'min:2', 'max:1000'],
+        ]);
+
+        $product = Product::findOrFail($id);
+        $discussion = \App\Models\ProductDiscussion::where('product_id', $product->id)->findOrFail($discussionId);
+
+        $user = $request->user();
+        $isSeller = $user->store && $user->store->id === $product->store_id;
+
+        $parentId = $discussion->parent_id ?: $discussion->id;
+
+        $reply = \App\Models\ProductDiscussion::create([
+            'product_id' => $product->id,
+            'user_id'    => $user->id,
+            'parent_id'  => $parentId,
+            'body'       => $replyBody = $request->body,
+            'is_seller'  => $isSeller,
+        ]);
+
+        if ($discussion->user_id !== $user->id) {
+            \App\Models\AppNotification::create([
+                'user_id' => $discussion->user_id,
+                'title'   => $isSeller ? 'Penjual Membalas Pertanyaan Anda' : 'Ada Balasan di Diskusi Produk',
+                'message' => "{$user->name} membalas pertanyaan Anda pada produk {$product->name}",
+                'link'    => route('product.show', $product) . '#discussion-' . $parentId,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Balasan Anda berhasil dikirim!',
+            'data'    => $reply,
+        ], 201);
     }
 }

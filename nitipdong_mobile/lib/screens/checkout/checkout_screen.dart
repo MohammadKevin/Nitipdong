@@ -16,9 +16,13 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final _addressController = TextEditingController();
+  final _voucherController = TextEditingController();
   String _selectedPayment = 'QRIS Instant (BCA, Mandiri, GoPay, OVO)';
   String _selectedCourier = 'J&T Express (Gratis Ongkir Rp0)';
   bool _isProcessing = false;
+  bool _isValidatingVoucher = false;
+  String? _appliedVoucherCode;
+  double _discountAmount = 0.0;
 
   @override
   void initState() {
@@ -32,6 +36,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String _formatCurrency(double amount) {
     final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     return formatter.format(amount);
+  }
+
+  Future<void> _applyVoucher() async {
+    if (_voucherController.text.trim().isEmpty) return;
+    setState(() => _isValidatingVoucher = true);
+    final result = await ApiService.validateVoucher(_voucherController.text.trim());
+    setState(() {
+      _isValidatingVoucher = false;
+      if (result['success'] == true) {
+        _appliedVoucherCode = result['code'];
+        _discountAmount = result['discount_amount'] ?? 0.0;
+      } else {
+        _appliedVoucherCode = null;
+        _discountAmount = 0.0;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Voucher tidak dapat digunakan')),
+        );
+      }
+    });
   }
 
   @override
@@ -145,6 +168,89 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             const SizedBox(height: 12),
 
+            // Voucher Card
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.confirmation_number_outlined, color: AppTheme.primary, size: 20),
+                      SizedBox(width: 6),
+                      Text('Voucher Promo Toko / Platform', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _voucherController,
+                          decoration: const InputDecoration(
+                            hintText: 'Masukkan kode voucher...',
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          ),
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: _isValidatingVoucher ? null : _applyVoucher,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          minimumSize: const Size(0, 40),
+                        ),
+                        child: _isValidatingVoucher
+                            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                            : Text(_appliedVoucherCode != null ? 'Ganti' : 'Pakai', style: const TextStyle(fontSize: 12)),
+                      ),
+                    ],
+                  ),
+                  if (_appliedVoucherCode != null) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppTheme.success.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.check_circle, color: AppTheme.success, size: 16),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Voucher $_appliedVoucherCode berhasil digunakan! Diskon ${_formatCurrency(_discountAmount)}',
+                              style: const TextStyle(color: AppTheme.success, fontSize: 11, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, size: 16, color: AppTheme.success),
+                            constraints: const BoxConstraints(),
+                            padding: EdgeInsets.zero,
+                            onPressed: () {
+                              setState(() {
+                                _appliedVoucherCode = null;
+                                _discountAmount = 0.0;
+                                _voucherController.clear();
+                              });
+                            },
+                          )
+                        ],
+                      ),
+                    )
+                  ]
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+
             // 4. Order Summary Card
             Container(
               padding: const EdgeInsets.all(14),
@@ -165,13 +271,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       Text(_formatCurrency(cartProvider.subtotal), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                     ],
                   ),
+                  if (_discountAmount > 0) ...[
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Diskon Voucher', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                        Text('- ${_formatCurrency(_discountAmount)}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.red)),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 6),
                   const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Ongkos Kirim', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                      Text('Rp 0 (Voucher Bebas Ongkir)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.success)),
-                    ],
+                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                     children: [
+                       Text('Ongkos Kirim', style: TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                       Text('Rp 0 (Voucher Bebas Ongkir)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.success)),
+                     ],
                   ),
                   const Divider(height: 20),
                   Row(
@@ -179,7 +295,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     children: [
                       const Text('Total Tagihan', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
                       Text(
-                        _formatCurrency(cartProvider.subtotal),
+                        _formatCurrency((cartProvider.subtotal - _discountAmount) < 0 ? 0.0 : (cartProvider.subtotal - _discountAmount)),
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppTheme.primaryDark),
                       ),
                     ],
@@ -202,6 +318,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           shippingAddress: _addressController.text,
                           paymentMethod: _selectedPayment,
                           courier: _selectedCourier,
+                          voucherCode: _appliedVoucherCode,
                         );
                         setState(() => _isProcessing = false);
 

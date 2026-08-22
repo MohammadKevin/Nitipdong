@@ -17,6 +17,7 @@ class ProductModel {
   final int storeId;
   final String city;
   final String description;
+  final List<DiscussionModel> discussions;
 
   ProductModel({
     required this.id,
@@ -37,12 +38,18 @@ class ProductModel {
     this.storeId = 1,
     this.city = 'Jakarta',
     this.description = '',
+    this.discussions = const [],
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     List<String> imgList = [];
     if (json['images'] != null && json['images'] is List) {
       imgList = List<String>.from(json['images']);
+    }
+
+    var discList = <DiscussionModel>[];
+    if (json['discussions'] != null && json['discussions'] is List) {
+      discList = (json['discussions'] as List).map((d) => DiscussionModel.fromJson(d)).toList();
     }
 
     return ProductModel(
@@ -64,6 +71,67 @@ class ProductModel {
       storeId: json['store_id'] ?? (json['store']?['id'] ?? 1),
       city: json['city'] ?? (json['store']?['city'] ?? 'Jakarta'),
       description: json['description'] ?? '',
+      discussions: discList,
+    );
+  }
+}
+
+class DiscussionModel {
+  final int id;
+  final String body;
+  final String userName;
+  final bool isSeller;
+  final String createdAt;
+  final List<DiscussionReplyModel> replies;
+
+  DiscussionModel({
+    required this.id,
+    required this.body,
+    required this.userName,
+    required this.isSeller,
+    required this.createdAt,
+    required this.replies,
+  });
+
+  factory DiscussionModel.fromJson(Map<String, dynamic> json) {
+    var repliesList = <DiscussionReplyModel>[];
+    if (json['replies'] != null && json['replies'] is List) {
+      repliesList = (json['replies'] as List).map((r) => DiscussionReplyModel.fromJson(r)).toList();
+    }
+
+    return DiscussionModel(
+      id: json['id'] ?? 0,
+      body: json['body'] ?? '',
+      userName: json['user_name'] ?? '',
+      isSeller: json['is_seller'] ?? false,
+      createdAt: json['created_at'] ?? '',
+      replies: repliesList,
+    );
+  }
+}
+
+class DiscussionReplyModel {
+  final int id;
+  final String body;
+  final String userName;
+  final bool isSeller;
+  final String createdAt;
+
+  DiscussionReplyModel({
+    required this.id,
+    required this.body,
+    required this.userName,
+    required this.isSeller,
+    required this.createdAt,
+  });
+
+  factory DiscussionReplyModel.fromJson(Map<String, dynamic> json) {
+    return DiscussionReplyModel(
+      id: json['id'] ?? 0,
+      body: json['body'] ?? '',
+      userName: json['user_name'] ?? '',
+      isSeller: json['is_seller'] ?? false,
+      createdAt: json['created_at'] ?? '',
     );
   }
 }

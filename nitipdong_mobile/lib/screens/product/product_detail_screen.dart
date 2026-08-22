@@ -24,6 +24,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool _isLoading = true;
   int _currentImageIndex = 0;
   int _quantity = 1;
+  final _commentController = TextEditingController();
+  final _replyController = TextEditingController();
+  int? _activeReplyDiscussionId;
+  bool _isPostingComment = false;
+  bool _isPostingReply = false;
 
   @override
   void initState() {
@@ -54,6 +59,59 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                    .replaceAll('&lt;', '<')
                    .replaceAll('&gt;', '>');
     return result.trim();
+  }
+
+  Future<void> _submitComment() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (!authProvider.isAuthenticated) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+      return;
+    }
+    if (_commentController.text.trim().isEmpty) return;
+
+    setState(() => _isPostingComment = true);
+    final result = await ApiService.postDiscussion(_product!.id, _commentController.text.trim());
+    setState(() {
+      _isPostingComment = false;
+      if (result['success'] == true) {
+        _commentController.clear();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Pertanyaan berhasil dikirim!'), backgroundColor: AppTheme.success),
+        );
+        _fetchDetail();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Gagal mengirim pertanyaan'), backgroundColor: Colors.red),
+        );
+      }
+    });
+  }
+
+  Future<void> _submitReply(int discussionId) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (!authProvider.isAuthenticated) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+      return;
+    }
+    if (_replyController.text.trim().isEmpty) return;
+
+    setState(() => _isPostingReply = true);
+    final result = await ApiService.postReply(_product!.id, discussionId, _replyController.text.trim());
+    setState(() {
+      _isPostingReply = false;
+      if (result['success'] == true) {
+        _replyController.clear();
+        _activeReplyDiscussionId = null;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Balasan berhasil dikirim!'), backgroundColor: AppTheme.success),
+        );
+        _fetchDetail();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Gagal mengirim balasan'), backgroundColor: Colors.red),
+        );
+      }
+    });
   }
 
   @override
@@ -322,6 +380,249 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         : 'Produk original berkualitas tinggi terjamin di NitipDong dengan garansi pengembalian 100%.',
                     style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary, height: 1.5),
                   ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // 5. Discussion Q&A Section
+            Container(
+              width: double.infinity,
+              color: Colors.white,
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Text(
+                        'Diskusi & Tanya Jawab',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryLight,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          '${p.discussions.length}',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryDark,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Ask Question Input
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _commentController,
+                          decoration: const InputDecoration(
+                            hintText: 'Tanyakan sesuatu tentang produk ini...',
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          ),
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: _isPostingComment ? null : _submitComment,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(0, 40),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                        ),
+                        child: _isPostingComment
+                            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                            : const Text('Kirim', style: TextStyle(fontSize: 12)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Discussions List
+                  p.discussions.isEmpty
+                      ? const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: Center(
+                            child: Text(
+                              'Belum ada diskusi. Jadilah yang pertama bertanya!',
+                              style: TextStyle(color: AppTheme.textMuted, fontSize: 11),
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: p.discussions.length,
+                          itemBuilder: (context, dIndex) {
+                            final disc = p.discussions[dIndex];
+                            final isReplyingThis = _activeReplyDiscussionId == disc.id;
+
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 16),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade50,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: Colors.grey.shade200),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Question Header
+                                  Row(
+                                    children: [
+                                      Text(
+                                        disc.userName,
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                                      ),
+                                      if (disc.isSeller) ...[
+                                        const SizedBox(width: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.primary,
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: const Text('Penjual', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
+                                        ),
+                                      ],
+                                      const Spacer(),
+                                      Text(
+                                        disc.createdAt,
+                                        style: const TextStyle(color: AppTheme.textMuted, fontSize: 9),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    disc.body,
+                                    style: const TextStyle(fontSize: 12, height: 1.4, color: AppTheme.textPrimary),
+                                  ),
+                                  const SizedBox(height: 6),
+
+                                  // Reply action link
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        if (isReplyingThis) {
+                                          _activeReplyDiscussionId = null;
+                                        } else {
+                                          _activeReplyDiscussionId = disc.id;
+                                        }
+                                      });
+                                    },
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.reply, size: 12, color: isReplyingThis ? Colors.red : AppTheme.primary),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          isReplyingThis ? 'Batal' : 'Balas',
+                                          style: TextStyle(
+                                            color: isReplyingThis ? Colors.red : AppTheme.primary,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  // Inline Reply Input
+                                  if (isReplyingThis) ...[
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: TextField(
+                                            controller: _replyController,
+                                            decoration: const InputDecoration(
+                                              hintText: 'Tulis balasan...',
+                                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                            ),
+                                            style: const TextStyle(fontSize: 11),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        ElevatedButton(
+                                          onPressed: _isPostingReply ? null : () => _submitReply(disc.id),
+                                          style: ElevatedButton.styleFrom(
+                                            minimumSize: const Size(0, 34),
+                                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                                          ),
+                                          child: _isPostingReply
+                                              ? const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                              : const Text('Balas', style: TextStyle(fontSize: 11)),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+
+                                  // Replies list
+                                  if (disc.replies.isNotEmpty) ...[
+                                    const SizedBox(height: 10),
+                                    const Divider(height: 1),
+                                    const SizedBox(height: 10),
+                                    ListView.builder(
+                                      shrinkWrap: true,
+                                      physics: const NeverScrollableScrollPhysics(),
+                                      itemCount: disc.replies.length,
+                                      itemBuilder: (context, rIndex) {
+                                        final rep = disc.replies[rIndex];
+                                        return Container(
+                                          margin: const EdgeInsets.only(bottom: 10, left: 10),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    rep.userName,
+                                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: AppTheme.textPrimary),
+                                                  ),
+                                                  if (rep.isSeller) ...[
+                                                    const SizedBox(width: 6),
+                                                    Container(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                                      decoration: BoxDecoration(
+                                                        color: AppTheme.primary,
+                                                        borderRadius: BorderRadius.circular(4),
+                                                      ),
+                                                      child: const Text('Penjual', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
+                                                    ),
+                                                  ],
+                                                  const Spacer(),
+                                                  Text(
+                                                    rep.createdAt,
+                                                    style: const TextStyle(color: AppTheme.textMuted, fontSize: 9),
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                rep.body,
+                                                style: const TextStyle(fontSize: 11.5, height: 1.3, color: AppTheme.textSecondary),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                 ],
               ),
             ),

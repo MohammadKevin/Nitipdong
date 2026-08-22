@@ -382,6 +382,7 @@ class ApiService {
     required String paymentMethod,
     String courier = 'J&T Express',
     List<int>? cartIds,
+    String? voucherCode,
   }) async {
     try {
       final response = await http.post(
@@ -392,6 +393,7 @@ class ApiService {
           'payment_method': paymentMethod,
           'courier': courier,
           'cart_ids': cartIds,
+          'voucher_code': voucherCode,
         }),
       );
 
@@ -417,6 +419,61 @@ class ApiService {
       return {
         'success': response.statusCode == 200 && data['success'] == true,
         'message': data['message'] ?? 'Pembayaran berhasil diproses',
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  static Future<Map<String, dynamic>> validateVoucher(String voucherCode) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/vouchers/validate'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'voucher_code': voucherCode,
+        }),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Kupon berhasil diterapkan',
+        'discount_amount': data['data'] != null ? (data['data']['discount_amount'] as num).toDouble() : 0.0,
+        'code': data['data'] != null ? data['data']['code'] as String : null,
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString(), 'discount_amount': 0.0};
+    }
+  }
+
+  static Future<Map<String, dynamic>> postDiscussion(dynamic productId, String body) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/products/$productId/discussions'),
+        headers: await _getHeaders(),
+        body: jsonEncode({'body': body}),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 201 && data['success'] == true,
+        'message': data['message'] ?? 'Pertanyaan berhasil dikirim',
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  static Future<Map<String, dynamic>> postReply(dynamic productId, dynamic discussionId, String body) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/products/$productId/discussions/$discussionId/reply'),
+        headers: await _getHeaders(),
+        body: jsonEncode({'body': body}),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 201 && data['success'] == true,
+        'message': data['message'] ?? 'Balasan berhasil dikirim',
       };
     } catch (e) {
       return {'success': false, 'message': e.toString()};
