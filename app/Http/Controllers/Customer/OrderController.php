@@ -372,16 +372,38 @@ class OrderController extends Controller
             ->with('success', 'Pesanan Anda berhasil dibuat! Silakan selesaikan pembayaran.');
     }
 
-    public function payment(Order $order): View
+    public function payment(Request $request, Order $order): View
     {
         if ($order->user_id !== Auth::id()) {
             abort(403);
+        }
+
+        if ($request->filled('method') && $request->method !== $order->payment_method) {
+            $order->update(['payment_method' => $request->method]);
         }
 
         $paymentChannels = PaymentService::PAYMENT_CHANNELS;
         $charge = PaymentService::createPaymentCharge($order, $order->payment_method ?: 'qris');
 
         return view('customer.order.payment', compact('order', 'paymentChannels', 'charge'));
+    }
+
+    public function changePaymentMethod(Request $request, Order $order): RedirectResponse
+    {
+        if ($order->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'payment_method' => ['required', 'string'],
+        ]);
+
+        $order->update([
+            'payment_method' => $request->payment_method,
+        ]);
+
+        return redirect()->route('customer.order.payment', $order)
+            ->with('success', 'Metode pembayaran berhasil diubah!');
     }
 
     public function confirmPayment(Request $request, Order $order): RedirectResponse

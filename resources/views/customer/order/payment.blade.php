@@ -24,7 +24,8 @@
         $vaNumber = $charge['va_number'] ?? ('880299' . str_pad((string) $order->id, 6, '0', STR_PAD_LEFT));
     }
 
-    $qrImageUrl = $charge['qr_image_url'] ?? ('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode('00020101021226680016ID.CO.NITIPDONG.WWW011893600999' . str_pad((string) $order->id, 6, '0', STR_PAD_LEFT) . '5204541153033605802ID5918NITIPDONG6007JAKARTA62070703A016304' . strtoupper(substr(md5($order->invoice_number), 0, 4))));
+    $qrString = $charge['qr_string'] ?? ($charge['qris_data'] ?? ('00020101021226680016ID.CO.NITIPDONG.WWW011893600999' . str_pad((string) $order->id, 6, '0', STR_PAD_LEFT) . '5204541153033605802ID5918NITIPDONG6007JAKARTA62070703A016304' . strtoupper(substr(md5($order->invoice_number), 0, 4))));
+    $qrImageUrl = $charge['qris_image_url'] ?? ('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($qrString));
 @endphp
 
 <x-app-layout>
@@ -34,6 +35,8 @@
             copiedType: '',
             isChecking: false,
             isSimulating: false,
+            isChangeModalOpen: false,
+            newPaymentMethod: '{{ $order->payment_method ?: 'qris' }}',
             remainingSeconds: 86400,
             formattedTimer: '23:59:59',
             pollInterval: null,
@@ -110,13 +113,27 @@
             }
          }">
 
-        <div class="max-w-2xl mx-auto mb-5">
-            <a href="{{ route('customer.dashboard') }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-cyan-700 mb-2 transition-colors">
-                <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
-            </a>
-            <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Selesaikan Pembayaran</h1>
-            <p class="text-xs text-slate-500 mt-1">Lakukan pembayaran sebelum batas waktu berakhir agar pesanan segera diproses</p>
+        <div class="max-w-2xl mx-auto mb-5 flex items-center justify-between">
+            <div>
+                <a href="{{ route('customer.dashboard') }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-cyan-700 mb-1 transition-colors">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
+                </a>
+                <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Selesaikan Pembayaran</h1>
+            </div>
+            
+            {{-- Tombol Ubah Metode Pembayaran --}}
+            <button type="button" @click="isChangeModalOpen = true"
+                    class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:border-cyan-600 text-slate-700 hover:text-cyan-700 font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
+                <i class="fa-solid fa-wallet text-cyan-600"></i> Ubah Metode
+            </button>
         </div>
+
+        @if(session('success'))
+            <div class="max-w-2xl mx-auto mb-4 flex items-center gap-2.5 px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl text-xs font-semibold animate-fade-up">
+                <i class="fa-solid fa-circle-check text-emerald-600 text-sm shrink-0"></i>
+                <span>{{ session('success') }}</span>
+            </div>
+        @endif
 
         <div class="max-w-2xl mx-auto space-y-4">
 
@@ -162,15 +179,19 @@
                         </div>
                     </div>
 
-                    <p class="text-xs text-slate-600 max-w-md mx-auto leading-relaxed mb-4">
+                    <p class="text-xs text-slate-600 max-w-md mx-auto leading-relaxed mb-3">
                         Buka aplikasi <strong>GoPay, OVO, Dana, ShopeePay, LinkAja</strong> atau Mobile Banking (<strong>BCA, Mandiri, BRI, BNI</strong>), lalu pilih menu <strong>Scan QRIS</strong>.
                     </p>
 
-                    <div class="flex justify-center gap-2">
-                        <button type="button" @click="copyText('{{ $charge['qr_string'] ?? $order->invoice_number }}', 'qris')"
-                                class="btn-secondary h-9 text-xs px-4">
-                            <i class="fa-solid fa-copy mr-1"></i> Salin String QRIS
-                        </button>
+                    <div class="max-w-md mx-auto bg-slate-50 border border-slate-200 rounded-xl p-3 mb-4 text-left">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase block mb-1">String Kode QRIS (untuk Simulator / Debug):</span>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="font-mono text-xs text-slate-700 truncate select-all">{{ $qrString }}</span>
+                            <button type="button" @click="copyText('{{ $qrString }}', 'qris')"
+                                    class="shrink-0 px-2.5 py-1 text-xs font-bold bg-cyan-700 hover:bg-cyan-800 text-white rounded-lg transition-all">
+                                <i class="fa-solid fa-copy"></i> Salin
+                            </button>
+                        </div>
                     </div>
                 </div>
             @elseif(!$isManual)
@@ -285,12 +306,119 @@
                 </button>
             </div>
 
+            {{-- MODAL UBAH METODE PEMBAYARAN --}}
+            <div x-show="isChangeModalOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
+                <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity bg-slate-900/60 backdrop-blur-sm" @click="isChangeModalOpen = false"></div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+                    
+                    <div class="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-2xl border border-slate-100 relative z-10">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                <i class="fa-solid fa-wallet text-cyan-700"></i> Pilih Metode Pembayaran
+                            </h3>
+                            <button type="button" @click="isChangeModalOpen = false" class="text-slate-400 hover:text-slate-600">
+                                <i class="fa-solid fa-xmark text-lg"></i>
+                            </button>
+                        </div>
+
+                        <form action="{{ route('customer.order.change_payment_method', $order) }}" method="POST" class="mt-4 space-y-2.5">
+                            @csrf
+                            
+                            {{-- QRIS --}}
+                            <label class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all"
+                                   :class="newPaymentMethod === 'qris' ? 'border-cyan-600 bg-cyan-50/50' : 'border-slate-200 hover:border-slate-300'">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" name="payment_method" value="qris" x-model="newPaymentMethod" class="text-cyan-600 focus:ring-cyan-500">
+                                    <div>
+                                        <div class="text-xs font-bold text-slate-800">QRIS (GoPay, OVO, Dana, ShopeePay)</div>
+                                        <div class="text-[11px] text-slate-500">Scan QR Code instan otomatis</div>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-qrcode text-red-500 text-lg"></i>
+                            </label>
+
+                            {{-- BCA VA --}}
+                            <label class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all"
+                                   :class="newPaymentMethod === 'va_bca' ? 'border-cyan-600 bg-cyan-50/50' : 'border-slate-200 hover:border-slate-300'">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" name="payment_method" value="va_bca" x-model="newPaymentMethod" class="text-cyan-600 focus:ring-cyan-500">
+                                    <div>
+                                        <div class="text-xs font-bold text-slate-800">BCA Virtual Account</div>
+                                        <div class="text-[11px] text-slate-500">Verifikasi otomatis 24 jam</div>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-building-columns text-blue-600 text-lg"></i>
+                            </label>
+
+                            {{-- BRI VA --}}
+                            <label class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all"
+                                   :class="newPaymentMethod === 'va_bri' ? 'border-cyan-600 bg-cyan-50/50' : 'border-slate-200 hover:border-slate-300'">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" name="payment_method" value="va_bri" x-model="newPaymentMethod" class="text-cyan-600 focus:ring-cyan-500">
+                                    <div>
+                                        <div class="text-xs font-bold text-slate-800">BRI Virtual Account (BRIVA)</div>
+                                        <div class="text-[11px] text-slate-500">Verifikasi otomatis 24 jam</div>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-building-columns text-cyan-600 text-lg"></i>
+                            </label>
+
+                            {{-- Mandiri VA --}}
+                            <label class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all"
+                                   :class="newPaymentMethod === 'va_mandiri' ? 'border-cyan-600 bg-cyan-50/50' : 'border-slate-200 hover:border-slate-300'">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" name="payment_method" value="va_mandiri" x-model="newPaymentMethod" class="text-cyan-600 focus:ring-cyan-500">
+                                    <div>
+                                        <div class="text-xs font-bold text-slate-800">Mandiri Virtual Account</div>
+                                        <div class="text-[11px] text-slate-500">Verifikasi otomatis 24 jam</div>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-building-columns text-amber-600 text-lg"></i>
+                            </label>
+
+                            {{-- BNI VA --}}
+                            <label class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all"
+                                   :class="newPaymentMethod === 'va_bni' ? 'border-cyan-600 bg-cyan-50/50' : 'border-slate-200 hover:border-slate-300'">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" name="payment_method" value="va_bni" x-model="newPaymentMethod" class="text-cyan-600 focus:ring-cyan-500">
+                                    <div>
+                                        <div class="text-xs font-bold text-slate-800">BNI Virtual Account</div>
+                                        <div class="text-[11px] text-slate-500">Verifikasi otomatis 24 jam</div>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-building-columns text-orange-600 text-lg"></i>
+                            </label>
+
+                            {{-- Manual --}}
+                            <label class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all"
+                                   :class="newPaymentMethod === 'manual_transfer' ? 'border-cyan-600 bg-cyan-50/50' : 'border-slate-200 hover:border-slate-300'">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" name="payment_method" value="manual_transfer" x-model="newPaymentMethod" class="text-cyan-600 focus:ring-cyan-500">
+                                    <div>
+                                        <div class="text-xs font-bold text-slate-800">Transfer Bank Manual</div>
+                                        <div class="text-[11px] text-slate-500">Upload foto bukti transfer / struk</div>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-receipt text-slate-600 text-lg"></i>
+                            </label>
+
+                            <div class="pt-3">
+                                <button type="submit" class="w-full btn-primary h-10 text-xs font-bold">
+                                    Simpan & Gunakan Metode Ini
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
             {{-- Floating Copy Notification Toast --}}
             <div x-show="copied" x-transition
                  class="fixed bottom-6 right-6 z-50 px-4 py-3 bg-slate-900 text-white text-xs font-bold rounded-xl shadow-2xl flex items-center gap-2"
                  x-cloak>
                 <i class="fa-solid fa-circle-check text-emerald-400"></i>
-                <span x-text="copiedType === 'nominal' ? 'Nominal tagihan berhasil disalin!' : (copiedType === 'va' ? 'Nomor Virtual Account berhasil disalin!' : 'Teks berhasil disalin!')"></span>
+                <span x-text="copiedType === 'nominal' ? 'Nominal tagihan berhasil disalin!' : (copiedType === 'va' ? 'Nomor Virtual Account berhasil disalin!' : (copiedType === 'qris' ? 'Kode String QRIS berhasil disalin!' : 'Teks berhasil disalin!'))"></span>
             </div>
 
         </div>

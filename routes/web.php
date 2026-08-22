@@ -350,6 +350,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/orders/{order}/payment', [OrderController::class, 'payment'])->name('order.payment');
         Route::post('/orders/{order}/payment', [OrderController::class, 'confirmPayment'])->name('order.confirm_payment');
+        Route::post('/orders/{order}/change-payment-method', [OrderController::class, 'changePaymentMethod'])->name('order.change_payment_method');
         Route::match(['get', 'post'], '/orders/{order}/midtrans/snap-token', [MidtransPaymentController::class, 'getSnapToken'])->name('order.midtrans_snap_token');
         Route::match(['get', 'post'], '/orders/{order}/duitku/create', [MidtransPaymentController::class, 'getSnapToken'])->name('order.duitku_create');
         Route::post('/orders/{order}/simulate-payment', [PaymentCallbackController::class, 'simulateInstantPayment'])->name('order.simulate_payment');
