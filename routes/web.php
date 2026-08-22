@@ -47,18 +47,45 @@ Route::post('/api/midtrans/notification', [MidtransPaymentController::class, 'ha
 Route::post('/api/payment/notification', [MidtransPaymentController::class, 'handleNotification'])->name('payment.webhook');
 Route::post('/api/duitku/callback', [DuitkuPaymentController::class, 'handleCallback'])->name('duitku.callback');
 
-// Download Mobile Android APK Route
-Route::get('/download/app', function () {
-    // Serve from local server if APK file exists (uploaded manually)
+// Smart Download Route for Mobile Apps (Auto-detects Android vs iOS)
+Route::get('/download/app', function (\Illuminate\Http\Request $request) {
+    $userAgent = strtolower($request->header('User-Agent', ''));
+    $isIos = str_contains($userAgent, 'iphone') || str_contains($userAgent, 'ipad') || str_contains($userAgent, 'ipod');
+
+    if ($isIos) {
+        $ipaPath = public_path('downloads/nitipdong.ipa');
+        if (file_exists($ipaPath)) {
+            return response()->download($ipaPath, 'NitipDong-latest.ipa');
+        }
+        return redirect('https://github.com/MohammadKevin/Nitipdong/releases/latest/download/NitipDong-latest.ipa');
+    }
+
     $apkPath = public_path('downloads/nitipdong.apk');
     if (file_exists($apkPath)) {
         return response()->download($apkPath, 'NitipDong-latest.apk');
     }
-    // Fallback: redirect to GitHub Releases (auto-published by CI/CD)
     return redirect('https://github.com/MohammadKevin/Nitipdong/releases/latest/download/NitipDong-latest.apk');
 })->name('app.download');
 
-// App Landing Page & Download Page
+// Direct Android Download Route
+Route::get('/download/android', function () {
+    $apkPath = public_path('downloads/nitipdong.apk');
+    if (file_exists($apkPath)) {
+        return response()->download($apkPath, 'NitipDong-latest.apk');
+    }
+    return redirect('https://github.com/MohammadKevin/Nitipdong/releases/latest/download/NitipDong-latest.apk');
+})->name('app.download.android');
+
+// Direct iOS Download Route
+Route::get('/download/ios', function () {
+    $ipaPath = public_path('downloads/nitipdong.ipa');
+    if (file_exists($ipaPath)) {
+        return response()->download($ipaPath, 'NitipDong-latest.ipa');
+    }
+    return redirect('https://github.com/MohammadKevin/Nitipdong/releases/latest/download/NitipDong-latest.ipa');
+})->name('app.download.ios');
+
+// App Landing Page & Download Hub
 Route::get('/apps', function () {
     return view('app-download');
 })->name('app.landing');
