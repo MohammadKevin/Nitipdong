@@ -11,12 +11,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable(['name', 'email', 'password', 'role', 'phone', 'address', 'avatar', 'otp_code', 'otp_expires_at', 'pending_email'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, HasObfuscatedId;
+    use HasApiTokens, HasFactory, Notifiable, HasObfuscatedId;
 
     protected $fillable = [
         'name',
