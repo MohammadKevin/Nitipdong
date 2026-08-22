@@ -8,6 +8,7 @@ import '../../theme/app_theme.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/login_screen.dart';
+import 'store_screen.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final dynamic productId;
@@ -42,6 +43,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   String _formatCurrency(double amount) {
     final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     return formatter.format(amount);
+  }
+
+  String _stripHtml(String htmlString) {
+    if (htmlString.isEmpty) return '';
+    String result = htmlString.replaceAll(RegExp(r'<[^>]*>', multiLine: true, caseSensitive: false), '');
+    result = result.replaceAll('&nbsp;', ' ')
+                   .replaceAll('&amp;', '&')
+                   .replaceAll('&quot;', '"')
+                   .replaceAll('&lt;', '<')
+                   .replaceAll('&gt;', '>');
+    return result.trim();
   }
 
   @override
@@ -263,7 +275,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   ),
                   OutlinedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StoreScreen(
+                            storeId: p.storeId,
+                            storeName: p.storeName,
+                            city: p.city,
+                          ),
+                        ),
+                      );
+                    },
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       side: const BorderSide(color: AppTheme.primary),
@@ -295,7 +318,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   const SizedBox(height: 8),
                   Text(
                     p.description.isNotEmpty
-                        ? p.description
+                        ? _stripHtml(p.description)
                         : 'Produk original berkualitas tinggi terjamin di NitipDong dengan garansi pengembalian 100%.',
                     style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary, height: 1.5),
                   ),

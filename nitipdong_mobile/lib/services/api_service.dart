@@ -248,6 +248,7 @@ class ApiService {
   static Future<List<ProductModel>> getProducts({
     String? category,
     String? q,
+    dynamic storeId,
     String sort = 'latest',
     int page = 1,
   }) async {
@@ -258,6 +259,7 @@ class ApiService {
       };
       if (category != null && category.isNotEmpty) params['category'] = category;
       if (q != null && q.isNotEmpty) params['q'] = q;
+      if (storeId != null) params['store_id'] = storeId.toString();
 
       final uri = Uri.parse('$baseUrl/products').replace(queryParameters: params);
       final response = await http.get(uri, headers: await _getHeaders(withAuth: false));
@@ -396,6 +398,22 @@ class ApiService {
         'message': data['message'] ?? 'Pesanan berhasil diproses',
         'order_id': data['order_id'],
         'order_number': data['order_number'],
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  static Future<Map<String, dynamic>> payOrder(dynamic orderId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/orders/$orderId/pay'),
+        headers: await _getHeaders(),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Pembayaran berhasil diproses',
       };
     } catch (e) {
       return {'success': false, 'message': e.toString()};

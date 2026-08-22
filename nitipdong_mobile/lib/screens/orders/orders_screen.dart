@@ -212,14 +212,42 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                           ),
                                         ],
                                       ),
-                                      OutlinedButton(
-                                        onPressed: () {},
-                                        style: OutlinedButton.styleFrom(
-                                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                                          side: const BorderSide(color: AppTheme.primary),
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                        ),
-                                        child: const Text('Detail Pesanan', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.primary)),
+                                      Row(
+                                        children: [
+                                          if (order.status.toLowerCase() == 'pending') ...[
+                                            ElevatedButton(
+                                              onPressed: () async {
+                                                setState(() => _isLoading = true);
+                                                final result = await ApiService.payOrder(order.id);
+                                                if (mounted) {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(result['message'] ?? 'Status pembayaran diupdate'),
+                                                      backgroundColor: result['success'] == true ? AppTheme.success : Colors.red,
+                                                    ),
+                                                  );
+                                                }
+                                                _fetchOrders();
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: AppTheme.accentOrange,
+                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                              ),
+                                              child: const Text('Bayar Sekarang', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white)),
+                                            ),
+                                            const SizedBox(width: 8),
+                                          ],
+                                          OutlinedButton(
+                                            onPressed: () {},
+                                            style: OutlinedButton.styleFrom(
+                                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                              side: const BorderSide(color: AppTheme.primary),
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                            ),
+                                            child: const Text('Detail Pesanan', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.primary)),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),

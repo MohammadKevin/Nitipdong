@@ -5,6 +5,7 @@ import 'dart:async';
 import '../models/product_model.dart';
 import '../theme/app_theme.dart';
 import '../screens/product/product_detail_screen.dart';
+import '../screens/product/flash_sale_list_screen.dart';
 
 class FlashSaleSection extends StatefulWidget {
   final List<ProductModel> items;
@@ -146,9 +147,19 @@ class _FlashSaleSectionState extends State<FlashSaleSection> {
               const SizedBox(width: 3),
               _buildTimeBlock(secondsStr),
               const Spacer(),
-              const Text(
-                'Lihat Semua',
-                style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const FlashSaleListScreen(),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'Lihat Semua',
+                  style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600),
+                ),
               ),
             ],
           ),

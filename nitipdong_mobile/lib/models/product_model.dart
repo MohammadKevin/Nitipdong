@@ -14,6 +14,7 @@ class ProductModel {
   final List<String> images;
   final String categoryName;
   final String storeName;
+  final int storeId;
   final String city;
   final String description;
 
@@ -33,6 +34,7 @@ class ProductModel {
     this.images = const [],
     this.categoryName = 'Produk',
     this.storeName = 'NitipDong',
+    this.storeId = 1,
     this.city = 'Jakarta',
     this.description = '',
   });
@@ -59,6 +61,7 @@ class ProductModel {
       images: imgList,
       categoryName: json['category_name'] ?? (json['category']?['name'] ?? 'Produk'),
       storeName: json['store_name'] ?? (json['store']?['name'] ?? 'NitipDong'),
+      storeId: json['store_id'] ?? (json['store']?['id'] ?? 1),
       city: json['city'] ?? (json['store']?['city'] ?? 'Jakarta'),
       description: json['description'] ?? '',
     );

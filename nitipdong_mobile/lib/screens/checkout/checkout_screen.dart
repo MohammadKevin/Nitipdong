@@ -16,7 +16,7 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final _addressController = TextEditingController();
-  String _selectedPayment = 'QRIS Instant';
+  String _selectedPayment = 'QRIS Instant (BCA, Mandiri, GoPay, OVO)';
   String _selectedCourier = 'J&T Express (Gratis Ongkir Rp0)';
   bool _isProcessing = false;
 

@@ -182,4 +182,26 @@ class OrderController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Simulate payment for pending order.
+     */
+    public function pay(Request $request, $id): JsonResponse
+    {
+        $order = $request->user()->orders()->findOrFail($id);
+        if ($order->status === 'pending') {
+            $order->update([
+                'status' => 'processing',
+                'payment_status' => 'paid',
+            ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Pembayaran berhasil disimulasikan!',
+            ]);
+        }
+        return response()->json([
+            'success' => false,
+            'message' => 'Pesanan tidak dalam status menunggu pembayaran.',
+        ], 422);
+    }
 }

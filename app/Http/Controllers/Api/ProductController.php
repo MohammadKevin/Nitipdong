@@ -35,6 +35,11 @@ class ProductController extends Controller
             }
         }
 
+        // Store Filter
+        if ($request->filled('store_id')) {
+            $query->where('store_id', $request->store_id);
+        }
+
         // Sorting
         $sort = $request->get('sort', 'latest');
         switch ($sort) {
