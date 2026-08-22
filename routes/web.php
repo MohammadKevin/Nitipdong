@@ -206,6 +206,13 @@ Route::get('/products', [PublicProductController::class, 'index'])->name('produc
 Route::get('/api/search/suggestions', [PublicProductController::class, 'suggestions'])->name('api.search.suggestions');
 Route::get('/product/{product}', [PublicProductController::class, 'show'])->name('product.show');
 
+// Public Indonesian Administrative Regions & Geocoding API
+Route::get('/api/regions/provinces', [App\Http\Controllers\Api\RegionController::class, 'provinces'])->name('api.regions.provinces');
+Route::get('/api/regions/regencies/{province_id}', [App\Http\Controllers\Api\RegionController::class, 'regencies'])->name('api.regions.regencies');
+Route::get('/api/regions/districts/{regency_id}', [App\Http\Controllers\Api\RegionController::class, 'districts'])->name('api.regions.districts');
+Route::get('/api/regions/villages/{district_id}', [App\Http\Controllers\Api\RegionController::class, 'villages'])->name('api.regions.villages');
+Route::get('/api/regions/reverse-geocode', [App\Http\Controllers\Api\RegionController::class, 'reverseGeocode'])->name('api.regions.reverse_geocode');
+
 // Public Storefront (Etalase Toko)
 Route::get('/toko/{store:slug}', [StoreFrontController::class, 'show'])->name('store.show');
 

@@ -2,665 +2,678 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-    @php
-        $regionsData = \App\Services\IndonesianRegionService::PROVINCES_DATA;
-    @endphp
-
-    <div class="page-container py-5" x-data="{
-        showCreateModal: false,
-        showEditModal: false,
-        isLocating: false,
-        searchQuery: '',
-        searchResults: [],
-        isSearching: false,
-        mapCreate: null,
-        markerCreate: null,
-        mapEdit: null,
-        markerEdit: null,
-        provincesData: {{ json_encode($regionsData) }},
-        formData: {
-            id: null,
-            label: 'Rumah',
-            recipient_name: '',
-            phone: '',
-            full_address: '',
-            city: '',
-            district: '',
-            province: 'DKI Jakarta',
-            postal_code: '',
-            latitude: '-6.2088',
-            longitude: '106.8456',
-            notes: '',
-            is_default: false,
-            actionUrl: ''
-        },
-        getAvailableCities() {
-            if (this.formData.province && this.provincesData[this.formData.province]) {
-                return Object.keys(this.provincesData[this.formData.province].cities);
-            }
-            return [];
-        },
-        onProvinceChange(mode) {
-            const prov = this.formData.province;
-            const cities = this.getAvailableCities();
-            if (cities.length > 0 && !cities.includes(this.formData.city)) {
-                this.formData.city = cities[0];
-            }
-            this.onCityChange(mode);
-        },
-        onCityChange(mode) {
-            const prov = this.formData.province;
-            const city = this.formData.city;
-            if (prov && city && this.provincesData[prov] && this.provincesData[prov].cities[city]) {
-                const cityInfo = this.provincesData[prov].cities[city];
-                this.formData.postal_code = cityInfo.postal || this.formData.postal_code;
-                this.formData.latitude = cityInfo.lat.toFixed(6);
-                this.formData.longitude = cityInfo.lng.toFixed(6);
-
-                const map = mode === 'create' ? this.mapCreate : this.mapEdit;
-                const marker = mode === 'create' ? this.markerCreate : this.markerEdit;
-                if (map && marker) {
-                    map.flyTo([cityInfo.lat, cityInfo.lng], 13);
-                    marker.setLatLng([cityInfo.lat, cityInfo.lng]);
-                }
-            }
-        },
-        openCreate() {
-            this.formData = {
-                id: null,
-                label: 'Rumah',
-                recipient_name: '{{ auth()->user()->name }}',
-                phone: '{{ auth()->user()->phone ?? '' }}',
-                full_address: '',
-                city: 'Jakarta Pusat',
-                district: '',
-                province: 'DKI Jakarta',
-                postal_code: '10110',
-                latitude: '-6.2088',
-                longitude: '106.8456',
-                notes: '',
-                is_default: {{ $addresses->count() === 0 ? 'true' : 'false' }},
-                actionUrl: '{{ route('customer.addresses.store') }}'
-            };
-            this.showCreateModal = true;
-            this.$nextTick(() => {
-                this.initMap('create-map', 'create');
-            });
-        },
-        openEdit(addr, url) {
-            this.formData = {
-                id: addr.id,
-                label: addr.label || 'Rumah',
-                recipient_name: addr.recipient_name,
-                phone: addr.phone,
-                full_address: addr.full_address,
-                city: addr.city || 'Jakarta Pusat',
-                district: addr.district || '',
-                province: addr.province || 'DKI Jakarta',
-                postal_code: addr.postal_code || '',
-                latitude: addr.latitude || '-6.2088',
-                longitude: addr.longitude || '106.8456',
-                notes: addr.notes || '',
-                is_default: Boolean(addr.is_default),
-                actionUrl: url
-            };
-            this.showEditModal = true;
-            this.$nextTick(() => {
-                this.initMap('edit-map', 'edit');
-            });
-        },
-        initMap(containerId, mode) {
-            const lat = parseFloat(this.formData.latitude) || -6.2088;
-            const lng = parseFloat(this.formData.longitude) || 106.8456;
-
-            if (mode === 'create') {
-                if (this.mapCreate) {
-                    this.mapCreate.remove();
-                }
-                this.mapCreate = L.map(containerId).setView([lat, lng], 14);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap'
-                }).addTo(this.mapCreate);
-
-                this.markerCreate = L.marker([lat, lng], { draggable: true }).addTo(this.mapCreate);
-                this.markerCreate.on('dragend', (e) => {
-                    const pos = e.target.getLatLng();
-                    this.formData.latitude = pos.lat.toFixed(6);
-                    this.formData.longitude = pos.lng.toFixed(6);
-                    this.reverseGeocode(pos.lat, pos.lng);
-                });
-            } else {
-                if (this.mapEdit) {
-                    this.mapEdit.remove();
-                }
-                this.mapEdit = L.map(containerId).setView([lat, lng], 14);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap'
-                }).addTo(this.mapEdit);
-
-                this.markerEdit = L.marker([lat, lng], { draggable: true }).addTo(this.mapEdit);
-                this.markerEdit.on('dragend', (e) => {
-                    const pos = e.target.getLatLng();
-                    this.formData.latitude = pos.lat.toFixed(6);
-                    this.formData.longitude = pos.lng.toFixed(6);
-                    this.reverseGeocode(pos.lat, pos.lng);
-                });
-            }
-        },
-        getCurrentLocation(mode) {
-            if (!navigator.geolocation) {
-                alert('Browser Anda tidak mendukung Geolocation.');
-                return;
-            }
-            this.isLocating = true;
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    this.isLocating = false;
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    this.formData.latitude = lat.toFixed(6);
-                    this.formData.longitude = lng.toFixed(6);
-
-                    const map = mode === 'create' ? this.mapCreate : this.mapEdit;
-                    const marker = mode === 'create' ? this.markerCreate : this.markerEdit;
-
-                    if (map && marker) {
-                        map.setView([lat, lng], 16);
-                        marker.setLatLng([lat, lng]);
-                    }
-                    this.reverseGeocode(lat, lng);
-                },
-                (error) => {
-                    this.isLocating = false;
-                    alert('Gagal mendeteksi lokasi: ' + error.message);
-                },
-                { enableHighAccuracy: true, timeout: 10000 }
-            );
-        },
-        searchLocation(query) {
-            if (!query || query.length < 3) {
-                this.searchResults = [];
-                return;
-            }
-            this.isSearching = true;
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Indonesia')}&addressdetails=1&limit=5`)
-                .then(res => res.json())
-                .then(data => {
-                    this.searchResults = data;
-                    this.isSearching = false;
-                })
-                .catch(() => {
-                    this.isSearching = false;
-                });
-        },
-        selectLocation(result, mode) {
-            const lat = parseFloat(result.lat);
-            const lng = parseFloat(result.lon);
-            this.formData.latitude = lat.toFixed(6);
-            this.formData.longitude = lng.toFixed(6);
-
-            const map = mode === 'create' ? this.mapCreate : this.mapEdit;
-            const marker = mode === 'create' ? this.markerCreate : this.markerEdit;
-
-            if (map && marker) {
-                map.setView([lat, lng], 16);
-                marker.setLatLng([lat, lng]);
-            }
-
-            const addr = result.address || {};
-            this.formData.city = addr.city || addr.town || addr.municipality || addr.county || '';
-            this.formData.district = addr.suburb || addr.neighbourhood || addr.quarter || '';
-            this.formData.province = addr.state || '';
-            this.formData.postal_code = addr.postcode || '';
-            this.formData.full_address = result.display_name;
-
-            this.searchResults = [];
-            this.searchQuery = '';
-        },
-        reverseGeocode(lat, lng) {
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.address) {
-                        const addr = data.address;
-                        this.formData.city = addr.city || addr.town || addr.municipality || addr.county || this.formData.city;
-                        this.formData.district = addr.suburb || addr.neighbourhood || addr.quarter || this.formData.district;
-                        this.formData.province = addr.state || this.formData.province;
-                        this.formData.postal_code = addr.postcode || this.formData.postal_code;
-                        if (!this.formData.full_address) {
-                            this.formData.full_address = data.display_name;
-                        }
-                    }
-                })
-                .catch(() => {});
-        }
-    }">
-        <nav class="flex text-xs text-slate-400 mb-4 items-center gap-1.5 flex-wrap" aria-label="Breadcrumb">
-            <a href="{{ auth()->check() ? url('/?is_from_login=true') : url('/') }}" class="hover:text-cyan-700 transition-colors">Beranda</a>
-            <i class="fa-solid fa-chevron-right text-[8px] text-slate-300"></i>
-            <a href="{{ route('customer.dashboard') }}" class="hover:text-cyan-700 transition-colors">Akun Saya</a>
-            <i class="fa-solid fa-chevron-right text-[8px] text-slate-300"></i>
-            <span class="text-slate-700 font-medium">Buku Alamat Pengiriman</span>
-        </nav>
-
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+    <div class="page-container py-6" x-data="addressManagerComponent()">
+        
+        {{-- Breadcrumbs & Header --}}
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-                <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                    <i class="fa-solid fa-map-location-dot text-cyan-600 text-lg"></i>
-                    Buku Alamat Pengiriman
+                <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
+                    <a href="{{ route('customer.dashboard') }}" class="hover:text-cyan-700 transition-colors">Dashboard</a>
+                    <span>/</span>
+                    <span class="text-slate-800 font-semibold">Buku Alamat</span>
+                </div>
+                <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+                    <i class="fa-solid fa-location-dot text-cyan-600"></i>
+                    Daftar Alamat Pengiriman
                 </h1>
-                <p class="text-xs text-slate-500 mt-0.5">Kelola daftar alamat tujuan dengan titik akurasi GPS dan estimasi ongkir otomatis</p>
+                <p class="text-xs text-slate-500 mt-1">Kelola alamat tujuan belanja Anda dengan data resmi wilayah Indonesia &amp; titik koordinat kurir presisi.</p>
             </div>
-            <button @click="openCreate()"
-                    class="btn-primary h-9.5 px-4 text-xs flex items-center gap-2 bg-cyan-700 hover:bg-cyan-800 rounded-xl shadow-xs cursor-pointer">
-                <i class="fa-solid fa-plus text-xs"></i>
+
+            <button type="button" @click="openCreateModal()"
+                    class="px-4 py-2.5 bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-2 transition-all active:scale-95 cursor-pointer shrink-0">
+                <i class="fa-solid fa-plus"></i>
                 <span>Tambah Alamat Baru</span>
             </button>
         </div>
 
+        {{-- Alerts --}}
         @if(session('success'))
-            <div class="mb-5 flex items-center gap-2.5 px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl text-xs font-semibold">
-                <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+            <div class="mb-6 flex items-center gap-2.5 px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl text-xs font-semibold animate-fade-up">
+                <i class="fa-solid fa-circle-check text-emerald-600 text-sm shrink-0"></i>
                 <span>{{ session('success') }}</span>
             </div>
         @endif
 
         @if($errors->any())
-            <div class="mb-5 p-3.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs space-y-1">
-                @foreach($errors->all() as $error)
-                    <p class="flex items-center gap-1.5"><i class="fa-solid fa-circle-exclamation text-rose-600"></i> {{ $error }}</p>
-                @endforeach
+            <div class="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-900 rounded-xl text-xs font-medium space-y-1 animate-fade-up">
+                <div class="font-bold flex items-center gap-1.5 text-rose-800">
+                    <i class="fa-solid fa-circle-exclamation text-sm"></i> Terjadi Kesalahan:
+                </div>
+                <ul class="list-disc list-inside pl-1 text-[11px] text-rose-700">
+                    @foreach($errors->all() as $err)
+                        <li>{{ $err }}</li>
+                    @endforeach
+                </ul>
             </div>
         @endif
 
-        @if($addresses->count() > 0)
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-                @foreach($addresses as $addr)
-                    <div class="bg-white rounded-xl border {{ $addr->is_default ? 'border-cyan-500 ring-2 ring-cyan-500/20' : 'border-slate-200/80' }} p-5 shadow-card flex flex-col justify-between relative transition-all">
-                        <div>
-                            <div class="flex items-center justify-between gap-2 mb-3">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider {{ $addr->label === 'Kantor' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-slate-100 text-slate-700 border border-slate-200' }}">
-                                        <i class="fa-solid {{ $addr->label === 'Kantor' ? 'fa-building' : 'fa-house' }} text-[9px] mr-1"></i>
-                                        {{ $addr->label }}
+        {{-- Address List Cards --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @forelse($addresses as $addr)
+                <div class="bg-white rounded-2xl border transition-all p-5 flex flex-col justify-between {{ $addr->is_default ? 'border-cyan-500 ring-2 ring-cyan-100 shadow-sm' : 'border-slate-200 hover:border-slate-300 shadow-2xs' }}">
+                    <div>
+                        {{-- Header Badges --}}
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider {{ $addr->label === 'Kantor' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-cyan-50 text-cyan-800 border border-cyan-200' }}">
+                                    {{ $addr->label ?: 'Rumah' }}
+                                </span>
+                                @if($addr->is_default)
+                                    <span class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                                        <i class="fa-solid fa-check text-[9px]"></i> Utama
                                     </span>
-                                    @if($addr->is_default)
-                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-cyan-50 text-cyan-800 border border-cyan-200 flex items-center gap-1">
-                                            <i class="fa-solid fa-check-circle text-[9px] text-cyan-600"></i> Utama
-                                        </span>
-                                    @endif
-                                    @if($addr->latitude && $addr->longitude)
-                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                                            <i class="fa-solid fa-location-crosshairs text-[9px]"></i> Pinpoint GPS
-                                        </span>
-                                    @endif
-                                </div>
-
-                                <div class="flex items-center gap-1">
-                                    <button @click="openEdit({{ $addr->toJson() }}, '{{ route('customer.addresses.update', $addr) }}')"
-                                            class="w-7 h-7 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-cyan-700 flex items-center justify-center text-xs transition-colors cursor-pointer" title="Edit Alamat">
-                                        <i class="fa-solid fa-pen-to-square"></i>
-                                    </button>
-
-                                    @if(!$addr->is_default)
-                                    <form action="{{ route('customer.addresses.destroy', $addr) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus alamat ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="w-7 h-7 rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 flex items-center justify-center text-xs transition-colors cursor-pointer" title="Hapus Alamat">
-                                            <i class="fa-solid fa-trash-can"></i>
-                                        </button>
-                                    </form>
-                                    @endif
-                                </div>
+                                @endif
                             </div>
 
-                            <h3 class="text-sm font-bold text-slate-900 leading-tight">{{ $addr->recipient_name }}</h3>
-                            <p class="text-xs text-slate-500 mt-0.5 font-mono">{{ $addr->phone }}</p>
-
-                            <p class="text-xs text-slate-700 mt-2.5 leading-relaxed whitespace-pre-line">
-                                {{ $addr->full_address }}
-                            </p>
-
-                            @if($addr->district || $addr->city || $addr->province || $addr->postal_code)
-                                <p class="text-[11px] text-slate-500 font-medium mt-1.5 flex items-center gap-1">
-                                    <i class="fa-solid fa-map-pin text-cyan-600 text-[10px]"></i>
-                                    {{ implode(', ', array_filter([$addr->district, $addr->city, $addr->province, $addr->postal_code])) }}
-                                </p>
-                            @endif
-
-                            @if($addr->notes)
-                                <div class="mt-2.5 p-2 bg-slate-50 rounded-lg border border-slate-200/80 text-[11px] text-slate-600 flex items-start gap-1.5">
-                                    <i class="fa-solid fa-circle-info text-cyan-600 text-[10px] mt-0.5 shrink-0"></i>
-                                    <span><strong>Catatan Kurir:</strong> {{ $addr->notes }}</span>
-                                </div>
-                            @endif
-                        </div>
-
-                        <div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
-                            @if(!$addr->is_default)
-                                <form action="{{ route('customer.addresses.set_default', $addr) }}" method="POST">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="text-xs font-semibold text-cyan-700 hover:text-cyan-800 hover:underline flex items-center gap-1 cursor-pointer">
-                                        <i class="fa-regular fa-star text-[10px]"></i> Jadikan Alamat Utama
-                                    </button>
-                                </form>
-                            @else
-                                <span class="text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
-                                    <i class="fa-solid fa-shield-check text-xs"></i> Alamat aktif saat checkout
+                            @if($addr->latitude && $addr->longitude)
+                                <span class="text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md flex items-center gap-1" title="Titik Koordinat Kurir Terpasang">
+                                    <i class="fa-solid fa-location-crosshairs text-cyan-600"></i>
+                                    <span>Pinpoint OK</span>
                                 </span>
                             @endif
                         </div>
-                    </div>
-                @endforeach
-            </div>
-        @else
-            <div class="bg-white rounded-2xl border border-slate-200/80 p-12 text-center shadow-card max-w-lg mx-auto">
-                <div class="w-16 h-16 rounded-full bg-cyan-50 border border-cyan-100 text-cyan-600 flex items-center justify-center mx-auto mb-4 text-2xl">
-                    <i class="fa-solid fa-map-location-dot"></i>
-                </div>
-                <h3 class="text-base font-bold text-slate-800">Belum Ada Alamat Pengiriman</h3>
-                <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                    Simpan alamat rumah atau kantormu agar proses checkout belanjaan lebih cepat, akurat, dan praktis.
-                </p>
-                <button @click="openCreate()" class="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-xs font-semibold shadow-sm transition-all cursor-pointer">
-                    <i class="fa-solid fa-plus"></i>
-                    Tambah Alamat Sekarang
-                </button>
-            </div>
-        @endif
 
-        {{-- Modal Tambah Alamat (Realtime Pinpoint GPS & Autocomplete) --}}
-        <div x-show="showCreateModal" x-cloak
-             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-            <div @click.outside="showCreateModal = false"
-                 x-transition:enter="transition ease-out duration-200"
-                 x-transition:enter-start="opacity-0 scale-95"
-                 x-transition:enter-end="opacity-100 scale-100"
-                 class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200 my-4 max-h-[90vh] overflow-y-auto">
-                <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-map-location-dot text-cyan-600 text-base"></i>
-                        <h3 class="font-bold text-sm sm:text-base text-slate-900">Tambah Alamat Pengiriman Baru</h3>
+                        {{-- Recipient & Phone --}}
+                        <div class="mb-2">
+                            <h3 class="font-extrabold text-sm text-slate-900 leading-snug">{{ $addr->recipient_name }}</h3>
+                            <p class="font-mono text-xs text-slate-500 mt-0.5">{{ $addr->phone }}</p>
+                        </div>
+
+                        {{-- Address Text --}}
+                        <p class="text-xs text-slate-700 leading-relaxed mt-2">
+                            {{ $addr->full_address }}
+                        </p>
+                        <p class="text-[11px] text-slate-500 font-medium mt-1">
+                            @php
+                                $regionParts = array_filter([
+                                    $addr->village ? 'Kel. ' . $addr->village : null,
+                                    $addr->district ? 'Kec. ' . $addr->district : null,
+                                    $addr->city,
+                                    $addr->province,
+                                    $addr->postal_code
+                                ]);
+                            @endphp
+                            {{ implode(', ', $regionParts) }}
+                        </p>
+
+                        {{-- Courier Notes / Patokan --}}
+                        @if($addr->notes)
+                            <div class="mt-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] text-slate-600 flex items-start gap-2">
+                                <i class="fa-solid fa-map-pin text-cyan-600 text-xs mt-0.5 shrink-0"></i>
+                                <span><strong class="text-slate-800">Patokan:</strong> {{ $addr->notes }}</span>
+                            </div>
+                        @endif
                     </div>
-                    <button @click="showCreateModal = false" class="text-slate-400 hover:text-slate-600 cursor-pointer">
-                        <i class="fa-solid fa-xmark text-base"></i>
+
+                    {{-- Actions Footer --}}
+                    <div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap text-xs">
+                        <div>
+                            @if(!$addr->is_default)
+                                <form action="{{ route('customer.addresses.set_default', $addr) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="font-semibold text-cyan-700 hover:text-cyan-800 hover:underline cursor-pointer text-xs">
+                                        Jadikan Alamat Utama
+                                    </button>
+                                </form>
+                            @else
+                                <span class="text-[11px] font-semibold text-slate-400">Alamat Pengiriman Utama</span>
+                            @endif
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button type="button" @click="openEditModal({{ $addr->toJson() }}, '{{ route('customer.addresses.update', $addr) }}')"
+                                    class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-cyan-50 hover:text-cyan-800 text-slate-700 font-semibold transition-colors flex items-center gap-1 cursor-pointer">
+                                <i class="fa-solid fa-pen text-[10px]"></i> Edit
+                            </button>
+
+                            @if(!$addr->is_default || $addresses->count() === 1)
+                                <form action="{{ route('customer.addresses.destroy', $addr) }}" method="POST"
+                                      onsubmit="return confirm('Apakah Anda yakin ingin menghapus alamat ini?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer" title="Hapus Alamat">
+                                        <i class="fa-regular fa-trash-can text-xs"></i>
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="col-span-full py-16 text-center bg-white rounded-2xl border border-slate-200 shadow-2xs p-8">
+                    <div class="w-14 h-14 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center mx-auto mb-3 text-xl">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-sm">Belum Ada Alamat Tersimpan</h3>
+                    <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Tambahkan alamat pengiriman Anda untuk memudahkan proses checkout dan kalkulasi ongkir ekspedisi.</p>
+                    <button type="button" @click="openCreateModal()" class="mt-4 px-5 py-2.5 rounded-xl bg-cyan-700 text-white font-bold text-xs hover:bg-cyan-800 shadow-xs transition-colors cursor-pointer">
+                        + Tambah Alamat Sekarang
                     </button>
                 </div>
-
-                {{-- Interactive Map Pinpoint Section --}}
-                <div class="mt-4 space-y-3">
-                    <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
-                        <div class="relative flex-1">
-                            <input type="text" x-model="searchQuery"
-                                   @input.debounce.500ms="searchLocation(searchQuery)"
-                                   placeholder="Cari jalan, kelurahan, kecamatan, atau kota..."
-                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 pl-8 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-                            <div x-show="isSearching" class="absolute right-3 top-2.5 text-cyan-600 text-xs">
-                                <i class="fa-solid fa-circle-notch fa-spin"></i>
-                            </div>
-
-                            {{-- Autocomplete Dropdown --}}
-                            <div x-show="searchResults.length > 0" x-cloak
-                                 class="absolute z-20 top-10 left-0 right-0 bg-white rounded-xl shadow-xl border border-slate-200 divide-y divide-slate-100 max-h-48 overflow-y-auto text-xs">
-                                <template x-for="res in searchResults" :key="res.place_id">
-                                    <button type="button" @click="selectLocation(res, 'create')"
-                                            class="w-full p-2.5 text-left hover:bg-cyan-50/70 flex items-start gap-2 cursor-pointer transition-colors">
-                                        <i class="fa-solid fa-location-dot text-cyan-600 text-xs mt-0.5 shrink-0"></i>
-                                        <span class="truncate" x-text="res.display_name"></span>
-                                    </button>
-                                </template>
-                            </div>
-                        </div>
-
-                        <button type="button" @click="getCurrentLocation('create')"
-                                :disabled="isLocating"
-                                class="h-9 px-3.5 bg-cyan-50 text-cyan-800 hover:bg-cyan-100 rounded-xl border border-cyan-200 text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0 cursor-pointer transition-all">
-                            <i class="fa-solid fa-location-crosshairs text-cyan-700" :class="isLocating ? 'animate-spin' : ''"></i>
-                            <span x-text="isLocating ? 'Mendeteksi...' : 'Lokasi Saya'"></span>
-                        </button>
-                    </div>
-
-                    {{-- Map Container --}}
-                    <div id="create-map" class="w-full h-44 rounded-xl border border-slate-200 overflow-hidden shadow-inner"></div>
-                    <p class="text-[11px] text-slate-500 italic">
-                        <i class="fa-solid fa-circle-info text-cyan-600 text-[10px] mr-1"></i>
-                        Geser pin merah di peta untuk menentukan titik koordinat rumah/kantor secara presisi.
-                    </p>
-                </div>
-
-                <form action="{{ route('customer.addresses.store') }}" method="POST" class="mt-4 space-y-3.5 text-xs">
-                    @csrf
-                    <input type="hidden" name="latitude" x-model="formData.latitude">
-                    <input type="hidden" name="longitude" x-model="formData.longitude">
-
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Label Alamat</label>
-                            <select name="label" x-model="formData.label" class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                                <option value="Rumah">Rumah</option>
-                                <option value="Kantor">Kantor</option>
-                                <option value="Apartemen">Apartemen</option>
-                                <option value="Kos">Kos</option>
-                                <option value="Toko">Toko</option>
-                                <option value="Lainnya">Lainnya</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Nama Penerima <span class="text-rose-500">*</span></label>
-                            <input type="text" name="recipient_name" x-model="formData.recipient_name" required placeholder="Nama Lengkap"
-                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Nomor Telepon/HP <span class="text-rose-500">*</span></label>
-                            <input type="text" name="phone" x-model="formData.phone" required placeholder="08123456789"
-                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Provinsi <span class="text-rose-500">*</span></label>
-                            <select name="province" x-model="formData.province" @change="onProvinceChange('create')"
-                                    class="w-full h-9 rounded-xl border border-slate-300 text-xs px-2.5 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                                <template x-for="prov in Object.keys(provincesData)" :key="prov">
-                                    <option :value="prov" x-text="prov" :selected="formData.province === prov"></option>
-                                </template>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Kota/Kabupaten <span class="text-rose-500">*</span></label>
-                            <select name="city" x-model="formData.city" @change="onCityChange('create')"
-                                    class="w-full h-9 rounded-xl border border-slate-300 text-xs px-2.5 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                                <template x-for="c in getAvailableCities()" :key="c">
-                                    <option :value="c" x-text="c" :selected="formData.city === c"></option>
-                                </template>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Kecamatan</label>
-                            <input type="text" name="district" x-model="formData.district" placeholder="Contoh: Kebayoran Baru"
-                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Kode Pos</label>
-                            <input type="text" name="postal_code" x-model="formData.postal_code" placeholder="12190"
-                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Alamat Lengkap (Nama Jalan, No. Rumah, RT/RW) <span class="text-rose-500">*</span></label>
-                        <textarea name="full_address" x-model="formData.full_address" rows="2" required placeholder="Jl. Sudirman No. 45, RT 02/RW 03..."
-                                  class="w-full rounded-xl border border-slate-300 text-xs p-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500"></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Catatan Patokan untuk Kurir (Opsional)</label>
-                        <input type="text" name="notes" x-model="formData.notes" placeholder="Contoh: Rumah pagar hitam samping minimarket, titipkan ke satpam"
-                               class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                    </div>
-
-                    <label class="flex items-center gap-2 pt-1 cursor-pointer">
-                        <input type="checkbox" name="is_default" value="1" x-model="formData.is_default" class="rounded border-slate-300 text-cyan-600 focus:ring-cyan-500">
-                        <span class="text-slate-700 font-medium">Jadikan sebagai alamat utama (default checkout)</span>
-                    </label>
-
-                    <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
-                        <button type="button" @click="showCreateModal = false" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium cursor-pointer">
-                            Batal
-                        </button>
-                        <button type="submit" class="px-5 py-2 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold shadow-xs cursor-pointer">
-                            Simpan Alamat
-                        </button>
-                    </div>
-                </form>
-            </div>
+            @endforelse
         </div>
 
-        {{-- Modal Edit Alamat --}}
-        <div x-show="showEditModal" x-cloak
-             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-            <div @click.outside="showEditModal = false"
+        {{-- MODAL COMPREHENSIVE ADDRESS PICKER (ADD & EDIT) --}}
+        <div x-show="showModal" x-cloak
+             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div @click.outside="showModal = false"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 scale-95"
                  x-transition:enter-end="opacity-100 scale-100"
-                 class="bg-white rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200 my-4 max-h-[90vh] overflow-y-auto">
-                <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-pen-to-square text-cyan-600 text-base"></i>
-                        <h3 class="font-bold text-sm sm:text-base text-slate-900">Ubah Alamat Pengiriman</h3>
-                    </div>
-                    <button @click="showEditModal = false" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+                 class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border border-slate-200 text-xs max-h-[92vh] flex flex-col">
+                
+                {{-- Modal Header --}}
+                <div class="flex items-center justify-between pb-3.5 border-b border-slate-100 shrink-0">
+                    <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-map-location-dot text-cyan-600"></i>
+                        <span x-text="isEdit ? 'Edit Alamat Pengiriman' : 'Tambah Alamat Pengiriman Baru'"></span>
+                    </h3>
+                    <button @click="showModal = false" class="text-slate-400 hover:text-slate-600 w-8 h-8 rounded-xl flex items-center justify-center hover:bg-slate-100 transition-colors cursor-pointer">
                         <i class="fa-solid fa-xmark text-base"></i>
                     </button>
                 </div>
 
-                {{-- Map Pinpoint for Edit --}}
-                <div class="mt-4 space-y-3">
-                    <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
-                        <div class="relative flex-1">
-                            <input type="text" x-model="searchQuery"
-                                   @input.debounce.500ms="searchLocation(searchQuery)"
-                                   placeholder="Cari jalan, kelurahan, kecamatan, atau kota..."
-                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 pl-8 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-                            <div x-show="isSearching" class="absolute right-3 top-2.5 text-cyan-600 text-xs">
-                                <i class="fa-solid fa-circle-notch fa-spin"></i>
-                            </div>
+                {{-- Modal Body Form (Scrollable) --}}
+                <form :action="formData.actionUrl" method="POST" class="mt-4 space-y-4 overflow-y-auto pr-1 flex-1 scrollbar-thin">
+                    @csrf
+                    <template x-if="isEdit">
+                        <input type="hidden" name="_method" value="PUT">
+                    </template>
 
+                    {{-- 1. Leaflet Interactive Map Pinpoint Section --}}
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                                <i class="fa-solid fa-map-pin text-rose-500"></i>
+                                <span>Titik Lokasi Pengiriman (Pinpoint Peta):</span>
+                            </label>
+                            <button type="button" @click="getCurrentLocation()" :disabled="isLocating"
+                                    class="px-2.5 py-1 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-800 font-bold text-[11px] border border-cyan-200 flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50">
+                                <i class="fa-solid fa-crosshairs text-cyan-600 text-xs" :class="isLocating ? 'animate-spin' : ''"></i>
+                                <span x-text="isLocating ? 'Mendeteksi...' : 'Lokasi Saat Ini (GPS)'"></span>
+                            </button>
+                        </div>
+
+                        {{-- Search on Map Input --}}
+                        <div class="relative">
+                            <input type="text" x-model="searchMapQuery" @input.debounce.400ms="searchMapLocation()"
+                                   placeholder="Ketik nama jalan, gedung, atau perumahan untuk mencari di peta..."
+                                   class="w-full h-8 pl-8 pr-3 rounded-xl border border-slate-300 text-[11px] bg-slate-50 focus:bg-white focus:border-cyan-600">
+                            <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-2.5 top-2.5 text-[10px]"></i>
+
+                            {{-- Autocomplete Dropdown Search Results --}}
                             <div x-show="searchResults.length > 0" x-cloak
-                                 class="absolute z-20 top-10 left-0 right-0 bg-white rounded-xl shadow-xl border border-slate-200 divide-y divide-slate-100 max-h-48 overflow-y-auto text-xs">
+                                 class="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden divide-y divide-slate-100 max-h-48 overflow-y-auto text-[11px]">
                                 <template x-for="res in searchResults" :key="res.place_id">
-                                    <button type="button" @click="selectLocation(res, 'edit')"
-                                            class="w-full p-2.5 text-left hover:bg-cyan-50/70 flex items-start gap-2 cursor-pointer transition-colors">
+                                    <button type="button" @click="selectSearchResult(res)"
+                                            class="w-full text-left p-2.5 hover:bg-cyan-50/80 transition-colors flex items-start gap-2 cursor-pointer">
                                         <i class="fa-solid fa-location-dot text-cyan-600 text-xs mt-0.5 shrink-0"></i>
-                                        <span class="truncate" x-text="res.display_name"></span>
+                                        <span class="text-slate-800 line-clamp-2" x-text="res.display_name"></span>
                                     </button>
                                 </template>
                             </div>
                         </div>
 
-                        <button type="button" @click="getCurrentLocation('edit')"
-                                :disabled="isLocating"
-                                class="h-9 px-3.5 bg-cyan-50 text-cyan-800 hover:bg-cyan-100 rounded-xl border border-cyan-200 text-xs font-semibold flex items-center justify-center gap-1.5 shrink-0 cursor-pointer transition-all">
-                            <i class="fa-solid fa-location-crosshairs text-cyan-700" :class="isLocating ? 'animate-spin' : ''"></i>
-                            <span x-text="isLocating ? 'Mendeteksi...' : 'Lokasi Saya'"></span>
-                        </button>
+                        {{-- Leaflet Map Container --}}
+                        <div class="relative rounded-2xl overflow-hidden border border-slate-300 shadow-2xs">
+                            <div id="address-map-container" class="w-full h-44 sm:h-52 bg-slate-100 z-10"></div>
+                            <div class="absolute bottom-2 left-2 right-2 z-20 bg-slate-900/80 backdrop-blur-xs text-white p-2 rounded-xl text-[10px] flex items-center justify-between">
+                                <span class="truncate">Geser pin untuk menentukan titik kurir presisi</span>
+                                <span class="font-mono text-cyan-300 shrink-0" x-text="formData.latitude + ', ' + formData.longitude"></span>
+                            </div>
+                        </div>
                     </div>
 
-                    <div id="edit-map" class="w-full h-44 rounded-xl border border-slate-200 overflow-hidden shadow-inner"></div>
-                </div>
-
-                <form :action="formData.actionUrl" method="POST" class="mt-4 space-y-3.5 text-xs">
-                    @csrf
-                    @method('PUT')
+                    {{-- Hidden Lat & Lng --}}
                     <input type="hidden" name="latitude" x-model="formData.latitude">
                     <input type="hidden" name="longitude" x-model="formData.longitude">
 
+                    {{-- 2. Label, Recipient & Phone --}}
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Label Alamat</label>
-                            <select name="label" x-model="formData.label" class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                            <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Label Alamat <span class="text-rose-500">*</span></label>
+                            <select name="label" x-model="formData.label" required class="input text-xs">
                                 <option value="Rumah">Rumah</option>
                                 <option value="Kantor">Kantor</option>
                                 <option value="Apartemen">Apartemen</option>
-                                <option value="Kos">Kos</option>
-                                <option value="Toko">Toko</option>
+                                <option value="Kost">Kost</option>
                                 <option value="Lainnya">Lainnya</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Nama Penerima <span class="text-rose-500">*</span></label>
-                            <input type="text" name="recipient_name" x-model="formData.recipient_name" required
-                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                            <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Nama Penerima <span class="text-rose-500">*</span></label>
+                            <input type="text" name="recipient_name" x-model="formData.recipient_name" required placeholder="Contoh: Budi Santoso" class="input text-xs">
                         </div>
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Nomor Telepon/HP <span class="text-rose-500">*</span></label>
-                            <input type="text" name="phone" x-model="formData.phone" required
-                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                            <label class="block font-semibold text-slate-700 mb-1 text-[11px]">No. WhatsApp / HP <span class="text-rose-500">*</span></label>
+                            <input type="text" name="phone" x-model="formData.phone" required placeholder="081234567890" class="input text-xs font-mono">
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Provinsi <span class="text-rose-500">*</span></label>
-                            <select name="province" x-model="formData.province" @change="onProvinceChange('edit')"
-                                    class="w-full h-9 rounded-xl border border-slate-300 text-xs px-2.5 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                                <template x-for="prov in Object.keys(provincesData)" :key="prov">
-                                    <option :value="prov" x-text="prov" :selected="formData.province === prov"></option>
-                                </template>
-                            </select>
+                    {{-- 3. Cascading Regions (Provinsi -> Kota -> Kecamatan -> Kelurahan -> Kode Pos) --}}
+                    <div class="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-200 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                                <i class="fa-solid fa-landmark text-cyan-700"></i>
+                                <span>Wilayah Administratif Indonesia (Resmi Kemendagri / BPS):</span>
+                            </span>
+                            <span class="text-[10px] text-cyan-700 font-semibold" x-show="isLoadingRegions" x-cloak>
+                                <i class="fa-solid fa-spinner animate-spin"></i> Memuat wilayah...
+                            </span>
                         </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Kota/Kabupaten <span class="text-rose-500">*</span></label>
-                            <select name="city" x-model="formData.city" @change="onCityChange('edit')"
-                                    class="w-full h-9 rounded-xl border border-slate-300 text-xs px-2.5 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                                <template x-for="c in getAvailableCities()" :key="c">
-                                    <option :value="c" x-text="c" :selected="formData.city === c"></option>
-                                </template>
-                            </select>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {{-- Provinsi --}}
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Provinsi <span class="text-rose-500">*</span></label>
+                                <select name="province" x-model="formData.province" @change="onProvinceSelect()" required class="input text-xs bg-white">
+                                    <option value="">-- Pilih Provinsi --</option>
+                                    <template x-for="p in provincesList" :key="p.id">
+                                        <option :value="p.name" :selected="p.name === formData.province" x-text="p.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            {{-- Kota / Kabupaten --}}
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Kota / Kabupaten <span class="text-rose-500">*</span></label>
+                                <select name="city" x-model="formData.city" @change="onCitySelect()" required class="input text-xs bg-white" :disabled="regenciesList.length === 0">
+                                    <option value="">-- Pilih Kota / Kabupaten --</option>
+                                    <template x-for="r in regenciesList" :key="r.id">
+                                        <option :value="r.name" :selected="r.name === formData.city" x-text="r.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            {{-- Kecamatan --}}
+                            <div>
+                                <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Kecamatan</label>
+                                <select name="district" x-model="formData.district" @change="onDistrictSelect()" class="input text-xs bg-white" :disabled="districtsList.length === 0">
+                                    <option value="">-- Pilih Kecamatan --</option>
+                                    <template x-for="d in districtsList" :key="d.id">
+                                        <option :value="d.name" :selected="d.name === formData.district" x-text="d.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            {{-- Kelurahan / Desa & Kode Pos --}}
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Kelurahan / Desa</label>
+                                    <select name="village" x-model="formData.village" @change="onVillageSelect()" class="input text-xs bg-white" :disabled="villagesList.length === 0">
+                                        <option value="">-- Pilih Desa --</option>
+                                        <template x-for="v in villagesList" :key="v.id">
+                                            <option :value="v.name" :selected="v.name === formData.village" x-text="v.name"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Kode Pos</label>
+                                    <input type="text" name="postal_code" x-model="formData.postal_code" placeholder="10110" class="input text-xs font-mono bg-white">
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Kecamatan</label>
-                            <input type="text" name="district" x-model="formData.district"
-                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                        </div>
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Kode Pos</label>
-                            <input type="text" name="postal_code" x-model="formData.postal_code"
-                                   class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
-                        </div>
+                    </div>
+
+                    {{-- 4. Alamat Lengkap & Patokan --}}
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Alamat Jalan Lengkap (Nama Jalan, No. Rumah, RT/RW, Blok) <span class="text-rose-500">*</span></label>
+                        <textarea name="full_address" x-model="formData.full_address" required rows="2"
+                                  placeholder="Contoh: Jl. Sudirman No. 45, RT 02/RW 05, Kelurahan Gambir"
+                                  class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500"></textarea>
                     </div>
 
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Alamat Lengkap <span class="text-rose-500">*</span></label>
-                        <textarea name="full_address" x-model="formData.full_address" rows="2" required
-                                  class="w-full rounded-xl border border-slate-300 text-xs p-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500"></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Catatan Patokan untuk Kurir</label>
+                        <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Patokan Lokasi / Catatan Khusus Kurir (Opsional)</label>
                         <input type="text" name="notes" x-model="formData.notes"
-                               class="w-full h-9 rounded-xl border border-slate-300 text-xs px-3 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500">
+                               placeholder="Contoh: Pagar hitam depan Alfamart, titip di pos satpam jika tidak ada orang"
+                               class="input text-xs">
                     </div>
 
-                    <label class="flex items-center gap-2 pt-1 cursor-pointer">
-                        <input type="checkbox" name="is_default" value="1" x-model="formData.is_default" class="rounded border-slate-300 text-cyan-600 focus:ring-cyan-500">
-                        <span class="text-slate-700 font-medium">Jadikan sebagai alamat utama (default checkout)</span>
-                    </label>
+                    {{-- 5. Set Default Toggle --}}
+                    <div class="pt-2 flex items-center gap-2">
+                        <input type="checkbox" id="is_default_chk" name="is_default" value="1" x-model="formData.is_default"
+                               class="w-4 h-4 text-cyan-600 rounded border-slate-300 focus:ring-cyan-500 cursor-pointer">
+                        <label for="is_default_chk" class="text-xs font-semibold text-slate-800 cursor-pointer">
+                            Jadikan sebagai alamat pengiriman utama
+                        </label>
+                    </div>
 
-                    <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
-                        <button type="button" @click="showEditModal = false" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium cursor-pointer">
+                    {{-- Modal Footer Actions --}}
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5 shrink-0">
+                        <button type="button" @click="showModal = false" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium text-xs cursor-pointer transition-colors">
                             Batal
                         </button>
-                        <button type="submit" class="px-5 py-2 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold shadow-xs cursor-pointer">
-                            Perbarui Alamat
+                        <button type="submit" class="px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shadow-xs cursor-pointer transition-all active:scale-95">
+                            <span x-text="isEdit ? 'Simpan Perubahan' : 'Simpan Alamat'"></span>
                         </button>
                     </div>
                 </form>
             </div>
         </div>
+
     </div>
+
+    @push('scripts')
+    <script>
+        function addressManagerComponent() {
+            return {
+                showModal: false,
+                isEdit: false,
+                isLocating: false,
+                isLoadingRegions: false,
+                map: null,
+                marker: null,
+                searchMapQuery: '',
+                searchResults: [],
+                
+                provincesList: [],
+                regenciesList: [],
+                districtsList: [],
+                villagesList: [],
+
+                formData: {
+                    id: null,
+                    label: 'Rumah',
+                    recipient_name: '',
+                    phone: '',
+                    full_address: '',
+                    province: 'DKI Jakarta',
+                    city: 'Jakarta Pusat',
+                    district: '',
+                    village: '',
+                    postal_code: '',
+                    latitude: '-6.2088',
+                    longitude: '106.8456',
+                    notes: '',
+                    is_default: false,
+                    actionUrl: ''
+                },
+
+                async init() {
+                    await this.loadProvinces();
+                },
+
+                async loadProvinces() {
+                    try {
+                        const res = await fetch('{{ route('api.regions.provinces') }}');
+                        const json = await res.json();
+                        if (json.success && Array.isArray(json.data)) {
+                            this.provincesList = json.data;
+                        }
+                    } catch (e) {
+                        console.error('Error loading provinces:', e);
+                    }
+                },
+
+                async onProvinceSelect() {
+                    const prov = this.provincesList.find(p => p.name === this.formData.province);
+                    this.regenciesList = [];
+                    this.districtsList = [];
+                    this.villagesList = [];
+                    this.formData.city = '';
+                    this.formData.district = '';
+                    this.formData.village = '';
+
+                    if (!prov) return;
+
+                    this.isLoadingRegions = true;
+                    try {
+                        const res = await fetch(`{{ url('/api/regions/regencies') }}/${prov.id}`);
+                        const json = await res.json();
+                        if (json.success && Array.isArray(json.data)) {
+                            this.regenciesList = json.data;
+                            if (this.regenciesList.length > 0) {
+                                this.formData.city = this.regenciesList[0].name;
+                                await this.onCitySelect();
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error loading regencies:', e);
+                    } finally {
+                        this.isLoadingRegions = false;
+                    }
+                },
+
+                async onCitySelect() {
+                    const reg = this.regenciesList.find(r => r.name === this.formData.city);
+                    this.districtsList = [];
+                    this.villagesList = [];
+                    this.formData.district = '';
+                    this.formData.village = '';
+
+                    if (!reg) return;
+
+                    this.isLoadingRegions = true;
+                    try {
+                        const res = await fetch(`{{ url('/api/regions/districts') }}/${reg.id}`);
+                        const json = await res.json();
+                        if (json.success && Array.isArray(json.data)) {
+                            this.districtsList = json.data;
+                        }
+                    } catch (e) {
+                        console.error('Error loading districts:', e);
+                    } finally {
+                        this.isLoadingRegions = false;
+                    }
+                },
+
+                async onDistrictSelect() {
+                    const dist = this.districtsList.find(d => d.name === this.formData.district);
+                    this.villagesList = [];
+                    this.formData.village = '';
+
+                    if (!dist) return;
+
+                    this.isLoadingRegions = true;
+                    try {
+                        const res = await fetch(`{{ url('/api/regions/villages') }}/${dist.id}`);
+                        const json = await res.json();
+                        if (json.success && Array.isArray(json.data)) {
+                            this.villagesList = json.data;
+                        }
+                    } catch (e) {
+                        console.error('Error loading villages:', e);
+                    } finally {
+                        this.isLoadingRegions = false;
+                    }
+                },
+
+                onVillageSelect() {
+                    // Village selected
+                },
+
+                openCreateModal() {
+                    this.isEdit = false;
+                    this.formData = {
+                        id: null,
+                        label: 'Rumah',
+                        recipient_name: '{{ auth()->user()->name }}',
+                        phone: '{{ auth()->user()->phone ?? '' }}',
+                        full_address: '',
+                        province: 'DKI Jakarta',
+                        city: 'Jakarta Pusat',
+                        district: '',
+                        village: '',
+                        postal_code: '10110',
+                        latitude: '-6.2088',
+                        longitude: '106.8456',
+                        notes: '',
+                        is_default: {{ $addresses->count() === 0 ? 'true' : 'false' }},
+                        actionUrl: '{{ route('customer.addresses.store') }}'
+                    };
+                    this.showModal = true;
+                    this.onProvinceSelect();
+                    this.$nextTick(() => {
+                        this.initLeafletMap();
+                    });
+                },
+
+                async openEditModal(addr, actionUrl) {
+                    this.isEdit = true;
+                    this.formData = {
+                        id: addr.id,
+                        label: addr.label || 'Rumah',
+                        recipient_name: addr.recipient_name,
+                        phone: addr.phone,
+                        full_address: addr.full_address,
+                        province: addr.province || 'DKI Jakarta',
+                        city: addr.city || 'Jakarta Pusat',
+                        district: addr.district || '',
+                        village: addr.village || '',
+                        postal_code: addr.postal_code || '',
+                        latitude: addr.latitude || '-6.2088',
+                        longitude: addr.longitude || '106.8456',
+                        notes: addr.notes || '',
+                        is_default: Boolean(addr.is_default),
+                        actionUrl: actionUrl
+                    };
+                    this.showModal = true;
+
+                    // Load cascade options for existing values
+                    const prov = this.provincesList.find(p => p.name === this.formData.province);
+                    if (prov) {
+                        const resReg = await fetch(`{{ url('/api/regions/regencies') }}/${prov.id}`);
+                        const jsonReg = await resReg.json();
+                        this.regenciesList = jsonReg.data || [];
+
+                        const reg = this.regenciesList.find(r => r.name === this.formData.city);
+                        if (reg) {
+                            const resDist = await fetch(`{{ url('/api/regions/districts') }}/${reg.id}`);
+                            const jsonDist = await resDist.json();
+                            this.districtsList = jsonDist.data || [];
+
+                            const dist = this.districtsList.find(d => d.name === this.formData.district);
+                            if (dist) {
+                                const resVil = await fetch(`{{ url('/api/regions/villages') }}/${dist.id}`);
+                                const jsonVil = await resVil.json();
+                                this.villagesList = jsonVil.data || [];
+                            }
+                        }
+                    }
+
+                    this.$nextTick(() => {
+                        this.initLeafletMap();
+                    });
+                },
+
+                initLeafletMap() {
+                    const lat = parseFloat(this.formData.latitude) || -6.2088;
+                    const lng = parseFloat(this.formData.longitude) || 106.8456;
+                    const container = document.getElementById('address-map-container');
+
+                    if (!container) return;
+
+                    if (this.map) {
+                        this.map.remove();
+                    }
+
+                    this.map = L.map('address-map-container').setView([lat, lng], 15);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(this.map);
+
+                    this.marker = L.marker([lat, lng], { draggable: true }).addTo(this.map);
+
+                    this.marker.on('dragend', (e) => {
+                        const pos = e.target.getLatLng();
+                        this.formData.latitude = pos.lat.toFixed(6);
+                        this.formData.longitude = pos.lng.toFixed(6);
+                        this.reverseGeocode(pos.lat, pos.lng);
+                    });
+
+                    this.map.on('click', (e) => {
+                        const pos = e.latlng;
+                        this.formData.latitude = pos.lat.toFixed(6);
+                        this.formData.longitude = pos.lng.toFixed(6);
+                        this.marker.setLatLng(pos);
+                        this.reverseGeocode(pos.lat, pos.lng);
+                    });
+
+                    // Force redraw in modal
+                    setTimeout(() => {
+                        if (this.map) this.map.invalidateSize();
+                    }, 250);
+                },
+
+                getCurrentLocation() {
+                    if (!navigator.geolocation) {
+                        alert('Browser Anda tidak mendukung Geolocation.');
+                        return;
+                    }
+                    this.isLocating = true;
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            this.isLocating = false;
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            this.formData.latitude = lat.toFixed(6);
+                            this.formData.longitude = lng.toFixed(6);
+
+                            if (this.map && this.marker) {
+                                this.map.setView([lat, lng], 16);
+                                this.marker.setLatLng([lat, lng]);
+                            }
+                            this.reverseGeocode(lat, lng);
+                        },
+                        (error) => {
+                            this.isLocating = false;
+                            alert('Gagal mendeteksi lokasi: ' + error.message);
+                        },
+                        { enableHighAccuracy: true, timeout: 10000 }
+                    );
+                },
+
+                async searchMapLocation() {
+                    const q = this.searchMapQuery ? this.searchMapQuery.trim() : '';
+                    if (q.length < 3) {
+                        this.searchResults = [];
+                        return;
+                    }
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q + ', Indonesia')}&addressdetails=1&limit=5`);
+                        const data = await res.json();
+                        this.searchResults = Array.isArray(data) ? data : [];
+                    } catch (e) {
+                        this.searchResults = [];
+                    }
+                },
+
+                selectSearchResult(res) {
+                    const lat = parseFloat(res.lat);
+                    const lng = parseFloat(res.lon);
+                    this.formData.latitude = lat.toFixed(6);
+                    this.formData.longitude = lng.toFixed(6);
+
+                    if (this.map && this.marker) {
+                        this.map.setView([lat, lng], 16);
+                        this.marker.setLatLng([lat, lng]);
+                    }
+
+                    this.searchResults = [];
+                    this.searchMapQuery = '';
+                    this.reverseGeocode(lat, lng);
+                },
+
+                async reverseGeocode(lat, lng) {
+                    try {
+                        const res = await fetch(`{{ route('api.regions.reverse_geocode') }}?lat=${lat}&lng=${lng}`);
+                        const json = await res.json();
+                        if (json.success && json.data) {
+                            const d = json.data;
+                            if (d.street && !this.formData.full_address) {
+                                this.formData.full_address = d.street;
+                            } else if (d.display_name && !this.formData.full_address) {
+                                this.formData.full_address = d.display_name;
+                            }
+                            if (d.postal_code) this.formData.postal_code = d.postal_code;
+                        }
+                    } catch (e) {
+                        console.error('Reverse geocode error:', e);
+                    }
+                }
+            };
+        }
+    </script>
+    @endpush
 </x-app-layout>

@@ -20,6 +20,7 @@ class UserAddress extends Model
         'full_address',
         'city',
         'district',
+        'village',
         'province',
         'postal_code',
         'latitude',
@@ -34,7 +35,22 @@ class UserAddress extends Model
 
     protected $appends = [
         'obfuscated_id',
+        'formatted_address_line',
     ];
+
+    public function getFormattedAddressLineAttribute(): string
+    {
+        $parts = array_filter([
+            $this->full_address,
+            $this->village ? 'Kel. ' . $this->village : null,
+            $this->district ? 'Kec. ' . $this->district : null,
+            $this->city,
+            $this->province,
+            $this->postal_code,
+        ]);
+
+        return implode(', ', $parts);
+    }
 
     public function user(): BelongsTo
     {

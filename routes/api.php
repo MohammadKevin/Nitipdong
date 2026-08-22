@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\SystemConfigController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,13 @@ Route::prefix('v1')->group(function () {
 
     // 0. App System Status & Maintenance Mode
     Route::get('/system/status', [SystemConfigController::class, 'status']);
+
+    // 0.1 Indonesian Administrative Regions & Geocoding
+    Route::get('/regions/provinces', [RegionController::class, 'provinces']);
+    Route::get('/regions/regencies/{province_id}', [RegionController::class, 'regencies']);
+    Route::get('/regions/districts/{regency_id}', [RegionController::class, 'districts']);
+    Route::get('/regions/villages/{district_id}', [RegionController::class, 'villages']);
+    Route::get('/regions/reverse-geocode', [RegionController::class, 'reverseGeocode']);
 
     // 1. Authentication & OTP Verification
     Route::post('/auth/login', [AuthController::class, 'login']);
