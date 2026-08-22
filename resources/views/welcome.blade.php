@@ -316,7 +316,7 @@
                 </a>
             </div>
 
-            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 2xl:grid-cols-12 gap-3">
                 @foreach($categories as $category)
                 <a href="{{ route('products.index', ['category' => $category->slug]) }}"
                    class="flex flex-col items-center text-center p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all group">
@@ -580,7 +580,7 @@
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 translate-y-2"
              x-transition:enter-end="opacity-100 translate-y-0"
-             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6 2xl:grid-cols-8 gap-3.5">
             @forelse($products as $prod)
             <div class="bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-card hover:shadow-lg transition-all duration-200 flex flex-col justify-between group relative">
                 {{-- Wishlist Heart Button Top Right --}}
@@ -699,7 +699,7 @@
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 translate-y-2"
              x-transition:enter-end="opacity-100 translate-y-0"
-             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5"
+             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6 2xl:grid-cols-8 gap-3.5"
              x-cloak>
             @forelse($topProducts as $index => $prod)
             <div class="bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-card hover:shadow-lg transition-all duration-200 flex flex-col justify-between group relative">
@@ -836,7 +836,7 @@
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 translate-y-2"
              x-transition:enter-end="opacity-100 translate-y-0"
-             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5"
+             class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6 2xl:grid-cols-8 gap-3.5"
              x-cloak>
             @forelse($officialProducts as $prod)
             <div class="bg-white rounded-xl border border-cyan-100 overflow-hidden shadow-card hover:shadow-lg transition-all duration-200 flex flex-col justify-between group relative">

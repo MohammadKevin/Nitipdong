@@ -64,7 +64,7 @@
             </a>
 
             {{-- Center Search Bar with Live Suggestions --}}
-            <div class="flex-1 max-w-xl hidden md:flex flex-col justify-center relative" @click.outside="showSuggestions = false">
+            <div class="flex-1 max-w-3xl hidden md:flex flex-col justify-center relative" @click.outside="showSuggestions = false">
                 <form action="{{ url('/products') }}" method="GET" class="w-full flex items-center relative">
                     <div class="relative w-full flex items-center">
                         <input type="text" name="q" x-model="searchQuery"
