@@ -32,9 +32,10 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: 📦 Install Flutter Dependencies
+      - name: ⚙️ Setup Android Platform Scaffold & Dependencies
         run: |
           cd nitipdong_mobile
+          flutter create --platforms=android --org=com.nitipdong .
           flutter pub get
 
       - name: 🔨 Build Android Release APK
