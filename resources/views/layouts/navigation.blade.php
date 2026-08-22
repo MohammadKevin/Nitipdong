@@ -169,8 +169,8 @@
 
             <div class="flex items-center gap-1.5 sm:gap-2">
 
-                {{-- Direct Download App Link in Navbar (No Popup) --}}
-                <a href="{{ route('app.download') }}" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cyan-200 bg-cyan-50/70 hover:bg-cyan-100 text-cyan-800 text-xs font-bold transition-all shadow-2xs group" title="Download Aplikasi Android NitipDong">
+                {{-- Download App Link → /apps landing page --}}
+                <a href="{{ route('app.landing') }}" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cyan-200 bg-cyan-50/70 hover:bg-cyan-100 text-cyan-800 text-xs font-bold transition-all shadow-2xs group" title="Download Aplikasi Android NitipDong">
                     <i class="fa-brands fa-android text-sm text-cyan-600 group-hover:scale-110 transition-transform"></i>
                     <span>Download App</span>
                 </a>
@@ -567,7 +567,7 @@
                         Flash Sale
                     </a>
                     <span class="w-1 h-1 rounded-full bg-slate-300"></span>
-                    <a href="{{ route('app.download') }}" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 hover:bg-cyan-50 text-[11px] font-bold text-slate-700 hover:text-cyan-700 transition-colors">
+                    <a href="{{ route('app.landing') }}" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 hover:bg-cyan-50 text-[11px] font-bold text-slate-700 hover:text-cyan-700 transition-colors">
                         <i class="fa-brands fa-android text-cyan-600 text-xs"></i>
                         <span>APK Mobile</span>
                     </a>

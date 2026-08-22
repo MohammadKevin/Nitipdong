@@ -53,8 +53,13 @@ Route::get('/download/app', function () {
     if (file_exists($apkPath)) {
         return response()->download($apkPath, 'NitipDong-v1.0.0.apk');
     }
-    return redirect('https://github.com/MohammadKevin/Nitipdong/actions');
+    return redirect('https://github.com/MohammadKevin/Nitipdong/releases/latest');
 })->name('app.download');
+
+// App Landing Page & Download Page
+Route::get('/apps', function () {
+    return view('app-download');
+})->name('app.landing');
 
 // Return URL Redirect after Duitku Payment
 Route::get('/payment/finish', [DuitkuPaymentController::class, 'handleReturn'])->name('duitku.return');
