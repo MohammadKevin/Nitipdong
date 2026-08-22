@@ -1,7 +1,7 @@
 name: nitipdong_mobile
 description: "NitipDong Mobile App - Marketplace & Jastip Terpercaya"
 publish_to: 'none'
-version: 1.0.2+3
+version: 1.0.3+4
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -24,7 +24,7 @@ dev_dependencies:
   flutter_launcher_icons: ^0.13.1
 
 flutter_launcher_icons:
-  android: "launcher_icon"
+  android: true
   ios: true
   image_path: "assets/icon/app_icon.png"
   min_sdk_android: 21
