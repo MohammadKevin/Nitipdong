@@ -176,14 +176,10 @@
                 </a>
 
                 {{-- Download App button for Mobile --}}
-                <a href="{{ route('app.download') }}" class="md:hidden inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-cyan-200 bg-cyan-50 text-cyan-800 text-[11px] font-bold shadow-2xs active:scale-95 transition-all shrink-0" title="Download Aplikasi NitipDong">
+                <a href="{{ route('app.download') }}" class="md:hidden inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-cyan-200 bg-cyan-50 text-cyan-800 text-[11px] font-bold shadow-2xs active:scale-95 transition-all shrink-0" title="Download Aplikasi NitipDong">
                     <i class="fa-solid fa-download text-[11px] text-cyan-600"></i>
                     <span>App</span>
                 </a>
-
-                <button @click="mobileSearch = !mobileSearch" aria-label="Search" class="btn-icon md:hidden">
-                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
-                </button>
 
                 @auth
                     @php 
@@ -525,10 +521,10 @@
                         </div>
                     </div>
 
-                    <a href="{{ route('login') }}" class="btn-outline text-xs h-8 px-3">
+                    <a href="{{ route('login') }}" class="btn-outline text-xs h-8 px-3 hidden md:inline-flex">
                         Masuk
                     </a>
-                    <a href="{{ route('register') }}" class="btn-primary text-xs h-8 px-3">
+                    <a href="{{ route('register') }}" class="btn-primary text-xs h-8 px-3 hidden md:inline-flex">
                         Daftar
                     </a>
                 @endauth
