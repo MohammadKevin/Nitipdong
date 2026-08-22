@@ -272,9 +272,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👨‍💻 Developer
 
 **Your Name**
-- Website: [yourwebsite.com](https://yourwebsite.com)
-- Email: your.email@example.com
-- GitHub: [@yourusername](https://github.com/yourusername)
+- Website: [yourwebsite.com](https://corecraft.my.id)
+- Email: kvn4.200581@gmail.com
+- GitHub: [@yourusername](https://github.com/MohammadKevin)
 
 ---
 
