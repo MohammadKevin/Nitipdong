@@ -1,9 +1,9 @@
 <x-guest-layout>
     {{-- Brand Logo (Desktop only) --}}
     <div class="hidden lg:flex items-center justify-center gap-2.5 mb-8">
-        <img src="{{ asset('img/belanjain-logo.svg') }}" alt="BelanjaIn" class="w-8 h-8 object-contain">
+        <img src="{{ asset('img/saksershop-logo.png') }}" alt="NitipDong" class="w-8 h-8 rounded-lg object-cover">
         <span class="font-extrabold text-xl tracking-tight text-slate-900">
-            Belanja<span style="color:#0891b2;">In</span>
+            Nitip<span class="text-cyan-600">Dong</span>
         </span>
     </div>
 
