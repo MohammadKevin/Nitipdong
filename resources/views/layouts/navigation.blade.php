@@ -169,9 +169,9 @@
 
             <div class="flex items-center gap-1.5 sm:gap-2">
 
-                {{-- Download App Link → /apps landing page --}}
-                <a href="{{ route('app.landing') }}" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cyan-200 bg-cyan-50/70 hover:bg-cyan-100 text-cyan-800 text-xs font-bold transition-all shadow-2xs group" title="Download Aplikasi Android NitipDong">
-                    <i class="fa-brands fa-android text-sm text-cyan-600 group-hover:scale-110 transition-transform"></i>
+                {{-- Download App button → direct download APK --}}
+                <a href="{{ route('app.download') }}" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cyan-200 bg-cyan-50/70 hover:bg-cyan-100 text-cyan-800 text-xs font-bold transition-all shadow-2xs group" title="Download Aplikasi Android NitipDong">
+                    <i class="fa-solid fa-download text-sm text-cyan-600 group-hover:scale-110 transition-transform"></i>
                     <span>Download App</span>
                 </a>
 
