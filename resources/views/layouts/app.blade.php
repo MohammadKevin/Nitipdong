@@ -64,7 +64,7 @@
         @include('layouts.navigation')
 
         {{-- Main Body --}}
-        <main class="flex-1 animate-fade-up pb-20 md:pb-0">
+        <main class="flex-1 pb-20 md:pb-0">
             {{ $slot }}
         </main>
 
