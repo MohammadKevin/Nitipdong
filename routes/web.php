@@ -47,6 +47,15 @@ Route::post('/api/midtrans/notification', [MidtransPaymentController::class, 'ha
 Route::post('/api/payment/notification', [MidtransPaymentController::class, 'handleNotification'])->name('payment.webhook');
 Route::post('/api/duitku/callback', [DuitkuPaymentController::class, 'handleCallback'])->name('duitku.callback');
 
+// Download Mobile Android APK Route
+Route::get('/download/app', function () {
+    $apkPath = public_path('downloads/nitipdong.apk');
+    if (file_exists($apkPath)) {
+        return response()->download($apkPath, 'NitipDong-v1.0.0.apk');
+    }
+    return redirect('https://github.com/MohammadKevin/Nitipdong/actions');
+})->name('app.download');
+
 // Return URL Redirect after Duitku Payment
 Route::get('/payment/finish', [DuitkuPaymentController::class, 'handleReturn'])->name('duitku.return');
 
