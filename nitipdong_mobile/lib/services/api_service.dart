@@ -9,9 +9,9 @@ import '../models/cart_model.dart';
 import '../models/order_model.dart';
 
 class ApiService {
-  // Default API Base URL:
+  // Default API Base URL (Production - budayakita.com)
   // Can be configured dynamically from app UI or loaded from SharedPreferences
-  static String baseUrl = 'http://10.217.145.88:8000/api/v1';
+  static String baseUrl = 'https://budayakita.com/api/v1';
 
   static Future<String> getBaseUrl() async {
     final prefs = await SharedPreferences.getInstance();
