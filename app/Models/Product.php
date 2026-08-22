@@ -13,6 +13,7 @@ class Product extends Model
     use HasFactory, HasObfuscatedId;
 
     protected $fillable = [
+        'uuid',
         'store_id',
         'category_id',
         'name',
@@ -29,6 +30,15 @@ class Product extends Model
         'sold_count',
         'is_active',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
 
     protected $casts = [
         'discount_percentage' => 'integer',

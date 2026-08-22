@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\{Store, Category, Product};
+use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
@@ -23,6 +24,7 @@ class ProductSeeder extends Seeder
                 'stock' => 45,
                 'badge' => 'new',
                 'is_featured' => true,
+                'image' => 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=800&auto=format&fit=crop&q=80',
             ],
             [
                 'name' => 'Laptop Gaming RGB Mechanical Keyboard',
@@ -34,6 +36,7 @@ class ProductSeeder extends Seeder
                 'stock' => 23,
                 'badge' => 'bestseller',
                 'is_featured' => true,
+                'image' => 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=800&auto=format&fit=crop&q=80',
             ],
             [
                 'name' => 'Sepatu Sneakers Running Sport Premium',
@@ -45,6 +48,7 @@ class ProductSeeder extends Seeder
                 'stock' => 156,
                 'badge' => 'sale',
                 'is_featured' => false,
+                'image' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format&fit=crop&q=80',
             ],
             [
                 'name' => 'Smartwatch Fitness Tracker GPS',
@@ -56,6 +60,7 @@ class ProductSeeder extends Seeder
                 'stock' => 78,
                 'badge' => null,
                 'is_featured' => true,
+                'image' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80',
             ],
             [
                 'name' => 'Wireless Earbuds ANC Pro Max',
@@ -67,6 +72,7 @@ class ProductSeeder extends Seeder
                 'stock' => 234,
                 'badge' => 'hot',
                 'is_featured' => false,
+                'image' => 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80',
             ],
             [
                 'name' => 'Tas Ransel Anti Maling USB Port',
@@ -78,6 +84,7 @@ class ProductSeeder extends Seeder
                 'stock' => 450,
                 'badge' => 'sale',
                 'is_featured' => false,
+                'image' => 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&auto=format&fit=crop&q=80',
             ],
             [
                 'name' => 'Kamera Mirrorless 4K Video Vlog',
@@ -89,6 +96,7 @@ class ProductSeeder extends Seeder
                 'stock' => 12,
                 'badge' => 'new',
                 'is_featured' => true,
+                'image' => 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&auto=format&fit=crop&q=80',
             ],
             [
                 'name' => 'Mechanical Keyboard RGB Gaming',
@@ -100,6 +108,7 @@ class ProductSeeder extends Seeder
                 'stock' => 89,
                 'badge' => null,
                 'is_featured' => false,
+                'image' => 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=80',
             ],
             [
                 'name' => 'Monitor Gaming 27" 165Hz Curved',
@@ -111,6 +120,7 @@ class ProductSeeder extends Seeder
                 'stock' => 34,
                 'badge' => 'bestseller',
                 'is_featured' => true,
+                'image' => 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800&auto=format&fit=crop&q=80',
             ],
             [
                 'name' => 'Jaket Hoodie Premium Cotton',
@@ -122,42 +132,64 @@ class ProductSeeder extends Seeder
                 'stock' => 890,
                 'badge' => 'sale',
                 'is_featured' => false,
+                'image' => 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800&auto=format&fit=crop&q=80',
             ],
         ];
 
         // Ambil store dan category pertama untuk contoh
-        $store = \App\Models\Store::where('status', 'approved')->first();
-        $categories = \App\Models\Category::all();
+        $store = Store::where('status', 'approved')->first();
+        if (!$store) {
+            $seller = \App\Models\User::firstOrCreate(
+                ['email' => 'seller@nitipdong.test'],
+                [
+                    'name' => 'NitipDong Official',
+                    'password' => bcrypt('password'),
+                    'role' => 'seller',
+                    'email_verified_at' => now(),
+                ]
+            );
+            $store = Store::create([
+                'user_id' => $seller->id,
+                'name' => 'NitipDong Official Store',
+                'slug' => 'nitipdong-official',
+                'description' => 'Toko resmi dengan rating 4.0 dan produk terbaik se-Indonesia',
+                'status' => 'approved',
+                'city' => 'Jakarta Pusat',
+            ]);
+        }
 
-        if (!$store || $categories->isEmpty()) {
-            $this->command->warn('Tidak ada store yang approved atau category. Silakan buat terlebih dahulu.');
-            return;
+        $categories = Category::all();
+        if ($categories->isEmpty()) {
+            $catNames = ['Elektronik', 'Pakaian', 'Makanan', 'Otomotif'];
+            foreach ($catNames as $c) {
+                Category::firstOrCreate(['name' => $c], ['slug' => Str::slug($c)]);
+            }
+            $categories = Category::all();
         }
 
         foreach ($products as $productData) {
-            // Random category
             $category = $categories->random();
 
-            \App\Models\Product::create([
+            Product::create([
+                'uuid' => (string) Str::uuid(),
                 'store_id' => $store->id,
                 'category_id' => $category->id,
                 'name' => $productData['name'],
-                'slug' => \Illuminate\Support\Str::slug($productData['name']),
+                'slug' => Str::slug($productData['name']) . '-' . Str::random(4),
                 'description' => $productData['description'],
                 'price' => $productData['price'],
                 'discount_percentage' => $productData['discount_percentage'],
                 'rating' => $productData['rating'],
                 'sold_count' => $productData['sold_count'],
                 'stock' => $productData['stock'],
-                'image' => null, // Nanti diisi dengan foto asli Anda
-                'images' => null, // Nanti diisi dengan array foto tambahan
+                'image' => $productData['image'],
+                'images' => [$productData['image']],
                 'badge' => $productData['badge'],
                 'is_active' => true,
                 'is_featured' => $productData['is_featured'],
             ]);
         }
 
-        $this->command->info('✅ Berhasil membuat ' . count($products) . ' produk demo!');
-        $this->command->info('📸 Silakan upload foto produk Anda sendiri melalui panel seller.');
+        $this->command->info('✅ Berhasil membuat ' . count($products) . ' produk demo dengan foto HD!');
     }
 }

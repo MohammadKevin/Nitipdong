@@ -1,5 +1,6 @@
 class ProductModel {
   final int id;
+  final String? uuid;
   final String name;
   final String slug;
   final double price;
@@ -7,6 +8,7 @@ class ProductModel {
   final bool hasDiscount;
   final int discountPercentage;
   final double rating;
+  final double storeRating;
   final int soldCount;
   final String formattedSold;
   final int stock;
@@ -15,12 +17,14 @@ class ProductModel {
   final String categoryName;
   final String storeName;
   final int storeId;
+  final String? storeUuid;
   final String city;
   final String description;
   final List<DiscussionModel> discussions;
 
   ProductModel({
     required this.id,
+    this.uuid,
     required this.name,
     required this.slug,
     required this.price,
@@ -28,6 +32,7 @@ class ProductModel {
     this.hasDiscount = false,
     this.discountPercentage = 0,
     this.rating = 5.0,
+    this.storeRating = 4.0,
     this.soldCount = 0,
     this.formattedSold = '0',
     this.stock = 10,
@@ -36,6 +41,7 @@ class ProductModel {
     this.categoryName = 'Produk',
     this.storeName = 'NitipDong',
     this.storeId = 1,
+    this.storeUuid,
     this.city = 'Jakarta',
     this.description = '',
     this.discussions = const [],
@@ -53,7 +59,8 @@ class ProductModel {
     }
 
     return ProductModel(
-      id: json['id'] ?? 0,
+      id: json['id'] is int ? json['id'] : (int.tryParse(json['id']?.toString() ?? '0') ?? 0),
+      uuid: json['uuid']?.toString(),
       name: json['name'] ?? '',
       slug: json['slug'] ?? '',
       price: (json['price'] as num?)?.toDouble() ?? (json['original_price'] as num?)?.toDouble() ?? 0.0,
@@ -61,6 +68,7 @@ class ProductModel {
       hasDiscount: json['has_discount'] ?? (json['discount_percentage'] != null && (json['discount_percentage'] as num) > 0),
       discountPercentage: json['discount_percentage'] ?? 0,
       rating: (json['rating'] as num?)?.toDouble() ?? 5.0,
+      storeRating: (json['store_rating'] as num?)?.toDouble() ?? (json['store']?['rating'] as num?)?.toDouble() ?? 4.0,
       soldCount: json['sold_count'] ?? 0,
       formattedSold: json['formatted_sold'] ?? (json['sold_count']?.toString() ?? '0'),
       stock: json['stock'] ?? 0,
@@ -69,6 +77,7 @@ class ProductModel {
       categoryName: json['category_name'] ?? (json['category']?['name'] ?? 'Produk'),
       storeName: json['store_name'] ?? (json['store']?['name'] ?? 'NitipDong'),
       storeId: json['store_id'] ?? (json['store']?['id'] ?? 1),
+      storeUuid: json['store_uuid']?.toString() ?? json['store']?['uuid']?.toString(),
       city: json['city'] ?? (json['store']?['city'] ?? 'Jakarta'),
       description: json['description'] ?? '',
       discussions: discList,

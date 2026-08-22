@@ -13,6 +13,7 @@ class Store extends Model
     use HasFactory, HasObfuscatedId;
 
     protected $fillable = [
+        'uuid',
         'user_id',
         'name',
         'slug',
@@ -33,6 +34,15 @@ class Store extends Model
         'bank_account_holder',
     ];
 
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
+
     protected $casts = [
         'balance' => 'float',
     ];
@@ -42,7 +52,17 @@ class Store extends Model
         'logo_url',
         'banner_url',
         'effective_city',
+        'rating',
     ];
+
+    public function getRatingAttribute(): float
+    {
+        $avg = \App\Models\Review::whereHas('product', function ($q) {
+            $q->where('store_id', $this->id);
+        })->avg('rating');
+
+        return $avg ? round((float) $avg, 1) : 4.0;
+    }
 
     public function getEffectiveCityAttribute(): string
     {

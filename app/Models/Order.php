@@ -17,6 +17,9 @@ class Order extends Model
     protected static function booted(): void
     {
         static::creating(function ($order) {
+            if (empty($order->uuid)) {
+                $order->uuid = (string) Str::uuid();
+            }
             if (empty($order->invoice_number)) {
                 $order->invoice_number = 'INV-' . strtoupper(Str::random(10));
             }
@@ -24,6 +27,7 @@ class Order extends Model
     }
 
     protected $fillable = [
+        'uuid',
         'invoice_number',
         'user_id',
         'store_id',

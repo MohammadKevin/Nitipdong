@@ -175,11 +175,12 @@ class ProductController extends Controller
                 ],
                 'store'               => [
                     'id'          => $product->store->id,
+                    'uuid'        => $product->store->uuid ?? null,
                     'name'        => $product->store->name,
-                    'city'        => $product->store->city ?? 'Jakarta',
-                    'rating'      => 4.9,
+                    'city'        => $product->store->effective_city ?? 'Jakarta',
+                    'rating'      => (float) ($product->store->rating ?? 4.0),
                     'is_official' => true,
-                    'logo_url'    => $product->store->logo ? asset('storage/' . $product->store->logo) : asset('img/saksershop-logo.png'),
+                    'logo_url'    => $product->store->logo_url,
                 ],
                 'discussions'         => $product->discussions->map(function ($disc) {
                     return [
@@ -210,6 +211,7 @@ class ProductController extends Controller
     {
         return [
             'id'                  => $product->id,
+            'uuid'                => $product->uuid ?? null,
             'name'                => $product->name,
             'slug'                => $product->slug,
             'price'               => (float) $product->price,
@@ -218,12 +220,18 @@ class ProductController extends Controller
             'discount_percentage' => (int) $product->discount_percentage_effective,
             'rating'              => (float) $product->effective_rating,
             'sold_count'          => (int) $product->sold_count,
-            'formatted_sold'      => $product->formatted_sold_count,
+            'formatted_sold'      => (string) $product->formatted_sold,
             'stock'               => (int) $product->stock,
-            'image_url'           => $product->image_url ?? asset('img/saksershop-logo.png'),
+            'image_url'           => $product->image_url,
+            'images'              => $product->images_urls,
             'category_name'       => $product->category->name ?? 'Produk',
             'store_name'          => $product->store->name ?? 'NitipDong',
-            'city'                => $product->store->city ?? 'Jakarta',
+            'store_id'            => $product->store_id,
+            'store_uuid'          => $product->store->uuid ?? null,
+            'store_rating'        => (float) ($product->store->rating ?? 4.0),
+            'city'                => $product->store->effective_city ?? 'Jakarta',
+            'badge'               => $product->badge,
+            'is_featured'         => (bool) $product->is_featured,
         ];
     }
 
