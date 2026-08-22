@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/cart_provider.dart';
+import '../../services/api_service.dart';
 import '../auth/login_screen.dart';
 import '../cart/cart_screen.dart';
 import '../orders/orders_screen.dart';
@@ -264,7 +265,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onPressed: () => _showLogoutConfirmDialog(context, authProvider),
                 ),
               ),
-            const SizedBox(height: 40),
+            
+            // ══════════════════════════════════════════════════
+            // 5. APP VERSION DISPLAY & AUTO-UPDATE CHECK
+            // ══════════════════════════════════════════════════
+            const SizedBox(height: 24),
+            Center(
+              child: Column(
+                children: [
+                  InkWell(
+                    onTap: () => _checkForAppUpdate(context),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryLight,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: AppTheme.border),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.system_update_alt_rounded, size: 14, color: AppTheme.primaryDark),
+                          SizedBox(width: 6),
+                          Text(
+                            'NitipDong App v1.0.1 (Terbaru)',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.primaryDark,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Marketplace & Jastip Terpercaya Indonesia',
+                    style: TextStyle(fontSize: 10, color: AppTheme.textMuted),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 30),
           ],
         ),
       ),
@@ -856,5 +900,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
+  }
+
+  // ══════════════════════════════════════════════════
+  // 9. CHECK FOR APP UPDATE (AUTOMATIC VIA SERVER API)
+  // ══════════════════════════════════════════════════
+  Future<void> _checkForAppUpdate(BuildContext context) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Memeriksa pembaruan sistem ke server... ⏳'),
+        duration: Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+
+    final status = await ApiService.checkSystemStatus();
+    final latestVer = status['latest_version'] ?? '1.0.1';
+
+    if (!mounted) return;
+
+    if (latestVer != ApiService.currentAppVersion) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Pembaruan Tersedia! 🚀', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+          content: Text('Versi terbaru ($latestVer) telah dirilis dengan pembaruan fitur & peningkatan stabilitas.'),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Nanti')),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Mengunduh pembaruan dari budayakita.com/download/app... 📥'),
+                    backgroundColor: Colors.green,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+              child: const Text('Perbarui Sekarang'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Aplikasi Anda sudah versi paling baru (v${ApiService.currentAppVersion})! ✨'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }

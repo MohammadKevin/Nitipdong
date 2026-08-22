@@ -55,34 +55,42 @@ Route::get('/download/app', function (\Illuminate\Http\Request $request) {
     if ($isIos) {
         $ipaPath = public_path('downloads/nitipdong.ipa');
         if (file_exists($ipaPath)) {
-            return response()->download($ipaPath, 'NitipDong-latest.ipa');
+            return response()->download($ipaPath, 'NitipDong-v1.0.1.ipa', [
+                'Content-Type' => 'application/octet-stream',
+            ]);
         }
-        return redirect('https://github.com/MohammadKevin/Nitipdong/releases/latest/download/NitipDong-latest.ipa');
+        return redirect()->away('https://github.com/MohammadKevin/Nitipdong/releases/download/latest/NitipDong-latest.ipa', 302);
     }
 
     $apkPath = public_path('downloads/nitipdong.apk');
     if (file_exists($apkPath)) {
-        return response()->download($apkPath, 'NitipDong-latest.apk');
+        return response()->download($apkPath, 'NitipDong-v1.0.1.apk', [
+            'Content-Type' => 'application/vnd.android.package-archive',
+        ]);
     }
-    return redirect('https://github.com/MohammadKevin/Nitipdong/releases/latest/download/NitipDong-latest.apk');
+    return redirect()->away('https://github.com/MohammadKevin/Nitipdong/releases/download/latest/NitipDong-latest.apk', 302);
 })->name('app.download');
 
 // Direct Android Download Route
 Route::get('/download/android', function () {
     $apkPath = public_path('downloads/nitipdong.apk');
     if (file_exists($apkPath)) {
-        return response()->download($apkPath, 'NitipDong-latest.apk');
+        return response()->download($apkPath, 'NitipDong-v1.0.1.apk', [
+            'Content-Type' => 'application/vnd.android.package-archive',
+        ]);
     }
-    return redirect('https://github.com/MohammadKevin/Nitipdong/releases/latest/download/NitipDong-latest.apk');
+    return redirect()->away('https://github.com/MohammadKevin/Nitipdong/releases/download/latest/NitipDong-latest.apk', 302);
 })->name('app.download.android');
 
 // Direct iOS Download Route
 Route::get('/download/ios', function () {
     $ipaPath = public_path('downloads/nitipdong.ipa');
     if (file_exists($ipaPath)) {
-        return response()->download($ipaPath, 'NitipDong-latest.ipa');
+        return response()->download($ipaPath, 'NitipDong-v1.0.1.ipa', [
+            'Content-Type' => 'application/octet-stream',
+        ]);
     }
-    return redirect('https://github.com/MohammadKevin/Nitipdong/releases/latest/download/NitipDong-latest.ipa');
+    return redirect()->away('https://github.com/MohammadKevin/Nitipdong/releases/download/latest/NitipDong-latest.ipa', 302);
 })->name('app.download.ios');
 
 // App Landing Page & Download Hub
