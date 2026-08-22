@@ -49,7 +49,7 @@ class SystemConfigController extends Controller
             ? (string) $customTitle
             : 'Mode Pemeliharaan & Pengembangan 🛠️';
 
-        $latestVersion = env('APP_MOBILE_LATEST_VERSION', '1.0.5');
+        $latestVersion = env('APP_MOBILE_LATEST_VERSION', '1.0.6');
         $minVersion = env('APP_MOBILE_MIN_VERSION', '1.0.0');
 
         return response()->json([

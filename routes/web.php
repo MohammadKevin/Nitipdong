@@ -52,7 +52,7 @@ Route::post('/api/duitku/callback', [DuitkuPaymentController::class, 'handleCall
 Route::get('/download/app', function (\Illuminate\Http\Request $request) {
     $userAgent = strtolower($request->header('User-Agent', ''));
     $isIos = str_contains($userAgent, 'iphone') || str_contains($userAgent, 'ipad') || str_contains($userAgent, 'ipod');
-    $version = env('APP_MOBILE_LATEST_VERSION', '1.0.5');
+    $version = env('APP_MOBILE_LATEST_VERSION', '1.0.6');
 
     if ($isIos) {
         $paths = [
@@ -99,7 +99,7 @@ Route::get('/download/app', function (\Illuminate\Http\Request $request) {
 
 // Direct Android Download Route
 Route::get('/download/android', function () {
-    $version = env('APP_MOBILE_LATEST_VERSION', '1.0.5');
+    $version = env('APP_MOBILE_LATEST_VERSION', '1.0.6');
     $paths = [
         public_path('downloads/nitipdong.apk'),
         public_path('downloads/NitipDong-latest.apk'),
