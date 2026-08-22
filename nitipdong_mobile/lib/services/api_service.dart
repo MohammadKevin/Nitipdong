@@ -16,6 +16,39 @@ class ApiService {
   // Can be configured dynamically from app UI or loaded from SharedPreferences
   static String baseUrl = 'https://budayakita.com/api/v1';
 
+  // Global Maintenance Interception & Auto-Logout Callback
+  static bool isMaintenanceRedirecting = false;
+  static void Function(String title, String message)? onMaintenanceDetected;
+
+  static void triggerMaintenanceRedirect({String? title, String? message}) {
+    if (isMaintenanceRedirecting) return;
+    isMaintenanceRedirecting = true;
+    clearToken();
+    if (onMaintenanceDetected != null) {
+      onMaintenanceDetected!(
+        title ?? 'Mode Pemeliharaan & Pengembangan 🛠️',
+        message ?? 'Aplikasi NitipDong sedang dalam tahap pemeliharaan sistem. Silakan coba kembali beberapa saat lagi.',
+      );
+    }
+  }
+
+  static void resetMaintenanceState() {
+    isMaintenanceRedirecting = false;
+  }
+
+  static void checkResponseForMaintenance(http.Response response) {
+    if (response.statusCode == 503) {
+      String title = 'Mode Pemeliharaan & Pengembangan 🛠️';
+      String message = 'Aplikasi NitipDong sedang dalam tahap pemeliharaan sistem. Silakan coba kembali beberapa saat lagi.';
+      try {
+        final data = jsonDecode(response.body);
+        if (data['maintenance_title'] != null) title = data['maintenance_title'];
+        if (data['maintenance_message'] != null) message = data['maintenance_message'];
+      } catch (_) {}
+      triggerMaintenanceRedirect(title: title, message: message);
+    }
+  }
+
   static Future<String> getBaseUrl() async {
     final prefs = await SharedPreferences.getInstance();
     final savedUrl = prefs.getString('api_base_url');
@@ -332,6 +365,7 @@ class ApiService {
         headers: await _getHeaders(withAuth: false),
       );
 
+      checkResponseForMaintenance(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return (data['data'] as List).map((b) => BannerModel.fromJson(b)).toList();
@@ -347,6 +381,7 @@ class ApiService {
         headers: await _getHeaders(withAuth: false),
       );
 
+      checkResponseForMaintenance(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return (data['data'] as List).map((c) => CategoryModel.fromJson(c)).toList();
@@ -362,6 +397,7 @@ class ApiService {
         headers: await _getHeaders(withAuth: false),
       );
 
+      checkResponseForMaintenance(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] == true) {
@@ -400,6 +436,7 @@ class ApiService {
       final uri = Uri.parse('$baseUrl/products').replace(queryParameters: params);
       final response = await http.get(uri, headers: await _getHeaders(withAuth: false));
 
+      checkResponseForMaintenance(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return (data['data'] as List).map((p) => ProductModel.fromJson(p)).toList();
@@ -415,6 +452,7 @@ class ApiService {
         headers: await _getHeaders(withAuth: false),
       );
 
+      checkResponseForMaintenance(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return ProductModel.fromJson(data['data']);
@@ -433,6 +471,7 @@ class ApiService {
         headers: await _getHeaders(),
       );
 
+      checkResponseForMaintenance(response);
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final items = (data['items'] as List).map((c) => CartItemModel.fromJson(c)).toList();

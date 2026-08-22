@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
+import '../services/api_service.dart';
 import '../providers/cart_provider.dart';
 import 'home/home_screen.dart';
 import 'cart/cart_screen.dart';
@@ -16,6 +18,7 @@ class MainNavScreen extends StatefulWidget {
 
 class _MainNavScreenState extends State<MainNavScreen> {
   int _currentIndex = 0;
+  Timer? _heartbeatTimer;
 
   final List<Widget> _screens = const [
     HomeScreen(),
@@ -27,9 +30,33 @@ class _MainNavScreenState extends State<MainNavScreen> {
   @override
   void initState() {
     super.initState();
+    ApiService.resetMaintenanceState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<CartProvider>(context, listen: false).fetchCart();
+      _startMaintenanceHeartbeat();
     });
+  }
+
+  void _startMaintenanceHeartbeat() {
+    _heartbeatTimer?.cancel();
+    // Periodically check server maintenance status every 8 seconds
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 8), (_) async {
+      try {
+        final status = await ApiService.checkSystemStatus();
+        if (status['is_maintenance'] == true) {
+          ApiService.triggerMaintenanceRedirect(
+            title: status['maintenance_title'],
+            message: status['maintenance_message'],
+          );
+        }
+      } catch (_) {}
+    });
+  }
+
+  @override
+  void dispose() {
+    _heartbeatTimer?.cancel();
+    super.dispose();
   }
 
   @override
