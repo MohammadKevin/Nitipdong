@@ -7,6 +7,8 @@ class AppTheme {
   static const Color primaryDark = Color(0xFF0E7490);  // Darker Cyan
   static const Color primaryLight = Color(0xFFECFEFF); // Sky Soft
   static const Color accentNavy = Color(0xFF0B1528);   // Deep Luxury Navy
+  static const Color primaryNavy = Color(0xFF0B1528);  // Deep Luxury Navy alias
+  static const Color accentCyan = Color(0xFF0891B2);   // Vibrant Cyan alias
   static const Color accentOrange = Color(0xFFEA580C); // Coral / Flash Sale
   static const Color background = Color(0xFFF8FAFC);   // Canvas Off-white
   static const Color surface = Color(0xFFFFFFFF);      // White Card
