@@ -19,11 +19,30 @@ class MaintenanceScreen extends StatefulWidget {
 
 class _MaintenanceScreenState extends State<MaintenanceScreen> {
   bool _isChecking = false;
+  late String _currentTitle;
+  late String _currentMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentTitle = widget.title;
+    _currentMessage = widget.message;
+  }
 
   Future<void> _recheckStatus() async {
     setState(() => _isChecking = true);
     final status = await ApiService.checkSystemStatus();
-    setState(() => _isChecking = false);
+    setState(() {
+      _isChecking = false;
+      if (status['is_maintenance'] == true) {
+        if (status['maintenance_title'] != null && status['maintenance_title'].toString().isNotEmpty) {
+          _currentTitle = status['maintenance_title'];
+        }
+        if (status['maintenance_message'] != null && status['maintenance_message'].toString().isNotEmpty) {
+          _currentMessage = status['maintenance_message'];
+        }
+      }
+    });
 
     if (status['is_maintenance'] == false && mounted) {
       Navigator.pushReplacement(
@@ -105,7 +124,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
 
                 // Title
                 Text(
-                  widget.title,
+                  _currentTitle,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 20,
@@ -125,7 +144,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
                     border: Border.all(color: Colors.white.withOpacity(0.1)),
                   ),
                   child: Text(
-                    widget.message,
+                    _currentMessage,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 13,
@@ -165,9 +184,9 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
                 const SizedBox(height: 14),
 
                 // App info
-                const Text(
-                  'NitipDong Platform • Versi 1.0.0',
-                  style: TextStyle(color: Colors.white38, fontSize: 11),
+                Text(
+                  'NitipDong Platform • Versi ${ApiService.currentAppVersion}',
+                  style: const TextStyle(color: Colors.white38, fontSize: 11),
                 ),
               ],
             ),
