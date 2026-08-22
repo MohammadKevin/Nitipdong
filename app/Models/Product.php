@@ -250,11 +250,7 @@ class Product extends Model
             }
         }
 
-        // Jika belum ada ulasan produk, ikuti rating toko dinamis (base 3.5)
-        if ($this->relationLoaded('store') && $this->store) {
-            return (float) $this->store->rating;
-        }
-
+        // Produk yang belum diulas tetap di nilai dasar 3.5 (tidak terpengaruh produk lain)
         return 3.5;
     }
 
