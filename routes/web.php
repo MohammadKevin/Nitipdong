@@ -242,7 +242,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->inRandomOrder()
                 ->take(8)
                 ->get();
-            return view('customer.dashboard', compact('userStore', 'orders', 'recommendedProducts'));
+            $activeFlashSale = FlashSale::active()->with(['items.product'])->first();
+            return view('customer.dashboard', compact('userStore', 'orders', 'recommendedProducts', 'activeFlashSale'));
         })->name('dashboard');
 
         Route::get('/store/register', [StoreRegistrationController::class, 'create'])->name('store.register');

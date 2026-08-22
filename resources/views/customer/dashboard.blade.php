@@ -75,6 +75,7 @@
         searchQuery: '',
         isReordering: null,
         isAddingRecommended: null,
+        isAddingFlashSale: null,
         showReviewModal: false,
         reviewData: {
             orderId: null,
@@ -226,6 +227,47 @@
                 }
             } finally {
                 this.isAddingRecommended = null;
+            }
+        },
+        async addFlashSaleProduct(url, productName, productId) {
+            this.isAddingFlashSale = productId;
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ quantity: 1 })
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    if (window.toast) {
+                        window.toast.success(
+                            productName + ' masuk ke keranjang belanja!',
+                            'Berhasil Ditambahkan',
+                            {
+                                action: {
+                                    label: 'Lihat Keranjang',
+                                    url: '{{ route('customer.cart.index') }}'
+                                }
+                            }
+                        );
+                    }
+                    window.dispatchEvent(new CustomEvent('cart-updated'));
+                } else {
+                    if (window.toast) {
+                        window.toast.error(data.message || 'Gagal menambahkan ke keranjang.');
+                    }
+                }
+            } catch (e) {
+                if (window.toast) {
+                    window.toast.error('Terjadi kendala saat menambahkan barang.');
+                }
+            } finally {
+                this.isAddingFlashSale = null;
             }
         }
     }">
@@ -1082,6 +1124,131 @@
                         @endif
                     </div>
                 </div>
+
+                {{-- FEATURE 3: FLASH SALE SECTION --}}
+                @if(isset($activeFlashSale) && $activeFlashSale && $activeFlashSale->items->count() > 0)
+                    <div class="bg-gradient-to-r from-rose-900 via-rose-950 to-slate-900 rounded-2xl p-5 text-white border border-rose-800/80 shadow-card space-y-4"
+                         x-data="{
+                            secondsRemaining: {{ $activeFlashSale->remaining_seconds }},
+                            hours: '00',
+                            minutes: '00',
+                            seconds: '00',
+                            init() {
+                                this.updateTime();
+                                setInterval(() => {
+                                    if (this.secondsRemaining > 0) {
+                                        this.secondsRemaining--;
+                                        this.updateTime();
+                                    }
+                                }, 1000);
+                            },
+                            updateTime() {
+                                let h = Math.floor(this.secondsRemaining / 3600);
+                                let m = Math.floor((this.secondsRemaining % 3600) / 60);
+                                let s = this.secondsRemaining % 60;
+                                this.hours = String(h).padStart(2, '0');
+                                this.minutes = String(m).padStart(2, '0');
+                                this.seconds = String(s).padStart(2, '0');
+                            }
+                         }">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-rose-800/50">
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-lg sm:text-xl font-black italic tracking-tighter text-white flex items-center gap-1.5">
+                                        <i class="fa-solid fa-fire text-amber-400 animate-bounce text-base"></i>
+                                        FLASH SALE
+                                    </span>
+                                    <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-400 text-slate-950 uppercase tracking-wider">
+                                        DISKON KILAT
+                                    </span>
+                                </div>
+
+                                {{-- Countdown Timer --}}
+                                <div class="flex items-center gap-1 ml-2">
+                                    <div class="flex items-center gap-1 font-mono font-bold text-xs">
+                                        <span class="px-2 py-1 rounded-md bg-slate-950 text-white border border-rose-700/50" x-text="hours">00</span>
+                                        <span class="text-amber-400 font-bold">:</span>
+                                        <span class="px-2 py-1 rounded-md bg-slate-950 text-white border border-rose-700/50" x-text="minutes">00</span>
+                                        <span class="text-amber-400 font-bold">:</span>
+                                        <span class="px-2 py-1 rounded-md bg-slate-950 text-white border border-rose-700/50" x-text="seconds">00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <a href="{{ url('/products?flash_sale=1') }}" class="text-xs font-bold text-amber-300 hover:text-white flex items-center gap-1">
+                                <span>Lihat Semua Promo</span>
+                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            </a>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-1">
+                            @foreach($activeFlashSale->items->take(4) as $fsItem)
+                                @php $product = $fsItem->product; @endphp
+                                @if($product)
+                                <div class="bg-white rounded-2xl overflow-hidden p-3 text-slate-900 group shadow-2xs hover:shadow-card hover:border-rose-500 border border-transparent transition-all flex flex-col justify-between">
+                                    <div>
+                                        <div class="relative w-full aspect-square rounded-xl overflow-hidden bg-slate-50 mb-2 border border-slate-100">
+                                            <a href="{{ route('product.show', $product) }}" class="block w-full h-full">
+                                                @if($product->image_url)
+                                                    <img src="{{ $product->image_url }}"
+                                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                                         alt="{{ $product->name }}"
+                                                         onerror="this.src='{{ asset('img/saksershop-logo.png') }}'">
+                                                @else
+                                                    <div class="w-full h-full flex items-center justify-center text-slate-300 text-xl">
+                                                        <i class="fa-solid fa-box"></i>
+                                                    </div>
+                                                @endif
+                                            </a>
+                                            <span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-black bg-rose-600 text-white shadow-xs">
+                                                -{{ $fsItem->discount_percentage }}%
+                                            </span>
+                                        </div>
+
+                                        <p class="text-xs font-bold text-slate-800 line-clamp-2 leading-snug group-hover:text-cyan-700 transition-colors">
+                                            <a href="{{ route('product.show', $product) }}">
+                                                {{ $product->name }}
+                                            </a>
+                                        </p>
+                                    </div>
+
+                                    <div class="mt-2.5">
+                                        <div class="flex flex-col">
+                                            <span class="text-sm sm:text-base font-black text-rose-600 leading-none">
+                                                Rp {{ number_format($fsItem->flash_sale_price, 0, ',', '.') }}
+                                            </span>
+                                            <span class="text-[10px] text-slate-400 line-through mt-0.5">
+                                                Rp {{ number_format($product->price, 0, ',', '.') }}
+                                            </span>
+                                        </div>
+
+                                        {{-- Progress Bar Terjual --}}
+                                        <div class="mt-2">
+                                            <div class="w-full bg-rose-100 rounded-full h-3.5 relative overflow-hidden flex items-center">
+                                                <div class="bg-gradient-to-r from-amber-400 to-rose-500 h-full rounded-full transition-all" style="width: {{ max($fsItem->sold_percentage, 15) }}%"></div>
+                                                <span class="absolute inset-0 flex items-center justify-center text-[9px] font-extrabold text-slate-900 uppercase">
+                                                    🔥 Terjual {{ $fsItem->stock_sold }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {{-- Quick Add to Cart --}}
+                                        <div class="mt-2.5">
+                                            <button type="button"
+                                                    @click="addFlashSaleProduct('{{ route('customer.cart.store', $product) }}', '{{ addslashes($product->name) }}', {{ $product->id }})"
+                                                    :disabled="isAddingFlashSale === {{ $product->id }}"
+                                                    class="w-full py-1.5 px-2.5 rounded-xl border border-rose-200 hover:border-rose-500 bg-rose-50 hover:bg-rose-600 text-rose-800 hover:text-white font-bold text-[10px] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50">
+                                                <i class="fa-solid fa-cart-plus text-xs" :class="isAddingFlashSale === {{ $product->id }} ? 'fa-spinner animate-spin' : ''"></i>
+                                                <span x-text="isAddingFlashSale === {{ $product->id }} ? 'Menambah...' : '+ Keranjang'"></span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
 
                 {{-- FEATURE 4: SECTION "REKOMENDASI KHUSUS UNTUK ANDA" DI BAWAH DASHBOARD --}}
                 @if(isset($recommendedProducts) && $recommendedProducts->count() > 0)
