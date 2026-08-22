@@ -35,9 +35,14 @@ class AppUpCommand extends Command
             $this->info("📱 Aplikasi Mobile sudah kembali aktif normal (Live/Up)!");
         } elseif ($isWeb) {
             @unlink(storage_path('framework/maintenance_web.json'));
+            if (file_exists(storage_path('framework/down'))) {
+                $this->call('up');
+            }
             $this->info("🌐 Website sudah kembali aktif normal (Live/Up)!");
         } else {
-            $this->call('up');
+            if (file_exists(storage_path('framework/down'))) {
+                $this->call('up');
+            }
             @unlink(storage_path('framework/maintenance_message.json'));
             @unlink(storage_path('framework/maintenance_app.json'));
             @unlink(storage_path('framework/maintenance_web.json'));
