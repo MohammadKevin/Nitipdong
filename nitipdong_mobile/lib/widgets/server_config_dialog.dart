@@ -48,7 +48,7 @@ class _ServerConfigDialogState extends State<ServerConfigDialog> {
     await ApiService.setBaseUrl(inputUrl);
 
     final status = await ApiService.checkSystemStatus();
-    final products = await ApiService.getProducts(limit: 1);
+    final products = await ApiService.getProducts();
 
     setState(() {
       _isTesting = false;

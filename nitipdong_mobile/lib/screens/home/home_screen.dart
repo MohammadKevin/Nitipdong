@@ -75,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
             tooltip: 'Server API',
             onPressed: () {
               ServerConfigDialog.show(context, onSaved: () {
-                Provider.of<ProductProvider>(context, listen: false).loadHomeData();
+                Provider.of<ProductProvider>(context, listen: false).fetchHomeData();
               });
             },
           ),
