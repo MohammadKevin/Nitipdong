@@ -80,3 +80,29 @@ jobs:
           files: NitipDong-latest.apk
           prerelease: false
           make_latest: true
+
+      - name: 🌐 Deploy APK Directly to DomaiNesia Server
+        uses: appleboy/scp-action@v0.1.7
+        continue-on-error: true
+        with:
+          host: ${{ secrets.CPANEL_HOST }}
+          username: ${{ secrets.CPANEL_USER }}
+          key: ${{ secrets.CPANEL_SSH_KEY }}
+          port: ${{ secrets.CPANEL_PORT || 22 }}
+          source: "NitipDong-latest.apk"
+          target: "/home/${{ secrets.CPANEL_USER }}/public_html/downloads/"
+
+      - name: ⚙️ Setup Symlink & Permissions on DomaiNesia
+        uses: appleboy/ssh-action@v1.0.3
+        continue-on-error: true
+        with:
+          host: ${{ secrets.CPANEL_HOST }}
+          username: ${{ secrets.CPANEL_USER }}
+          key: ${{ secrets.CPANEL_SSH_KEY }}
+          port: ${{ secrets.CPANEL_PORT || 22 }}
+          script: |
+            mkdir -p /home/${{ secrets.CPANEL_USER }}/public_html/downloads
+            mkdir -p /home/${{ secrets.CPANEL_USER }}/laravel_app/public/downloads
+            cp -f /home/${{ secrets.CPANEL_USER }}/public_html/downloads/NitipDong-latest.apk /home/${{ secrets.CPANEL_USER }}/public_html/downloads/nitipdong.apk 2>/dev/null || true
+            cp -f /home/${{ secrets.CPANEL_USER }}/public_html/downloads/NitipDong-latest.apk /home/${{ secrets.CPANEL_USER }}/laravel_app/public/downloads/nitipdong.apk 2>/dev/null || true
+            chmod 644 /home/${{ secrets.CPANEL_USER }}/public_html/downloads/*
