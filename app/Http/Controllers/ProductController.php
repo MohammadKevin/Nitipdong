@@ -101,7 +101,7 @@ class ProductController extends Controller
                 'has_discount'        => $p->has_discount,
                 'discount_percentage' => $p->discount_percentage,
                 'image_url'           => $p->image_url,
-                'store_name'          => $p->store->name ?? 'SakserShop',
+                'store_name'          => $p->store->name ?? 'NitipDong',
                 'url'                 => route('product.show', $p),
             ]);
 

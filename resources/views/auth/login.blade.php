@@ -1,20 +1,12 @@
 <x-guest-layout>
     <div x-data x-on:submit="$dispatch('auth-submitting')" class="relative">
-        {{-- Brand Logo (Desktop only) --}}
-        <div class="hidden lg:flex items-center justify-center gap-2.5 -mt-6 mb-12">
-            <img src="{{ asset('img/belanjain-logo.svg') }}" alt="BelanjaIn" class="w-10 h-10 object-contain">
-            <span class="font-extrabold text-2xl tracking-tight text-slate-900">
-                Belanja<span style="color:#0891b2;">In</span>
-            </span>
-        </div>
-
         <x-auth-session-status class="mb-4" :status="session('status')" />
 
         <div class="mb-6">
             <h1 class="text-2xl font-bold text-slate-900 tracking-tight">
                 Selamat Datang Kembali
             </h1>
-            <p class="text-xs text-slate-500 mt-1">Masuk ke akun SakserShop Anda untuk melanjutkan transaksi</p>
+            <p class="text-xs text-slate-500 mt-1">Masuk ke akun NitipDong Anda untuk melanjutkan transaksi</p>
         </div>
 
         <form method="POST" action="{{ route('login') }}" class="space-y-4">

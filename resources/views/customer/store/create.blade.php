@@ -16,7 +16,7 @@
                         </div>
                         <div>
                             <h1 class="text-lg font-bold text-white tracking-tight">Formulir Pendaftaran Toko Resmi</h1>
-                            <p class="text-xs text-slate-300 mt-0.5">Buka toko Anda sendiri dan mulai berjualan ke jutaan pelanggan di SakserShop.</p>
+                            <p class="text-xs text-slate-300 mt-0.5">Buka toko Anda sendiri dan mulai berjualan ke jutaan pelanggan di NitipDong.</p>
                         </div>
                     </div>
                 </div>
@@ -126,7 +126,7 @@
 
                     <div class="p-3 bg-cyan-50 border border-cyan-200 rounded-md text-xs text-cyan-900 flex items-start gap-2.5">
                         <i class="fa-solid fa-circle-info text-cyan-600 text-sm mt-0.5"></i>
-                        <p>Setelah formulir dikirim, tim operasional SakserShop akan meninjau pengajuan Anda dalam waktu 1x24 jam kerja.</p>
+                        <p>Setelah formulir dikirim, tim operasional NitipDong akan meninjau pengajuan Anda dalam waktu 1x24 jam kerja.</p>
                     </div>
 
                     <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">

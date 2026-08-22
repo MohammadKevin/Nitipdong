@@ -1,6 +1,6 @@
 <x-super-admin-layout>
     <x-slot name="title">
-        Super Admin Dashboard - {{ config('app.name', 'SakserShop') }}
+        Super Admin Dashboard - {{ config('app.name', 'NitipDong') }}
     </x-slot>
 
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
@@ -112,7 +112,7 @@
         <div class="lg:col-span-4 bg-white p-5 sm:p-6 rounded-xl border border-slate-200/80 shadow-card flex flex-col justify-between">
             <div class="pb-3 border-b border-slate-100 mb-3">
                 <h3 class="text-sm font-bold text-slate-900 tracking-tight">Komposisi Pengguna</h3>
-                <p class="text-xs text-slate-400 mt-0.5">Distribusi peran di SakserShop</p>
+                <p class="text-xs text-slate-400 mt-0.5">Distribusi peran di NitipDong</p>
             </div>
 
             <div class="space-y-4 py-2">
@@ -180,7 +180,7 @@
                     @forelse($recentOrders as $order)
                     <tr class="hover:bg-slate-50/80 transition-colors">
                         <td class="px-5 py-3.5 font-mono font-bold text-slate-900">#{{ $order->invoice_number }}</td>
-                        <td class="px-5 py-3.5 font-medium text-slate-800">{{ $order->store->name ?? 'SakserShop Store' }}</td>
+                        <td class="px-5 py-3.5 font-medium text-slate-800">{{ $order->store->name ?? 'NitipDong Store' }}</td>
                         <td class="px-5 py-3.5 font-bold text-slate-900">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</td>
                         <td class="px-5 py-3.5 font-bold text-cyan-800">Rp {{ number_format(round($order->total_amount * 0.05), 0, ',', '.') }}</td>
                         <td class="px-5 py-3.5">

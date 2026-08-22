@@ -103,7 +103,7 @@
             <div class="flex-1 min-w-0">
                 <div class="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-card mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div class="text-xs text-slate-500">
-                        Hasil pencarian katalog SakserShop
+                        Hasil pencarian katalog NitipDong
                     </div>
 
                     <form method="GET" action="{{ url('/products') }}" class="flex items-center gap-2">

@@ -189,7 +189,7 @@
                 <div x-show="activeTab === 'qris'" class="space-y-4 pt-1">
                     <div class="text-center bg-slate-50 border border-slate-200/80 rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
                         <div class="inline-block p-4 bg-white rounded-2xl shadow-sm border border-slate-200">
-                            <img src="{{ $charge['qr_image_url'] ?? ('https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=' . urlencode('SAKSERSHOP-QRIS-' . $order->invoice_number . '-' . $order->total_amount)) }}"
+                            <img src="{{ $charge['qr_image_url'] ?? ('https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=' . urlencode('NITIPDONG-QRIS-' . $order->invoice_number . '-' . $order->total_amount)) }}"
                                  alt="QRIS Code" class="w-56 h-56 sm:w-64 sm:h-64 mx-auto rounded-lg">
                         </div>
                         
@@ -205,7 +205,7 @@
                         <div class="p-3.5 bg-white rounded-xl border border-slate-200 max-w-sm mx-auto text-xs space-y-1.5 text-left">
                             <div class="flex justify-between text-slate-500">
                                 <span>Merchant Resmi:</span>
-                                <span class="font-bold text-slate-800">SakserShop Official</span>
+                                <span class="font-bold text-slate-800">NitipDong Official</span>
                             </div>
                             <div class="flex justify-between text-slate-500">
                                 <span>Total Tagihan:</span>
@@ -316,14 +316,14 @@
                                 if(type === 'bni') { this.copiedBni = true; setTimeout(() => this.copiedBni = false, 2000); }
                             }
                          }">
-                        <p class="text-xs font-bold text-slate-800">Pilihan Rekening Resmi SakserShop:</p>
+                        <p class="text-xs font-bold text-slate-800">Pilihan Rekening Resmi NitipDong:</p>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div class="p-3.5 bg-white rounded-xl border border-slate-200 flex items-center justify-between">
                                 <div>
                                     <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">Bank BCA</span>
                                     <p class="font-mono font-bold text-slate-900 text-xs mt-1.5">8820-1928-3721</p>
-                                    <p class="text-[10px] text-slate-400 mt-0.5">a.n. PT SakserShop Indonesia</p>
+                                    <p class="text-[10px] text-slate-400 mt-0.5">a.n. PT NitipDong Indonesia</p>
                                 </div>
                                 <button type="button" @click="copyNumber('882019283721', 'bca')" class="text-slate-400 hover:text-cyan-700 p-2 cursor-pointer" title="Salin Rekening">
                                     <i :class="copiedBca ? 'fa-solid fa-check text-cyan-600' : 'fa-regular fa-copy'"></i>
@@ -334,7 +334,7 @@
                                 <div>
                                     <span class="text-[10px] font-bold text-orange-700 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200">Bank BNI</span>
                                     <p class="font-mono font-bold text-slate-900 text-xs mt-1.5">0987-6543-2100</p>
-                                    <p class="text-[10px] text-slate-400 mt-0.5">a.n. PT SakserShop Indonesia</p>
+                                    <p class="text-[10px] text-slate-400 mt-0.5">a.n. PT NitipDong Indonesia</p>
                                 </div>
                                 <button type="button" @click="copyNumber('098765432100', 'bni')" class="text-slate-400 hover:text-cyan-700 p-2 cursor-pointer" title="Salin Rekening">
                                     <i :class="copiedBni ? 'fa-solid fa-check text-cyan-600' : 'fa-regular fa-copy'"></i>

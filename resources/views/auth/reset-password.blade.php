@@ -12,7 +12,7 @@
             Atur Ulang Kata Sandi
         </h1>
         <p class="text-xs text-slate-500 mt-1">
-            Buat kata sandi baru yang kuat untuk akun SakserShop Anda.
+            Buat kata sandi baru yang kuat untuk akun NitipDong Anda.
         </p>
     </div>
 

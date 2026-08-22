@@ -1,12 +1,12 @@
 <x-super-admin-layout>
     <x-slot name="title">
-        Daftar Toko - {{ config('app.name', 'SakserShop') }}
+        Daftar Toko - {{ config('app.name', 'NitipDong') }}
     </x-slot>
 
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
         <div>
             <h1 class="text-xl font-bold text-slate-900 tracking-tight">Manajemen Toko & Merchant</h1>
-            <p class="text-xs text-slate-500 mt-0.5">Kelola seluruh toko dan seller yang terdaftar di platform SakserShop.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Kelola seluruh toko dan seller yang terdaftar di platform NitipDong.</p>
         </div>
 
         <form action="{{ route('super_admin.stores.index') }}" method="GET" class="flex items-center gap-2 w-full sm:w-auto">

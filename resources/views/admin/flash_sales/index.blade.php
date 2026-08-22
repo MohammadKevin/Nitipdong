@@ -1,6 +1,6 @@
 <x-admin-layout>
     <x-slot name="title">
-        Kelola Flash Sale - {{ config('app.name', 'BelanjaIn') }}
+        Kelola Flash Sale - {{ config('app.name', 'NitipDong') }}
     </x-slot>
 
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-2">

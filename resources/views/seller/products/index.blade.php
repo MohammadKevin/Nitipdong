@@ -1,6 +1,6 @@
 <x-seller-layout>
     <x-slot name="title">
-        Katalog Produk Toko - {{ config('app.name', 'BelanjaIn') }}
+        Katalog Produk Toko - {{ config('app.name', 'NitipDong') }}
     </x-slot>
 
     <div x-data="{

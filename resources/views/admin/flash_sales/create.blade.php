@@ -1,6 +1,6 @@
 <x-admin-layout>
     <x-slot name="title">
-        Buat Flash Sale Baru - {{ config('app.name', 'BelanjaIn') }}
+        Buat Flash Sale Baru - {{ config('app.name', 'NitipDong') }}
     </x-slot>
 
     <div class="mb-3">

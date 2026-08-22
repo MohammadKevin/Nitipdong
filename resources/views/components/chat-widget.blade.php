@@ -24,7 +24,7 @@
                     <i class="fa-solid fa-robot"></i>
                 </div>
                 <div>
-                    <h4 class="font-bold text-xs text-white leading-tight">Asisten AI SakserShop</h4>
+                    <h4 class="font-bold text-xs text-white leading-tight">Asisten AI NitipDong</h4>
                     <p class="text-[10px] text-cyan-300 font-medium flex items-center gap-1 mt-0.5">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
                         Online & Siap Membantu
@@ -73,7 +73,7 @@
             <button type="button" @click="askQuick('Bagaimana cara buka toko?')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-cyan-50 hover:text-cyan-800 text-slate-600 text-[10px] font-medium shrink-0 transition-colors cursor-pointer">
                 Buka Toko
             </button>
-            <button type="button" @click="askQuick('Apa itu Flash Sale SakserShop?')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-cyan-50 hover:text-cyan-800 text-slate-600 text-[10px] font-medium shrink-0 transition-colors cursor-pointer">
+            <button type="button" @click="askQuick('Apa itu Flash Sale NitipDong?')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-cyan-50 hover:text-cyan-800 text-slate-600 text-[10px] font-medium shrink-0 transition-colors cursor-pointer">
                 Flash Sale
             </button>
             <button type="button" @click="askQuick('Bagaimana cara pakai voucher?')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-cyan-50 hover:text-cyan-800 text-slate-600 text-[10px] font-medium shrink-0 transition-colors cursor-pointer">
@@ -118,7 +118,7 @@ function aiChatWidget() {
         messages: [
             { 
                 role: 'ai', 
-                text: 'Halo! 👋 Saya <strong>Asisten AI SakserShop</strong>. Ada yang bisa saya bantu hari ini seputar toko, belanja, atau promo flash sale?' 
+                text: 'Halo! 👋 Saya <strong>Asisten AI NitipDong</strong>. Ada yang bisa saya bantu hari ini seputar toko, belanja, atau promo flash sale?' 
             }
         ],
         initAiWidget() {

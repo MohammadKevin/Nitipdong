@@ -46,7 +46,7 @@
                                     <i class="fa-solid fa-circle-check text-cyan-600 text-[10px]"></i> Toko Resmi
                                 </span>
                             </div>
-                            <p class="text-xs text-slate-500 mt-1 max-w-xl line-clamp-2">{{ $store->description ?? 'Selamat datang di toko resmi ' . $store->name . ' di SakserShop. Temukan berbagai produk original berkualitas!' }}</p>
+                            <p class="text-xs text-slate-500 mt-1 max-w-xl line-clamp-2">{{ $store->description ?? 'Selamat datang di toko resmi ' . $store->name . ' di NitipDong. Temukan berbagai produk original berkualitas!' }}</p>
                             <div class="flex items-center gap-3 mt-1.5 flex-wrap">
                                 <p class="text-[11px] text-slate-600 flex items-center gap-1.5 font-medium">
                                     <i class="fa-solid fa-location-dot text-cyan-600"></i>

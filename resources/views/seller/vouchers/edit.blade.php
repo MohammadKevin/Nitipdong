@@ -1,6 +1,6 @@
 <x-seller-layout>
     <x-slot name="title">
-        Edit Voucher: {{ $voucher->code }} - {{ config('app.name', 'BelanjaIn') }}
+        Edit Voucher: {{ $voucher->code }} - {{ config('app.name', 'NitipDong') }}
     </x-slot>
 
     <div class="mb-3">

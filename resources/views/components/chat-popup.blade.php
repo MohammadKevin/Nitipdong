@@ -13,7 +13,7 @@
                 @click="$dispatch('toggle-ai-chat')"
                 :class="isAiOpen ? 'bg-cyan-700 text-white shadow-lg ring-2 ring-cyan-400' : 'bg-slate-900 hover:bg-slate-800 text-white shadow-md'"
                 class="h-11 px-3.5 sm:px-4 rounded-full border border-slate-700/80 flex items-center gap-2 text-xs font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer"
-                title="Tanya Asisten AI SakserShop">
+                title="Tanya Asisten AI NitipDong">
             <i class="fa-solid fa-sparkles text-cyan-400 text-xs"></i>
             <span class="text-xs">Asisten AI</span>
             <span x-show="isAiOpen" class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>

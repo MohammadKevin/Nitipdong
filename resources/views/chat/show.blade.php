@@ -10,7 +10,7 @@
 
 <x-dynamic-component :component="$layout">
     <x-slot name="title">
-        Obrolan dengan {{ $partner->name }} - {{ config('app.name', 'BelanjaIn') }}
+        Obrolan dengan {{ $partner->name }} - {{ config('app.name', 'NitipDong') }}
     </x-slot>
 
     <div class="{{ $isSidebarLayout ? 'max-w-4xl mx-auto w-full' : 'page-container py-4 sm:py-6 max-w-4xl mx-auto min-h-[80vh]' }}">
@@ -66,7 +66,7 @@
             <div class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-3 bg-slate-50/70" id="chat-messages">
                 <div class="text-center my-2">
                     <span class="text-[10px] font-medium text-slate-400 bg-white/90 border border-slate-200/80 px-3.5 py-1 rounded-full shadow-2xs">
-                        <i class="fa-solid fa-lock text-[9px] mr-1 text-slate-400"></i> Percakapan dilindungi enkripsi sistem BelanjaIn
+                        <i class="fa-solid fa-lock text-[9px] mr-1 text-slate-400"></i> Percakapan dilindungi enkripsi sistem NitipDong
                     </span>
                 </div>
 

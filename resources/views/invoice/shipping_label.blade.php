@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Label Pengiriman #{{ $order->invoice_number }} — SakserShop</title>
+    <title>Label Pengiriman #{{ $order->invoice_number }} — NitipDong</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+128&family=Plus+Jakarta+Sans:wght@500;700;800&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
@@ -39,8 +39,8 @@
         {{-- Header Strip --}}
         <div class="flex items-center justify-between pb-3 border-b-2 border-slate-900">
             <div class="flex items-center gap-1.5">
-                <div class="w-6 h-6 rounded bg-slate-900 text-white flex items-center justify-center font-extrabold text-xs">S</div>
-                <span class="font-extrabold text-base tracking-tight">Sakser<span class="text-cyan-700">Shop</span></span>
+                <div class="w-6 h-6 rounded bg-slate-900 text-white flex items-center justify-center font-extrabold text-xs">N</div>
+                <span class="font-extrabold text-base tracking-tight">Nitip<span class="text-cyan-700">Dong</span></span>
             </div>
             <div class="text-right">
                 <span class="font-extrabold text-xs uppercase px-2 py-0.5 bg-slate-900 text-white rounded">
@@ -77,7 +77,7 @@
         <div class="py-3 border-b-2 border-slate-900 grid grid-cols-2 gap-2 text-[11px]">
             <div>
                 <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">PENGIRIM:</span>
-                <strong class="text-slate-900 block mt-0.5">{{ $order->store->name ?? 'SakserShop Store' }}</strong>
+                <strong class="text-slate-900 block mt-0.5">{{ $order->store->name ?? 'NitipDong Store' }}</strong>
                 <p class="text-slate-600 mt-0.5 line-clamp-2">{{ $order->store->address ?? 'Kota Penjual' }}</p>
             </div>
             <div class="border-l border-slate-200 pl-2">
@@ -110,7 +110,7 @@
             <span class="flex items-center gap-1 text-rose-700">
                 <i class="fa-solid fa-wine-glass"></i> FRAGILE / JANGAN DIBANTING
             </span>
-            <span>SakserShop Express</span>
+            <span>NitipDong Express</span>
         </div>
     </div>
 

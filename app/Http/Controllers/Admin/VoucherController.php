@@ -73,7 +73,7 @@ class VoucherController extends Controller
             'expires_at'   => $validated['expires_at'] ?? null,
         ]);
 
-        return redirect()->route('admin.vouchers.index')->with('success', 'Voucher platform SakserShop berhasil dibuat!');
+        return redirect()->route('admin.vouchers.index')->with('success', 'Voucher platform NitipDong berhasil dibuat!');
     }
 
     public function edit(Voucher $voucher): View

@@ -1,4 +1,4 @@
-<x-seller-layout title="Pengaturan Alamat & Profil Toko - SakserShop">
+<x-seller-layout title="Pengaturan Alamat & Profil Toko - NitipDong">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
@@ -166,7 +166,7 @@
                     <div class="space-y-0.5">
                         <span class="font-bold block">Bagaimana Cara Kerja Gratis Ongkir 1 Kota?</span>
                         <p class="text-[11px] text-slate-600 leading-relaxed">
-                            Setiap pelanggan SakserShop yang alamat pengirimannya berada di <strong>Kota / Kabupaten yang sama</strong> dengan toko Anda akan otomatis mendapatkan <strong>Gratis Ongkos Kirim (Rp 0)</strong> di checkout!
+                            Setiap pelanggan NitipDong yang alamat pengirimannya berada di <strong>Kota / Kabupaten yang sama</strong> dengan toko Anda akan otomatis mendapatkan <strong>Gratis Ongkos Kirim (Rp 0)</strong> di checkout!
                         </p>
                     </div>
                 </div>
@@ -265,7 +265,7 @@
                     </div>
                     <div>
                         <h2 class="text-sm font-extrabold text-slate-900">2. Identitas & Tampilan Toko</h2>
-                        <p class="text-[11px] text-slate-400">Informasi yang akan dilihat oleh calon pembeli di SakserShop.</p>
+                        <p class="text-[11px] text-slate-400">Informasi yang akan dilihat oleh calon pembeli di NitipDong.</p>
                     </div>
                 </div>
 

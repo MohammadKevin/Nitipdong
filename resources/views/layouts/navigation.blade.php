@@ -51,11 +51,13 @@
     <div class="page-container">
         <div class="flex items-center justify-between h-16 gap-4">
 
-            <a href="{{ auth()->check() ? url('/?is_from_login=true') : url('/') }}" class="flex items-center gap-2.5 shrink-0 group" aria-label="BelanjaIn Home">
-                <img src="{{ asset('img/belanjain-logo.svg') }}" alt="BelanjaIn Logo" class="w-9 h-9 object-contain">
+            <a href="{{ auth()->check() ? url('/?is_from_login=true') : url('/') }}" class="flex items-center gap-2.5 shrink-0 group" aria-label="NitipDong Home">
+                <div class="w-9 h-9 rounded-xl overflow-hidden border border-cyan-200 bg-cyan-50 flex items-center justify-center shadow-xs">
+                    <img src="{{ asset('img/saksershop-logo.png') }}" alt="NitipDong Logo" class="w-full h-full object-cover">
+                </div>
                 <div>
                     <span class="font-bold text-base tracking-tight text-slate-900 leading-none block">
-                        Sakser<span class="text-cyan-600 font-black">Shop</span>
+                        Nitip<span class="text-cyan-600 font-black">Dong</span>
                     </span>
                     <span class="text-[9px] font-bold text-cyan-700 tracking-wider uppercase">Official Mall</span>
                 </div>
@@ -68,7 +70,7 @@
                         <input type="text" name="q" x-model="searchQuery"
                                @input.debounce.250ms="fetchSuggestions()"
                                @focus="if(searchQuery.trim().length >= 2) showSuggestions = true"
-                               placeholder="Cari di SakserShop (contoh: Laptop, Sepatu, Smartwatch, TWS)..."
+                               placeholder="Cari di NitipDong (contoh: Laptop, Sepatu, Smartwatch, TWS)..."
                                class="w-full h-10 pl-9 pr-24 rounded-xl border border-slate-200 bg-slate-50/70 text-xs focus:bg-white focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100 transition-all">
                         <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3 text-xs" :class="isLoadingSuggestions ? 'animate-spin fa-spinner' : 'fa-magnifying-glass'"></i>
                         <div class="absolute right-1.5 flex items-center gap-1">

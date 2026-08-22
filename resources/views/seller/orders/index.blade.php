@@ -1,6 +1,6 @@
 <x-seller-layout>
     <x-slot name="title">
-        Pesanan Masuk Toko - {{ config('app.name', 'SakserShop') }}
+        Pesanan Masuk Toko - {{ config('app.name', 'NitipDong') }}
     </x-slot>
 
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-4" x-data="{

@@ -6,7 +6,7 @@
                 <div class="flex items-center gap-2.5">
                     <i class="fa-solid fa-circle-check text-cyan-600 text-sm"></i>
                     @if(request('is_from_login') && auth()->check())
-                        <span>Selamat datang kembali, <strong>{{ auth()->user()->name }}</strong>! Selamat berbelanja di SakserShop.</span>
+                        <span>Selamat datang kembali, <strong>{{ auth()->user()->name }}</strong>! Selamat berbelanja di NitipDong.</span>
                     @else
                         <span>{{ session('success') }}</span>
                     @endif
@@ -71,7 +71,7 @@
                             <div class="max-w-lg">
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 mb-2.5">
                                     <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                                    SakserShop Mega Mall 2026
+                                    NitipDong Mega Mall 2026
                                 </span>
                                 <h1 class="text-xl sm:text-3xl font-extrabold text-white leading-tight tracking-tight">
                                     Pesta Diskon Akbar & Produk Official Store Terpercaya
@@ -214,7 +214,7 @@
                     </div>
                     <div class="pt-3">
                         <a href="{{ route('store.register') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-cyan-400 hover:text-cyan-300">
-                            Mulai Jual di SakserShop <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                            Mulai Jual di NitipDong <i class="fa-solid fa-chevron-right text-[9px]"></i>
                         </a>
                     </div>
                 </div>
@@ -230,7 +230,7 @@
                     <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-cyan-50 border border-cyan-100 text-cyan-600 flex items-center justify-center text-lg mb-1.5 group-hover:scale-110 group-hover:bg-cyan-600 group-hover:text-white transition-all shadow-xs">
                         <i class="fa-solid fa-store"></i>
                     </div>
-                    <span class="text-[10px] sm:text-[11px] font-semibold text-slate-700 group-hover:text-cyan-700 leading-tight">SakserShop Mall</span>
+                    <span class="text-[10px] sm:text-[11px] font-semibold text-slate-700 group-hover:text-cyan-700 leading-tight">NitipDong Mall</span>
                 </a>
 
                 <a href="{{ url('/products?flash_sale=1') }}" class="flex flex-col items-center group">
@@ -279,7 +279,7 @@
                     <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-yellow-50 border border-yellow-100 text-yellow-600 flex items-center justify-center text-lg mb-1.5 group-hover:scale-110 group-hover:bg-yellow-600 group-hover:text-white transition-all shadow-xs">
                         <i class="fa-solid fa-coins"></i>
                     </div>
-                    <span class="text-[10px] sm:text-[11px] font-semibold text-slate-700 group-hover:text-yellow-700 leading-tight">Koin SakserShop</span>
+                    <span class="text-[10px] sm:text-[11px] font-semibold text-slate-700 group-hover:text-yellow-700 leading-tight">Koin NitipDong</span>
                 </a>
 
                 <a href="{{ route('customer.wishlist.index') }}" class="flex flex-col items-center group">
@@ -450,7 +450,7 @@
     </section>
     @endif
 
-    {{-- SakserShop Mall (Official Stores & Verified Brands Showcase) --}}
+    {{-- NitipDong Mall (Official Stores & Verified Brands Showcase) --}}
     @if(isset($officialStores) && $officialStores->count() > 0)
     <section class="page-container py-3">
         <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-card">
@@ -459,7 +459,7 @@
                     <div class="flex items-center gap-2">
                         <span class="text-sm sm:text-base font-black text-slate-900 tracking-tight flex items-center gap-1.5">
                             <i class="fa-solid fa-shield-check text-cyan-600"></i>
-                            SAKSERSHOP MALL
+                            NITIPDONG MALL
                         </span>
                         <span class="hidden sm:inline-block text-slate-300">•</span>
                         <div class="hidden sm:flex items-center gap-3 text-xs text-slate-500 font-medium">

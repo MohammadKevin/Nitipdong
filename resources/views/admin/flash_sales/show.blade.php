@@ -1,6 +1,6 @@
 <x-admin-layout>
     <x-slot name="title">
-        Kelola Produk Flash Sale: {{ $flashSale->title }} - {{ config('app.name', 'BelanjaIn') }}
+        Kelola Produk Flash Sale: {{ $flashSale->title }} - {{ config('app.name', 'NitipDong') }}
     </x-slot>
 
     <div class="mb-3">

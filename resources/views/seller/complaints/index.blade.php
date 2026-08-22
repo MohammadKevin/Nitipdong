@@ -1,6 +1,6 @@
 <x-seller-layout>
     <x-slot name="title">
-        Pusat Komplain & Retur - {{ config('app.name', 'SakserShop') }}
+        Pusat Komplain & Retur - {{ config('app.name', 'NitipDong') }}
     </x-slot>
 
     <div class="space-y-6" x-data="{

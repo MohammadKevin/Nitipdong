@@ -90,7 +90,7 @@ class OrderManagementController extends Controller
                 AppNotification::send(
                     $order->user_id,
                     'Pesanan Telah Selesai',
-                    "Pesanan #{$order->invoice_number} telah ditandai selesai. Terima kasih telah berbelanja di SakserShop!",
+                    "Pesanan #{$order->invoice_number} telah ditandai selesai. Terima kasih telah berbelanja di NitipDong!",
                     'order',
                     route('customer.dashboard')
                 );

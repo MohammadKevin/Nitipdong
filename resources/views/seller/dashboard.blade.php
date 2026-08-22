@@ -1,6 +1,6 @@
 <x-seller-layout>
     <x-slot name="title">
-        Dashboard Toko - {{ config('app.name', 'SakserShop') }}
+        Dashboard Toko - {{ config('app.name', 'NitipDong') }}
     </x-slot>
 
     @php

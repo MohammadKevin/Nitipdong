@@ -189,7 +189,7 @@ class CartController extends Controller
             'quantity'        => $c->quantity,
             'stock'           => $c->product?->stock ?? 99,
             'variant'         => $c->variant,
-            'store_name'      => $c->product?->store?->name ?? 'SakserShop',
+            'store_name'      => $c->product?->store?->name ?? 'NitipDong',
             'subtotal'        => ($c->product ? $c->product->final_price : 0) * $c->quantity,
             'formatted_subtotal' => 'Rp ' . number_format(($c->product ? $c->product->final_price : 0) * $c->quantity, 0, ',', '.'),
             'update_url'      => route('customer.cart.update', $c),
@@ -284,7 +284,7 @@ class CartController extends Controller
 
         session(['applied_voucher' => $voucher->code]);
 
-        $source = $voucher->is_store_voucher ? ('Toko ' . ($voucher->store->name ?? '')) : 'SakserShop';
+        $source = $voucher->is_store_voucher ? ('Toko ' . ($voucher->store->name ?? '')) : 'NitipDong';
         return back()->with('success', "Voucher {$source} ({$voucher->code}) berhasil digunakan!");
     }
 

@@ -1,1 +1,1 @@
-<img src="{{ asset('img/belanjain-logo.svg') }}" alt="BelanjaIn Logo" {{ $attributes->merge(['class' => 'rounded-lg shadow-sm object-contain']) }}>
+<img src="{{ asset('img/saksershop-logo.png') }}" alt="NitipDong Logo" {{ $attributes->merge(['class' => 'rounded-lg shadow-md object-cover']) }}>

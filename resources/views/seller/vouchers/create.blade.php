@@ -1,6 +1,6 @@
 <x-seller-layout>
     <x-slot name="title">
-        Buat Voucher Toko Baru - {{ config('app.name', 'BelanjaIn') }}
+        Buat Voucher Toko Baru - {{ config('app.name', 'NitipDong') }}
     </x-slot>
 
     <div class="mb-3">

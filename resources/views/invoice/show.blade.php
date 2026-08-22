@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Invoice #{{ $order->invoice_number }} — SakserShop</title>
+    <title>Invoice #{{ $order->invoice_number }} — NitipDong</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -37,8 +37,8 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200 gap-4">
             <div>
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-xl bg-cyan-700 text-white flex items-center justify-center font-bold text-sm">S</div>
-                    <span class="font-extrabold text-xl text-slate-900 tracking-tight">Sakser<span class="text-cyan-700">Shop</span></span>
+                    <div class="w-8 h-8 rounded-xl bg-cyan-700 text-white flex items-center justify-center font-bold text-sm">N</div>
+                    <span class="font-extrabold text-xl text-slate-900 tracking-tight">Nitip<span class="text-cyan-700">Dong</span></span>
                 </div>
                 <p class="text-[11px] text-slate-400 mt-1">Platform Belanja Online Terpercaya di Indonesia</p>
             </div>
@@ -53,7 +53,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 py-6 border-b border-slate-100 text-xs">
             <div>
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Diterbitkan Atas Nama:</span>
-                <p class="font-bold text-slate-900 text-sm">{{ $order->store->name ?? 'Official Store SakserShop' }}</p>
+                <p class="font-bold text-slate-900 text-sm">{{ $order->store->name ?? 'Official Store NitipDong' }}</p>
                 <p class="text-slate-500 mt-0.5">{{ $order->store->address ?? 'Indonesia' }}</p>
                 <p class="text-slate-600 mt-2">
                     <strong>Metode Pembayaran:</strong> {{ strtoupper($order->payment_method ?? 'QRIS') }}
@@ -127,7 +127,7 @@
                     {{ $st['label'] }}
                 </span>
                 <p class="text-[10px] text-slate-400 mt-2 leading-relaxed">
-                    Invoice ini merupakan bukti pembayaran yang sah dan diterbitkan secara elektronik oleh sistem SakserShop.
+                    Invoice ini merupakan bukti pembayaran yang sah dan diterbitkan secara elektronik oleh sistem NitipDong.
                 </p>
             </div>
 
@@ -161,8 +161,8 @@
 
         {{-- Footer --}}
         <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
-            <span>Terima kasih telah berbelanja di SakserShop</span>
-            <span>www.saksershop.com</span>
+            <span>Terima kasih telah berbelanja di NitipDong</span>
+            <span>www.nitipdong.com</span>
         </div>
     </div>
 

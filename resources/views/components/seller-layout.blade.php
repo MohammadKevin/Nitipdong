@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'Seller Center - ' . config('app.name', 'SakserShop') }}</title>
+    <title>{{ $title ?? 'Seller Center - ' . config('app.name', 'NitipDong') }}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,10 +29,12 @@
                 <div>
                     <div class="flex items-center gap-2.5 px-3 py-1 mb-5">
                         <a href="{{ route('seller.dashboard') }}" class="flex items-center gap-2.5 group">
-                            <img src="{{ asset('img/belanjain-logo.svg') }}" alt="BelanjaIn Logo" class="w-8 h-8 object-contain shrink-0">
+                            <div class="w-8 h-8 rounded-lg overflow-hidden border border-cyan-400/30 bg-slate-950 flex items-center justify-center shrink-0">
+                                <img src="{{ asset('img/saksershop-logo.png') }}" alt="NitipDong Logo" class="w-full h-full object-cover">
+                            </div>
                             <div class="min-w-0">
                                 <div class="flex items-center gap-2">
-                                    <p class="font-bold text-white text-sm leading-tight tracking-tight">Sakser<span class="text-cyan-400 font-extrabold">Shop</span></p>
+                                    <p class="font-bold text-white text-sm leading-tight tracking-tight">Nitip<span class="text-cyan-400 font-extrabold">Dong</span></p>
                                     <span class="text-[10px] font-semibold text-cyan-400 bg-cyan-950/60 border border-cyan-800/50 px-1.5 py-0.5 rounded tracking-normal">Seller Center</span>
                                 </div>
                             </div>

@@ -248,7 +248,7 @@
                     <span class="w-2.5 h-2.5 rounded-full bg-cyan-600 animate-pulse"></span>
                     <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Akun & Riwayat Belanja</h1>
                 </div>
-                <p class="text-xs text-slate-500 mt-1">Pantau status pesanan, kelola alamat pengiriman, dan nikmati keuntungan member SakserShop</p>
+                <p class="text-xs text-slate-500 mt-1">Pantau status pesanan, kelola alamat pengiriman, dan nikmati keuntungan member NitipDong</p>
             </div>
             <div class="flex items-center gap-2 relative z-10 shrink-0">
                 <a href="{{ route('customer.wishlist.index') }}" class="h-9 px-3.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs flex items-center gap-1.5 transition-colors">
@@ -485,7 +485,7 @@
                                     @elseif($highlightOrder->status === 'shipped')
                                         Kurir sedang mengantar paket ke alamat Anda (No. Resi: {{ $highlightOrder->tracking_number ?: 'Dalam Perjalanan' }})
                                     @else
-                                        Pesanan sedang dikemas oleh toko {{ $highlightOrder->store?->name ?? 'Official Store SakserShop' }}
+                                        Pesanan sedang dikemas oleh toko {{ $highlightOrder->store?->name ?? 'Official Store NitipDong' }}
                                     @endif
                                 </h3>
 
@@ -749,7 +749,7 @@
                                             @else
                                                 <div class="flex items-center gap-1.5 font-bold text-slate-800">
                                                     <i class="fa-solid fa-store text-cyan-700 text-xs"></i>
-                                                    <span>{{ $order->store->name ?? 'Official Store SakserShop' }}</span>
+                                                    <span>{{ $order->store->name ?? 'Official Store NitipDong' }}</span>
                                                 </div>
                                             @endif
                                             <span class="text-slate-300">|</span>
@@ -1093,7 +1093,7 @@
                                 </div>
                                 <div>
                                     <h3 class="font-extrabold text-sm text-slate-900">Rekomendasi Pilihan Untuk Anda</h3>
-                                    <p class="text-[11px] text-slate-400">Produk terlaris dan penawaran terbaik di SakserShop Official</p>
+                                    <p class="text-[11px] text-slate-400">Produk terlaris dan penawaran terbaik di NitipDong Official</p>
                                 </div>
                             </div>
                             <a href="{{ url('/products') }}" class="text-xs font-bold text-cyan-700 hover:underline flex items-center gap-1">

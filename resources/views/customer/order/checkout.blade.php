@@ -381,7 +381,7 @@
                 @foreach($groupedCarts as $storeId => $items)
                     @php
                         $storeObj = $items->first()->product->store ?? null;
-                        $storeName = $storeObj ? $storeObj->name : 'Official Store SakserShop';
+                        $storeName = $storeObj ? $storeObj->name : 'Official Store NitipDong';
                         $shippingInfo = $storeShippingData[$storeId] ?? null;
                         $storeOriginCity = $shippingInfo['origin_city'] ?? ($storeObj?->effective_city ?? 'Jakarta Pusat');
                     @endphp

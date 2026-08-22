@@ -1,6 +1,6 @@
 <x-admin-layout>
     <x-slot name="title">
-        Edit Kategori: {{ $category->name }} - {{ config('app.name', 'BelanjaIn') }}
+        Edit Kategori: {{ $category->name }} - {{ config('app.name', 'NitipDong') }}
     </x-slot>
 
     <div class="mb-3">
