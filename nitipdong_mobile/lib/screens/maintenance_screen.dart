@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
-import '../widgets/server_config_dialog.dart';
 import 'main_nav_screen.dart';
 
 class MaintenanceScreen extends StatefulWidget {
@@ -22,7 +21,6 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
   bool _isChecking = false;
   late String _currentTitle;
   late String _currentMessage;
-  int _devTapCount = 0;
 
   @override
   void initState() {
@@ -61,41 +59,14 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
     }
   }
 
-  void _openDevSettings() {
-    ServerConfigDialog.show(context, onSaved: () {
-      _recheckStatus();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.accentNavy,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        actions: [
-          // Developer / Server Config Quick Access
-          IconButton(
-            tooltip: 'Pengaturan Server & Mode Pengembang',
-            icon: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.dns_rounded, color: Colors.cyanAccent, size: 18),
-            ),
-            onPressed: _openDevSettings,
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -122,7 +93,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 28),
 
                 // Badge
                 Container(
@@ -182,7 +153,7 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 36),
 
                 // Retry Button
                 SizedBox(
@@ -210,24 +181,12 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> {
                           ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 14),
 
-                // App info & Secret tap trigger for Developer Mode
-                GestureDetector(
-                  onTap: () {
-                    _devTapCount++;
-                    if (_devTapCount >= 3) {
-                      _devTapCount = 0;
-                      _openDevSettings();
-                    }
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'NitipDong Platform • Versi ${ApiService.currentAppVersion}',
-                      style: const TextStyle(color: Colors.white38, fontSize: 11),
-                    ),
-                  ),
+                // App info
+                Text(
+                  'NitipDong Platform • Versi ${ApiService.currentAppVersion}',
+                  style: const TextStyle(color: Colors.white38, fontSize: 11),
                 ),
               ],
             ),

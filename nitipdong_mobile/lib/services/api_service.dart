@@ -12,9 +12,8 @@ class ApiService {
   // Current Installed Mobile App Version
   static const String currentAppVersion = '1.0.4';
 
-  // Default API Base URL (Production - budayakita.com)
-  // Can be configured dynamically from app UI or loaded from SharedPreferences
-  static String baseUrl = 'https://budayakita.com/api/v1';
+  // Fixed Production Backend API URL (budayakita.com)
+  static const String baseUrl = 'https://budayakita.com/api/v1';
 
   // Global Maintenance Interception & Auto-Logout Callback
   static bool isMaintenanceRedirecting = false;
@@ -50,25 +49,7 @@ class ApiService {
   }
 
   static Future<String> getBaseUrl() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedUrl = prefs.getString('api_base_url');
-    if (savedUrl != null && savedUrl.isNotEmpty) {
-      baseUrl = savedUrl;
-    }
     return baseUrl;
-  }
-
-  static Future<void> setBaseUrl(String url) async {
-    baseUrl = url.trim().replaceAll(RegExp(r'/+$'), '');
-    if (!baseUrl.endsWith('/api/v1')) {
-      if (baseUrl.endsWith('/api')) {
-        baseUrl = '$baseUrl/v1';
-      } else {
-        baseUrl = '$baseUrl/api/v1';
-      }
-    }
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('api_base_url', baseUrl);
   }
 
   // Token Management

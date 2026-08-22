@@ -8,7 +8,6 @@ import '../../widgets/category_item.dart';
 import '../../widgets/flash_sale_section.dart';
 import '../../widgets/in_app_update_banner.dart';
 import '../../widgets/product_card.dart';
-import '../../widgets/server_config_dialog.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -114,21 +113,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
-          // Server Config / Dev Tools icon
-          IconButton(
-            tooltip: 'Pengaturan Server API',
-            icon: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryLight,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(Icons.dns_rounded, color: AppTheme.primaryDark, size: 16),
-            ),
-            onPressed: () => ServerConfigDialog.show(context, onSaved: () {
-              productProvider.fetchHomeData();
-            }),
-          ),
           // Notification icon
           IconButton(
             icon: const Icon(Icons.notifications_outlined, color: AppTheme.textPrimary, size: 22),
