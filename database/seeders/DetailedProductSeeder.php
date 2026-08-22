@@ -10,391 +10,554 @@ class DetailedProductSeeder extends Seeder
 {
     public function run(): void
     {
-        // Pastikan ada seller dan store
-        $store = $this->ensureStoreExists();
+        // 1. Inisialisasi Kategori
+        $categories = $this->createCategories();
 
-        // Pastikan categories ada
-        $this->ensureCategories();
+        // 2. Data Toko & Produk (Minimal 5-6 Produk per Toko)
+        $storeDataList = $this->getStoresAndProducts();
 
-        // Data produk lengkap
-        $products = $this->getProducts();
+        $totalStores = 0;
+        $totalProducts = 0;
 
-        $createdCount = 0;
-        foreach ($products as $productData) {
-            $category = Category::where('name', $productData['category'])->first();
-
-            if (!$category) {
-                $category = Category::inRandomOrder()->first();
-            }
-
-            Product::create([
-                'uuid' => (string) Str::uuid(),
-                'store_id' => $store->id,
-                'category_id' => $category->id,
-                'name' => $productData['name'],
-                'slug' => Str::slug($productData['name']) . '-' . Str::random(5),
-                'description' => $productData['description'],
-                'price' => $productData['price'],
-                'discount_percentage' => $productData['discount_percentage'],
-                'rating' => $productData['rating'],
-                'sold_count' => $productData['sold_count'],
-                'stock' => $productData['stock'],
-                'image' => $productData['image'] ?? null,
-                'images' => $productData['images'] ?? null,
-                'badge' => $productData['badge'],
-                'is_active' => true,
-                'is_featured' => $productData['is_featured'],
-            ]);
-
-            $createdCount++;
-        }
-
-        $this->displaySummary($createdCount, $products);
-    }
-
-    private function ensureStoreExists(): Store
-    {
-        $store = Store::where('status', 'approved')->first();
-
-        if (!$store) {
+        foreach ($storeDataList as $item) {
             $seller = User::firstOrCreate(
-                ['email' => 'seller@belanjain.com'],
+                ['email' => $item['seller_email']],
                 [
-                    'name' => 'NitipDong Official Store',
-                    'password' => bcrypt('password'),
-                    'role' => 'seller',
+                    'name'              => $item['seller_name'],
+                    'password'          => bcrypt('password'),
+                    'role'              => 'seller',
+                    'phone'             => $item['phone'],
                     'email_verified_at' => now(),
                 ]
             );
 
-            $store = Store::create([
-                'user_id' => $seller->id,
-                'name' => 'NitipDong Official Store',
-                'slug' => 'nitipdong-official',
-                'description' => 'Toko resmi dengan produk berkualitas dan harga terbaik se-Indonesia',
-                'status' => 'approved',
-                'city' => 'Jakarta Pusat',
-            ]);
+            $store = Store::updateOrCreate(
+                ['slug' => $item['slug']],
+                [
+                    'user_id'     => $seller->id,
+                    'name'        => $item['name'],
+                    'description' => $item['description'],
+                    'status'      => 'approved',
+                    'city'        => $item['city'],
+                    'address'     => $item['address'],
+                    'logo'        => $item['logo'],
+                    'banner'      => $item['banner'],
+                ]
+            );
+
+            $totalStores++;
+
+            $catModel = $categories[$item['category_key']] ?? $categories['Elektronik'];
+
+            foreach ($item['products'] as $prod) {
+                Product::updateOrCreate(
+                    [
+                        'store_id' => $store->id,
+                        'name'     => $prod['name'],
+                    ],
+                    [
+                        'uuid'                => (string) Str::uuid(),
+                        'category_id'         => $catModel->id,
+                        'slug'                => Str::slug($prod['name']) . '-' . Str::random(4),
+                        'description'         => $prod['description'],
+                        'price'               => $prod['price'],
+                        'discount_percentage' => $prod['discount_percentage'],
+                        'rating'              => $prod['rating'],
+                        'sold_count'          => $prod['sold_count'],
+                        'stock'               => $prod['stock'],
+                        'image'               => $prod['image'],
+                        'images'              => $prod['images'] ?? [$prod['image']],
+                        'badge'               => $prod['badge'],
+                        'is_active'           => true,
+                        'is_featured'         => $prod['is_featured'] ?? false,
+                    ]
+                );
+                $totalProducts++;
+            }
         }
 
-        return $store;
+        $this->command->info('');
+        $this->command->info("✅ Berhasil membuat {$totalStores} Toko Resmi & {$totalProducts} Produk Demo HD!");
+        $this->command->line("   • Eiger Adventure Official (Outdoor & Fashion) - 6 Produk");
+        $this->command->line("   • Apple iBox Official Store (Elektronik & Gadget) - 6 Produk");
+        $this->command->line("   • Nike Official Store Indonesia (Pakaian & Olahraga) - 6 Produk");
+        $this->command->line("   • Kopi Nusantara & Makanan Sehat (Makanan & Minuman) - 6 Produk");
+        $this->command->line("   • Autospeed Racing & Garage (Otomotif & Aksesoris) - 6 Produk");
+        $this->command->info('');
     }
 
-    private function ensureCategories(): void
+    private function createCategories(): array
     {
-        $categories = ['Elektronik', 'Pakaian', 'Makanan', 'Otomotif'];
+        $cats = [
+            'Outdoor'    => ['name' => 'Outdoor & Petualangan', 'slug' => 'outdoor-petualangan'],
+            'Elektronik' => ['name' => 'Elektronik & Gadget',   'slug' => 'elektronik-gadget'],
+            'Pakaian'    => ['name' => 'Pakaian & Olahraga',     'slug' => 'pakaian-olahraga'],
+            'Makanan'    => ['name' => 'Makanan & Minuman',      'slug' => 'makanan-minuman'],
+            'Otomotif'   => ['name' => 'Otomotif & Aksesoris',   'slug' => 'otomotif-aksesoris'],
+        ];
 
-        foreach ($categories as $catName) {
-            Category::firstOrCreate(
-                ['name' => $catName],
-                ['slug' => Str::slug($catName)]
+        $models = [];
+        foreach ($cats as $key => $data) {
+            $models[$key] = Category::firstOrCreate(
+                ['slug' => $data['slug']],
+                ['name' => $data['name']]
             );
         }
+
+        return $models;
     }
 
-    private function getProducts(): array
+    private function getStoresAndProducts(): array
     {
         return [
-            // ELEKTRONIK
+            // ══════════════════════════════════════════════════
+            // 1. EIGER ADVENTURE OFFICIAL STORE (OUTDOOR)
+            // ══════════════════════════════════════════════════
             [
-                'name' => 'iPhone 15 Pro Max 256GB Natural Titanium',
-                'description' => 'iPhone 15 Pro Max dengan chip A17 Pro, kamera 48MP dengan 5x optical zoom, layar Super Retina XDR 6.7", ProMotion 120Hz, Dynamic Island, baterai hingga 29 jam video playback. Frame titanium premium dengan desain paling ringan. Sudah termasuk: USB-C cable, dokumentasi. Garansi resmi iBox 1 tahun.',
-                'price' => 23999000,
-                'discount_percentage' => 5,
-                'rating' => 4.95,
-                'sold_count' => 856,
-                'stock' => 15,
-                'badge' => 'new',
-                'is_featured' => true,
-                'category' => 'Elektronik',
-                'image' => 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800&auto=format&fit=crop&q=80',
-                'images' => [
-                    'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800&auto=format&fit=crop&q=80',
+                'name'         => 'Eiger Adventure Official',
+                'slug'         => 'eiger-adventure-official',
+                'seller_name'  => 'Eigerindo Multi Produk',
+                'seller_email' => 'seller.eiger@nitipdong.com',
+                'phone'        => '081298765431',
+                'city'         => 'Bandung',
+                'address'      => 'Jl. Sumatera No. 23, Kota Bandung, Jawa Barat',
+                'description'  => 'Toko resmi Eiger Adventure Indonesia. Perlengkapan mendaki, tas ransel carrier, jaket outdoor, dan gear petualangan terbaik.',
+                'category_key' => 'Outdoor',
+                'logo'         => 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=200&auto=format&fit=crop&q=80',
+                'banner'       => 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&auto=format&fit=crop&q=80',
+                'products'     => [
+                    [
+                        'name' => 'Eiger Carrier Rhinos 60L Hiking Backpack Black',
+                        'description' => 'Tas gunung carrier Eiger kapasitas 60L dengan sistem suspensi backsystem ergonomis, bahan Cordura ripstop ultra durable, include raincover. Cocok untuk pendakian 3-5 hari.',
+                        'price' => 1299000,
+                        'discount_percentage' => 10,
+                        'rating' => 4.9,
+                        'sold_count' => 1420,
+                        'stock' => 35,
+                        'badge' => 'bestseller',
+                        'is_featured' => true,
+                        'image' => 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&auto=format&fit=crop&q=80',
+                        'images' => [
+                            'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&auto=format&fit=crop&q=80',
+                            'https://images.unsplash.com/photo-1577733966973-d680bffd2e80?w=800&auto=format&fit=crop&q=80',
+                        ],
+                    ],
+                    [
+                        'name' => 'Eiger Jacket WS X-Torrent Waterproof Windproof',
+                        'description' => 'Jaket outdoor Eiger wanita dan pria dengan teknologi Tropic Waterproof 10.000mm, breathable mesh inner, seam-sealed taped, hoodie adjustable. Melindungi dari hujan badai dan angin kencang.',
+                        'price' => 849000,
+                        'discount_percentage' => 15,
+                        'rating' => 4.85,
+                        'sold_count' => 980,
+                        'stock' => 50,
+                        'badge' => 'hot',
+                        'is_featured' => true,
+                        'image' => 'https://images.unsplash.com/photo-1548883354-7622d03aca27?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Eiger Pollock Mid Cut Waterproof Hiking Boots',
+                        'description' => 'Sepatu gunung Eiger dengan upper nubuck leather & Tropic Waterproof membrane, outsole Vibram grip anti slip di medan bebatuan dan lumpur. Insole Ortholite empuk anti lecet.',
+                        'price' => 1499000,
+                        'discount_percentage' => 20,
+                        'rating' => 4.92,
+                        'sold_count' => 640,
+                        'stock' => 28,
+                        'badge' => 'bestseller',
+                        'is_featured' => true,
+                        'image' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Eiger Shiraishi Quickdry Stretch Cargo Pants Olive',
+                        'description' => 'Celana panjang outdoor Eiger bahan Tropic Repellent quick dry yang cepat kering saat basah, elastis lentur bergerak bebas, 6 kantong cargo luas.',
+                        'price' => 429000,
+                        'discount_percentage' => 5,
+                        'rating' => 4.75,
+                        'sold_count' => 2100,
+                        'stock' => 110,
+                        'badge' => null,
+                        'image' => 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Eiger X-Tormentor Tactical Waist Bag 4L',
+                        'description' => 'Tas pinggang selempang waistbag Eiger dengan kompartemen utama luas, organizer barang esensial, resleting YKK waterproof, material polyester 600D kuat.',
+                        'price' => 259000,
+                        'discount_percentage' => 25,
+                        'rating' => 4.88,
+                        'sold_count' => 3890,
+                        'stock' => 200,
+                        'badge' => 'sale',
+                        'image' => 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Eiger Fortress 4 Person Camping Dome Tent',
+                        'description' => 'Tenda camping kapasitas 4 orang dengan vestibule teras depan luas, frame aluminium alloy kokoh tahan angin gunung, flysheet 3000mm waterproof PU coating.',
+                        'price' => 2199000,
+                        'discount_percentage' => 10,
+                        'rating' => 4.95,
+                        'sold_count' => 310,
+                        'stock' => 15,
+                        'badge' => 'new',
+                        'image' => 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&auto=format&fit=crop&q=80',
+                    ],
                 ],
             ],
 
+            // ══════════════════════════════════════════════════
+            // 2. APPLE IBOX OFFICIAL STORE (ELEKTRONIK)
+            // ══════════════════════════════════════════════════
             [
-                'name' => 'Samsung Galaxy S24 Ultra 12/512GB Titanium Black',
-                'description' => 'Samsung Galaxy S24 Ultra dengan Snapdragon 8 Gen 3, kamera 200MP, layar Dynamic AMOLED 2X 6.8" 120Hz, S Pen built-in, Galaxy AI features. Baterai 5000mAh dengan fast charging 45W. Design titanium premium tahan gores. Paket: charger 45W, cable USB-C, S Pen tips, clear case. SEIN 1 tahun.',
-                'price' => 21999000,
-                'discount_percentage' => 8,
-                'rating' => 4.92,
-                'sold_count' => 1243,
-                'stock' => 23,
-                'badge' => 'bestseller',
-                'is_featured' => true,
-                'category' => 'Elektronik',
-                'image' => 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=800&auto=format&fit=crop&q=80',
-                'images' => [
-                    'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1580910051074-3eb694886505?w=800&auto=format&fit=crop&q=80',
+                'name'         => 'iBox Apple Official Store',
+                'slug'         => 'ibox-apple-official-store',
+                'seller_name'  => 'PT Erajaya Swasembada Tbk',
+                'seller_email' => 'seller.ibox@nitipdong.com',
+                'phone'        => '081298765432',
+                'city'         => 'Jakarta Selatan',
+                'address'      => 'Mall Pacific Place Lt. 2, SCBD, Jakarta Selatan',
+                'description'  => 'Reseller resmi produk Apple di Indonesia. iPhone, iPad, Mac, Apple Watch, AirPods dengan garansi resmi 1 tahun.',
+                'category_key' => 'Elektronik',
+                'logo'         => 'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=200&auto=format&fit=crop&q=80',
+                'banner'       => 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=1200&auto=format&fit=crop&q=80',
+                'products'     => [
+                    [
+                        'name' => 'Apple iPhone 15 Pro Max 256GB Natural Titanium',
+                        'description' => 'iPhone 15 Pro Max chip A17 Pro, kamera 48MP dengan 5x optical zoom, layar Super Retina XDR 6.7" ProMotion 120Hz, bodi Titanium ringan. Garansi resmi iBox 1 tahun.',
+                        'price' => 23999000,
+                        'discount_percentage' => 5,
+                        'rating' => 4.95,
+                        'sold_count' => 856,
+                        'stock' => 25,
+                        'badge' => 'bestseller',
+                        'is_featured' => true,
+                        'image' => 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800&auto=format&fit=crop&q=80',
+                        'images' => [
+                            'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800&auto=format&fit=crop&q=80',
+                            'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=800&auto=format&fit=crop&q=80',
+                        ],
+                    ],
+                    [
+                        'name' => 'Apple MacBook Pro 14" M3 Pro 18GB/512GB Space Black',
+                        'description' => 'MacBook Pro 14 inch dengan chip M3 Pro (12-core CPU, 18-core GPU), RAM 18GB, SSD 512GB. Layar Liquid Retina XDR 120Hz, baterai hingga 18 jam.',
+                        'price' => 39999000,
+                        'discount_percentage' => 3,
+                        'rating' => 4.98,
+                        'sold_count' => 432,
+                        'stock' => 12,
+                        'badge' => 'new',
+                        'is_featured' => true,
+                        'image' => 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Apple iPad Pro 11" M2 WiFi 128GB Space Gray',
+                        'description' => 'iPad Pro 11 inch chip M2, Liquid Retina display 120Hz ProMotion, kamera 12MP + LiDAR sensor. Mendukung Apple Pencil 2 dan Magic Keyboard.',
+                        'price' => 14999000,
+                        'discount_percentage' => 7,
+                        'rating' => 4.91,
+                        'sold_count' => 724,
+                        'stock' => 30,
+                        'badge' => 'hot',
+                        'image' => 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Apple Watch Series 9 GPS 45mm Midnight Aluminium',
+                        'description' => 'Apple Watch Series 9 chip S9 SiP, layar Always-On 2000 nits, fitur Double Tap gesture, sensor ECG, blood oxygen, dan crash detection.',
+                        'price' => 7999000,
+                        'discount_percentage' => 10,
+                        'rating' => 4.93,
+                        'sold_count' => 1534,
+                        'stock' => 40,
+                        'badge' => 'bestseller',
+                        'image' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Apple AirPods Pro Gen 2 USB-C MagSafe Case',
+                        'description' => 'AirPods Pro Gen 2 dengan Active Noise Cancellation 2x lebih kuat, Adaptive Audio, Transparency mode, dan casing pengisian daya USB-C MagSafe.',
+                        'price' => 3999000,
+                        'discount_percentage' => 12,
+                        'rating' => 4.94,
+                        'sold_count' => 3210,
+                        'stock' => 85,
+                        'badge' => 'bestseller',
+                        'image' => 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Apple Magic Keyboard with Touch ID & Numeric Keypad',
+                        'description' => 'Keyboard nirkabel Apple dengan sensor Touch ID untuk login cepat dan aman, keypad numerik lengkap, baterai tahan sebulan sekali charge.',
+                        'price' => 2799000,
+                        'discount_percentage' => 5,
+                        'rating' => 4.86,
+                        'sold_count' => 510,
+                        'stock' => 20,
+                        'badge' => null,
+                        'image' => 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=80',
+                    ],
                 ],
             ],
 
+            // ══════════════════════════════════════════════════
+            // 3. NIKE OFFICIAL STORE INDONESIA (FASHION & SPORT)
+            // ══════════════════════════════════════════════════
             [
-                'name' => 'MacBook Pro 14" M3 Pro 18GB/512GB Space Black',
-                'description' => 'MacBook Pro 14 inch dengan chip M3 Pro (12-core CPU, 18-core GPU), RAM 18GB unified memory, SSD 512GB. Layar Liquid Retina XDR 14.2" dengan ProMotion 120Hz, 3 Thunderbolt 4 ports, HDMI, SD card slot, MagSafe 3. Baterai hingga 18 jam. Garansi resmi Apple Indonesia 1 tahun. Gratis: USB-C to MagSafe cable, 96W adapter.',
-                'price' => 39999000,
-                'discount_percentage' => 3,
-                'rating' => 4.98,
-                'sold_count' => 432,
-                'stock' => 8,
-                'badge' => 'new',
-                'is_featured' => true,
-                'category' => 'Elektronik',
-                'image' => 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80',
-                'images' => [
-                    'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=800&auto=format&fit=crop&q=80',
+                'name'         => 'Nike Official Store Indonesia',
+                'slug'         => 'nike-official-store-indonesia',
+                'seller_name'  => 'PT Mitra Adiperkasa Tbk',
+                'seller_email' => 'seller.nike@nitipdong.com',
+                'phone'        => '081298765433',
+                'city'         => 'Jakarta Pusat',
+                'address'      => 'Grand Indonesia Mall East Mall Lt. 3, Jakarta Pusat',
+                'description'  => 'Toko resmi Nike Indonesia. Sepatu lari, sneakers ikonik, pakaian olahraga Dri-FIT, dan aksesoris original bergaransi.',
+                'category_key' => 'Pakaian',
+                'logo'         => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&auto=format&fit=crop&q=80',
+                'banner'       => 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=1200&auto=format&fit=crop&q=80',
+                'products'     => [
+                    [
+                        'name' => 'Nike Air Max 90 Premium White Black Original',
+                        'description' => 'Sneakers legendaris Nike Air Max 90 dengan bantalan Max Air empuk, upper kulit asli kombinasi mesh breathable, sol karet wafel tahan aus.',
+                        'price' => 1899000,
+                        'discount_percentage' => 20,
+                        'rating' => 4.89,
+                        'sold_count' => 3421,
+                        'stock' => 60,
+                        'badge' => 'bestseller',
+                        'is_featured' => true,
+                        'image' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format&fit=crop&q=80',
+                        'images' => [
+                            'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format&fit=crop&q=80',
+                            'https://images.unsplash.com/photo-1607522370275-f14206abe5d3?w=800&auto=format&fit=crop&q=80',
+                        ],
+                    ],
+                    [
+                        'name' => 'Nike Pegasus 40 Road Running Shoes Black White',
+                        'description' => 'Sepatu lari andalan Nike Pegasus 40 dengan bantalan ganda Zoom Air di depan dan tumit, busa React super empuk untuk jarak 5K hingga Marathon.',
+                        'price' => 2099000,
+                        'discount_percentage' => 15,
+                        'rating' => 4.93,
+                        'sold_count' => 2100,
+                        'stock' => 45,
+                        'badge' => 'hot',
+                        'is_featured' => true,
+                        'image' => 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Nike Dunk Low Retro White Black Panda',
+                        'description' => 'Sneaker ikonik Nike Dunk Low warna Panda White Black yang sangat populer. Kulit premium halus, desain timeless cocok untuk segala outfit.',
+                        'price' => 1649000,
+                        'discount_percentage' => 0,
+                        'rating' => 4.96,
+                        'sold_count' => 4520,
+                        'stock' => 30,
+                        'badge' => 'bestseller',
+                        'is_featured' => true,
+                        'image' => 'https://images.unsplash.com/photo-1607522370275-f14206abe5d3?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Nike Sportswear Club Fleece Pullover Hoodie Black',
+                        'description' => 'Hoodie fleece katun premium Nike dengan bagian dalam lembut hangat, saku kangguru besar, logo bordir Nike Futura di dada.',
+                        'price' => 799000,
+                        'discount_percentage' => 25,
+                        'rating' => 4.82,
+                        'sold_count' => 3190,
+                        'stock' => 90,
+                        'badge' => 'sale',
+                        'image' => 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Nike Pro Dri-FIT Men Tight Training T-Shirt',
+                        'description' => 'Baju kompresi olahraga pria Nike Pro dengan teknologi Dri-FIT penyerap keringat cepat, bahan elastis 4 arah nyaman untuk gym dan fitness.',
+                        'price' => 459000,
+                        'discount_percentage' => 10,
+                        'rating' => 4.79,
+                        'sold_count' => 1840,
+                        'stock' => 120,
+                        'badge' => null,
+                        'image' => 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Nike Brasilia 9.5 Training Duffel Bag 60L',
+                        'description' => 'Tas olahraga duffel bag Nike kapasitas 60L dengan kompartemen sepatu terpisah, saku botol minum, tali bahu empuk yang nyaman.',
+                        'price' => 599000,
+                        'discount_percentage' => 20,
+                        'rating' => 4.87,
+                        'sold_count' => 1230,
+                        'stock' => 55,
+                        'badge' => null,
+                        'image' => 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&auto=format&fit=crop&q=80',
+                    ],
                 ],
             ],
 
+            // ══════════════════════════════════════════════════
+            // 4. KOPI NUSANTARA & MAKANAN SEHAT (KULINER)
+            // ══════════════════════════════════════════════════
             [
-                'name' => 'ASUS ROG Strix G16 RTX 4060 i7-13650HX 16GB/512GB',
-                'description' => 'Laptop gaming ASUS ROG dengan processor Intel Core i7-13650HX (14-core), NVIDIA GeForce RTX 4060 8GB, RAM 16GB DDR5 4800MHz (upgradeable), SSD 512GB NVMe PCIe 4.0. Layar 16" FHD 165Hz, RGB keyboard per-key, cooling system dual-fan. Windows 11 Home + Office. Bonus: gaming mouse ROG, backpack ROG. Garansi 2 tahun.',
-                'price' => 19999000,
-                'discount_percentage' => 12,
-                'rating' => 4.87,
-                'sold_count' => 967,
-                'stock' => 31,
-                'badge' => 'hot',
-                'is_featured' => true,
-                'category' => 'Elektronik',
-                'image' => 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=800&auto=format&fit=crop&q=80',
-                'images' => [
-                    'https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=800&auto=format&fit=crop&q=80',
+                'name'         => 'Kopi Nusantara & Makanan Sehat',
+                'slug'         => 'kopi-nusantara-makanan-sehat',
+                'seller_name'  => 'Budi Hartono Santoso',
+                'seller_email' => 'seller.kopi@nitipdong.com',
+                'phone'        => '081298765434',
+                'city'         => 'Medan',
+                'address'      => 'Jl. Gatot Subroto No. 88, Kota Medan, Sumatera Utara',
+                'description'  => 'Distributor biji kopi specialty nusantara, madu hutan liar murni, matcha jepang asli, dan camilan sehat organik bersertifikasi BPOM.',
+                'category_key' => 'Makanan',
+                'logo'         => 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200&auto=format&fit=crop&q=80',
+                'banner'       => 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=1200&auto=format&fit=crop&q=80',
+                'products'     => [
+                    [
+                        'name' => 'Kopi Arabica Gayo Aceh Specialty Roast 1kg',
+                        'description' => 'Biji kopi arabika single origin dataran tinggi Gayo Aceh altitude 1500mdpl. Full washed process, medium roast dengan aroma dark chocolate & brown sugar.',
+                        'price' => 185000,
+                        'discount_percentage' => 15,
+                        'rating' => 4.94,
+                        'sold_count' => 3456,
+                        'stock' => 150,
+                        'badge' => 'bestseller',
+                        'is_featured' => true,
+                        'image' => 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Madu Hutan Liar Murni Sumbawa Organik 500ml',
+                        'description' => 'Madu hutan liar asli 100% dari sarang lebah Apis Dorsata Sumbawa. Tanpa pemanasan dan tanpa campuran gula, kaya antioksidan dan antibakteri.',
+                        'price' => 125000,
+                        'discount_percentage' => 20,
+                        'rating' => 4.89,
+                        'sold_count' => 2345,
+                        'stock' => 80,
+                        'badge' => 'hot',
+                        'is_featured' => true,
+                        'image' => 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Teh Hijau Matcha Ceremonial Grade A Uji Japan 100g',
+                        'description' => 'Bubuk matcha murni kualitas seremonial tertinggi dari perkebunan Uji Kyoto Jepang. Warna hijau cerah dengan rasa umami manis lembut.',
+                        'price' => 299000,
+                        'discount_percentage' => 10,
+                        'rating' => 4.93,
+                        'sold_count' => 1234,
+                        'stock' => 65,
+                        'badge' => 'new',
+                        'image' => 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Dark Chocolate 85% Cacao Single Origin Belgium 250g',
+                        'description' => 'Cokelat hitam premium Belgia dengan kadar kakao 85%, rendah gula, kaya flavonoid baik untuk kesehatan jantung dan diet vegan.',
+                        'price' => 159000,
+                        'discount_percentage' => 30,
+                        'rating' => 4.88,
+                        'sold_count' => 2876,
+                        'stock' => 110,
+                        'badge' => 'sale',
+                        'image' => 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Kopi Luwak Liar Asli Toraja Premium 250g',
+                        'description' => 'Kopi luwak murni dari hutan Toraja pegunungan Sulawesi. Keasaman sangat rendah, aftertaste karamel yang sangat halus dan mewah.',
+                        'price' => 450000,
+                        'discount_percentage' => 10,
+                        'rating' => 4.96,
+                        'sold_count' => 480,
+                        'stock' => 25,
+                        'badge' => 'hot',
+                        'image' => 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Granola Roasted Almond & Honey Healthy Breakfast 500g',
+                        'description' => 'Oatmeal panggang renyah dengan kacang almond utuh, biji chia, dan madu hutan murni. Bebas minyak sawit, sarapan sehat tinggi serat.',
+                        'price' => 89000,
+                        'discount_percentage' => 15,
+                        'rating' => 4.82,
+                        'sold_count' => 1920,
+                        'stock' => 140,
+                        'badge' => null,
+                        'image' => 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=800&auto=format&fit=crop&q=80',
+                    ],
                 ],
             ],
 
+            // ══════════════════════════════════════════════════
+            // 5. AUTOSPEED RACING & GARAGE (OTOMOTIF)
+            // ══════════════════════════════════════════════════
             [
-                'name' => 'iPad Pro 11" M2 WiFi 128GB Space Gray',
-                'description' => 'iPad Pro 11 inch dengan chip M2 8-core, Liquid Retina display 11" ProMotion 120Hz, kamera 12MP + LiDAR, Face ID, 4 speakers. Mendukung Apple Pencil Gen 2 dan Magic Keyboard. Baterai hingga 10 jam. iOS terbaru dengan Stage Manager. Cocok untuk design, editing, dan produktivitas. Garansi resmi iBox 1 tahun.',
-                'price' => 14999000,
-                'discount_percentage' => 7,
-                'rating' => 4.91,
-                'sold_count' => 724,
-                'stock' => 42,
-                'badge' => null,
-                'is_featured' => true,
-                'category' => 'Elektronik',
-                'image' => 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800&auto=format&fit=crop&q=80',
-                'images' => [
-                    'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800&auto=format&fit=crop&q=80',
-                ],
-            ],
-
-            [
-                'name' => 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones Black',
-                'description' => 'Headphone premium Sony dengan ANC terbaik di kelasnya, 8 microphones untuk crystal clear calls, 30mm driver baru, LDAC & Hi-Res Audio, multipoint connection. Baterai 30 jam dengan ANC on, quick charge 3 menit = 3 jam. Ultra comfortable fit dengan soft fit leather. Include: carrying case premium, cable 3.5mm, USB-C cable. Garansi resmi TAM 1 tahun.',
-                'price' => 5299000,
-                'discount_percentage' => 15,
-                'rating' => 4.89,
-                'sold_count' => 2145,
-                'stock' => 67,
-                'badge' => 'bestseller',
-                'is_featured' => false,
-                'category' => 'Elektronik',
-                'image' => 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80',
-                'images' => [
-                    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800&auto=format&fit=crop&q=80',
-                ],
-            ],
-
-            [
-                'name' => 'Apple Watch Series 9 GPS 45mm Midnight Aluminium',
-                'description' => 'Apple Watch Series 9 dengan chip S9 SiP, display always-on Retina LTPO OLED 2000 nits, double tap gesture. Health features: ECG, blood oxygen, sleep tracking, temperature sensing. Fitness tracking 100+ workout types. Crash detection & Fall detection. Water resistant 50m. Baterai 18 jam. Strap: Sport Band Midnight. Garansi resmi iBox 1 tahun.',
-                'price' => 7999000,
-                'discount_percentage' => 10,
-                'rating' => 4.93,
-                'sold_count' => 1534,
-                'stock' => 28,
-                'badge' => 'new',
-                'is_featured' => true,
-                'category' => 'Elektronik',
-                'image' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80',
-                'images' => [
-                    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=800&auto=format&fit=crop&q=80',
-                ],
-            ],
-
-            [
-                'name' => 'DJI Mini 4 Pro Fly More Combo',
-                'description' => 'Drone DJI Mini 4 Pro dengan kamera 48MP 4K/60fps HDR, sensor 1/1.3" CMOS, gimbal 3-axis, omnidirectional obstacle sensing, ActiveTrack 360°, berat hanya 249g (no license needed). Fly More Combo include: 3 baterai intelligent flight (total 102 menit), charging hub, shoulder bag, propeller guard. Controller RC-N2. Garansi resmi DJI Indonesia 1 tahun.',
-                'price' => 14499000,
-                'discount_percentage' => 5,
-                'rating' => 4.96,
-                'sold_count' => 389,
-                'stock' => 12,
-                'badge' => 'new',
-                'is_featured' => true,
-                'category' => 'Elektronik',
-                'image' => 'https://images.unsplash.com/photo-1527977966376-1c8408f9f108?w=800&auto=format&fit=crop&q=80',
-                'images' => [
-                    'https://images.unsplash.com/photo-1527977966376-1c8408f9f108?w=800&auto=format&fit=crop&q=80',
-                ],
-            ],
-
-            // FASHION & PAKAIAN
-            [
-                'name' => 'Nike Air Max 90 Premium White Black Original',
-                'description' => 'Sepatu sneakers Nike Air Max 90 original dengan teknologi Air cushioning, upper premium leather & mesh breathable, midsole foam empuk, outsole rubber durable. Design iconic retro modern. Tersedia size 40-45 (US 7-11). Sudah termasuk: box original, extra laces, paper stuffing. 100% original dengan QR authenticity. Garansi sole 6 bulan. Perfect untuk daily wear dan casual style.',
-                'price' => 1899000,
-                'discount_percentage' => 25,
-                'rating' => 4.86,
-                'sold_count' => 3421,
-                'stock' => 234,
-                'badge' => 'bestseller',
-                'is_featured' => true,
-                'category' => 'Pakaian',
-                'image' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format&fit=crop&q=80',
-                'images' => [
-                    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1607522370275-f14206abe5d3?w=800&auto=format&fit=crop&q=80',
-                ],
-            ],
-
-            [
-                'name' => 'Adidas Ultraboost 22 Running Shoes Black Solar Yellow',
-                'description' => 'Sepatu running Adidas Ultraboost 22 dengan teknologi Boost cushioning responsif, Primeknit+ upper fit seperti kaus kaki, Continental rubber outsole grip maksimal, support frame LEP 2.0. Energy return 20% lebih tinggi. Cocok untuk long distance running dan daily training. Size chart: 40-46. Include: box original, shoebag, extra insole. Authenticity guaranteed. Garansi manufacturing defect 3 bulan.',
-                'price' => 2699000,
-                'discount_percentage' => 15,
-                'rating' => 4.92,
-                'sold_count' => 1876,
-                'stock' => 156,
-                'badge' => 'hot',
-                'is_featured' => true,
-                'category' => 'Pakaian',
-                'image' => 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=800&auto=format&fit=crop&q=80',
-                'images' => [
-                    'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=800&auto=format&fit=crop&q=80',
-                ],
-            ],
-
-            [
-                'name' => 'Champion Reverse Weave Hoodie Grey Heather',
-                'description' => 'Hoodie Champion Reverse Weave premium dengan heavyweight 350gsm fleece, anti-shrink technology (no shrinkage after wash), ribbed side panels untuk durability, kangaroo pocket, adjustable drawcord hood, ribbed cuffs & hem. Logo Champion classic embroidered. Ukuran: S-XXL (oversized fit). Composition: 82% cotton 18% polyester. Machine washable. USA authentic quality. Comfort & durability terjamin.',
-                'price' => 899000,
-                'discount_percentage' => 30,
-                'rating' => 4.85,
-                'sold_count' => 4231,
-                'stock' => 678,
-                'badge' => 'bestseller',
-                'is_featured' => false,
-                'category' => 'Pakaian',
-                'image' => 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800&auto=format&fit=crop&q=80',
-                'images' => [
-                    'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800&auto=format&fit=crop&q=80',
-                ],
-            ],
-
-            [
-                'name' => 'Ray-Ban Wayfarer Classic Black Green G-15 RB2140',
-                'description' => 'Kacamata Ray-Ban Wayfarer original dengan frame acetate premium glossy black, lensa crystal glass G-15 (100% UV protection), iconic square shape. Lens size: 50mm, bridge: 22mm, temple: 150mm. Include: original case Ray-Ban, cleaning cloth, authenticity card, booklet. Made in Italy. Serial number engraved. Timeless design sejak 1956. Perfect untuk fashion & eye protection.',
-                'price' => 2199000,
-                'discount_percentage' => 12,
-                'rating' => 4.96,
-                'sold_count' => 2145,
-                'stock' => 123,
-                'badge' => 'bestseller',
-                'is_featured' => true,
-                'category' => 'Pakaian',
-                'image' => 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=800&auto=format&fit=crop&q=80',
-                'images' => [
-                    'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=800&auto=format&fit=crop&q=80',
-                ],
-            ],
-
-            // MAKANAN & MINUMAN
-            [
-                'name' => 'Kopi Arabica Gayo Aceh Premium 1kg Biji/Bubuk',
-                'description' => 'Kopi arabica single origin dari dataran tinggi Gayo Aceh dengan altitude 1200-1600 mdpl. Proses full washed, roast level medium (city roast). Flavor notes: dark chocolate, brown sugar, mild spice. Acidity: medium, body: full, sweetness: high. Tersedia whole beans atau ground (pilih saat order). Roast date tercantum di kemasan. Best before: 6 bulan dari roast date. Kemasan: valve zipper bag foil. 100% arabica, no mix.',
-                'price' => 185000,
-                'discount_percentage' => 15,
-                'rating' => 4.91,
-                'sold_count' => 3456,
-                'stock' => 567,
-                'badge' => 'bestseller',
-                'is_featured' => true,
-                'category' => 'Makanan',
-                'image' => 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800&auto=format&fit=crop&q=80',
-                'images' => [
-                    'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=800&auto=format&fit=crop&q=80',
-                ],
-            ],
-
-            [
-                'name' => 'Madu Hutan Liar Murni Sumbawa 500ml',
-                'description' => 'Madu hutan liar 100% murni dari hutan Sumbawa, dipanen langsung oleh masyarakat lokal dari sarang lebah liar (Apis dorsata). Tidak dipanaskan, tidak ada campuran gula/sirup. Warna: gelap keemasan, tekstur: kental natural, rasa: manis kompleks dengan aroma floral & woody. Manfaat: antioksidan tinggi, antibacterial, boost immunity. Kemasan: botol kaca 500ml. BPOM & Halal MUI. Best before: 2 tahun. Free sendok kayu.',
-                'price' => 125000,
-                'discount_percentage' => 20,
-                'rating' => 4.88,
-                'sold_count' => 2345,
-                'stock' => 234,
-                'badge' => 'hot',
-                'is_featured' => true,
-                'category' => 'Makanan',
-                'image' => 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=800&auto=format&fit=crop&q=80',
-                'images' => [
-                    'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=800&auto=format&fit=crop&q=80',
-                ],
-            ],
-
-            [
-                'name' => 'Teh Hijau Matcha Premium Japan Grade A 100g',
-                'description' => 'Matcha powder premium dari Uji, Japan dengan grade ceremonial (highest quality). Bright vibrant green color, fine powder texture smooth, umami flavor rich dengan natural sweetness. Shade-grown tencha leaves, stone-ground traditional method. Perfect untuk matcha latte, baking, smoothies, ice cream. Caffeine content: medium-high. Antioksidan super tinggi (EGCG). Kemasan: tin can kedap udara. Made in Japan. Best before: 12 bulan. Include bamboo scoop.',
-                'price' => 299000,
-                'discount_percentage' => 10,
-                'rating' => 4.93,
-                'sold_count' => 1234,
-                'stock' => 156,
-                'badge' => null,
-                'is_featured' => true,
-                'category' => 'Makanan',
-                'image' => 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80',
-                'images' => [
-                    'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80',
-                ],
-            ],
-
-            // OTOMOTIF
-            [
-                'name' => 'Helm Full Face AGV K1 Rossi Mugello 2016 Replica',
-                'description' => 'Helm full face AGV K1 dengan desain Rossi Mugello 2016 replica. Shell thermoplastic high-resistance, visor class optical 1 anti-scratch, ventilation system 5 air vents, interior fabric antiseptic removable & washable, double D-ring retention system. DOT & ECE certified. Weight: ±1.5kg. Size: S(55-56), M(57-58), L(59-60), XL(61-62). Include: helmet bag, clear visor spare, chin curtain. Garansi shell 1 tahun. Premium quality replica dengan safety standard.',
-                'price' => 1899000,
-                'discount_percentage' => 20,
-                'rating' => 4.87,
-                'sold_count' => 1234,
-                'stock' => 67,
-                'badge' => 'hot',
-                'is_featured' => true,
-                'category' => 'Otomotif',
-                'image' => 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=800&auto=format&fit=crop&q=80',
-                'images' => [
-                    'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=800&auto=format&fit=crop&q=80',
+                'name'         => 'Autospeed Racing & Garage',
+                'slug'         => 'autospeed-racing-garage',
+                'seller_name'  => 'Hendro Wicaksono',
+                'seller_email' => 'seller.otomotif@nitipdong.com',
+                'phone'        => '081298765435',
+                'city'         => 'Surabaya',
+                'address'      => 'Jl. Mayjen Sungkono No. 102, Kota Surabaya, Jawa Timur',
+                'description'  => 'Pusat suku cadang motor & mobil, helm branded AGV / Shoei, ban Michelin resmi, oli performa tinggi, dan aksesoris racing.',
+                'category_key' => 'Otomotif',
+                'logo'         => 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=200&auto=format&fit=crop&q=80',
+                'banner'       => 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=1200&auto=format&fit=crop&q=80',
+                'products'     => [
+                    [
+                        'name' => 'Helm Full Face AGV K1 Rossi Mugello 2016 Replica',
+                        'description' => 'Helm full face AGV K1 dengan motif legendaris Rossi Mugello. Shell thermoplastic berkekuatan tinggi, visor anti-gores, pengunci Double D-Ring standar balap Moto-GP.',
+                        'price' => 1899000,
+                        'discount_percentage' => 20,
+                        'rating' => 4.92,
+                        'sold_count' => 1234,
+                        'stock' => 30,
+                        'badge' => 'bestseller',
+                        'is_featured' => true,
+                        'image' => 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Ban Motor Michelin Pilot Street 2 110/70 & 140/70-17',
+                        'description' => 'Paket ban tubeless Michelin Pilot Street 2 untuk motor sport 150-250cc. Alur tapak membuang air maksimal, kompon silika mencengkeram kuat di jalan basah.',
+                        'price' => 1249000,
+                        'discount_percentage' => 15,
+                        'rating' => 4.91,
+                        'sold_count' => 3456,
+                        'stock' => 50,
+                        'badge' => 'hot',
+                        'is_featured' => true,
+                        'image' => 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Oli Motor Shell Advance AX7 10W-40 Matic 1 Liter',
+                        'description' => 'Oli semi-sintetis Shell Advance AX7 teknologi Active Cleansing menjaga kebersihan mesin motor matic, tarikan enteng dan konsumsi BBM irit.',
+                        'price' => 89000,
+                        'discount_percentage' => 25,
+                        'rating' => 4.85,
+                        'sold_count' => 8934,
+                        'stock' => 300,
+                        'badge' => 'sale',
+                        'image' => 'https://images.unsplash.com/photo-1486006920555-c77dce18193b?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Intercom Helm Bluetooth Cardo Packtalk Bold JBL',
+                        'description' => 'Intercom helm touring Cardo teknologi Dynamic Mesh Communication (DMC) jangkauan hingga 1.6km, audio speaker JBL premium, tahan air IP67.',
+                        'price' => 3899000,
+                        'discount_percentage' => 10,
+                        'rating' => 4.97,
+                        'sold_count' => 520,
+                        'stock' => 18,
+                        'badge' => 'new',
+                        'image' => 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Sarung Tangan Motor Kulit Alpinestars SP-8 V3 Leather',
+                        'description' => 'Sarung tangan balap motor kulit kambing asli Alpinestars dengan pelindung knuckle polimer keras, jembatan jari anti patah, ventilasi optimal.',
+                        'price' => 1450000,
+                        'discount_percentage' => 15,
+                        'rating' => 4.88,
+                        'sold_count' => 890,
+                        'stock' => 40,
+                        'badge' => null,
+                        'image' => 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    [
+                        'name' => 'Box Motor Givi E43NTL Mule Top Box 43 Liter',
+                        'description' => 'Box belakang motor Givi kapasitas 43L muat 2 helm full face. Kunci Monolock kokoh dan dudukan baseplate universal untuk segala jenis motor.',
+                        'price' => 1199000,
+                        'discount_percentage' => 10,
+                        'rating' => 4.89,
+                        'sold_count' => 1430,
+                        'stock' => 35,
+                        'badge' => null,
+                        'image' => 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=800&auto=format&fit=crop&q=80',
+                    ],
                 ],
             ],
         ];
-    }
-
-    private function displaySummary(int $createdCount, array $products): void
-    {
-        $elektronik = count(array_filter($products, fn($p) => $p['category'] === 'Elektronik'));
-        $pakaian = count(array_filter($products, fn($p) => $p['category'] === 'Pakaian'));
-        $makanan = count(array_filter($products, fn($p) => $p['category'] === 'Makanan'));
-        $otomotif = count(array_filter($products, fn($p) => $p['category'] === 'Otomotif'));
-
-        $this->command->info('');
-        $this->command->info('✅ Berhasil membuat ' . $createdCount . ' produk lengkap dengan foto HD!');
-        $this->command->info('');
-        $this->command->line('📦 Detail Produk:');
-        $this->command->line('   • ' . $elektronik . ' produk Elektronik');
-        $this->command->line('   • ' . $pakaian . ' produk Fashion & Pakaian');
-        $this->command->line('   • ' . $makanan . ' produk Makanan & Minuman');
-        $this->command->line('   • ' . $otomotif . ' produk Otomotif');
-        $this->command->info('');
     }
 }
