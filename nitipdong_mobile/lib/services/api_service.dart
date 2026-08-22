@@ -256,18 +256,19 @@ class ApiService {
   }
 
   // ══════════════════════════════════════════════════
-  // AUTHENTICATION
+  // AUTHENTICATION & OTP
   // ══════════════════════════════════════════════════
-  static Future<Map<String, dynamic>> login(String email, String password) async {
+  static Future<Map<String, dynamic>> login(String loginIdentifier, String password) async {
     try {
       final response = await http
           .post(
             Uri.parse('$baseUrl/auth/login'),
             headers: await _getHeaders(withAuth: false),
-            body: jsonEncode({'email': email, 'password': password}),
+            body: jsonEncode({'login': loginIdentifier.trim(), 'password': password}),
           )
           .timeout(const Duration(seconds: 5));
 
+      checkResponseForMaintenance(response);
       final data = jsonDecode(response.body);
       if (response.statusCode == 200 && data['success'] == true) {
         await setToken(data['token']);
@@ -279,40 +280,50 @@ class ApiService {
       } else {
         return {
           'success': false,
-          'message': data['message'] ?? 'Gagal masuk. Periksa email & kata sandi Anda.',
+          'message': data['message'] ?? 'Gagal masuk. Periksa email/nomor HP & kata sandi Anda.',
         };
       }
     } catch (_) {
       return {
         'success': false,
-        'message': 'Gagal terhubung ke server. Periksa koneksi atau IP server Anda.',
+        'message': 'Gagal terhubung ke server. Periksa koneksi internet Anda.',
       };
     }
   }
 
   static Future<Map<String, dynamic>> register(
-      String name, String email, String password, String passwordConfirmation) async {
+      String name, String email, String password, String passwordConfirmation,
+      {String? phone}) async {
     try {
+      final payload = <String, dynamic>{
+        'name': name.trim(),
+        'email': email.trim(),
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+      };
+      if (phone != null && phone.isNotEmpty) {
+        payload['phone'] = phone.trim();
+      }
+
       final response = await http
           .post(
             Uri.parse('$baseUrl/auth/register'),
             headers: await _getHeaders(withAuth: false),
-            body: jsonEncode({
-              'name': name,
-              'email': email,
-              'password': password,
-              'password_confirmation': passwordConfirmation,
-            }),
+            body: jsonEncode(payload),
           )
           .timeout(const Duration(seconds: 5));
 
+      checkResponseForMaintenance(response);
       final data = jsonDecode(response.body);
       if (response.statusCode == 201 && data['success'] == true) {
-        await setToken(data['token']);
+        if (data['token'] != null) {
+          await setToken(data['token']);
+        }
         return {
           'success': true,
           'token': data['token'],
           'user': UserModel.fromJson(data['user']),
+          'otp_preview': data['otp_preview'],
         };
       } else {
         return {
@@ -323,7 +334,72 @@ class ApiService {
     } catch (_) {
       return {
         'success': false,
-        'message': 'Gagal terhubung ke server. Periksa koneksi atau IP server Anda.',
+        'message': 'Gagal terhubung ke server. Periksa koneksi internet Anda.',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> verifyOtp(String identifier, String otpCode) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/auth/verify-otp'),
+            headers: await _getHeaders(withAuth: false),
+            body: jsonEncode({
+              'identifier': identifier.trim(),
+              'otp_code': otpCode.trim(),
+            }),
+          )
+          .timeout(const Duration(seconds: 5));
+
+      checkResponseForMaintenance(response);
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['success'] == true) {
+        if (data['token'] != null) {
+          await setToken(data['token']);
+        }
+        return {
+          'success': true,
+          'token': data['token'],
+          'user': UserModel.fromJson(data['user']),
+          'message': data['message'],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Kode OTP salah atau telah kedaluwarsa.',
+        };
+      }
+    } catch (_) {
+      return {
+        'success': false,
+        'message': 'Gagal memverifikasi OTP. Periksa koneksi internet Anda.',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> resendOtp(String identifier) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/auth/resend-otp'),
+            headers: await _getHeaders(withAuth: false),
+            body: jsonEncode({'identifier': identifier.trim()}),
+          )
+          .timeout(const Duration(seconds: 5));
+
+      checkResponseForMaintenance(response);
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Kode OTP baru telah dikirimkan.',
+        'cooldown_seconds': data['cooldown_seconds'] ?? 60,
+      };
+    } catch (_) {
+      return {
+        'success': false,
+        'message': 'Gagal mengirim ulang OTP.',
+        'cooldown_seconds': 60,
       };
     }
   }

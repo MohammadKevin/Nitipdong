@@ -26,9 +26,11 @@ Route::prefix('v1')->group(function () {
     // 0. App System Status & Maintenance Mode
     Route::get('/system/status', [SystemConfigController::class, 'status']);
 
-    // 1. Authentication
+    // 1. Authentication & OTP Verification
     Route::post('/auth/login', [AuthController::class, 'login']);
     Route::post('/auth/register', [AuthController::class, 'register']);
+    Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp']);
+    Route::post('/auth/resend-otp', [AuthController::class, 'resendOtp']);
 
     // 2. Banners & Categories
     Route::get('/banners', [BannerController::class, 'index']);
