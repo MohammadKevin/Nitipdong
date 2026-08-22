@@ -49,11 +49,13 @@ Route::post('/api/duitku/callback', [DuitkuPaymentController::class, 'handleCall
 
 // Download Mobile Android APK Route
 Route::get('/download/app', function () {
+    // Serve from local server if APK file exists (uploaded manually)
     $apkPath = public_path('downloads/nitipdong.apk');
     if (file_exists($apkPath)) {
-        return response()->download($apkPath, 'NitipDong-v1.0.0.apk');
+        return response()->download($apkPath, 'NitipDong-latest.apk');
     }
-    return redirect('https://github.com/MohammadKevin/Nitipdong/releases/latest');
+    // Fallback: redirect to GitHub Releases (auto-published by CI/CD)
+    return redirect('https://github.com/MohammadKevin/Nitipdong/releases/latest/download/NitipDong-latest.apk');
 })->name('app.download');
 
 // App Landing Page & Download Page

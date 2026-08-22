@@ -9,6 +9,9 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write  # Required for creating GitHub Releases
+
 jobs:
   build-apk:
     name: Build Release APK
@@ -44,9 +47,36 @@ jobs:
           cd nitipdong_mobile
           flutter build apk --release --no-tree-shake-icons
 
+      - name: 📋 Rename APK
+        run: |
+          cp nitipdong_mobile/build/app/outputs/flutter-apk/app-release.apk NitipDong-latest.apk
+
       - name: 📤 Upload Release APK as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: NitipDong-Release-APK
-          path: nitipdong_mobile/build/app/outputs/flutter-apk/app-release.apk
+          path: NitipDong-latest.apk
           retention-days: 30
+
+      - name: 🚀 Publish to GitHub Releases (Latest)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "NitipDong App — Latest Build"
+          body: |
+            ## 📱 NitipDong Android App
+
+            **Build otomatis** dari commit terbaru di branch `main`.
+
+            ### Cara Install:
+            1. Download file `NitipDong-latest.apk` di bawah
+            2. Aktifkan *Sumber Tidak Dikenal* di Pengaturan HP
+            3. Buka file APK → Install → Selesai! 🎉
+
+            ### Persyaratan:
+            - Android 5.0 (Lollipop) ke atas
+            - Koneksi internet aktif
+
+          files: NitipDong-latest.apk
+          prerelease: false
+          make_latest: true
