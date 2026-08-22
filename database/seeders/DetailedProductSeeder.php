@@ -61,8 +61,13 @@ class DetailedProductSeeder extends Seeder
                     'name'        => $item['name'],
                     'description' => $item['description'],
                     'status'      => 'approved',
+                    'province'    => $item['province'] ?? 'DKI Jakarta',
                     'city'        => $item['city'],
+                    'district'    => $item['district'] ?? null,
+                    'postal_code' => $item['postal_code'] ?? '10110',
                     'address'     => $item['address'],
+                    'latitude'    => $item['latitude'] ?? -6.2088,
+                    'longitude'   => $item['longitude'] ?? 106.8456,
                     'logo'        => $item['logo'],
                     'banner'      => $item['banner'],
                 ]
@@ -99,14 +104,9 @@ class DetailedProductSeeder extends Seeder
             }
         }
 
-        $this->command->info('');
-        $this->command->info("✅ Berhasil membuat {$totalStores} Toko Resmi & {$totalProducts} Produk Demo HD!");
-        $this->command->line("   • Eiger Adventure Official (Outdoor & Fashion) - 6 Produk");
-        $this->command->line("   • Apple iBox Official Store (Elektronik & Gadget) - 6 Produk");
-        $this->command->line("   • Nike Official Store Indonesia (Pakaian & Olahraga) - 6 Produk");
-        $this->command->line("   • Kopi Nusantara & Makanan Sehat (Makanan & Minuman) - 6 Produk");
-        $this->command->line("   • Autospeed Racing & Garage (Otomotif & Aksesoris) - 6 Produk");
-        $this->command->info('');
+        if ($this->command) {
+            $this->command->info("✅ Berhasil membuat {$totalStores} Toko Resmi & {$totalProducts} Produk Demo HD dengan koordinat presisi!");
+        }
     }
 
     private function createCategories(): array
@@ -114,9 +114,9 @@ class DetailedProductSeeder extends Seeder
         $cats = [
             'Outdoor'    => ['name' => 'Outdoor & Petualangan', 'slug' => 'outdoor-petualangan'],
             'Elektronik' => ['name' => 'Elektronik & Gadget',   'slug' => 'elektronik-gadget'],
-            'Pakaian'    => ['name' => 'Pakaian & Olahraga',     'slug' => 'pakaian-olahraga'],
-            'Makanan'    => ['name' => 'Makanan & Minuman',      'slug' => 'makanan-minuman'],
-            'Otomotif'   => ['name' => 'Otomotif & Aksesoris',   'slug' => 'otomotif-aksesoris'],
+            'Pakaian'    => ['name' => 'Fashion & Olahraga',     'slug' => 'fashion-olahraga'],
+            'Makanan'    => ['name' => 'Kuliner & Makanan Sehat', 'slug' => 'kuliner-makanan-sehat'],
+            'Otomotif'   => ['name' => 'Otomotif & Sparepart',   'slug' => 'otomotif-sparepart'],
         ];
 
         $models = [];
@@ -142,8 +142,13 @@ class DetailedProductSeeder extends Seeder
                 'seller_name'  => 'Eigerindo Multi Produk',
                 'seller_email' => 'seller.eiger@nitipdong.com',
                 'phone'        => '081298765431',
-                'city'         => 'Bandung',
+                'province'     => 'Jawa Barat',
+                'city'         => 'Kota Bandung',
+                'district'     => 'Sumur Bandung',
+                'postal_code'  => '40111',
                 'address'      => 'Jl. Sumatera No. 23, Kota Bandung, Jawa Barat',
+                'latitude'     => -6.9175000,
+                'longitude'    => 107.6191000,
                 'description'  => 'Toko resmi Eiger Adventure Indonesia. Perlengkapan mendaki, tas ransel carrier, jaket outdoor, dan gear petualangan terbaik.',
                 'category_key' => 'Outdoor',
                 'logo'         => 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=200&auto=format&fit=crop&q=80',
@@ -234,8 +239,13 @@ class DetailedProductSeeder extends Seeder
                 'seller_name'  => 'PT Erajaya Swasembada Tbk',
                 'seller_email' => 'seller.ibox@nitipdong.com',
                 'phone'        => '081298765432',
+                'province'     => 'DKI Jakarta',
                 'city'         => 'Jakarta Selatan',
-                'address'      => 'Mall Pacific Place Lt. 2, SCBD, Jakarta Selatan',
+                'district'     => 'Kebayoran Baru',
+                'postal_code'  => '12190',
+                'address'      => 'Mall Pacific Place Lt. 2, SCBD Jl. Jend. Sudirman, Jakarta Selatan',
+                'latitude'     => -6.2248000,
+                'longitude'    => 106.8098000,
                 'description'  => 'Reseller resmi produk Apple di Indonesia. iPhone, iPad, Mac, Apple Watch, AirPods dengan garansi resmi 1 tahun.',
                 'category_key' => 'Elektronik',
                 'logo'         => 'https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=200&auto=format&fit=crop&q=80',
@@ -325,8 +335,13 @@ class DetailedProductSeeder extends Seeder
                 'seller_name'  => 'PT Mitra Adiperkasa Tbk',
                 'seller_email' => 'seller.nike@nitipdong.com',
                 'phone'        => '081298765433',
+                'province'     => 'DKI Jakarta',
                 'city'         => 'Jakarta Pusat',
-                'address'      => 'Grand Indonesia Mall East Mall Lt. 3, Jakarta Pusat',
+                'district'     => 'Menteng',
+                'postal_code'  => '10350',
+                'address'      => 'Grand Indonesia Mall East Mall Lt. 3, Jl. M.H. Thamrin No. 1, Jakarta Pusat',
+                'latitude'     => -6.1954000,
+                'longitude'    => 106.8214000,
                 'description'  => 'Toko resmi Nike Indonesia. Sepatu lari, sneakers ikonik, pakaian olahraga Dri-FIT, dan aksesoris original bergaransi.',
                 'category_key' => 'Pakaian',
                 'logo'         => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&auto=format&fit=crop&q=80',
@@ -417,8 +432,13 @@ class DetailedProductSeeder extends Seeder
                 'seller_name'  => 'Budi Hartono Santoso',
                 'seller_email' => 'seller.kopi@nitipdong.com',
                 'phone'        => '081298765434',
-                'city'         => 'Medan',
+                'province'     => 'Sumatera Utara',
+                'city'         => 'Kota Medan',
+                'district'     => 'Medan Petisah',
+                'postal_code'  => '20112',
                 'address'      => 'Jl. Gatot Subroto No. 88, Kota Medan, Sumatera Utara',
+                'latitude'     => 3.5852000,
+                'longitude'    => 98.6722000,
                 'description'  => 'Distributor biji kopi specialty nusantara, madu hutan liar murni, matcha jepang asli, dan camilan sehat organik bersertifikasi BPOM.',
                 'category_key' => 'Makanan',
                 'logo'         => 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=200&auto=format&fit=crop&q=80',
@@ -504,8 +524,13 @@ class DetailedProductSeeder extends Seeder
                 'seller_name'  => 'Hendro Wicaksono',
                 'seller_email' => 'seller.otomotif@nitipdong.com',
                 'phone'        => '081298765435',
-                'city'         => 'Surabaya',
+                'province'     => 'Jawa Timur',
+                'city'         => 'Kota Surabaya',
+                'district'     => 'Sawahan',
+                'postal_code'  => '60256',
                 'address'      => 'Jl. Mayjen Sungkono No. 102, Kota Surabaya, Jawa Timur',
+                'latitude'     => -7.2891000,
+                'longitude'    => 112.7214000,
                 'description'  => 'Pusat suku cadang motor & mobil, helm branded AGV / Shoei, ban Michelin resmi, oli performa tinggi, dan aksesoris racing.',
                 'category_key' => 'Otomotif',
                 'logo'         => 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=200&auto=format&fit=crop&q=80',

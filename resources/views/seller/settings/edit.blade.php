@@ -45,63 +45,116 @@
 
         <form action="{{ route('seller.settings.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6"
               x-data="{
-                  provinces: {{ json_encode($provincesData) }},
+                  provincesList: [],
+                  regenciesList: [],
+                  districtsList: [],
+                  villagesList: [],
                   selectedProvince: '{{ old('province', $store->province ?: 'DKI Jakarta') }}',
                   selectedCity: '{{ old('city', $store->city ?: ($store->effective_city ?: 'Jakarta Pusat')) }}',
-                  cities: [],
+                  selectedDistrict: '{{ old('district', $store->district ?: '') }}',
+                  selectedVillage: '',
+                  postalCode: '{{ old('postal_code', $store->postal_code ?: '10110') }}',
+                  fullAddress: '{{ old('address', $store->address ?: '') }}',
+                  lat: '{{ old('latitude', $store->latitude ?: -6.2088) }}',
+                  lng: '{{ old('longitude', $store->longitude ?: 106.8456) }}',
+                  isLoadingRegions: false,
+                  isLocating: false,
                   map: null,
                   marker: null,
-                  lat: {{ old('latitude', $store->latitude ?: -6.2088) }},
-                  lng: {{ old('longitude', $store->longitude ?: 106.8456) }},
-                  init() {
-                      this.updateCities(true);
+
+                  async init() {
+                      await this.loadProvinces();
                       this.$nextTick(() => {
                           this.initMap();
                       });
                   },
-                  updateCities(isInit = false) {
-                      if (this.provinces[this.selectedProvince]) {
-                          this.cities = Object.keys(this.provinces[this.selectedProvince].cities);
-                          if (!isInit && (!this.cities.includes(this.selectedCity))) {
-                              this.selectedCity = this.cities[0] || '';
+
+                  async loadProvinces() {
+                      try {
+                          const res = await fetch('{{ route('api.regions.provinces') }}');
+                          const json = await res.json();
+                          if (json.success && Array.isArray(json.data)) {
+                              this.provincesList = json.data;
+                              await this.onProvinceChange(true);
                           }
-                          if (!isInit) {
-                              // Center map to selected province/city
-                              const pData = this.provinces[this.selectedProvince];
-                              if (pData) {
-                                  this.updateCoords(pData.lat, pData.lng);
+                      } catch (e) {
+                          console.error('Error loading provinces:', e);
+                      }
+                  },
+
+                  async onProvinceChange(isInit = false) {
+                      const prov = this.provincesList.find(p => p.name === this.selectedProvince);
+                      this.regenciesList = [];
+                      this.districtsList = [];
+                      this.villagesList = [];
+
+                      if (!prov) return;
+
+                      this.isLoadingRegions = true;
+                      try {
+                          const res = await fetch(`{{ url('/api/regions/regencies') }}/${prov.id}`);
+                          const json = await res.json();
+                          if (json.success && Array.isArray(json.data)) {
+                              this.regenciesList = json.data;
+                              if (!isInit && this.regenciesList.length > 0) {
+                                  this.selectedCity = this.regenciesList[0].name;
+                                  await this.onCityChange();
+                              } else if (isInit) {
+                                  await this.onCityChange(true);
                               }
                           }
-                      } else {
-                          this.cities = [];
-                          this.selectedCity = '';
+                      } catch (e) {
+                          console.error('Error loading regencies:', e);
+                      } finally {
+                          this.isLoadingRegions = false;
                       }
                   },
-                  onCityChange() {
-                      if (this.provinces[this.selectedProvince] && this.provinces[this.selectedProvince].cities[this.selectedCity]) {
-                          const cData = this.provinces[this.selectedProvince].cities[this.selectedCity];
-                          if (cData.lat && cData.lng) {
-                              this.updateCoords(cData.lat, cData.lng);
+
+                  async onCityChange(isInit = false) {
+                      const reg = this.regenciesList.find(r => r.name === this.selectedCity);
+                      this.districtsList = [];
+                      this.villagesList = [];
+
+                      if (!reg) return;
+
+                      this.isLoadingRegions = true;
+                      try {
+                          const res = await fetch(`{{ url('/api/regions/districts') }}/${reg.id}`);
+                          const json = await res.json();
+                          if (json.success && Array.isArray(json.data)) {
+                              this.districtsList = json.data;
+                              if (!isInit && this.districtsList.length > 0) {
+                                  this.selectedDistrict = this.districtsList[0].name;
+                              }
                           }
+                      } catch (e) {
+                          console.error('Error loading districts:', e);
+                      } finally {
+                          this.isLoadingRegions = false;
                       }
                   },
+
                   initMap() {
                       const mapContainer = document.getElementById('seller-store-map');
                       if (!mapContainer) return;
-                      this.map = L.map('seller-store-map').setView([this.lat, this.lng], 13);
+
+                      const curLat = parseFloat(this.lat) || -6.2088;
+                      const curLng = parseFloat(this.lng) || 106.8456;
+
+                      this.map = L.map('seller-store-map').setView([curLat, curLng], 14);
                       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                           maxZoom: 19,
-                          attribution: '&copy; OpenStreetMap'
+                          attribution: '&copy; OpenStreetMap contributors'
                       }).addTo(this.map);
 
                       const pinIcon = L.divIcon({
                           className: 'custom-pin',
-                          html: '<div style=\'background-color:#0891b2;width:32px;height:32px;border-radius:50%;border:3px solid #fff;box-shadow:0 4px 6px -1px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;\'><i class=\'fa-solid fa-store\'></i></div>',
-                          iconSize: [32, 32],
-                          iconAnchor: [16, 16]
+                          html: '<div style=\'background-color:#0891b2;width:34px;height:34px;border-radius:50%;border:3px solid #fff;box-shadow:0 4px 6px -1px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;\'><i class=\'fa-solid fa-store\'></i></div>',
+                          iconSize: [34, 34],
+                          iconAnchor: [17, 17]
                       });
 
-                      this.marker = L.marker([this.lat, this.lng], {
+                      this.marker = L.marker([curLat, curLng], {
                           draggable: true,
                           icon: pinIcon
                       }).addTo(this.map);
@@ -110,12 +163,15 @@
                           const pos = e.target.getLatLng();
                           this.lat = pos.lat.toFixed(7);
                           this.lng = pos.lng.toFixed(7);
+                          this.reverseGeocode(pos.lat, pos.lng);
                       });
 
                       this.map.on('click', (e) => {
                           this.updateCoords(e.latlng.lat, e.latlng.lng);
+                          this.reverseGeocode(e.latlng.lat, e.latlng.lng);
                       });
                   },
+
                   updateCoords(newLat, newLng) {
                       this.lat = Number(newLat).toFixed(7);
                       this.lng = Number(newLng).toFixed(7);
@@ -123,18 +179,43 @@
                           this.marker.setLatLng([this.lat, this.lng]);
                       }
                       if (this.map) {
-                          this.map.setView([this.lat, this.lng], 14);
+                          this.map.setView([this.lat, this.lng], 15);
                       }
                   },
+
                   getCurrentLocation() {
                       if (navigator.geolocation) {
+                          this.isLocating = true;
                           navigator.geolocation.getCurrentPosition((pos) => {
+                              this.isLocating = false;
                               this.updateCoords(pos.coords.latitude, pos.coords.longitude);
+                              this.reverseGeocode(pos.coords.latitude, pos.coords.longitude);
                           }, (err) => {
+                              this.isLocating = false;
                               alert('Gagal mengambil lokasi GPS perangkat: ' + err.message);
-                          });
+                          }, { enableHighAccuracy: true });
                       } else {
                           alert('Browser Anda tidak mendukung geolokasi.');
+                      }
+                  },
+
+                  async reverseGeocode(lat, lng) {
+                      try {
+                          const res = await fetch(`{{ route('api.regions.reverse_geocode') }}?lat=${lat}&lng=${lng}`);
+                          const json = await res.json();
+                          if (json.success && json.data) {
+                              const d = json.data;
+                              if (d.street && !this.fullAddress) {
+                                  this.fullAddress = d.street;
+                              } else if (d.display_name && !this.fullAddress) {
+                                  this.fullAddress = d.display_name;
+                              }
+                              if (d.postal_code) {
+                                  this.postalCode = d.postal_code;
+                              }
+                          }
+                      } catch (e) {
+                          console.error('Reverse geocode error:', e);
                       }
                   }
               }">
@@ -143,13 +224,13 @@
 
             {{-- 1. LOKASI ASAL PENGIRIMAN TOKO (Paling Utama) --}}
             <div class="bg-white rounded-2xl border border-slate-200 shadow-card p-6 space-y-5">
-                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
                     <div class="flex items-center gap-2">
                         <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center text-sm">
                             <i class="fa-solid fa-location-dot"></i>
                         </div>
                         <div>
-                            <h2 class="text-sm font-extrabold text-slate-900">1. Lokasi & Asal Pengiriman Toko</h2>
+                            <h2 class="text-sm font-extrabold text-slate-900">1. Lokasi &amp; Asal Pengiriman Toko</h2>
                             <p class="text-[11px] text-slate-400">Tentukan kota asal pengiriman untuk penghitungan ongkir dan promo gratis ongkir 1 kota.</p>
                         </div>
                     </div>
@@ -171,16 +252,17 @@
                     </div>
                 </div>
 
+                {{-- Cascading Regions (Provinsi -> Kota -> Kecamatan -> Kode Pos) --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="province" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                             Provinsi Asal Toko <span class="text-rose-500">*</span>
                         </label>
-                        <select id="province" name="province" x-model="selectedProvince" @change="updateCities()" required
-                                class="input text-xs rounded-xl focus:border-cyan-600 focus:ring-cyan-500">
-                            @foreach(array_keys($provincesData) as $prov)
-                                <option value="{{ $prov }}">{{ $prov }}</option>
-                            @endforeach
+                        <select id="province" name="province" x-model="selectedProvince" @change="onProvinceChange()" required
+                                class="input text-xs rounded-xl focus:border-cyan-600 focus:ring-cyan-500 bg-white">
+                            <template x-for="p in provincesList" :key="p.id">
+                                <option :value="p.name" :selected="p.name === selectedProvince" x-text="p.name"></option>
+                            </template>
                         </select>
                     </div>
 
@@ -189,9 +271,9 @@
                             Kota / Kabupaten Asal Pengiriman <span class="text-rose-500">*</span>
                         </label>
                         <select id="city" name="city" x-model="selectedCity" @change="onCityChange()" required
-                                class="input text-xs rounded-xl font-bold text-slate-900 border-cyan-300 focus:border-cyan-600 focus:ring-cyan-500 bg-cyan-50/20">
-                            <template x-for="c in cities" :key="c">
-                                <option :value="c" x-text="c"></option>
+                                class="input text-xs rounded-xl font-bold text-slate-900 border-cyan-300 focus:border-cyan-600 focus:ring-cyan-500 bg-cyan-50/20" :disabled="regenciesList.length === 0">
+                            <template x-for="c in regenciesList" :key="c.id">
+                                <option :value="c.name" :selected="c.name === selectedCity" x-text="c.name"></option>
                             </template>
                         </select>
                     </div>
@@ -200,18 +282,22 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="district" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                            Kecamatan / Kelurahan
+                            Kecamatan Asal Toko
                         </label>
-                        <input type="text" id="district" name="district" value="{{ old('district', $store->district) }}"
-                               placeholder="Contoh: Gambir, Menteng, Kebayoran Baru"
-                               class="input text-xs rounded-xl">
+                        <select id="district" name="district" x-model="selectedDistrict"
+                                class="input text-xs rounded-xl bg-white" :disabled="districtsList.length === 0">
+                            <option value="">-- Pilih Kecamatan --</option>
+                            <template x-for="d in districtsList" :key="d.id">
+                                <option :value="d.name" :selected="d.name === selectedDistrict" x-text="d.name"></option>
+                            </template>
+                        </select>
                     </div>
 
                     <div>
                         <label for="postal_code" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                             Kode Pos Gudang
                         </label>
-                        <input type="text" id="postal_code" name="postal_code" value="{{ old('postal_code', $store->postal_code) }}"
+                        <input type="text" id="postal_code" name="postal_code" x-model="postalCode"
                                placeholder="Contoh: 10110" maxlength="10"
                                class="input text-xs rounded-xl font-mono">
                     </div>
@@ -221,9 +307,9 @@
                     <label for="address" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                         Alamat Lengkap Gudang / Toko Pengambilan Paket <span class="text-rose-500">*</span>
                     </label>
-                    <textarea id="address" name="address" rows="3" required
+                    <textarea id="address" name="address" x-model="fullAddress" rows="3" required
                               placeholder="Nama jalan, nomor gedung/ruko, RT/RW, nomor kontak gudang, dan instruksi penjemputan paket kurir ekspedisi..."
-                              class="input text-xs rounded-xl leading-relaxed">{{ old('address', $store->address) }}</textarea>
+                              class="input text-xs rounded-xl leading-relaxed"></textarea>
                 </div>
 
                 {{-- Interactive Map Pinpoint --}}
@@ -235,10 +321,10 @@
                             </label>
                             <span class="text-[10px] text-slate-400">Geser pin biru atau klik pada peta untuk menentukan titik penjemputan kurir akurat</span>
                         </div>
-                        <button type="button" @click="getCurrentLocation()"
-                                class="text-xs font-bold text-cyan-700 hover:text-cyan-800 bg-cyan-50 hover:bg-cyan-100 px-3 py-1.5 rounded-lg border border-cyan-200 flex items-center gap-1.5 transition-all cursor-pointer">
-                            <i class="fa-solid fa-location-crosshairs text-xs"></i>
-                            <span>Gunakan Lokasi Saya Sekarang</span>
+                        <button type="button" @click="getCurrentLocation()" :disabled="isLocating"
+                                class="text-xs font-bold text-cyan-700 hover:text-cyan-800 bg-cyan-50 hover:bg-cyan-100 px-3 py-1.5 rounded-lg border border-cyan-200 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50">
+                            <i class="fa-solid fa-location-crosshairs text-xs" :class="isLocating ? 'animate-spin' : ''"></i>
+                            <span x-text="isLocating ? 'Mendeteksi...' : 'Gunakan Lokasi Saya Sekarang'"></span>
                         </button>
                     </div>
 

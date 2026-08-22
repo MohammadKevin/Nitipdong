@@ -208,16 +208,18 @@
                 this.searchQuery = '';
             },
             reverseGeocode(lat, lng) {
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`)
+                fetch(`{{ route('api.regions.reverse_geocode') }}?lat=${lat}&lng=${lng}`)
                     .then(r => r.json())
-                    .then(data => {
-                        if (data && data.address) {
-                            const addr = data.address;
-                            this.newAddr.city = addr.city || addr.town || addr.municipality || addr.county || this.newAddr.city;
-                            this.newAddr.district = addr.suburb || addr.neighbourhood || addr.quarter || this.newAddr.district;
-                            this.newAddr.province = addr.state || this.newAddr.province;
-                            this.newAddr.postal_code = addr.postcode || this.newAddr.postal_code;
-                            if (!this.newAddr.full_address) {
+                    .then(res => {
+                        if (res.success && res.data) {
+                            const data = res.data;
+                            if (data.city) this.newAddr.city = data.city;
+                            if (data.district) this.newAddr.district = data.district;
+                            if (data.province) this.newAddr.province = data.province;
+                            if (data.postal_code) this.newAddr.postal_code = data.postal_code;
+                            if (data.street && !this.newAddr.full_address) {
+                                this.newAddr.full_address = data.street;
+                            } else if (data.display_name && !this.newAddr.full_address) {
                                 this.newAddr.full_address = data.display_name;
                             }
                         }
