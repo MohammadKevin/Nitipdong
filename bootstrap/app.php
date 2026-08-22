@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckWebMaintenanceMode;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -31,15 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
             '/api/duitku/callback',
         ]);
 
-        $middleware->append(function (Request $request, $next) {
-            if (!$request->is('api/*') && !$request->is('download/*') && !$request->is('up')) {
-                $isWebDown = env('APP_WEB_MAINTENANCE', false) || file_exists(storage_path('framework/maintenance_web.json'));
-                if ($isWebDown) {
-                    abort(503, 'Website sedang dalam pemeliharaan sistem.');
-                }
-            }
-            return $next($request);
-        });
+        $middleware->append(CheckWebMaintenanceMode::class);
 
         $middleware->redirectUsersTo(function (Request $request) {
             $user = $request->user();
