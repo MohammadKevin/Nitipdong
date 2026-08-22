@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/product_provider.dart';
 import '../../widgets/banner_carousel.dart';
 import '../../widgets/category_item.dart';
 import '../../widgets/flash_sale_section.dart';
+import '../../widgets/in_app_update_banner.dart';
 import '../../widgets/product_card.dart';
 import '../../widgets/server_config_dialog.dart';
-import '../product/product_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -28,41 +29,84 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final productProvider = Provider.of<ProductProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context);
+    final user = authProvider.user;
 
     return Scaffold(
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 2,
         titleSpacing: 16,
         title: Row(
           children: [
-            // Logo
+            // User Avatar or App Brand Mark
             Container(
-              width: 32,
-              height: 32,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
-                color: AppTheme.primaryLight,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.border),
+                gradient: const LinearGradient(
+                  colors: [AppTheme.primary, AppTheme.primaryDark],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primary.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
-              child: const Center(
-                child: Icon(Icons.shopping_bag, color: AppTheme.primary, size: 18),
+              child: Center(
+                child: Text(
+                  user?.name.isNotEmpty == true ? user!.name[0].toUpperCase() : 'N',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 10),
-            RichText(
-              text: const TextSpan(
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                  color: AppTheme.textPrimary,
-                  letterSpacing: -0.5,
-                ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextSpan(text: 'Nitip'),
-                  TextSpan(
-                    text: 'Dong',
-                    style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.w900),
+                  Text(
+                    user != null ? 'Hai, ${user.name.split(' ').first} 👋' : 'Selamat Datang di NitipDong!',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const Row(
+                    children: [
+                      Icon(Icons.location_on_outlined, size: 11, color: AppTheme.primary),
+                      SizedBox(width: 2),
+                      Text(
+                        'Kirim ke Indonesia • Gratis Ongkir Rp0',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: AppTheme.textMuted,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -70,9 +114,33 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
+          // Server Config / Dev Tools icon
           IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, color: AppTheme.textPrimary),
-            onPressed: () {},
+            tooltip: 'Pengaturan Server API',
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryLight,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(Icons.dns_rounded, color: AppTheme.primaryDark, size: 16),
+            ),
+            onPressed: () => ServerConfigDialog.show(context, onSaved: () {
+              productProvider.fetchHomeData();
+            }),
+          ),
+          // Notification icon
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined, color: AppTheme.textPrimary, size: 22),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Tidak ada notifikasi baru untuk saat ini. ✨'),
+                  duration: Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
           ),
           const SizedBox(width: 8),
         ],
@@ -80,74 +148,188 @@ class _HomeScreenState extends State<HomeScreen> {
           preferredSize: const Size.fromHeight(56),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-            child: TextField(
-              controller: _searchController,
-              onSubmitted: (val) => productProvider.search(val),
-              decoration: InputDecoration(
-                hintText: 'Cari di NitipDong (iPhone, Sepatu, Skincare)...',
-                prefixIcon: const Icon(Icons.search, color: AppTheme.textMuted, size: 20),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear, size: 18),
-                        onPressed: () {
-                          _searchController.clear();
-                          productProvider.search('');
-                        },
-                      )
-                    : null,
-                contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                fillColor: AppTheme.background,
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppTheme.background,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: TextField(
+                controller: _searchController,
+                onSubmitted: (val) => productProvider.search(val),
+                decoration: InputDecoration(
+                  hintText: 'Cari produk jastip, branded, atau skincare...',
+                  hintStyle: const TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                  prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.primary, size: 20),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, size: 18, color: AppTheme.textMuted),
+                          onPressed: () {
+                            _searchController.clear();
+                            productProvider.search('');
+                            setState(() {});
+                          },
+                        )
+                      : null,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                ),
+                onChanged: (val) => setState(() {}),
               ),
             ),
           ),
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: () => productProvider.fetchHomeData(),
+        onRefresh: () async {
+          await productProvider.fetchHomeData();
+        },
         color: AppTheme.primary,
         child: productProvider.isLoading && productProvider.products.isEmpty
-            ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
+            ? const Center(
+                child: CircularProgressIndicator(color: AppTheme.primary),
+              )
             : SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.only(bottom: 30),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 1. Promo Banners Carousel
-                    BannerCarousel(banners: productProvider.banners),
+                    // ══════════════════════════════════════════════════
+                    // 1. SMART IN-APP UPDATE BANNER / CARD
+                    // ══════════════════════════════════════════════════
+                    const InAppUpdateBanner(),
+
+                    // ══════════════════════════════════════════════════
+                    // 2. PROMO BANNERS CAROUSEL
+                    // ══════════════════════════════════════════════════
+                    if (productProvider.banners.isNotEmpty)
+                      BannerCarousel(banners: productProvider.banners),
+
                     const SizedBox(height: 14),
 
-                    // 2. Categories
+                    // ══════════════════════════════════════════════════
+                    // 3. QUICK SERVICES / QUICK ACTIONS ROW
+                    // ══════════════════════════════════════════════════
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AppTheme.border),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.02),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _buildQuickActionItem(
+                              icon: Icons.flight_takeoff_rounded,
+                              iconColor: const Color(0xFF0284C7),
+                              bgColor: const Color(0xFFE0F2FE),
+                              label: 'Jastip Global',
+                              onTap: () {
+                                productProvider.filterByCategory('jastip-luar-negeri');
+                              },
+                            ),
+                            _buildQuickActionItem(
+                              icon: Icons.verified_rounded,
+                              iconColor: const Color(0xFF059669),
+                              bgColor: const Color(0xFFD1FAE5),
+                              label: 'Official Store',
+                              onTap: () {
+                                productProvider.filterByCategory('official-store');
+                              },
+                            ),
+                            _buildQuickActionItem(
+                              icon: Icons.local_shipping_rounded,
+                              iconColor: const Color(0xFFD97706),
+                              bgColor: const Color(0xFFFEF3C7),
+                              label: 'Gratis Ongkir',
+                              onTap: () {
+                                productProvider.filterByCategory('');
+                              },
+                            ),
+                            _buildQuickActionItem(
+                              icon: Icons.discount_rounded,
+                              iconColor: const Color(0xFFDC2626),
+                              bgColor: const Color(0xFFFEE2E2),
+                              label: 'Voucher Hemat',
+                              onTap: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Voucher diskon otomatis diterapkan pada halaman Checkout! 🎟️'),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // ══════════════════════════════════════════════════
+                    // 4. CATEGORIES SECTION
+                    // ══════════════════════════════════════════════════
                     if (productProvider.categories.isNotEmpty) ...[
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              'Kategori Pilihan',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w800,
-                                color: AppTheme.textPrimary,
-                              ),
+                            const Row(
+                              children: [
+                                Icon(Icons.grid_view_rounded, size: 16, color: AppTheme.primary),
+                                SizedBox(width: 6),
+                                Text(
+                                  'Kategori Pilihan',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppTheme.textPrimary,
+                                  ),
+                                ),
+                              ],
                             ),
-                            TextButton(
-                              onPressed: () => productProvider.filterByCategory(''),
-                              child: const Text(
-                                'Semua',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppTheme.primary,
+                            if (productProvider.selectedCategory.isNotEmpty)
+                              GestureDetector(
+                                onTap: () => productProvider.filterByCategory(''),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.primaryLight,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Row(
+                                    children: [
+                                      Text(
+                                        'Reset Filter',
+                                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.primaryDark),
+                                      ),
+                                      SizedBox(width: 3),
+                                      Icon(Icons.close, size: 12, color: AppTheme.primaryDark),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 10),
                       SizedBox(
-                        height: 82,
+                        height: 86,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -171,7 +353,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
 
-                    // 3. Flash Sale Section
+                    const SizedBox(height: 12),
+
+                    // ══════════════════════════════════════════════════
+                    // 5. FLASH SALE SECTION
+                    // ══════════════════════════════════════════════════
                     if (productProvider.flashSaleItems.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -181,40 +367,58 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
 
-                    // 4. Product Feed Section Header
+                    const SizedBox(height: 14),
+
+                    // ══════════════════════════════════════════════════
+                    // 6. RECOMMENDED PRODUCTS FEED
+                    // ══════════════════════════════════════════════════
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            width: 3.5,
-                            height: 16,
-                            decoration: BoxDecoration(
-                              color: AppTheme.primary,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
+                          Row(
+                            children: [
+                              Container(
+                                width: 3.5,
+                                height: 16,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primary,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Rekomendasi Produk Pilihan',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppTheme.textPrimary,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Rekomendasi Produk Pilihan',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                              color: AppTheme.textPrimary,
-                            ),
+                          Text(
+                            '${productProvider.products.length} Produk',
+                            style: const TextStyle(fontSize: 11, color: AppTheme.textMuted, fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),
                     ),
 
-                    // 5. 2-Column Product Grid
                     if (productProvider.products.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.all(40),
+                      Padding(
+                        padding: const EdgeInsets.all(40),
                         child: Center(
-                          child: Text(
-                            'Tidak ada produk yang cocok dengan pencarian.',
-                            style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                          child: Column(
+                            children: [
+                              Icon(Icons.inventory_2_outlined, size: 48, color: Colors.grey.shade400),
+                              const SizedBox(height: 12),
+                              const Text(
+                                'Tidak ada produk yang cocok dengan pencarian.',
+                                style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                              ),
+                            ],
                           ),
                         ),
                       )
@@ -236,11 +440,49 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                         ),
                       ),
-
-                    const SizedBox(height: 20),
                   ],
                 ),
               ),
+      ),
+    );
+  }
+
+  Widget _buildQuickActionItem({
+    required IconData icon,
+    required Color iconColor,
+    required Color bgColor,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+        child: Column(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Center(
+                child: Icon(icon, color: iconColor, size: 22),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
