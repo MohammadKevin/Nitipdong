@@ -472,13 +472,19 @@ class OrderController extends Controller
         return redirect()->route('customer.dashboard')->with('success', 'Pesanan berhasil diselesaikan! Silakan berikan ulasan untuk produk yang telah Anda terima.');
     }
 
-    public function cancel(Request $request, Order $order): RedirectResponse
+    public function cancel(Request $request, Order $order): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         if ($order->user_id !== Auth::id()) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Akses tidak sah.'], 403);
+            }
             abort(403, 'Akses tidak sah.');
         }
 
         if (! in_array($order->status, ['pending', 'processing'])) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Pesanan yang sudah dikirim atau selesai tidak dapat dibatalkan.'], 422);
+            }
             return redirect()->route('customer.dashboard')->with('error', 'Pesanan yang sudah dikirim atau selesai tidak dapat dibatalkan.');
         }
 
@@ -526,6 +532,24 @@ class OrderController extends Controller
             }
         });
 
-        return redirect()->route('customer.dashboard')->with('success', 'Pesanan berhasil dibatalkan.');
+        // Cancel on Midtrans Sandbox if active reference exists
+        if (!empty($order->payment_reference)) {
+            try {
+                $serverKey = config('services.midtrans.server_key', 'Mid-server-QRIG4umIOjT0Q4w1JDxzIc0c');
+                \Illuminate\Support\Facades\Http::withBasicAuth($serverKey, '')
+                    ->timeout(5)
+                    ->post("https://api.sandbox.midtrans.com/v2/{$order->payment_reference}/cancel");
+            } catch (\Exception $e) {}
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Pesanan #{$order->invoice_number} berhasil dibatalkan. Stok produk telah dipulihkan.",
+                'status'  => 'cancelled'
+            ]);
+        }
+
+        return redirect()->route('customer.dashboard')->with('success', "Pesanan #{$order->invoice_number} berhasil dibatalkan. Stok produk telah dipulihkan.");
     }
 }

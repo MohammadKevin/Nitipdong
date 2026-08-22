@@ -91,6 +91,7 @@
         copiedInvoice: null,
         showComplaintModal: false,
         showCancelModal: false,
+        isCancelling: false,
         cancelData: {
             invoiceNumber: '',
             reason: 'Ingin mengubah metode pembayaran / salah pesan',
@@ -110,6 +111,7 @@
                 reason: 'Ingin mengubah metode pembayaran / salah pesan',
                 actionUrl: actionUrl
             };
+            this.isCancelling = false;
             this.showCancelModal = true;
         },
         copyToClipboard(text) {
@@ -1501,16 +1503,21 @@
                     </button>
                 </div>
 
-                <form :action="cancelData.actionUrl" method="POST" class="mt-4 space-y-4">
+                <form :action="cancelData.actionUrl" method="POST" class="mt-4 space-y-4"
+                      @submit="isCancelling = true">
                     @csrf
-                    <div class="p-3 bg-rose-50/60 rounded-xl border border-rose-200/80 text-rose-900 leading-relaxed">
-                        <p class="font-semibold text-xs">Konfirmasi Pembatalan</p>
-                        <p class="text-[11px] text-rose-700 mt-0.5">Apakah Anda yakin ingin membatalkan pesanan <span class="font-mono font-bold" x-text="'#' + cancelData.invoiceNumber"></span>? Stok barang akan segera dipulihkan.</p>
+                    <div class="p-3.5 bg-rose-50 rounded-xl border border-rose-200 text-rose-900 leading-relaxed">
+                        <p class="font-bold text-xs flex items-center gap-1.5 text-rose-800">
+                            <i class="fa-solid fa-triangle-exclamation text-rose-600"></i> Konfirmasi Pembatalan Pesanan
+                        </p>
+                        <p class="text-[11px] text-rose-700 mt-1">
+                            Apakah Anda yakin ingin membatalkan pesanan <span class="font-mono font-bold text-rose-900" x-text="'#' + cancelData.invoiceNumber"></span>? Stok barang akan segera dipulihkan ke toko.
+                        </p>
                     </div>
 
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Pilih Alasan Pembatalan</label>
-                        <select name="reason" x-model="cancelData.reason" required class="w-full py-2 px-3 rounded-xl border border-slate-300 text-xs focus:border-cyan-600 font-medium">
+                        <label class="block font-semibold text-slate-700 mb-1.5 text-xs">Pilih Alasan Pembatalan:</label>
+                        <select name="reason" x-model="cancelData.reason" required class="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-xs focus:border-rose-600 focus:ring-1 focus:ring-rose-500 font-medium bg-white">
                             <option value="Ingin mengubah metode pembayaran / pesanan">Ingin mengubah metode pembayaran / pesanan</option>
                             <option value="Ingin mengubah alamat pengiriman">Ingin mengubah alamat pengiriman</option>
                             <option value="Ingin mengganti varian produk (warna/ukuran)">Ingin mengganti varian produk (warna/ukuran)</option>
@@ -1520,12 +1527,13 @@
                         </select>
                     </div>
 
-                    <div class="pt-2 flex justify-end gap-2">
-                        <button type="button" @click="showCancelModal = false" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium cursor-pointer">
+                    <div class="pt-2 flex justify-end gap-2.5">
+                        <button type="button" @click="showCancelModal = false" :disabled="isCancelling" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium text-xs cursor-pointer transition-colors disabled:opacity-50">
                             Kembali
                         </button>
-                        <button type="submit" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold shadow-xs cursor-pointer">
-                            Ya, Batalkan Pesanan
+                        <button type="submit" :disabled="isCancelling" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs cursor-pointer flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50">
+                            <i class="fa-solid fa-spinner fa-spin text-xs" x-show="isCancelling" x-cloak></i>
+                            <span x-text="isCancelling ? 'Membatalkan...' : 'Ya, Batalkan Pesanan'"></span>
                         </button>
                     </div>
                 </form>

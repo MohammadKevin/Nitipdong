@@ -310,4 +310,71 @@ class OrderController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Cancel an active pending or processing order.
+     */
+    public function cancel(Request $request, $id): JsonResponse
+    {
+        $order = $request->user()->orders()->where('id', $id)->orWhere('uuid', $id)->first();
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan tidak ditemukan.',
+            ], 404);
+        }
+
+        if (!in_array($order->status, ['pending', 'processing'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya pesanan menunggu pembayaran atau sedang diproses yang dapat dibatalkan.',
+            ], 422);
+        }
+
+        $reason = $request->input('reason', 'Dibatalkan oleh pembeli via aplikasi.');
+
+        DB::transaction(function () use ($order, $reason) {
+            $order->update(['status' => 'cancelled']);
+
+            // Restore stock
+            foreach ($order->orderItems as $item) {
+                if ($item->product) {
+                    $item->product->increment('stock', $item->quantity);
+                    $item->product->decrement('sold_count', min($item->product->sold_count, $item->quantity));
+                }
+            }
+
+            // Restore voucher quota
+            if ($order->voucher_code) {
+                $voucher = \App\Models\Voucher::where('code', $order->voucher_code)->first();
+                if ($voucher) {
+                    $voucher->increment('quota');
+                }
+            }
+
+            \App\Models\AppNotification::send(
+                $order->user_id,
+                'Pesanan Dibatalkan',
+                "Pesanan #{$order->invoice_number} telah berhasil dibatalkan.",
+                'order',
+                route('customer.dashboard')
+            );
+        });
+
+        // Cancel on Midtrans Sandbox
+        if (!empty($order->payment_reference)) {
+            try {
+                $serverKey = config('services.midtrans.server_key', 'Mid-server-QRIG4umIOjT0Q4w1JDxzIc0c');
+                \Illuminate\Support\Facades\Http::withBasicAuth($serverKey, '')
+                    ->timeout(5)
+                    ->post("https://api.sandbox.midtrans.com/v2/{$order->payment_reference}/cancel");
+            } catch (\Exception $e) {}
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Pesanan #{$order->invoice_number} berhasil dibatalkan. Stok barang telah dipulihkan.",
+            'status'  => 'cancelled',
+        ]);
+    }
 }

@@ -67,6 +67,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/orders/{id}', [OrderController::class, 'show']);
         Route::post('/orders/checkout', [OrderController::class, 'checkout']);
         Route::post('/orders/{id}/pay', [OrderController::class, 'pay']);
+        Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel']);
         Route::post('/vouchers/validate', [OrderController::class, 'validateVoucher']);
         Route::post('/products/{id}/discussions', [ProductController::class, 'storeDiscussion']);
         Route::post('/products/{id}/discussions/{discussion_id}/reply', [ProductController::class, 'replyDiscussion']);
