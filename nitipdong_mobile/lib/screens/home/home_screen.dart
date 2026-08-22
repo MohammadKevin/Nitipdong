@@ -71,15 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.dns_outlined, color: AppTheme.textPrimary, size: 20),
-            tooltip: 'Server API',
-            onPressed: () {
-              ServerConfigDialog.show(context, onSaved: () {
-                Provider.of<ProductProvider>(context, listen: false).fetchHomeData();
-              });
-            },
-          ),
-          IconButton(
             icon: const Icon(Icons.notifications_none_rounded, color: AppTheme.textPrimary),
             onPressed: () {},
           ),
