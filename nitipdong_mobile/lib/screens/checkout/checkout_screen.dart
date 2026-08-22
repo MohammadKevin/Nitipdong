@@ -6,6 +6,7 @@ import '../../providers/cart_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
 import '../orders/orders_screen.dart';
+import 'payment_direct_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final List<int>? selectedCartIds;
@@ -450,13 +451,34 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         if (result['success'] == true && mounted) {
                           ApiService.saveAddress(fullAddress: _addressController.text.trim());
                           await cartProvider.fetchCart();
-                          _showPaymentInstructionDialog(
-                            context: context,
-                            orderId: result['order_id'] ?? 1,
-                            orderNumber: result['order_number'] ?? 'NTD-ORDER',
-                            totalAmount: totalAmount,
+
+                          // Direct Midtrans Core API Charge
+                          final chargeRes = await ApiService.chargeMidtransCore(
+                            orderId: result['order_id'] ?? result['order_number'],
                             paymentMethod: _selectedPayment,
                           );
+
+                          if (mounted) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => PaymentDirectScreen(
+                                  orderId: result['order_id'] ?? result['order_number'],
+                                  invoiceNumber: result['order_number'] ?? result['invoice_number'] ?? 'INV-ORDER',
+                                  totalAmount: totalAmount,
+                                  paymentType: chargeRes['payment_type'] ?? 'qris',
+                                  bank: chargeRes['bank'],
+                                  qrImageUrl: chargeRes['qr_image_url'],
+                                  qrString: chargeRes['qr_string'],
+                                  vaNumber: chargeRes['va_number'],
+                                  billerCode: chargeRes['biller_code'],
+                                  billKey: chargeRes['bill_key'],
+                                  expiryTime: chargeRes['expiry_time'],
+                                  instructions: chargeRes['instructions'] ?? [],
+                                ),
+                              ),
+                            );
+                          }
                         } else if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(

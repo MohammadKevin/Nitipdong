@@ -708,4 +708,66 @@ class ApiService {
       return {'success': false, 'message': e.toString()};
     }
   }
+
+  // ══════════════════════════════════════════════════
+  // MIDTRANS CORE API DIRECT PAYMENT & POLLING
+  // ══════════════════════════════════════════════════
+
+  /// Request Direct Payment Charge (QRIS, BCA VA, BRI VA, Mandiri Bill, ShopeePay)
+  static Future<Map<String, dynamic>> chargeMidtransCore({
+    required dynamic orderId,
+    required String paymentMethod,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/payment/midtrans/charge'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'order_id': orderId,
+          'payment_method': paymentMethod,
+        }),
+      );
+
+      checkResponseForMaintenance(response);
+      final data = jsonDecode(response.body);
+      return data;
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Gagal menghubungkan ke Midtrans Payment Gateway: $e',
+      };
+    }
+  }
+
+  /// Real-time Polling to check if transaction has settled
+  static Future<Map<String, dynamic>> checkPaymentStatus(dynamic orderId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/orders/$orderId/payment-status'),
+        headers: await _getHeaders(),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return {'success': false, 'is_paid': false};
+    } catch (_) {
+      return {'success': false, 'is_paid': false};
+    }
+  }
+
+  /// Instant Demo / Sandbox Testing Settlement
+  static Future<bool> simulatePaymentSuccess(dynamic orderId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/orders/$orderId/simulate-paid'),
+        headers: await _getHeaders(),
+      );
+      final data = jsonDecode(response.body);
+      return response.statusCode == 200 && data['success'] == true;
+    } catch (_) {
+      return false;
+    }
+  }
 }
+

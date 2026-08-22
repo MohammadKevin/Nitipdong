@@ -33,6 +33,20 @@
             },
             copied: false,
             isLoadingMidtrans: false,
+            pollInterval: null,
+            init() {
+                this.pollInterval = setInterval(() => {
+                    fetch('/api/v1/orders/{{ $order->id }}/payment-status')
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.is_paid) {
+                                clearInterval(this.pollInterval);
+                                window.location.href = '{{ route('customer.dashboard') }}?payment=success';
+                            }
+                        })
+                        .catch(() => {});
+                }, 3000);
+            },
             copyText(text) {
                 navigator.clipboard.writeText(text);
                 this.copied = true;
