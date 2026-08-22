@@ -5,6 +5,7 @@ import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 import '../screens/main_nav_screen.dart';
 import '../screens/maintenance_screen.dart';
+import '../screens/auth/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -45,10 +46,20 @@ class _SplashScreenState extends State<SplashScreen> {
     await authProvider.checkAuth();
 
     if (!mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const MainNavScreen()),
-    );
+
+    if (authProvider.isAuthenticated) {
+      // User already logged in -> Go straight to Home
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainNavScreen()),
+      );
+    } else {
+      // New download / Not logged in -> Go to Login / Register Screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen(isFromSplash: true)),
+      );
+    }
   }
 
   @override

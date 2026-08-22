@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
+import '../main_nav_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  final bool isFromSplash;
+
+  const LoginScreen({Key? key, this.isFromSplash = false}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -23,6 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Masuk ke Akun'),
+        automaticallyImplyLeading: !widget.isFromSplash,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -31,12 +35,12 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             const SizedBox(height: 10),
             Text(
-              'Selamat Datang Kembali! 👋',
+              'Selamat Datang di NitipDong! 👋',
               style: Theme.of(context).textTheme.displayLarge?.copyWith(fontSize: 22),
             ),
             const SizedBox(height: 6),
             Text(
-              'Masuk untuk mengakses keranjang, wishlist, dan riwayat pesanan Anda di NitipDong.',
+              'Masuk atau daftar untuk mengakses ribuan promo, keranjang, dan riwayat pesanan Anda.',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 30),
@@ -132,7 +136,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         final success = await authProvider.login(email, password);
                         if (success && mounted) {
-                          Navigator.pop(context);
+                          if (widget.isFromSplash) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => const MainNavScreen()),
+                            );
+                          } else {
+                            Navigator.pop(context);
+                          }
                         }
                       },
                 child: authProvider.isLoading
@@ -144,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     : const Text('Masuk Sekarang'),
               ),
             ),
-            const SizedBox(height: 25),
+            const SizedBox(height: 20),
 
             // Register Link
             Row(
@@ -155,7 +166,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => RegisterScreen(isFromSplash: widget.isFromSplash),
+                      ),
                     );
                   },
                   child: const Text(
@@ -164,6 +177,24 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 10),
+
+            // Guest Explore Option
+            Center(
+              child: TextButton.icon(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MainNavScreen()),
+                  );
+                },
+                icon: const Text(
+                  'Lewati & Jelajahi sebagai Tamu',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.textMuted),
+                ),
+                label: const Icon(Icons.arrow_forward_rounded, size: 14, color: AppTheme.textMuted),
+              ),
             ),
           ],
         ),
