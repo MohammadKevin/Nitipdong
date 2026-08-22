@@ -23,12 +23,18 @@ class SystemConfigController extends Controller
 
         $isMaintenance = (bool) (env('APP_MAINTENANCE', false) || $isDown);
 
-        $customMessage = $downData['message'] ?? env('APP_MAINTENANCE_MESSAGE') ?? null;
+        $msgFilePath = storage_path('framework/maintenance_message.json');
+        $msgData = [];
+        if (file_exists($msgFilePath)) {
+            $msgData = json_decode(@file_get_contents($msgFilePath), true) ?: [];
+        }
+
+        $customMessage = $msgData['message'] ?? $downData['message'] ?? env('APP_MAINTENANCE_MESSAGE') ?? null;
         $maintenanceMessage = !empty($customMessage)
             ? (string) $customMessage
             : 'Aplikasi NitipDong sedang dalam tahap pembaruan fitur & optimalisasi sistem untuk pengalaman belanja yang lebih baik. Silakan coba kembali beberapa saat lagi.';
 
-        $customTitle = env('APP_MAINTENANCE_TITLE') ?? null;
+        $customTitle = $msgData['title'] ?? env('APP_MAINTENANCE_TITLE') ?? null;
         $maintenanceTitle = !empty($customTitle)
             ? (string) $customTitle
             : 'Mode Pemeliharaan & Pengembangan 🛠️';
