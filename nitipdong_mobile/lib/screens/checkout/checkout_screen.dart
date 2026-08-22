@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
@@ -55,36 +54,53 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return formatter.format(amount);
   }
 
-  Future<void> _applyVoucher(double subtotal) async {
-    final code = _voucherController.text.trim();
-    if (code.isEmpty) return;
-
-    setState(() => _isProcessing = true);
-    final result = await ApiService.validateVoucher(code);
-    setState(() {
-      _isProcessing = false;
-      if (result['success'] == true) {
-        _appliedVoucherCode = result['code'];
-        _discountAmount = result['discount_amount'] ?? 0.0;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Voucher $_appliedVoucherCode berhasil digunakan! Diskon ${_formatCurrency(_discountAmount)} 🎉'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      } else {
-        _appliedVoucherCode = null;
-        _discountAmount = 0.0;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result['message'] ?? 'Kupon tidak valid atau sudah kadaluarsa.'),
-            backgroundColor: Colors.redAccent,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    });
+  void _applyVoucher(double subtotal) {
+    final code = _voucherController.text.trim().toUpperCase();
+    if (code == 'NITIPHEMAT') {
+      setState(() {
+        _discountAmount = subtotal * 0.15 > 50000 ? 50000 : subtotal * 0.15;
+        _appliedVoucherCode = code;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Kupon NITIPHEMAT berhasil digunakan! Diskon ${_formatCurrency(_discountAmount)} 🎉'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else if (code == 'ONGKIRNOL') {
+      setState(() {
+        _discountAmount = 15000;
+        _appliedVoucherCode = code;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Kupon ONGKIRNOL aktif! Gratis ongkos kirim seluruh Indonesia. 🚚'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else if (code == 'FLASHSALE20') {
+      setState(() {
+        _discountAmount = subtotal * 0.20;
+        _appliedVoucherCode = code;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Kupon FLASHSALE20 aktif! Cashback ${_formatCurrency(_discountAmount)} 🎉'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Kode voucher tidak valid atau telah habis masa berlakunya.'),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
@@ -112,9 +128,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ══════════════════════════════════════════════════
             // 1. SHIPPING ADDRESS CARD
-            // ══════════════════════════════════════════════════
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
@@ -158,9 +172,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             const SizedBox(height: 12),
 
-            // ══════════════════════════════════════════════════
             // 2. SHIPPING COURIER SELECTION
-            // ══════════════════════════════════════════════════
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
@@ -220,9 +232,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             const SizedBox(height: 12),
 
-            // ══════════════════════════════════════════════════
             // 3. PAYMENT METHOD SELECTION
-            // ══════════════════════════════════════════════════
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
@@ -286,9 +296,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             const SizedBox(height: 12),
 
-            // ══════════════════════════════════════════════════
             // 4. VOUCHER & PROMO INPUT
-            // ══════════════════════════════════════════════════
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
@@ -351,9 +359,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             const SizedBox(height: 12),
 
-            // ══════════════════════════════════════════════════
             // 5. PAYMENT BREAKDOWN
-            // ══════════════════════════════════════════════════
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
@@ -409,9 +415,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             const SizedBox(height: 30),
 
-            // ══════════════════════════════════════════════════
             // 6. PAY BUTTON
-            // ══════════════════════════════════════════════════
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -425,7 +429,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           paymentMethod: _selectedPayment,
                           courier: _selectedCourier,
                           cartIds: widget.selectedCartIds,
-                          voucherCode: _appliedVoucherCode,
                         );
                         setState(() => _isProcessing = false);
 
@@ -466,9 +469,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  // ══════════════════════════════════════════════════
-  // PAYMENT INSTRUCTION MODAL DIALOG
-  // ══════════════════════════════════════════════════
   void _showPaymentInstructionDialog({
     required BuildContext context,
     required dynamic orderId,
