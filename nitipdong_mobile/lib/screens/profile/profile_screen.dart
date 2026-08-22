@@ -264,7 +264,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onPressed: () => _showLogoutConfirmDialog(context, authProvider),
                 ),
               ),
-            const SizedBox(height: 40),
+            
+            // ══════════════════════════════════════════════════
+            // 5. APP VERSION DISPLAY
+            // ══════════════════════════════════════════════════
+            const SizedBox(height: 24),
+            Center(
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryLight,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppTheme.border),
+                    ),
+                    child: const Text(
+                      'NitipDong App v1.0.1 (Terbaru)',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.primaryDark,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Marketplace & Jastip Terpercaya Indonesia',
+                    style: TextStyle(fontSize: 10, color: AppTheme.textMuted),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 30),
           ],
         ),
       ),
