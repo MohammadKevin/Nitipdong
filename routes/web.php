@@ -209,7 +209,7 @@ Route::get('/product/{product}', [PublicProductController::class, 'show'])->name
 Route::get('/toko/{store:slug}', [StoreFrontController::class, 'show'])->name('store.show');
 
 // Authenticated Routes
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
 
     Route::get('/store/register', [StoreRegistrationController::class, 'create'])->name('store.register');
     Route::post('/store/register', [StoreRegistrationController::class, 'store'])->name('store.store');
