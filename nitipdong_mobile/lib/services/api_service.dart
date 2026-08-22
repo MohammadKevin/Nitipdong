@@ -10,7 +10,7 @@ import '../models/order_model.dart';
 
 class ApiService {
   // Current Installed Mobile App Version
-  static const String currentAppVersion = '1.0.3';
+  static const String currentAppVersion = '1.0.4';
 
   // Default API Base URL (Production - budayakita.com)
   // Can be configured dynamically from app UI or loaded from SharedPreferences
