@@ -1,0 +1,78 @@
+name: Build Flutter iOS IPA
+
+on:
+  push:
+    paths:
+      - 'nitipdong_mobile/**'
+      - '.github/workflows/build-ipa.yml'
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write  # Required for creating GitHub Releases
+
+jobs:
+  build-ipa:
+    name: Build iOS IPA (Unsigned - For Sideload)
+    runs-on: macos-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 💙 Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: 'stable'
+          cache: true
+
+      - name: ⚙️ Setup iOS Platform Scaffold & Dependencies
+        run: |
+          cd nitipdong_mobile
+          flutter create --platforms=ios --org=com.nitipdong .
+          flutter pub get
+
+      - name: 🔨 Build iOS IPA (Unsigned — Sideload Ready)
+        run: |
+          cd nitipdong_mobile
+          flutter build ipa --no-codesign --release
+
+      - name: 📋 Rename IPA
+        run: |
+          IPA_PATH=$(find nitipdong_mobile/build/ios/ipa -name "*.ipa" | head -1)
+          cp "$IPA_PATH" NitipDong-latest.ipa
+
+      - name: 📤 Upload IPA as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NitipDong-iOS-IPA
+          path: NitipDong-latest.ipa
+          retention-days: 30
+
+      - name: 🚀 Publish IPA to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "NitipDong App — Latest Build"
+          body: |
+            ## 📱 NitipDong App
+
+            **Build otomatis** dari commit terbaru.
+
+            ### Download:
+            | Platform | File | Cara Install |
+            |---|---|---|
+            | 🤖 Android | `NitipDong-latest.apk` | Install langsung |
+            | 🍎 iOS (iPhone) | `NitipDong-latest.ipa` | AltStore / Sideloadly |
+
+            ### Cara Install iOS (Sideload tanpa Jailbreak):
+            1. Download `NitipDong-latest.ipa` di PC/laptop
+            2. Install **AltStore** di PC: [altstore.io](https://altstore.io)
+            3. Sambungkan iPhone ke PC via kabel
+            4. Drag & drop file IPA ke AltStore → Install!
+
+          files: NitipDong-latest.ipa
+          prerelease: false
+          make_latest: true
