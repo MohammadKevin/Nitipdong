@@ -26,7 +26,7 @@
         <div class="bg-slate-950 text-slate-300 text-[11px] py-1.5 border-b border-slate-800 hidden sm:block">
             <div class="page-container flex items-center justify-between">
                 <div class="flex items-center gap-3 text-slate-400">
-                    <a href="{{ route('store.register') }}" class="hover:text-cyan-300 font-medium transition-colors flex items-center gap-1">
+                    <a href="{{ route('store.register') }}" class="hover:text-cyan-300 font-medium transition-colors flex items-center gap-1.5">
                         <i class="fa-solid fa-store text-[10px] text-cyan-400"></i> Mulai Jual di NitipDong
                     </a>
                     <span class="text-slate-700">|</span>
@@ -88,11 +88,11 @@
                                 <span class="font-bold text-lg text-slate-900 tracking-tight block leading-none">
                                     Nitip<span class="text-cyan-600 font-black">Dong</span>
                                 </span>
-                                <span class="text-[9px] font-bold text-cyan-700 uppercase tracking-wider">Marketplace Indonesia</span>
+                                <span class="text-[9px] font-bold text-cyan-700 uppercase tracking-wider">Marketplace &amp; Official Mall</span>
                             </div>
                         </div>
                         <p class="text-xs text-slate-500 leading-relaxed max-w-sm">
-                            Platform e-commerce terdepan untuk belanja online aman, cepat, dan hemat. Temukan jutaan produk original, flash sale harian diskon hingga 70%, dan voucher gratis ongkir Rp0.
+                            Platform e-commerce &amp; titip beli terpercaya di Indonesia. Menyediakan jutaan produk original, flash sale harian diskon hingga 80%, voucher gratis ongkir Rp0, dan perlindungan transaksi 100% aman.
                         </p>
                         
                         <div class="pt-2">
@@ -118,25 +118,25 @@
                     <div>
                         <h4 class="font-bold text-slate-900 mb-3.5 text-xs uppercase tracking-wider">Layanan Pelanggan</h4>
                         <ul class="space-y-2 text-xs">
-                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Pusat Bantuan</a></li>
-                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Cara Membeli</a></li>
-                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Pengiriman & Pelacakan</a></li>
-                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Pengembalian Barang & Dana</a></li>
-                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Garansi NitipDong</a></li>
-                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Hubungi Kami 24/7</a></li>
+                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Pusat Bantuan &amp; FAQ</a></li>
+                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Cara Belanja &amp; Bayar</a></li>
+                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Pengiriman &amp; Pelacakan Resi</a></li>
+                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Garansi 100% Produk Original</a></li>
+                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Pengembalian Barang &amp; Retur</a></li>
+                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Customer Service 24/7</a></li>
                         </ul>
                     </div>
 
-                    {{-- Col 4: Jelajahi NitipDong --}}
+                    {{-- Col 4: Solusi Penjual & Bisnis --}}
                     <div>
-                        <h4 class="font-bold text-slate-900 mb-3.5 text-xs uppercase tracking-wider">Jelajahi NitipDong</h4>
+                        <h4 class="font-bold text-slate-900 mb-3.5 text-xs uppercase tracking-wider">Solusi Penjual</h4>
                         <ul class="space-y-2 text-xs">
-                            <li><a href="{{ url('/products') }}" class="hover:text-cyan-700 transition-colors">Semua Produk</a></li>
+                            <li><a href="{{ route('store.register') }}" class="text-cyan-700 font-bold hover:underline">Buka Toko Gratis</a></li>
+                            <li><a href="{{ route('store.register') }}" class="hover:text-cyan-700 transition-colors">Mitra Official Store</a></li>
+                            <li><a href="{{ url('/products') }}" class="hover:text-cyan-700 transition-colors">Katalog Semua Produk</a></li>
                             <li><a href="{{ url('/products?flash_sale=1') }}" class="hover:text-cyan-700 transition-colors">Flash Sale Kilat</a></li>
-                            <li><a href="{{ route('store.register') }}" class="hover:text-cyan-700 transition-colors font-semibold text-cyan-700">Buka Toko Gratis</a></li>
-                            <li><a href="{{ route('customer.wishlist.index') }}" class="hover:text-cyan-700 transition-colors">Wishlist Saya</a></li>
-                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Mitra Brand Resmi</a></li>
-                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Karir & Blog</a></li>
+                            <li><a href="{{ route('customer.vouchers.index') }}" class="hover:text-cyan-700 transition-colors">Klaim Voucher Belanja</a></li>
+                            <li><a href="#" class="hover:text-cyan-700 transition-colors">Kebijakan Privasi &amp; Syarat</a></li>
                         </ul>
                     </div>
 

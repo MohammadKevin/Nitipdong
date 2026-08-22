@@ -35,9 +35,9 @@
 </head>
 <body class="font-sans antialiased" style="font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden;">
 
-<div class="min-h-screen flex flex-col lg:flex-row relative" id="auth-wrapper">
+<div class="min-h-screen flex flex-col {{ $reverse ? 'lg:flex-row-reverse' : 'lg:flex-row' }} relative" id="auth-wrapper">
 
-    {{-- LEFT PANEL — Dark navy (desktop only lg:flex) --}}
+    {{-- BRAND SHOWCASE PANEL — Dark navy (desktop only lg:flex) --}}
     <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col justify-between p-12 text-white"
          style="background: linear-gradient(160deg, #0c1a35 0%, #0f2a4a 45%, #083a52 100%);">
 
@@ -48,7 +48,7 @@
              style="background: radial-gradient(circle, rgba(14,116,144,0.12), transparent 70%);"></div>
 
         {{-- Logo --}}
-        <div class="relative z-10 flex items-center gap-3 mt-24 ml-20">
+        <div class="relative z-10 flex items-center gap-3 mt-24 {{ $reverse ? 'mr-20 justify-start' : 'ml-20 justify-start' }}">
             <div class="w-12 h-12 rounded-2xl overflow-hidden bg-cyan-50 border border-cyan-200 flex items-center justify-center shadow-md">
                 <img src="{{ asset('img/saksershop-logo.png') }}" alt="NitipDong" class="w-full h-full object-cover">
             </div>
@@ -58,7 +58,7 @@
         </div>
 
         {{-- Main copy --}}
-        <div class="relative z-10 max-w-md">
+        <div class="relative z-10 max-w-md {{ $reverse ? 'self-start pl-8' : '' }}">
             <p class="text-xs font-bold uppercase tracking-widest mb-5 flex items-center gap-2 text-cyan-400">
                 <span class="w-1.5 h-1.5 rounded-full inline-block bg-cyan-400 animate-pulse"></span>
                 Marketplace Terpercaya
@@ -92,13 +92,13 @@
         </div>
 
         {{-- Footer --}}
-        <div class="relative z-10">
+        <div class="relative z-10 {{ $reverse ? 'pl-8' : '' }}">
             <p class="text-xs text-slate-400">&copy; {{ date('Y') }} NitipDong Platform. Hak Cipta Dilindungi.</p>
         </div>
     </div>
 
-    {{-- CURVE DIVIDER --}}
-    <div class="auth-curve-divider">
+    {{-- CURVE DIVIDER (Adapts cleanly based on $reverse) --}}
+    <div class="auth-curve-divider" @if($reverse) style="transform: scaleX(-1);" @endif>
         <svg viewBox="0 0 120 1000" preserveAspectRatio="none"
              xmlns="http://www.w3.org/2000/svg"
              style="width:100%;height:100%;display:block;">
@@ -118,8 +118,8 @@
         </svg>
     </div>
 
-    {{-- RIGHT PANEL (desktop white) / FULL PAGE (mobile dark+white) --}}
-    <div class="w-full lg:w-1/2 flex flex-col min-h-screen bg-white">
+    {{-- FORM PANEL (desktop white) / FULL PAGE (mobile dark+white) --}}
+    <div class="w-full lg:w-1/2 flex flex-col min-h-screen bg-white relative">
 
         {{-- MOBILE: dark header + dome curve (hidden on desktop) --}}
         <div class="lg:hidden relative flex flex-col items-center px-6 pt-12 pb-16"
@@ -166,7 +166,7 @@
 
             {{-- Desktop close button --}}
             <a href="/"
-               class="hidden lg:flex absolute top-5 right-5 z-50 w-9 h-9 rounded-full
+               class="hidden lg:flex absolute top-5 {{ $reverse ? 'left-5' : 'right-5' }} z-50 w-9 h-9 rounded-full
                       bg-white shadow-md hover:shadow-lg items-center justify-center
                       text-slate-500 hover:text-slate-900 transition-all
                       border border-slate-200 text-sm font-medium">

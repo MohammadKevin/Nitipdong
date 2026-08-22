@@ -7,6 +7,8 @@
         --color-primary:       #0891b2;
         --color-primary-dark:  #0e7490;
         --color-primary-light: #ecfeff;
+        --color-accent-sky:    #0284c7;
+        --color-accent-coral:  #f97316;
         --color-canvas:        #f8fafc;
         --color-surface:       #ffffff;
         --color-border:        #e2e8f0;
@@ -152,13 +154,53 @@
         border-radius: 0.5rem;
         background-color: #0891b2;
         color: #ffffff;
-        box-shadow: 0 1px 2px 0 rgba(8, 145, 178, 0.2);
-        transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.15s ease-in-out;
     }
 
     .btn-primary:hover {
         background-color: #0e7490;
-        box-shadow: 0 2px 4px 0 rgba(8, 145, 178, 0.3);
+    }
+
+    /* Cyan & Sky Blue Marketplace Badges */
+    .badge-cyan {
+        background-color: #ecfeff;
+        color: #0891b2;
+        border: 1px solid #cffafe;
+        font-weight: 700;
+    }
+
+    .badge-sky {
+        background-color: #f0f9ff;
+        color: #0284c7;
+        border: 1px solid #e0f2fe;
+        font-weight: 700;
+    }
+
+    .badge-discount-coral {
+        background-color: #fff7ed;
+        color: #ea580c;
+        border: 1px solid #ffedd5;
+        font-weight: 800;
+    }
+
+    .badge-flash-coral {
+        background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+        color: #ffffff;
+        font-weight: 800;
+    }
+
+    .badge-official-cyan {
+        background-color: #0e7490;
+        color: #ffffff;
+        font-weight: 700;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
 
     .btn-primary:active {

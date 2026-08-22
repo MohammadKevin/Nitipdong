@@ -59,7 +59,7 @@
                     <span class="font-bold text-base tracking-tight text-slate-900 leading-none block">
                         Nitip<span class="text-cyan-600 font-black">Dong</span>
                     </span>
-                    <span class="text-[9px] font-bold text-cyan-700 tracking-wider uppercase">Official Mall</span>
+                    <span class="text-[9px] font-bold text-cyan-700 tracking-wider uppercase">Official Store &amp; Marketplace</span>
                 </div>
             </a>
 
@@ -70,12 +70,12 @@
                         <input type="text" name="q" x-model="searchQuery"
                                @input.debounce.250ms="fetchSuggestions()"
                                @focus="if(searchQuery.trim().length >= 2) showSuggestions = true"
-                               placeholder="Cari di NitipDong (contoh: Laptop, Sepatu, Smartwatch, TWS)..."
-                               class="w-full h-10 pl-9 pr-24 rounded-xl border border-slate-200 bg-slate-50/70 text-xs focus:bg-white focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100 transition-all">
+                               placeholder="Cari di NitipDong (contoh: iPhone, Sepatu Sneakers, Kopi Robusta, Skincare)..."
+                               class="w-full h-10 pl-9 pr-24 rounded-xl border border-slate-200 bg-slate-50/70 text-xs focus:bg-white focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100 transition-all text-slate-800">
                         <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3 text-xs" :class="isLoadingSuggestions ? 'animate-spin fa-spinner' : 'fa-magnifying-glass'"></i>
                         <div class="absolute right-1.5 flex items-center gap-1">
                             <span class="text-[10px] text-slate-400 font-mono hidden lg:inline-block px-1.5 py-0.5 bg-slate-200/60 rounded">Ctrl K</span>
-                            <button type="submit" class="h-7 px-3.5 bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs rounded-lg shadow-xs transition-colors cursor-pointer">
+                            <button type="submit" class="h-7 px-4 bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xs rounded-lg shadow-xs transition-colors cursor-pointer">
                                 Cari
                             </button>
                         </div>
