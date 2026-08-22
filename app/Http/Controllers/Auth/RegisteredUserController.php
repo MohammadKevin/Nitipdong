@@ -28,6 +28,13 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email ini sudah terdaftar. Silakan masuk atau gunakan email lain.',
+            'password.required' => 'Kata sandi wajib diisi.',
+            'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
         ]);
 
         $otp = sprintf('%06d', mt_rand(100000, 999999));
@@ -35,12 +42,17 @@ class RegisteredUserController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'password' => $request->password,
+            'role' => 'customer',
             'otp_code' => $otp,
             'otp_expires_at' => now()->addMinutes(15),
         ]);
 
-        Mail::to($user->email)->send(new OtpMail($otp, 'register', $user->name));
+        try {
+            Mail::to($user->email)->send(new OtpMail($otp, 'register', $user->name));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('OTP Mail failed: ' . $e->getMessage());
+        }
 
         event(new Registered($user));
 

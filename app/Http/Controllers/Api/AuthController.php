@@ -54,34 +54,73 @@ class AuthController extends Controller
      */
     public function register(Request $request): JsonResponse
     {
-        $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name'                  => ['required', 'string', 'max:255'],
+            'email'                 => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password'              => ['required', 'string', 'min:8'],
+            'password_confirmation' => ['required', 'string', 'same:password'],
+        ], [
+            'name.required'                  => 'Nama lengkap wajib diisi.',
+            'email.required'                 => 'Alamat email wajib diisi.',
+            'email.email'                    => 'Format email tidak valid.',
+            'email.unique'                   => 'Email ini sudah terdaftar. Silakan gunakan email lain atau masuk.',
+            'password.required'              => 'Kata sandi wajib diisi.',
+            'password.min'                   => 'Kata sandi minimal 8 karakter.',
+            'password_confirmation.required' => 'Konfirmasi kata sandi wajib diisi.',
+            'password_confirmation.same'     => 'Konfirmasi kata sandi tidak cocok.',
         ]);
 
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => $request->password,
-            'role'     => 'customer',
-        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
 
-        $token = $user->createToken('nitipdong-mobile-app')->plainTextToken;
+        try {
+            $otp = sprintf('%06d', mt_rand(100000, 999999));
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Pendaftaran akun berhasil!',
-            'token'   => $token,
-            'user'    => [
-                'id'         => $user->id,
-                'name'       => $user->name,
-                'email'      => $user->email,
-                'phone'      => $user->phone ?? '',
-                'role'       => $user->role,
-                'avatar_url' => $user->avatar_url,
-            ],
-        ], 201);
+            $user = User::create([
+                'name'           => $request->name,
+                'email'          => strtolower(trim($request->email)),
+                'password'       => $request->password,
+                'role'           => 'customer',
+                'otp_code'       => $otp,
+                'otp_expires_at' => now()->addMinutes(15),
+            ]);
+
+            // Send OTP email in background / safely wrapped
+            try {
+                \Illuminate\Support\Facades\Mail::to($user->email)->send(
+                    new \App\Mail\OtpMail($otp, 'register', $user->name)
+                );
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Registration OTP email skipped/failed: ' . $e->getMessage());
+            }
+
+            $token = $user->createToken('nitipdong-mobile-app')->plainTextToken;
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pendaftaran akun berhasil!',
+                'token'   => $token,
+                'user'    => [
+                    'id'         => $user->id,
+                    'name'       => $user->name,
+                    'email'      => $user->email,
+                    'phone'      => $user->phone ?? '',
+                    'role'       => $user->role,
+                    'avatar_url' => $user->avatar_url,
+                ],
+            ], 201);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('API Registration error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mendaftar: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
