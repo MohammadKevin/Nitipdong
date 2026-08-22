@@ -22,31 +22,33 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initApp() async {
-    await Future.delayed(const Duration(seconds: 2));
-    if (!mounted) return;
+    // Quick parallel check (Splash animation + System status + Auth session)
+    try {
+      final results = await Future.wait([
+        ApiService.checkSystemStatus(),
+        Provider.of<AuthProvider>(context, listen: false).checkAuth(),
+        Future.delayed(const Duration(milliseconds: 700)),
+      ]).timeout(const Duration(seconds: 2));
 
-    // 1. Check if System is in Maintenance Mode
-    final systemStatus = await ApiService.checkSystemStatus();
-    if (systemStatus['is_maintenance'] == true) {
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MaintenanceScreen(
-            title: systemStatus['maintenance_title'] ?? 'Mode Pemeliharaan & Pengembangan 🛠️',
-            message: systemStatus['maintenance_message'] ?? 'Aplikasi sedang dalam tahap peningkatan sistem.',
+      final systemStatus = results[0] as Map<String, dynamic>;
+      if (systemStatus['is_maintenance'] == true) {
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MaintenanceScreen(
+              title: systemStatus['maintenance_title'] ?? 'Mode Pemeliharaan & Pengembangan 🛠️',
+              message: systemStatus['maintenance_message'] ?? 'Aplikasi sedang dalam tahap peningkatan sistem.',
+            ),
           ),
-        ),
-      );
-      return;
-    }
-
-    // 2. Check Auth Session
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    await authProvider.checkAuth();
+        );
+        return;
+      }
+    } catch (_) {}
 
     if (!mounted) return;
 
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     if (authProvider.isAuthenticated) {
       // User already logged in -> Go straight to Home
       Navigator.pushReplacement(

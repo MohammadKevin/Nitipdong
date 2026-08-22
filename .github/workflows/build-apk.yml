@@ -37,7 +37,7 @@ jobs:
           cd nitipdong_mobile
           flutter create --platforms=android --org=com.nitipdong .
           flutter pub get
-          dart run flutter_launcher_icons
+          flutter pub run flutter_launcher_icons || true
 
       - name: 🔨 Build Android Release APK
         run: |

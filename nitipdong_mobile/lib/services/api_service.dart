@@ -72,10 +72,12 @@ class ApiService {
   // ══════════════════════════════════════════════════
   static Future<Map<String, dynamic>> checkSystemStatus() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/system/status'),
-        headers: await _getHeaders(withAuth: false),
-      );
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/system/status'),
+            headers: await _getHeaders(withAuth: false),
+          )
+          .timeout(const Duration(seconds: 2));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -88,63 +90,83 @@ class ApiService {
   // AUTHENTICATION
   // ══════════════════════════════════════════════════
   static Future<Map<String, dynamic>> login(String email, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/login'),
-      headers: await _getHeaders(withAuth: false),
-      body: jsonEncode({'email': email, 'password': password}),
-    );
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/auth/login'),
+            headers: await _getHeaders(withAuth: false),
+            body: jsonEncode({'email': email, 'password': password}),
+          )
+          .timeout(const Duration(seconds: 5));
 
-    final data = jsonDecode(response.body);
-    if (response.statusCode == 200 && data['success'] == true) {
-      await setToken(data['token']);
-      return {
-        'success': true,
-        'token': data['token'],
-        'user': UserModel.fromJson(data['user']),
-      };
-    } else {
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['success'] == true) {
+        await setToken(data['token']);
+        return {
+          'success': true,
+          'token': data['token'],
+          'user': UserModel.fromJson(data['user']),
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Gagal masuk. Periksa email & kata sandi Anda.',
+        };
+      }
+    } catch (_) {
       return {
         'success': false,
-        'message': data['message'] ?? 'Gagal masuk. Periksa email & kata sandi Anda.',
+        'message': 'Gagal terhubung ke server. Periksa koneksi atau IP server Anda.',
       };
     }
   }
 
   static Future<Map<String, dynamic>> register(
       String name, String email, String password, String passwordConfirmation) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/register'),
-      headers: await _getHeaders(withAuth: false),
-      body: jsonEncode({
-        'name': name,
-        'email': email,
-        'password': password,
-        'password_confirmation': passwordConfirmation,
-      }),
-    );
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/auth/register'),
+            headers: await _getHeaders(withAuth: false),
+            body: jsonEncode({
+              'name': name,
+              'email': email,
+              'password': password,
+              'password_confirmation': passwordConfirmation,
+            }),
+          )
+          .timeout(const Duration(seconds: 5));
 
-    final data = jsonDecode(response.body);
-    if (response.statusCode == 201 && data['success'] == true) {
-      await setToken(data['token']);
-      return {
-        'success': true,
-        'token': data['token'],
-        'user': UserModel.fromJson(data['user']),
-      };
-    } else {
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 201 && data['success'] == true) {
+        await setToken(data['token']);
+        return {
+          'success': true,
+          'token': data['token'],
+          'user': UserModel.fromJson(data['user']),
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Gagal mendaftar. Silakan coba lagi.',
+        };
+      }
+    } catch (_) {
       return {
         'success': false,
-        'message': data['message'] ?? 'Gagal mendaftar. Silakan coba lagi.',
+        'message': 'Gagal terhubung ke server. Periksa koneksi atau IP server Anda.',
       };
     }
   }
 
   static Future<UserModel?> getProfile() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/auth/profile'),
-        headers: await _getHeaders(),
-      );
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/auth/profile'),
+            headers: await _getHeaders(),
+          )
+          .timeout(const Duration(seconds: 3));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
