@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:async';
 import '../models/product_model.dart';
 import '../theme/app_theme.dart';
 import '../screens/product/product_detail_screen.dart';
 
-class FlashSaleSection extends StatelessWidget {
+class FlashSaleSection extends StatefulWidget {
   final List<ProductModel> items;
   final int remainingSeconds;
 
@@ -15,14 +16,88 @@ class FlashSaleSection extends StatelessWidget {
     required this.remainingSeconds,
   }) : super(key: key);
 
+  @override
+  State<FlashSaleSection> createState() => _FlashSaleSectionState();
+}
+
+class _FlashSaleSectionState extends State<FlashSaleSection> {
+  late int _secondsRemaining;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _secondsRemaining = widget.remainingSeconds;
+    _startTimer();
+  }
+
+  @override
+  void didUpdateWidget(covariant FlashSaleSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.remainingSeconds != widget.remainingSeconds) {
+      setState(() {
+        _secondsRemaining = widget.remainingSeconds;
+      });
+      _startTimer();
+    }
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    if (_secondsRemaining <= 0) return;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_secondsRemaining > 0) {
+        setState(() {
+          _secondsRemaining--;
+        });
+      } else {
+        _timer?.cancel();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   String _formatCurrency(double amount) {
     final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     return formatter.format(amount);
   }
 
+  Widget _buildTimeBlock(String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: AppTheme.accentOrange.withOpacity(0.5)),
+      ),
+      child: Text(
+        value,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'monospace',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (items.isEmpty) return const SizedBox.shrink();
+    if (widget.items.isEmpty) return const SizedBox.shrink();
+
+    // Calculate HH : MM : SS
+    int h = _secondsRemaining ~/ 3600;
+    int m = (_secondsRemaining % 3600) ~/ 60;
+    int s = _secondsRemaining % 60;
+    String hoursStr = h.toString().padLeft(2, '0');
+    String minutesStr = m.toString().padLeft(2, '0');
+    String secondsStr = s.toString().padLeft(2, '0');
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 12),
@@ -60,6 +135,16 @@ class FlashSaleSection extends StatelessWidget {
                   style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800),
                 ),
               ),
+              const SizedBox(width: 8),
+              _buildTimeBlock(hoursStr),
+              const SizedBox(width: 3),
+              const Text(':', style: TextStyle(color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
+              const SizedBox(width: 3),
+              _buildTimeBlock(minutesStr),
+              const SizedBox(width: 3),
+              const Text(':', style: TextStyle(color: AppTheme.accentOrange, fontWeight: FontWeight.bold)),
+              const SizedBox(width: 3),
+              _buildTimeBlock(secondsStr),
               const Spacer(),
               const Text(
                 'Lihat Semua',
@@ -74,9 +159,9 @@ class FlashSaleSection extends StatelessWidget {
             height: 190,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: items.length,
+              itemCount: widget.items.length,
               itemBuilder: (context, index) {
-                final item = items[index];
+                final item = widget.items[index];
                 return GestureDetector(
                   onTap: () {
                     Navigator.push(
