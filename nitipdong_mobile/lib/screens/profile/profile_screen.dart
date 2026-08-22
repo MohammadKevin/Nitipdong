@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/cart_provider.dart';
@@ -22,6 +23,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _recipientName = 'Mohammad Kevin Arif Rudianto';
   String _recipientPhone = '081234567890';
   int _nitipPayBalance = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedAddress();
+  }
+
+  Future<void> _loadSavedAddress() async {
+    final data = await ApiService.getSavedAddress();
+    if (mounted) {
+      setState(() {
+        if (data['full_address'] != null && data['full_address']!.isNotEmpty) {
+          _currentAddress = data['full_address']!;
+        }
+        if (data['recipient_name'] != null && data['recipient_name']!.isNotEmpty) {
+          _recipientName = data['recipient_name']!;
+        }
+        if (data['phone'] != null && data['phone']!.isNotEmpty) {
+          _recipientPhone = data['phone']!;
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -285,12 +309,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(Icons.system_update_alt_rounded, size: 14, color: AppTheme.primaryDark),
-                          SizedBox(width: 6),
+                        children: [
+                          const Icon(Icons.system_update_alt_rounded, size: 14, color: AppTheme.primaryDark),
+                          const SizedBox(width: 6),
                           Text(
-                            'NitipDong App v1.0.1 (Terbaru)',
-                            style: TextStyle(
+                            'NitipDong App v${ApiService.currentAppVersion} (Terbaru)',
+                            style: const TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                               color: AppTheme.primaryDark,
@@ -657,14 +681,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ElevatedButton(
             onPressed: () {
               if (nameCtrl.text.isNotEmpty && addressCtrl.text.isNotEmpty) {
+                final newName = nameCtrl.text.trim();
+                final newPhone = phoneCtrl.text.trim();
+                final newAddress = addressCtrl.text.trim();
                 setState(() {
-                  _recipientName = nameCtrl.text;
-                  _recipientPhone = phoneCtrl.text;
-                  _currentAddress = addressCtrl.text;
+                  _recipientName = newName;
+                  _recipientPhone = newPhone;
+                  _currentAddress = newAddress;
                 });
+                ApiService.saveAddress(
+                  fullAddress: newAddress,
+                  recipientName: newName,
+                  phone: newPhone,
+                );
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Alamat pengiriman berhasil diperbarui! ✅'), backgroundColor: Colors.green, behavior: SnackBarBehavior.floating),
+                  const SnackBar(content: Text('Alamat pengiriman berhasil disimpan! ✅'), backgroundColor: Colors.green, behavior: SnackBarBehavior.floating),
                 );
               }
             },
@@ -928,15 +960,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Nanti')),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Mengunduh pembaruan dari budayakita.com/download/app... 📥'),
-                    backgroundColor: Colors.green,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
+                final updateUrl = status['update_url'] ?? 'https://budayakita.com/download/app';
+                try {
+                  final uri = Uri.parse(updateUrl);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Silakan unduh pembaruan di: $updateUrl')),
+                    );
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Gagal membuka tautan unduhan: $e')),
+                  );
+                }
               },
               child: const Text('Perbarui Sekarang'),
             ),

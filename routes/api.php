@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BannerController;
 use App\Http\Controllers\Api\CartController;
@@ -47,6 +48,10 @@ Route::prefix('v1')->group(function () {
         // User Profile & Logout
         Route::get('/auth/profile', [AuthController::class, 'profile']);
         Route::post('/auth/logout', [AuthController::class, 'logout']);
+
+        // User Shipping Address
+        Route::get('/addresses/primary', [AddressController::class, 'primary']);
+        Route::post('/addresses', [AddressController::class, 'storeOrUpdate']);
 
         // Cart Management
         Route::get('/cart', [CartController::class, 'index']);

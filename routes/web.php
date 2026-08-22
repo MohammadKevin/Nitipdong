@@ -51,6 +51,7 @@ Route::post('/api/duitku/callback', [DuitkuPaymentController::class, 'handleCall
 Route::get('/download/app', function (\Illuminate\Http\Request $request) {
     $userAgent = strtolower($request->header('User-Agent', ''));
     $isIos = str_contains($userAgent, 'iphone') || str_contains($userAgent, 'ipad') || str_contains($userAgent, 'ipod');
+    $version = env('APP_MOBILE_LATEST_VERSION', '1.0.2');
 
     if ($isIos) {
         $paths = [
@@ -61,9 +62,12 @@ Route::get('/download/app', function (\Illuminate\Http\Request $request) {
         ];
         foreach ($paths as $p) {
             if (file_exists($p)) {
-                return response()->download($p, 'NitipDong-v1.0.1.ipa', [
-                    'Content-Type' => 'application/octet-stream',
-                    'Content-Disposition' => 'attachment; filename="NitipDong-v1.0.1.ipa"',
+                return response()->download($p, "NitipDong-v{$version}.ipa", [
+                    'Content-Type'        => 'application/octet-stream',
+                    'Content-Disposition' => "attachment; filename=\"NitipDong-v{$version}.ipa\"",
+                    'Cache-Control'       => 'no-cache, no-store, must-revalidate, max-age=0',
+                    'Pragma'              => 'no-cache',
+                    'Expires'             => '0',
                 ]);
             }
         }
@@ -79,9 +83,12 @@ Route::get('/download/app', function (\Illuminate\Http\Request $request) {
     ];
     foreach ($paths as $p) {
         if (file_exists($p)) {
-            return response()->download($p, 'NitipDong-v1.0.1.apk', [
-                'Content-Type' => 'application/vnd.android.package-archive',
-                'Content-Disposition' => 'attachment; filename="NitipDong-v1.0.1.apk"',
+            return response()->download($p, "NitipDong-v{$version}.apk", [
+                'Content-Type'        => 'application/vnd.android.package-archive',
+                'Content-Disposition' => "attachment; filename=\"NitipDong-v{$version}.apk\"",
+                'Cache-Control'       => 'no-cache, no-store, must-revalidate, max-age=0',
+                'Pragma'              => 'no-cache',
+                'Expires'             => '0',
             ]);
         }
     }
@@ -91,6 +98,7 @@ Route::get('/download/app', function (\Illuminate\Http\Request $request) {
 
 // Direct Android Download Route
 Route::get('/download/android', function () {
+    $version = env('APP_MOBILE_LATEST_VERSION', '1.0.2');
     $paths = [
         public_path('downloads/nitipdong.apk'),
         public_path('downloads/NitipDong-latest.apk'),
@@ -99,9 +107,12 @@ Route::get('/download/android', function () {
     ];
     foreach ($paths as $p) {
         if (file_exists($p)) {
-            return response()->download($p, 'NitipDong-v1.0.1.apk', [
-                'Content-Type' => 'application/vnd.android.package-archive',
-                'Content-Disposition' => 'attachment; filename="NitipDong-v1.0.1.apk"',
+            return response()->download($p, "NitipDong-v{$version}.apk", [
+                'Content-Type'        => 'application/vnd.android.package-archive',
+                'Content-Disposition' => "attachment; filename=\"NitipDong-v{$version}.apk\"",
+                'Cache-Control'       => 'no-cache, no-store, must-revalidate, max-age=0',
+                'Pragma'              => 'no-cache',
+                'Expires'             => '0',
             ]);
         }
     }

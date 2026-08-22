@@ -10,7 +10,7 @@ import '../models/order_model.dart';
 
 class ApiService {
   // Current Installed Mobile App Version
-  static const String currentAppVersion = '1.0.1';
+  static const String currentAppVersion = '1.0.2';
 
   // Default API Base URL (Production - budayakita.com)
   // Can be configured dynamically from app UI or loaded from SharedPreferences
@@ -52,6 +52,121 @@ class ApiService {
   static Future<void> clearToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('auth_token');
+  }
+
+  // ══════════════════════════════════════════════════
+  // ADDRESS & LOCATION PERSISTENCE (ANTI-HILANG)
+  // ══════════════════════════════════════════════════
+  static Future<Map<String, String>> getSavedAddress() async {
+    final prefs = await SharedPreferences.getInstance();
+    String address = prefs.getString('saved_address_full') ?? '';
+    String name = prefs.getString('saved_address_recipient') ?? '';
+    String phone = prefs.getString('saved_address_phone') ?? '';
+    String city = prefs.getString('saved_address_city') ?? '';
+
+    // If local storage is empty, try to fetch from API if logged in
+    if (address.isEmpty) {
+      final remote = await fetchRemoteAddress();
+      if (remote != null && remote['full_address'] != null && (remote['full_address'] as String).isNotEmpty) {
+        return {
+          'full_address': remote['full_address'] ?? '',
+          'recipient_name': remote['recipient_name'] ?? '',
+          'phone': remote['phone'] ?? '',
+          'city': remote['city'] ?? '',
+        };
+      }
+      
+      // Default fallback
+      return {
+        'full_address': 'Jl. Raya Darmo No. 42, Wonokromo, Surabaya, Jawa Timur 60241',
+        'recipient_name': 'Mohammad Kevin Arif Rudianto',
+        'phone': '081234567890',
+        'city': 'Surabaya',
+      };
+    }
+
+    return {
+      'full_address': address,
+      'recipient_name': name,
+      'phone': phone,
+      'city': city,
+    };
+  }
+
+  static Future<void> saveAddress({
+    required String fullAddress,
+    String? recipientName,
+    String? phone,
+    String? city,
+    String? notes,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (fullAddress.isNotEmpty) {
+      await prefs.setString('saved_address_full', fullAddress.trim());
+    }
+    if (recipientName != null && recipientName.isNotEmpty) {
+      await prefs.setString('saved_address_recipient', recipientName.trim());
+    }
+    if (phone != null && phone.isNotEmpty) {
+      await prefs.setString('saved_address_phone', phone.trim());
+    }
+    if (city != null && city.isNotEmpty) {
+      await prefs.setString('saved_address_city', city.trim());
+    }
+
+    // Sync to backend API if user is authenticated
+    try {
+      final token = await getToken();
+      if (token != null && token.isNotEmpty) {
+        await http.post(
+          Uri.parse('$baseUrl/addresses'),
+          headers: await _getHeaders(withAuth: true),
+          body: jsonEncode({
+            'full_address': fullAddress.trim(),
+            'recipient_name': recipientName ?? prefs.getString('saved_address_recipient') ?? 'Pengguna NitipDong',
+            'phone': phone ?? prefs.getString('saved_address_phone') ?? '081234567890',
+            'city': city ?? prefs.getString('saved_address_city') ?? 'Surabaya',
+            'notes': notes ?? '',
+          }),
+        ).timeout(const Duration(seconds: 4));
+      }
+    } catch (_) {}
+  }
+
+  static Future<Map<String, dynamic>?> fetchRemoteAddress() async {
+    try {
+      final token = await getToken();
+      if (token == null || token.isEmpty) return null;
+
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/addresses/primary'),
+            headers: await _getHeaders(withAuth: true),
+          )
+          .timeout(const Duration(seconds: 3));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true && data['address'] != null) {
+          final addr = data['address'];
+          final prefs = await SharedPreferences.getInstance();
+          if (addr['full_address'] != null) {
+            await prefs.setString('saved_address_full', addr['full_address']);
+          }
+          if (addr['recipient_name'] != null) {
+            await prefs.setString('saved_address_recipient', addr['recipient_name']);
+          }
+          if (addr['phone'] != null) {
+            await prefs.setString('saved_address_phone', addr['phone']);
+          }
+          if (addr['city'] != null) {
+            await prefs.setString('saved_address_city', addr['city']);
+          }
+          return addr;
+        }
+      }
+    } catch (_) {}
+    return null;
   }
 
   static Future<Map<String, String>> _getHeaders({bool withAuth = true}) async {

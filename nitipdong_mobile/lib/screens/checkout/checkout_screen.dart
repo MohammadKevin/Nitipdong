@@ -45,8 +45,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   void initState() {
     super.initState();
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    _addressController.text = 'Jl. Raya Darmo No. 42, Wonokromo, Surabaya, Jawa Timur 60241 (Kevin - 081234567890)';
+    _loadAddress();
+  }
+
+  Future<void> _loadAddress() async {
+    final data = await ApiService.getSavedAddress();
+    if (mounted) {
+      final addr = data['full_address'] ?? '';
+      final name = data['recipient_name'] ?? '';
+      final phone = data['phone'] ?? '';
+      if (addr.isNotEmpty) {
+        if (name.isNotEmpty && phone.isNotEmpty && !addr.contains(name)) {
+          _addressController.text = '$addr ($name - $phone)';
+        } else {
+          _addressController.text = addr;
+        }
+      }
+    }
   }
 
   String _formatCurrency(double amount) {
@@ -433,6 +448,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         setState(() => _isProcessing = false);
 
                         if (result['success'] == true && mounted) {
+                          ApiService.saveAddress(fullAddress: _addressController.text.trim());
                           await cartProvider.fetchCart();
                           _showPaymentInstructionDialog(
                             context: context,
