@@ -98,15 +98,15 @@ class ProductController extends Controller
             $p = $item->product;
             if (!$p) return null;
 
-            $soldQty = $item->sold_quantity ?? 12;
-            $stockQty = $item->stock_quantity ?? 30;
-            $progress = $stockQty > 0 ? round(($soldQty / $stockQty) * 100) : 100;
+            $soldQty = $item->stock_sold ?? 0;
+            $stockQty = $item->stock_allocated ?? 0;
+            $progress = $item->sold_percentage ?? 0;
 
             return [
                 'id'                  => $p->id,
                 'name'                => $p->name,
-                'original_price'      => (float) $item->original_price,
-                'flash_sale_price'    => (float) $item->discount_price,
+                'original_price'      => (float) $p->price,
+                'flash_sale_price'    => (float) $item->flash_sale_price,
                 'discount_percentage' => (int) $item->discount_percentage,
                 'image_url'           => $p->image_url ?? asset('img/saksershop-logo.png'),
                 'sold_quantity'       => $soldQty,
