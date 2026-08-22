@@ -8,6 +8,8 @@ import '../../theme/app_theme.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/login_screen.dart';
+import '../cart/cart_screen.dart';
+import '../checkout/checkout_screen.dart';
 import 'store_screen.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -400,8 +402,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                     await cartProvider.addToCart(p.id, _quantity);
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Menuju proses checkout...')),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CheckoutScreen()),
                       );
                     }
                   },
