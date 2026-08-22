@@ -18,7 +18,7 @@ class OrderController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = $request->user()->orders()->with(['items.product.store'])->latest();
+        $query = $request->user()->orders()->with(['orderItems.product.store'])->latest();
 
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
@@ -27,20 +27,22 @@ class OrderController extends Controller
         $orders = $query->paginate(10);
 
         $formatted = $orders->map(function ($order) {
+            $firstItem = $order->orderItems->first();
             return [
                 'id'             => $order->id,
-                'order_number'   => $order->order_number ?? ('ORD-' . $order->id),
+                'order_number'   => $order->invoice_number,
+                'invoice_number' => $order->invoice_number,
                 'total_amount'   => (float) $order->total_amount,
                 'status'         => $order->status,
                 'status_label'   => ucfirst($order->status),
-                'payment_status' => $order->payment_status ?? 'pending',
+                'payment_status' => in_array($order->status, ['processing', 'shipped', 'completed']) ? 'paid' : 'pending',
                 'created_at'     => $order->created_at->format('d M Y, H:i'),
-                'items_count'    => $order->items->count(),
-                'first_product'  => $order->items->first()?->product ? [
-                    'name'      => $order->items->first()->product->name,
-                    'image_url' => $order->items->first()->product->image_url ?? asset('img/saksershop-logo.png'),
-                    'quantity'  => $order->items->first()->quantity,
-                    'price'     => (float) $order->items->first()->price,
+                'items_count'    => $order->orderItems->count(),
+                'first_product'  => $firstItem?->product ? [
+                    'name'      => $firstItem->product->name,
+                    'image_url' => $firstItem->product->image_url ?? asset('img/saksershop-logo.png'),
+                    'quantity'  => $firstItem->quantity,
+                    'price'     => (float) $firstItem->price,
                 ] : null,
             ];
         });
@@ -62,25 +64,26 @@ class OrderController extends Controller
     public function show(Request $request, $id): JsonResponse
     {
         $order = $request->user()->orders()
-            ->with(['items.product.store', 'store'])
+            ->with(['orderItems.product.store', 'store'])
             ->findOrFail($id);
 
         return response()->json([
             'success' => true,
             'data'    => [
                 'id'              => $order->id,
-                'order_number'    => $order->order_number ?? ('ORD-' . $order->id),
+                'order_number'    => $order->invoice_number,
+                'invoice_number'  => $order->invoice_number,
                 'status'          => $order->status,
-                'payment_status'  => $order->payment_status ?? 'pending',
+                'payment_status'  => in_array($order->status, ['processing', 'shipped', 'completed']) ? 'paid' : 'pending',
                 'payment_method'  => $order->payment_method ?? 'QRIS Instant',
                 'shipping_address'=> $order->shipping_address ?? $request->user()->address,
-                'courier'         => $order->courier ?? 'JNE Regular',
+                'courier'         => $order->shipping_courier ?? 'JNE Regular',
                 'tracking_number' => $order->tracking_number,
-                'subtotal'        => (float) ($order->total_amount - ($order->shipping_fee ?? 0)),
-                'shipping_fee'    => (float) ($order->shipping_fee ?? 0),
+                'subtotal'        => (float) ($order->total_amount - ($order->shipping_cost ?? 0)),
+                'shipping_fee'    => (float) ($order->shipping_cost ?? 0),
                 'total_amount'    => (float) $order->total_amount,
                 'created_at'      => $order->created_at->format('d M Y, H:i'),
-                'items'           => $order->items->map(function ($item) {
+                'items'           => $order->orderItems->map(function ($item) {
                     return [
                         'id'         => $item->id,
                         'name'       => $item->product?->name ?? 'Produk',
@@ -168,21 +171,23 @@ class OrderController extends Controller
             }
 
             $finalAmount = max(0, $totalAmount - $discountAmount);
+            $invoiceNumber = 'INV-' . strtoupper(Str::random(10));
 
             // Create Order
             $order = Order::create([
+                'invoice_number'   => $invoiceNumber,
                 'user_id'          => $user->id,
                 'store_id'         => $firstStoreId,
-                'order_number'     => 'NTD-' . strtoupper(Str::random(8)),
                 'total_amount'     => $finalAmount,
                 'voucher_code'     => $appliedVoucher ? $appliedVoucher->code : null,
                 'discount_amount'  => $discountAmount,
                 'status'           => 'pending',
-                'payment_status'   => 'pending',
-                'payment_method'   => $request->payment_method,
+                'payment_method'   => $request->payment_method ?? 'QRIS Instant',
                 'shipping_address' => $request->shipping_address,
-                'courier'          => $request->get('courier', 'J&T Express'),
-                'shipping_fee'     => 0,
+                'shipping_courier' => $request->get('courier', 'J&T Express'),
+                'shipping_service' => 'REG',
+                'shipping_cost'    => 0,
+                'total_weight'     => 1.0,
             ]);
 
             // Create Order Items & Decrement Stock
@@ -210,11 +215,12 @@ class OrderController extends Controller
             DB::commit();
 
             return response()->json([
-                'success'      => true,
-                'message'      => 'Pesanan berhasil dibuat!',
-                'order_id'     => $order->id,
-                'order_number' => $order->order_number,
-                'total_amount' => (float) $finalAmount,
+                'success'        => true,
+                'message'        => 'Pesanan berhasil dibuat!',
+                'order_id'       => $order->id,
+                'order_number'   => $invoiceNumber,
+                'invoice_number' => $invoiceNumber,
+                'total_amount'   => (float) $finalAmount,
             ], 201);
 
         } catch (\Exception $e) {
@@ -235,7 +241,6 @@ class OrderController extends Controller
         if ($order->status === 'pending') {
             $order->update([
                 'status' => 'processing',
-                'payment_status' => 'paid',
             ]);
             return response()->json([
                 'success' => true,
