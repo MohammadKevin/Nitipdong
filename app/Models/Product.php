@@ -250,7 +250,12 @@ class Product extends Model
             }
         }
 
-        return 0.0;
+        // Jika belum ada ulasan produk, ikuti rating toko dinamis (base 3.5)
+        if ($this->relationLoaded('store') && $this->store) {
+            return (float) $this->store->rating;
+        }
+
+        return 3.5;
     }
 
     public function getRatingAttribute(): float
@@ -260,7 +265,7 @@ class Product extends Model
 
     public function recalculateRating(): void
     {
-        $avg = $this->reviews()->avg('rating') ?: 0.0;
+        $avg = $this->reviews()->avg('rating') ?: 3.5;
         $this->update(['rating' => round($avg, 2)]);
     }
 

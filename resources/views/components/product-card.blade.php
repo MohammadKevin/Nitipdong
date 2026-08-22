@@ -70,11 +70,9 @@
         <div>
             {{-- Rating & Sales Row --}}
             <div class="mt-1 flex items-center gap-1 text-[11px] sm:text-xs text-slate-600 font-medium">
-                @if($product->effective_rating > 0)
-                    <i class="fa-solid fa-star text-amber-400 text-xs"></i>
-                    <span class="font-bold text-slate-800">{{ number_format($product->effective_rating, 1) }}</span>
-                    <span class="text-slate-300">•</span>
-                @endif
+                <i class="fa-solid fa-star text-amber-400 text-xs"></i>
+                <span class="font-bold text-slate-800">{{ number_format($product->effective_rating, 1) }}</span>
+                <span class="text-slate-300">•</span>
                 <span class="text-slate-500">{{ $product->formatted_sold_count }} terjual</span>
             </div>
 
