@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import '../screens/maintenance_screen.dart';
 
 class ServerConfigDialog extends StatefulWidget {
   final VoidCallback? onSaved;
@@ -54,12 +55,25 @@ class _ServerConfigDialogState extends State<ServerConfigDialog> {
       _isTesting = false;
       if (status['success'] == true || products.isNotEmpty) {
         _isSuccess = true;
-        _testResult = '🟢 Berhasil terhubung ke server Laravel! Database & API aktif.';
+        _testResult = '🟢 Berhasil terhubung ke server! Database & API aktif.';
       } else {
         _isSuccess = false;
-        _testResult = '🔴 Tidak dapat terhubung. Pastikan laptop & HP terhubung ke Wi-Fi yang sama dan Laravel server sedang aktif.';
+        _testResult = '🔴 Tidak dapat terhubung. Pastikan laptop/server aktif dan URL sudah benar.';
       }
     });
+  }
+
+  void _previewMaintenanceScreen() {
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MaintenanceScreen(
+          title: 'Mode Pemeliharaan & Pengembangan 🛠️ (Mode Demo)',
+          message: 'Ini adalah tampilan simulasi layar pemeliharaan untuk menguji respon aplikasi dan desain UI saat server dalam mode maintenance.',
+        ),
+      ),
+    );
   }
 
   @override
@@ -68,9 +82,9 @@ class _ServerConfigDialogState extends State<ServerConfigDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: const Row(
         children: [
-          Icon(Icons.dns_rounded, color: AppTheme.primary),
+          Icon(Icons.developer_mode_rounded, color: AppTheme.primary),
           SizedBox(width: 10),
-          Text('Pengaturan Server API', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+          Text('Pengaturan & Demo Tools', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
         ],
       ),
       content: SingleChildScrollView(
@@ -79,7 +93,7 @@ class _ServerConfigDialogState extends State<ServerConfigDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Masukkan IP Laptop atau Domain Website tempat backend Laravel berjalan:',
+              'Arahkan API backend ke Server Live atau Laptop Local Anda:',
               style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
             ),
             const SizedBox(height: 14),
@@ -87,12 +101,12 @@ class _ServerConfigDialogState extends State<ServerConfigDialog> {
               controller: _urlController,
               decoration: InputDecoration(
                 labelText: 'URL API Backend',
-                hintText: 'http://192.168.x.x:8000/api/v1',
+                hintText: 'https://budayakita.com/api/v1',
                 prefixIcon: const Icon(Icons.link, size: 20),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              style: const TextStyle(fontSize: 13),
+              style: const TextStyle(fontSize: 12),
             ),
             const SizedBox(height: 10),
 
@@ -101,20 +115,71 @@ class _ServerConfigDialogState extends State<ServerConfigDialog> {
               spacing: 6,
               children: [
                 ActionChip(
-                  label: const Text('Wi-Fi Laptop', style: TextStyle(fontSize: 11)),
+                  avatar: const Icon(Icons.cloud_done_rounded, size: 14, color: AppTheme.primary),
+                  label: const Text('Production Live', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
                   onPressed: () {
-                    setState(() => _urlController.text = 'http://10.217.145.88:8000/api/v1');
+                    setState(() => _urlController.text = 'https://budayakita.com/api/v1');
                   },
                 ),
                 ActionChip(
-                  label: const Text('Emulator', style: TextStyle(fontSize: 11)),
+                  avatar: const Icon(Icons.laptop_chromebook_rounded, size: 14),
+                  label: const Text('Localhost Laptop', style: TextStyle(fontSize: 11)),
                   onPressed: () {
-                    setState(() => _urlController.text = 'http://10.0.2.2:8000/api/v1');
+                    setState(() => _urlController.text = 'http://10.217.145.88:8000/api/v1');
                   },
                 ),
               ],
             ),
             const SizedBox(height: 14),
+
+            // Demo Tools Section
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryLight,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.science_rounded, size: 16, color: AppTheme.primaryDark),
+                      SizedBox(width: 6),
+                      Text(
+                        'Simulasi & Demo UI',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppTheme.primaryDark),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Uji tampilan mode maintenance tanpa harus mematikan server asli:',
+                    style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: _previewMaintenanceScreen,
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        side: const BorderSide(color: AppTheme.accentOrange),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      icon: const Icon(Icons.construction_rounded, size: 16, color: AppTheme.accentOrange),
+                      label: const Text(
+                        'Lihat Tampilan Maintenance',
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.accentOrange),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
 
             // Test Result Box
             if (_testResult != null)
