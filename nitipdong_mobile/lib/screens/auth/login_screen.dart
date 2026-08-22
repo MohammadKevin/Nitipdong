@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../main_nav_screen.dart';
+import '../../widgets/server_config_dialog.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -27,6 +28,13 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         title: const Text('Masuk ke Akun'),
         automaticallyImplyLeading: !widget.isFromSplash,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.dns_rounded, size: 20),
+            tooltip: 'Atur Server API',
+            onPressed: () => ServerConfigDialog.show(context),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),

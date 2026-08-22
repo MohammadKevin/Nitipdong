@@ -6,6 +6,8 @@ import '../../widgets/banner_carousel.dart';
 import '../../widgets/category_item.dart';
 import '../../widgets/flash_sale_section.dart';
 import '../../widgets/product_card.dart';
+import '../../widgets/server_config_dialog.dart';
+import '../product/product_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -69,11 +71,16 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, color: AppTheme.textPrimary),
-            onPressed: () {},
+            icon: const Icon(Icons.dns_outlined, color: AppTheme.textPrimary, size: 20),
+            tooltip: 'Server API',
+            onPressed: () {
+              ServerConfigDialog.show(context, onSaved: () {
+                Provider.of<ProductProvider>(context, listen: false).loadHomeData();
+              });
+            },
           ),
           IconButton(
-            icon: const Icon(Icons.chat_bubble_outline_rounded, color: AppTheme.textPrimary),
+            icon: const Icon(Icons.notifications_none_rounded, color: AppTheme.textPrimary),
             onPressed: () {},
           ),
           const SizedBox(width: 8),

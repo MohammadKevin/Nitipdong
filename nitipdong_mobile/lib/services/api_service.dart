@@ -10,12 +10,29 @@ import '../models/order_model.dart';
 
 class ApiService {
   // Default API Base URL:
-  // For Android Emulator -> 10.0.2.2:8000
-  // For Real Android Device / Network -> http://192.168.x.x:8000 or production domain
-  static String baseUrl = 'http://10.0.2.2:8000/api/v1';
+  // Can be configured dynamically from app UI or loaded from SharedPreferences
+  static String baseUrl = 'http://10.217.145.88:8000/api/v1';
 
-  static void setBaseUrl(String url) {
-    baseUrl = url;
+  static Future<String> getBaseUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedUrl = prefs.getString('api_base_url');
+    if (savedUrl != null && savedUrl.isNotEmpty) {
+      baseUrl = savedUrl;
+    }
+    return baseUrl;
+  }
+
+  static Future<void> setBaseUrl(String url) async {
+    baseUrl = url.trim().replaceAll(RegExp(r'/+$'), '');
+    if (!baseUrl.endsWith('/api/v1')) {
+      if (baseUrl.endsWith('/api')) {
+        baseUrl = '$baseUrl/v1';
+      } else {
+        baseUrl = '$baseUrl/api/v1';
+      }
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('api_base_url', baseUrl);
   }
 
   // Token Management
