@@ -18,23 +18,33 @@ class SystemConfigController extends Controller
             $downData = json_decode(@file_get_contents($downFilePath), true) ?: [];
         }
 
-        $isDown = (method_exists(app(), 'isDownForMaintenance') && app()->isDownForMaintenance())
-            || file_exists($downFilePath);
-
-        $isMaintenance = (bool) (env('APP_MAINTENANCE', false) || $isDown);
-
-        $msgFilePath = storage_path('framework/maintenance_message.json');
+        $appMsgFilePath = storage_path('framework/maintenance_app.json');
+        $globalMsgFilePath = storage_path('framework/maintenance_message.json');
+        
         $msgData = [];
-        if (file_exists($msgFilePath)) {
-            $msgData = json_decode(@file_get_contents($msgFilePath), true) ?: [];
+        if (file_exists($appMsgFilePath)) {
+            $msgData = json_decode(@file_get_contents($appMsgFilePath), true) ?: [];
+        } elseif (file_exists($globalMsgFilePath)) {
+            $msgData = json_decode(@file_get_contents($globalMsgFilePath), true) ?: [];
         }
 
-        $customMessage = $msgData['message'] ?? $downData['message'] ?? env('APP_MAINTENANCE_MESSAGE') ?? null;
+        $isGeneralDown = (method_exists(app(), 'isDownForMaintenance') && app()->isDownForMaintenance())
+            || file_exists($downFilePath);
+
+        // Mobile maintenance is active if:
+        // 1. APP_MOBILE_MAINTENANCE=true in .env
+        // 2. storage/framework/maintenance_app.json exists (php artisan app:down --mobile)
+        // 3. General down is active AND not marked as web-only
+        $isMobileDown = env('APP_MOBILE_MAINTENANCE', false) 
+            || file_exists($appMsgFilePath)
+            || ($isGeneralDown && !file_exists(storage_path('framework/maintenance_web.json')) && !env('APP_WEB_MAINTENANCE', false));
+
+        $customMessage = $msgData['message'] ?? $downData['message'] ?? env('APP_MAINTENANCE_MESSAGE') ?? env('APP_MOBILE_MAINTENANCE_MESSAGE') ?? null;
         $maintenanceMessage = !empty($customMessage)
             ? (string) $customMessage
             : 'Aplikasi NitipDong sedang dalam tahap pembaruan fitur & optimalisasi sistem untuk pengalaman belanja yang lebih baik. Silakan coba kembali beberapa saat lagi.';
 
-        $customTitle = $msgData['title'] ?? env('APP_MAINTENANCE_TITLE') ?? null;
+        $customTitle = $msgData['title'] ?? env('APP_MAINTENANCE_TITLE') ?? env('APP_MOBILE_MAINTENANCE_TITLE') ?? null;
         $maintenanceTitle = !empty($customTitle)
             ? (string) $customTitle
             : 'Mode Pemeliharaan & Pengembangan 🛠️';
@@ -44,7 +54,7 @@ class SystemConfigController extends Controller
 
         return response()->json([
             'success'             => true,
-            'is_maintenance'      => $isMaintenance,
+            'is_maintenance'      => (bool) $isMobileDown,
             'maintenance_title'   => $maintenanceTitle,
             'maintenance_message' => $maintenanceMessage,
             'min_version'         => $minVersion,
