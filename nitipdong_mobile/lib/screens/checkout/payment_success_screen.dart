@@ -60,7 +60,7 @@ class PaymentSuccessScreen extends StatelessWidget {
                       ],
                     ),
                     child: const Icon(
-                      Icons.check_circle_rounded,
+                      Icons.check_circle,
                       color: Colors.green,
                       size: 64,
                     ),
@@ -142,7 +142,7 @@ class PaymentSuccessScreen extends StatelessWidget {
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.receipt_long_rounded, size: 20),
+                          Icon(Icons.receipt_long, size: 20),
                           SizedBox(width: 8),
                           Text(
                             'Lihat Status Pesanan',

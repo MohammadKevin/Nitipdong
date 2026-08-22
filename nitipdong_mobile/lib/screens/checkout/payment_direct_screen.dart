@@ -214,7 +214,7 @@ class _PaymentDirectScreenState extends State<PaymentDirectScreen> {
         backgroundColor: Colors.white,
         elevation: 0.5,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xFF0F172A), size: 18),
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF0F172A), size: 18),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -438,7 +438,7 @@ class _PaymentDirectScreenState extends State<PaymentDirectScreen> {
                 ),
                 child: const Row(
                   children: [
-                    Icon(Icons.qr_code_2_rounded, size: 16, color: Colors.red),
+                    Icon(Icons.qr_code, size: 16, color: Colors.red),
                     SizedBox(width: 4),
                     Text(
                       'QRIS NASIONAL (GPN)',
