@@ -10,14 +10,16 @@ import 'orders/orders_screen.dart';
 import 'profile/profile_screen.dart';
 
 class MainNavScreen extends StatefulWidget {
-  const MainNavScreen({Key? key}) : super(key: key);
+  final int initialIndex;
+
+  const MainNavScreen({Key? key, this.initialIndex = 0}) : super(key: key);
 
   @override
   State<MainNavScreen> createState() => _MainNavScreenState();
 }
 
 class _MainNavScreenState extends State<MainNavScreen> {
-  int _currentIndex = 0;
+  late int _currentIndex;
   Timer? _heartbeatTimer;
 
   final List<Widget> _screens = const [
@@ -30,6 +32,7 @@ class _MainNavScreenState extends State<MainNavScreen> {
   @override
   void initState() {
     super.initState();
+    _currentIndex = widget.initialIndex;
     ApiService.resetMaintenanceState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<CartProvider>(context, listen: false).fetchCart();

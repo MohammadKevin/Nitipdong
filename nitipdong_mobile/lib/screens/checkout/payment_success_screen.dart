@@ -127,7 +127,7 @@ class PaymentSuccessScreen extends StatelessWidget {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const MainNavScreen(initialIndex: 2), // Index 2 is Orders
+                            builder: (_) => const MainNavScreen(initialIndex: 1), // Index 1 is OrdersScreen
                           ),
                           (route) => false,
                         );
