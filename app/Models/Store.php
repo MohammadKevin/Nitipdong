@@ -57,11 +57,28 @@ class Store extends Model
 
     public function getRatingAttribute(): float
     {
-        $avg = \App\Models\Review::whereHas('product', function ($q) {
+        $reviews = \App\Models\Review::whereHas('product', function ($q) {
             $q->where('store_id', $this->id);
-        })->avg('rating');
+        })->pluck('rating');
 
-        return $avg ? round((float) $avg, 1) : 4.0;
+        // 1. Jika sudah ada ulasan rating dari pembeli
+        if ($reviews->isNotEmpty()) {
+            $avgReview = (float) $reviews->avg();
+            return round($avgReview, 1);
+        }
+
+        // 2. Jika belum ada ulasan, cek pesanan sukses tanpa komplain
+        $completedOrdersCount = $this->orders()->where('status', 'completed')->count();
+        $complaintsCount = $this->complaints()->where('status', 'resolved_buyer_refund')->count();
+
+        // Kenaikan reputasi bertahap jika ada pesanan selesai & 0 komplain
+        if ($completedOrdersCount > 0 && $complaintsCount === 0) {
+            $boost = min(1.5, $completedOrdersCount * 0.1);
+            return round(min(5.0, 3.5 + $boost), 1);
+        }
+
+        // 3. Default rating awal toko baru = 3.5
+        return 3.5;
     }
 
     public function getEffectiveCityAttribute(): string

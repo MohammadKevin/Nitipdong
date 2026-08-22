@@ -66,9 +66,7 @@ class StoreFrontController extends Controller
             $q->where('store_id', $store->id);
         })->with(['user', 'product'])->latest()->take(10)->get();
 
-        $avgRating = Review::whereHas('product', function ($q) use ($store) {
-            $q->where('store_id', $store->id);
-        })->avg('rating') ?: 4.0;
+        $avgRating = $store->rating;
 
         $totalReviewsCount = Review::whereHas('product', function ($q) use ($store) {
             $q->where('store_id', $store->id);
