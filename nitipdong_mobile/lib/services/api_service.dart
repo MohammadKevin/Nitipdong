@@ -51,6 +51,23 @@ class ApiService {
   }
 
   // ══════════════════════════════════════════════════
+  // SYSTEM STATUS & MAINTENANCE MODE
+  // ══════════════════════════════════════════════════
+  static Future<Map<String, dynamic>> checkSystemStatus() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/system/status'),
+        headers: await _getHeaders(withAuth: false),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+    } catch (_) {}
+    return {'success': false, 'is_maintenance': false};
+  }
+
+  // ══════════════════════════════════════════════════
   // AUTHENTICATION
   // ══════════════════════════════════════════════════
   static Future<Map<String, dynamic>> login(String email, String password) async {

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\SystemConfigController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,9 @@ Route::prefix('v1')->group(function () {
     // ══════════════════════════════════════════════════
     // PUBLIC API ENDPOINTS
     // ══════════════════════════════════════════════════
+
+    // 0. App System Status & Maintenance Mode
+    Route::get('/system/status', [SystemConfigController::class, 'status']);
 
     // 1. Authentication
     Route::post('/auth/login', [AuthController::class, 'login']);

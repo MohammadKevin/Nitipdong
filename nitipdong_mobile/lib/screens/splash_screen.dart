@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../providers/auth_provider.dart';
+import '../services/api_service.dart';
 import '../screens/main_nav_screen.dart';
+import '../screens/maintenance_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -22,6 +24,23 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
 
+    // 1. Check if System is in Maintenance Mode
+    final systemStatus = await ApiService.checkSystemStatus();
+    if (systemStatus['is_maintenance'] == true) {
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MaintenanceScreen(
+            title: systemStatus['maintenance_title'] ?? 'Mode Pemeliharaan & Pengembangan 🛠️',
+            message: systemStatus['maintenance_message'] ?? 'Aplikasi sedang dalam tahap peningkatan sistem.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    // 2. Check Auth Session
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     await authProvider.checkAuth();
 
