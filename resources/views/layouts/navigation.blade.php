@@ -165,6 +165,8 @@
                     <a href="{{ url('/products?q=TWS') }}" class="hover:text-cyan-700 transition-colors truncate">TWS Earbuds</a>
                     <a href="{{ url('/products?q=Kemeja') }}" class="hover:text-cyan-700 transition-colors truncate">Kemeja</a>
                 </div>
+            </div>
+
             <div class="flex items-center gap-1.5 sm:gap-2">
 
                 {{-- Direct Download App Link in Navbar (No Popup) --}}

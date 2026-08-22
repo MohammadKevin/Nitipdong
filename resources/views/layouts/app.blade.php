@@ -178,7 +178,6 @@
         <x-chat-popup />
         <x-chat-widget />
         <x-toast-notifier />
-        <x-pwa-install-banner />
         <x-mobile-bottom-nav />
 
         @stack('scripts')
