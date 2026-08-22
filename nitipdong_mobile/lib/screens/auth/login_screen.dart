@@ -28,13 +28,6 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         title: const Text('Masuk ke Akun'),
         automaticallyImplyLeading: !widget.isFromSplash,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.dns_rounded, size: 20),
-            tooltip: 'Atur Server API',
-            onPressed: () => ServerConfigDialog.show(context),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
