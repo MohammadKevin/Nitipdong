@@ -10,6 +10,29 @@ class DetailedProductSeeder extends Seeder
 {
     public function run(): void
     {
+        // 0. Buat Akun Super Admin & Admin Utama
+        User::firstOrCreate(
+            ['email' => 'superadmin@nitipdong.com'],
+            [
+                'name'              => 'Super Administrator',
+                'password'          => bcrypt('password'),
+                'role'              => 'super_admin',
+                'phone'             => '081199990001',
+                'email_verified_at' => now(),
+            ]
+        );
+
+        User::firstOrCreate(
+            ['email' => 'admin@nitipdong.com'],
+            [
+                'name'              => 'Admin Operasional',
+                'password'          => bcrypt('password'),
+                'role'              => 'admin',
+                'phone'             => '081199990002',
+                'email_verified_at' => now(),
+            ]
+        );
+
         // 1. Inisialisasi Kategori
         $categories = $this->createCategories();
 
