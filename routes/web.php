@@ -31,6 +31,7 @@ use App\Http\Controllers\Seller\StoreSettingsController;
 use App\Http\Controllers\Seller\VoucherController as SellerVoucherController;
 use App\Http\Controllers\Seller\WalletController as SellerWalletController;
 use App\Http\Controllers\StoreFrontController;
+use App\Http\Controllers\SuperAdmin\AdminManagementController;
 use App\Http\Controllers\SuperAdmin\WithdrawalController as SuperAdminWithdrawalController;
 use App\Http\Controllers\SuperAdminController;
 use App\Models\Category;
@@ -236,6 +237,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/users', [SuperAdminController::class, 'users'])->name('users.index');
         Route::get('/stores', [SuperAdminController::class, 'stores'])->name('stores.index');
         Route::post('/stores/{store}/toggle-ban', [SuperAdminController::class, 'toggleBan'])->name('stores.toggle_ban');
+
+        // Manage Operational Admins
+        Route::resource('admins', AdminManagementController::class)->names('admins');
 
         // Withdrawals / Payouts
         Route::get('/withdrawals', [SuperAdminWithdrawalController::class, 'index'])->name('withdrawals.index');

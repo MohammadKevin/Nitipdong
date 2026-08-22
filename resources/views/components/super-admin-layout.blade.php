@@ -62,6 +62,12 @@
                             Daftar Pengguna
                         </a>
 
+                        <a href="{{ route('super_admin.admins.index') }}"
+                           class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('super_admin.admins.*') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
+                            <i class="fa-solid fa-user-shield w-4 h-4 text-xs flex items-center justify-center {{ request()->routeIs('super_admin.admins.*') ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
+                            Admin Operasional
+                        </a>
+
                         <a href="{{ route('admin.categories.index') }}"
                            class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('admin.categories.*') ? 'bg-cyan-500/10 text-cyan-400 font-semibold border-l-2 border-cyan-400 pl-2.5 rounded-r-md' : 'font-medium text-slate-400 hover:text-slate-100 hover:bg-slate-800/60' }}">
                             <i class="fa-solid fa-tags w-4 h-4 text-xs flex items-center justify-center {{ request()->routeIs('admin.categories.*') ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-200' }}"></i>
