@@ -28,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
         ApiService.checkSystemStatus(),
         Provider.of<AuthProvider>(context, listen: false).checkAuth(),
         Future.delayed(const Duration(milliseconds: 700)),
-      ]).timeout(const Duration(seconds: 2));
+      ]).timeout(const Duration(milliseconds: 3500));
 
       final systemStatus = results[0] as Map<String, dynamic>;
       if (systemStatus['is_maintenance'] == true) {

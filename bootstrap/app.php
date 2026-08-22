@@ -14,6 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->preventRequestsDuringMaintenance(except: [
+            '/api/v1/system/status',
+            'api/v1/system/status',
+            'up',
+        ]);
+
         $middleware->alias([
             'role' => RoleMiddleware::class,
         ]);

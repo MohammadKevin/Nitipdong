@@ -12,8 +12,10 @@ class SystemConfigController extends Controller
      */
     public function status(): JsonResponse
     {
-        // Maintenance mode can be triggered by Laravel down command or env APP_MAINTENANCE=true
-        $isMaintenance = env('APP_MAINTENANCE', false) || file_exists(storage_path('framework/down'));
+        // Maintenance mode can be triggered by Laravel down command, storage/framework/down, or env APP_MAINTENANCE=true
+        $isMaintenance = env('APP_MAINTENANCE', false) 
+            || (method_exists(app(), 'isDownForMaintenance') && app()->isDownForMaintenance())
+            || file_exists(storage_path('framework/down'));
 
         $latestVersion = env('APP_MOBILE_LATEST_VERSION', '1.0.2');
         $minVersion = env('APP_MOBILE_MIN_VERSION', '1.0.0');

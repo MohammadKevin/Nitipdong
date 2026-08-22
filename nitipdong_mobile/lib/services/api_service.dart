@@ -195,10 +195,28 @@ class ApiService {
             Uri.parse('$baseUrl/system/status'),
             headers: await _getHeaders(withAuth: false),
           )
-          .timeout(const Duration(seconds: 2));
+          .timeout(const Duration(seconds: 3));
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
+      } else if (response.statusCode == 503) {
+        // Server is in maintenance mode
+        try {
+          final data = jsonDecode(response.body);
+          return {
+            'success': true,
+            'is_maintenance': true,
+            'maintenance_title': data['maintenance_title'] ?? 'Mode Pemeliharaan & Pengembangan 🛠️',
+            'maintenance_message': data['maintenance_message'] ?? 'Aplikasi NitipDong sedang dalam tahap pemeliharaan sistem. Silakan coba kembali beberapa saat lagi.',
+          };
+        } catch (_) {
+          return {
+            'success': true,
+            'is_maintenance': true,
+            'maintenance_title': 'Mode Pemeliharaan & Pengembangan 🛠️',
+            'maintenance_message': 'Aplikasi NitipDong sedang dalam tahap pemeliharaan sistem. Silakan coba kembali beberapa saat lagi.',
+          };
+        }
       }
     } catch (_) {}
     return {'success': false, 'is_maintenance': false};
