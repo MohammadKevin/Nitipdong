@@ -169,10 +169,16 @@
 
             <div class="flex items-center gap-1.5 sm:gap-2">
 
-                {{-- Download App button → direct download APK --}}
-                <a href="{{ route('app.download') }}" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cyan-200 bg-cyan-50/70 hover:bg-cyan-100 text-cyan-800 text-xs font-bold transition-all shadow-2xs group" title="Download Aplikasi Android NitipDong">
+                {{-- Download App button for Desktop --}}
+                <a href="{{ route('app.download') }}" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cyan-200 bg-cyan-50/70 hover:bg-cyan-100 text-cyan-800 text-xs font-bold transition-all shadow-2xs group" title="Download Aplikasi NitipDong">
                     <i class="fa-solid fa-download text-sm text-cyan-600 group-hover:scale-110 transition-transform"></i>
                     <span>Download App</span>
+                </a>
+
+                {{-- Download App button for Mobile --}}
+                <a href="{{ route('app.download') }}" class="md:hidden inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-cyan-200 bg-cyan-50 text-cyan-800 text-[11px] font-bold shadow-2xs active:scale-95 transition-all shrink-0" title="Download Aplikasi NitipDong">
+                    <i class="fa-solid fa-download text-[11px] text-cyan-600"></i>
+                    <span>App</span>
                 </a>
 
                 <button @click="mobileSearch = !mobileSearch" aria-label="Search" class="btn-icon md:hidden">
