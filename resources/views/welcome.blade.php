@@ -675,10 +675,14 @@
                 {{-- Rating, Review Count, & Sold --}}
                 <div class="p-3 pt-0">
                     <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                        @if($prod->effective_rating > 0)
                         <div class="flex items-center gap-1 text-amber-500 font-bold">
                             <i class="fa-solid fa-star text-[9px]"></i>
                             <span>{{ number_format($prod->effective_rating, 1) }}</span>
                         </div>
+                        @else
+                        <span class="text-[9px] text-slate-400 font-medium">Baru</span>
+                        @endif
                         <span class="text-slate-400 truncate">
                             {{ $prod->formatted_sold_count }} terjual
                         </span>
@@ -745,10 +749,14 @@
 
                 <div class="p-3 pt-0">
                     <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                        @if($prod->effective_rating > 0)
                         <div class="flex items-center gap-1 text-amber-500 font-bold">
                             <i class="fa-solid fa-star text-[9px]"></i>
                             <span>{{ number_format($prod->effective_rating, 1) }}</span>
                         </div>
+                        @else
+                        <span class="text-[9px] text-slate-400 font-medium">Baru</span>
+                        @endif
                         <span class="font-extrabold text-amber-600 flex items-center gap-0.5 truncate">
                             <i class="fa-solid fa-fire text-[9px]"></i>
                             {{ $prod->formatted_sold_count }} terjual
@@ -811,10 +819,14 @@
 
                 <div class="p-3 pt-0">
                     <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                        @if($prod->effective_rating > 0)
                         <div class="flex items-center gap-1 text-amber-500 font-bold">
                             <i class="fa-solid fa-star text-[9px]"></i>
                             <span>{{ number_format($prod->effective_rating, 1) }}</span>
                         </div>
+                        @else
+                        <span class="text-[9px] text-slate-400 font-medium">Baru</span>
+                        @endif
                         <span class="text-slate-400 truncate">
                             {{ $prod->formatted_sold_count }} terjual
                         </span>
