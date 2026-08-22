@@ -30,10 +30,6 @@
                         <i class="fa-solid fa-store text-[10px] text-cyan-400"></i> Mulai Jual di NitipDong
                     </a>
                     <span class="text-slate-700">|</span>
-                    <a href="#" class="hover:text-cyan-300 transition-colors flex items-center gap-1">
-                        <i class="fa-solid fa-mobile-screen text-[10px]"></i> Download App
-                    </a>
-                    <span class="text-slate-700">|</span>
                     <div class="flex items-center gap-2">
                         <span>Ikuti kami:</span>
                         <a href="#" class="hover:text-cyan-300"><i class="fa-brands fa-facebook text-[11px]"></i></a>
@@ -54,13 +50,6 @@
                     <span class="flex items-center gap-1 text-slate-300">
                         <i class="fa-solid fa-globe text-[10px]"></i> Bahasa Indonesia
                     </span>
-
-                    @guest
-                        <span class="text-slate-700">|</span>
-                        <a href="{{ route('register') }}" class="font-bold text-white hover:text-cyan-300 transition-colors">Daftar</a>
-                        <span class="text-slate-700">/</span>
-                        <a href="{{ route('login') }}" class="font-bold text-white hover:text-cyan-300 transition-colors">Log In</a>
-                    @endguest
                 </div>
             </div>
         </div>
