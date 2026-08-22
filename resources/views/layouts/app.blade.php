@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'NitipDong') }} — Belanja Online Mudah, Cepat & Aman</title>
@@ -26,7 +26,7 @@
 
         @stack('head')
     </head>
-    <body class="antialiased bg-slate-50 text-slate-900 min-h-screen flex flex-col font-sans">
+    <body class="antialiased bg-slate-50 text-slate-900 min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-white">
 
         {{-- Shopee-Style Top Utility Bar --}}
         <div class="bg-slate-950 text-slate-300 text-[11px] py-1.5 border-b border-slate-800 hidden sm:block">
@@ -64,7 +64,7 @@
         @include('layouts.navigation')
 
         {{-- Main Body --}}
-        <main class="flex-1 animate-fade-up">
+        <main class="flex-1 animate-fade-up pb-20 md:pb-0">
             {{ $slot }}
         </main>
 
@@ -179,6 +179,7 @@
         <x-chat-widget />
         <x-toast-notifier />
         <x-pwa-install-banner />
+        <x-mobile-bottom-nav />
 
         @stack('scripts')
     </body>

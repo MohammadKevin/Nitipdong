@@ -340,4 +340,28 @@
         color: #475569;
         border-color: #e2e8f0;
     }
+
+    /* Mobile App Safe-Area & Touch Optimization */
+    .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom, 1rem);
+    }
+    .pt-safe {
+        padding-top: env(safe-area-inset-top, 0.5rem);
+    }
+    .scrollbar-none::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-none {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+}
+
+@media (max-width: 640px) {
+    /* Prevents auto-zoom on iOS Safari when tapping inputs */
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
 }

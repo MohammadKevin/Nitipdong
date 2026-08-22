@@ -524,13 +524,13 @@
             </div>
         </div>
 
-        <div x-show="mobileSearch" x-cloak class="pb-2.5 md:hidden">
+        <div class="pb-2.5 md:hidden">
             <form action="{{ url('/products') }}" method="GET" class="relative">
                 <input type="text" name="q" value="{{ request('q') }}"
-                       placeholder="Cari produk, kategori, toko..."
-                       class="input text-xs pl-8 pr-14 h-8">
-                <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 text-xs"></i>
-                <button type="submit" class="absolute right-1 top-1/2 -translate-y-1/2 px-2.5 h-6 bg-cyan-700 text-white text-[11px] font-semibold rounded">
+                       placeholder="Cari di NitipDong (produk, toko, kategori)..."
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl text-xs pl-9 pr-16 h-9 focus:bg-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 outline-none text-slate-800 transition-all">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 text-xs"></i>
+                <button type="submit" class="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 h-6.5 bg-cyan-600 hover:bg-cyan-700 text-white text-[11px] font-bold rounded-lg transition-colors shadow-2xs">
                     Cari
                 </button>
             </form>
