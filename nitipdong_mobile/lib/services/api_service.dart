@@ -973,6 +973,66 @@ class ApiService {
       return {'success': false, 'message': e.toString()};
     }
   }
+
+  // ══════════════════════════════════════════════════
+  // COURIER OPERATIONS
+  // ══════════════════════════════════════════════════
+
+  /// Get list of orders ready for courier delivery
+  static Future<List<Map<String, dynamic>>> getCourierOrders() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/courier/orders'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['data'] != null && data['data'] is List) {
+          return List<Map<String, dynamic>>.from(data['data']);
+        }
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Mark order as picked up by courier (shipped)
+  static Future<Map<String, dynamic>> pickupCourierOrder(dynamic orderId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/courier/orders/$orderId/pickup'),
+        headers: await _getHeaders(),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Order berhasil diambil!',
+        'status': data['status'],
+        'tracking_number': data['tracking_number'],
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Mark order as delivered by courier (completed)
+  static Future<Map<String, dynamic>> deliverCourierOrder(dynamic orderId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/courier/orders/$orderId/deliver'),
+        headers: await _getHeaders(),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Pengiriman selesai!',
+        'status': data['status'],
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
 }
 
 

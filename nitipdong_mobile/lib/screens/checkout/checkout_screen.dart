@@ -327,49 +327,100 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     children: [
                       Icon(Icons.confirmation_number_outlined, color: AppTheme.primary, size: 20),
                       SizedBox(width: 6),
-                      Text('Gunakan Voucher Diskon', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                      Text('Voucher & Kode Promo', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _voucherController,
-                          textCapitalization: TextCapitalization.characters,
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                          decoration: InputDecoration(
-                            hintText: 'Masukkan kode kupon (misal: ONGKIRNOL)',
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                            fillColor: Colors.grey.shade50,
+                  const SizedBox(height: 10),
+                  _appliedVoucherCode != null
+                      ? Container(
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.green.shade200),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade100,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(Icons.confirmation_number_rounded, color: Colors.green, size: 18),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _appliedVoucherCode!,
+                                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: Colors.green),
+                                    ),
+                                    Text(
+                                      'Diskon ${_formatCurrency(_discountAmount)}',
+                                      style: TextStyle(fontSize: 11, color: Colors.green.shade800, fontWeight: FontWeight.w700),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _appliedVoucherCode = null;
+                                    _discountAmount = 0.0;
+                                    _voucherController.clear();
+                                  });
+                                },
+                                child: const Text('Hapus', style: TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.bold)),
+                              ),
+                              const SizedBox(width: 4),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.primary,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                                onPressed: () => _showVoucherSelectionSheet(context, subtotal),
+                                child: const Text('Ubah', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                        )
+                      : InkWell(
+                          onTap: () => _showVoucherSelectionSheet(context, subtotal),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.discount_outlined, color: Colors.grey.shade600, size: 18),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      'Pilih Voucher Diskon / Potongan Ongkir',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey.shade700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Icon(Icons.chevron_right_rounded, color: Colors.grey, size: 18),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        onPressed: () => _applyVoucher(subtotal),
-                        child: const Text('Pakai', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                      ),
-                    ],
-                  ),
-                  if (_appliedVoucherCode != null) ...[
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(6)),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.check_circle_rounded, color: Colors.green, size: 14),
-                          const SizedBox(width: 6),
-                          Text('Voucher $_appliedVoucherCode aktif (- ${_formatCurrency(_discountAmount)})', style: const TextStyle(fontSize: 11, color: Colors.green, fontWeight: FontWeight.w700)),
-                        ],
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -445,6 +496,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           paymentMethod: _selectedPayment,
                           courier: _selectedCourier,
                           cartIds: widget.selectedCartIds,
+                          voucherCode: _appliedVoucherCode,
                         );
                         setState(() => _isProcessing = false);
 
@@ -560,6 +612,532 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               );
             },
             child: const Text('Lihat Pesanan Saya'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showVoucherSelectionSheet(BuildContext context, double subtotal) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return _VoucherSelectionWidget(
+          subtotal: subtotal,
+          appliedVoucherCode: _appliedVoucherCode,
+          onVoucherApplied: (String code, double discount) {
+            setState(() {
+              _appliedVoucherCode = code;
+              _discountAmount = discount;
+              _voucherController.text = code;
+            });
+          },
+        );
+      },
+    );
+  }
+}
+
+class _VoucherSelectionWidget extends StatefulWidget {
+  final double subtotal;
+  final String? appliedVoucherCode;
+  final Function(String code, double discount) onVoucherApplied;
+
+  const _VoucherSelectionWidget({
+    Key? key,
+    required this.subtotal,
+    this.appliedVoucherCode,
+    required this.onVoucherApplied,
+  }) : super(key: key);
+
+  @override
+  State<_VoucherSelectionWidget> createState() => _VoucherSelectionWidgetState();
+}
+
+class _VoucherSelectionWidgetState extends State<_VoucherSelectionWidget> {
+  final _manualVoucherController = TextEditingController();
+  List<Map<String, dynamic>> _vouchers = [];
+  bool _isLoading = true;
+  bool _isValidating = false;
+  String? _validatingCode;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchVouchers();
+  }
+
+  Future<void> _fetchVouchers() async {
+    if (!mounted) return;
+    setState(() => _isLoading = true);
+    final data = await ApiService.getAvailableVouchers();
+    if (mounted) {
+      setState(() {
+        _vouchers = data;
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _formatCurrency(double amount) {
+    final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    return formatter.format(amount);
+  }
+
+  Future<void> _applyVoucherCode(String code) async {
+    final cleanCode = code.trim().toUpperCase();
+    if (cleanCode.isEmpty) return;
+
+    if (!mounted) return;
+    setState(() {
+      _isValidating = true;
+      _validatingCode = cleanCode;
+    });
+
+    final res = await ApiService.validateVoucher(cleanCode);
+
+    if (mounted) {
+      setState(() {
+        _isValidating = false;
+        _validatingCode = null;
+      });
+
+      if (res['success'] == true) {
+        final double discount = res['discount_amount'] ?? 0.0;
+        widget.onVoucherApplied(cleanCode, discount);
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Voucher $cleanCode berhasil digunakan! Diskon ${_formatCurrency(discount)} 🎉'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } else {
+        _applyLocalFallback(cleanCode);
+      }
+    }
+  }
+
+  void _applyLocalFallback(String cleanCode) {
+    double calculatedDiscount = 0.0;
+    bool codeFound = false;
+
+    if (cleanCode == 'NITIPHEMAT') {
+      calculatedDiscount = widget.subtotal * 0.15 > 50000 ? 50000 : widget.subtotal * 0.15;
+      codeFound = true;
+    } else if (cleanCode == 'ONGKIRNOL') {
+      calculatedDiscount = 15000;
+      codeFound = true;
+    } else if (cleanCode == 'FLASHSALE20') {
+      calculatedDiscount = widget.subtotal * 0.20;
+      codeFound = true;
+    } else if (cleanCode == 'NITIPHEMAT20') {
+      calculatedDiscount = widget.subtotal * 0.20 > 50000 ? 50000 : widget.subtotal * 0.20;
+      codeFound = true;
+    } else if (cleanCode == 'ONGKIRGRATIS') {
+      calculatedDiscount = 25000;
+      codeFound = true;
+    } else if (cleanCode == 'GAJIANSERU50') {
+      calculatedDiscount = widget.subtotal >= 200000 ? 50000 : 0.0;
+      if (widget.subtotal < 200000) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Minimal belanja Rp 200.000 untuk menggunakan voucher ini.'),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      codeFound = true;
+    }
+
+    if (codeFound) {
+      widget.onVoucherApplied(cleanCode, calculatedDiscount);
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Voucher $cleanCode berhasil digunakan! Diskon ${_formatCurrency(calculatedDiscount)} 🎉'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Kode voucher tidak valid atau telah habis masa berlakunya.'),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      padding: EdgeInsets.only(
+        top: 16,
+        left: 16,
+        right: 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Pilih Voucher NitipDong',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  color: AppTheme.accentNavy,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.close, size: 20),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _manualVoucherController,
+                  textCapitalization: TextCapitalization.characters,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                  decoration: InputDecoration(
+                    hintText: 'Masukkan kode promo secara manual...',
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    fillColor: Colors.grey.shade50,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: _isValidating 
+                    ? null 
+                    : () => _applyVoucherCode(_manualVoucherController.text),
+                child: _isValidating && _validatingCode == _manualVoucherController.text.trim().toUpperCase()
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Text('Pakai', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Voucher Tersedia',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Flexible(
+            child: _isLoading
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 30),
+                    child: Center(
+                      child: CircularProgressIndicator(color: AppTheme.primary),
+                    ),
+                  )
+                : _vouchers.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 30),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Icon(Icons.confirmation_number_outlined, size: 40, color: Colors.grey.shade300),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Tidak ada voucher tersedia',
+                                style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: _vouchers.length,
+                        itemBuilder: (context, index) {
+                          final voucher = _vouchers[index];
+                          final code = voucher['code'] ?? '';
+                          final name = voucher['name'] ?? '';
+                          final desc = voucher['description'] ?? '';
+                          final minSpend = (voucher['min_spend'] as num?)?.toDouble() ?? 0.0;
+                          final formattedDiscount = voucher['formatted_discount'] ?? 'Diskon';
+                          final expiresAt = voucher['expires_at'] ?? 'Berlaku Selamanya';
+                          final badge = voucher['badge'] ?? '';
+                          final isSelected = widget.appliedVoucherCode == code;
+                          final isValidateLoading = _isValidating && _validatingCode == code;
+
+                          IconData voucherIcon = Icons.confirmation_number_rounded;
+                          if (name.toLowerCase().contains('ongkir')) {
+                            voucherIcon = Icons.local_shipping_rounded;
+                          } else if (name.toLowerCase().contains('star') || name.toLowerCase().contains('vip')) {
+                            voucherIcon = Icons.star_rounded;
+                          } else if (name.toLowerCase().contains('toko')) {
+                            voucherIcon = Icons.storefront_rounded;
+                          }
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            height: 100,
+                            child: Stack(
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                    border: Border.all(
+                                      color: isSelected ? AppTheme.success : AppTheme.border,
+                                      width: isSelected ? 1.5 : 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 85,
+                                        decoration: const BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: [
+                                              Color(0xFFF43F5E),
+                                              Color(0xFFE11D48),
+                                            ],
+                                          ),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(11),
+                                            bottomLeft: Radius.circular(11),
+                                          ),
+                                        ),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(voucherIcon, color: Colors.white, size: 28),
+                                            const SizedBox(height: 4),
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                                              child: Text(
+                                                name.toLowerCase().contains('ongkir') 
+                                                    ? 'ONGKIR' 
+                                                    : name.toLowerCase().contains('toko') 
+                                                        ? 'TOKO' 
+                                                        : 'PROMO',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 8,
+                                                  fontWeight: FontWeight.bold,
+                                                  letterSpacing: 0.5,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      name,
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: const TextStyle(
+                                                        fontWeight: FontWeight.w800,
+                                                        fontSize: 12,
+                                                        color: AppTheme.accentNavy,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 2),
+                                                    Text(
+                                                      'Min. Blj ${_formatCurrency(minSpend)}',
+                                                      style: const TextStyle(
+                                                        fontSize: 10,
+                                                        color: AppTheme.textSecondary,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 4),
+                                                    Row(
+                                                      children: [
+                                                        if (badge.isNotEmpty) ...[
+                                                          Container(
+                                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                            decoration: BoxDecoration(
+                                                              color: Colors.orange.shade50,
+                                                              borderRadius: BorderRadius.circular(4),
+                                                            ),
+                                                            child: Text(
+                                                              badge,
+                                                              style: TextStyle(
+                                                                fontSize: 8,
+                                                                color: Colors.orange.shade800,
+                                                                fontWeight: FontWeight.bold,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          const SizedBox(width: 6),
+                                                        ],
+                                                        Expanded(
+                                                          child: Text(
+                                                            's.d. $expiresAt',
+                                                            style: const TextStyle(
+                                                              fontSize: 9,
+                                                              color: AppTheme.textMuted,
+                                                            ),
+                                                            maxLines: 1,
+                                                            overflow: TextOverflow.ellipsis,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              isValidateLoading
+                                                  ? const SizedBox(
+                                                      width: 20,
+                                                      height: 20,
+                                                      child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary),
+                                                    )
+                                                  : isSelected
+                                                      ? Container(
+                                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                                          decoration: BoxDecoration(
+                                                            color: Colors.green.shade50,
+                                                            borderRadius: BorderRadius.circular(8),
+                                                            border: Border.all(color: Colors.green.shade300),
+                                                          ),
+                                                          child: Row(
+                                                            mainAxisSize: MainAxisSize.min,
+                                                            children: const [
+                                                              Icon(Icons.check_circle_outline_rounded, color: Colors.green, size: 12),
+                                                              SizedBox(width: 4),
+                                                              Text(
+                                                                'Terpilih',
+                                                                style: TextStyle(
+                                                                  color: Colors.green,
+                                                                  fontWeight: FontWeight.bold,
+                                                                  fontSize: 9,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        )
+                                                      : ElevatedButton(
+                                                          style: ElevatedButton.styleFrom(
+                                                            backgroundColor: AppTheme.primary,
+                                                            foregroundColor: Colors.white,
+                                                            elevation: 0,
+                                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                                            minimumSize: Size.zero,
+                                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                                            shape: RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius.circular(8),
+                                                            ),
+                                                          ),
+                                                          onPressed: () => _applyVoucherCode(code),
+                                                          child: const Text(
+                                                            'Pakai',
+                                                            style: TextStyle(
+                                                              fontSize: 10,
+                                                              fontWeight: FontWeight.bold,
+                                                            ),
+                                                          ),
+                                                        ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 80,
+                                  top: -6,
+                                  child: Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: 80,
+                                  bottom: -6,
+                                  child: Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
           ),
         ],
       ),

@@ -91,6 +91,11 @@ Route::prefix('v1')->group(function () {
         Route::post('/products/{id}/discussions', [ProductController::class, 'storeDiscussion']);
         Route::post('/products/{id}/discussions/{discussion_id}/reply', [ProductController::class, 'replyDiscussion']);
 
+        // Courier Delivery Routes
+        Route::get('/courier/orders', [\App\Http\Controllers\Api\CourierApiController::class, 'index']);
+        Route::post('/courier/orders/{id}/pickup', [\App\Http\Controllers\Api\CourierApiController::class, 'pickup']);
+        Route::post('/courier/orders/{id}/deliver', [\App\Http\Controllers\Api\CourierApiController::class, 'deliver']);
+
         // Midtrans Core API Direct Payment
         Route::post('/payment/midtrans/charge', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'charge']);
         Route::get('/orders/{id}/payment-status', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'status']);
