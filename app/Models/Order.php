@@ -46,6 +46,12 @@ class Order extends Model
         'payment_reference',
         'snap_token',
         'tracking_number',
+        'courier_id',
+        'courier_lat',
+        'courier_lng',
+        'courier_location_updated_at',
+        'delivery_proof_image',
+        'delivery_notes',
     ];
 
     protected $casts = [
@@ -53,7 +59,10 @@ class Order extends Model
         'discount_amount' => 'float',
         'shipping_cost'   => 'float',
         'total_weight'    => 'float',
+        'courier_lat'     => 'float',
+        'courier_lng'     => 'float',
         'completed_at'    => 'datetime',
+        'courier_location_updated_at' => 'datetime',
     ];
 
     protected $appends = [
@@ -63,6 +72,11 @@ class Order extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function courier(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'courier_id');
     }
 
     public function store(): BelongsTo

@@ -20,12 +20,26 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         // Admin
-        User::create([
-            'name'              => 'Admin Operasional',
-            'email'             => 'admin@belanjain.test',
-            'email_verified_at' => now(),
-            'password'          => Hash::make('password'),
-            'role'              => 'admin',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@belanjain.test'],
+            [
+                'name'              => 'Admin Operasional',
+                'email_verified_at' => now(),
+                'password'          => Hash::make('password'),
+                'role'              => 'admin',
+            ]
+        );
+
+        // Courier Mitra NitipDong
+        User::firstOrCreate(
+            ['email' => 'kurir@nitipdong.com'],
+            [
+                'name'              => 'Mas Kevin (Kurir Mitra)',
+                'email_verified_at' => now(),
+                'password'          => Hash::make('password'),
+                'role'              => 'courier',
+                'phone'             => '081234567890',
+            ]
+        );
     }
 }

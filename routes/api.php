@@ -91,13 +91,27 @@ Route::prefix('v1')->group(function () {
         Route::post('/products/{id}/discussions', [ProductController::class, 'storeDiscussion']);
         Route::post('/products/{id}/discussions/{discussion_id}/reply', [ProductController::class, 'replyDiscussion']);
 
+        // Courier Delivery Partner Endpoints
+        Route::prefix('courier')->group(function () {
+            Route::get('/deliveries', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'index']);
+            Route::get('/deliveries/{id}', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'show']);
+            Route::post('/deliveries/{id}/accept', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'acceptTask']);
+            Route::post('/deliveries/{id}/update-gps', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'updateGps']);
+            Route::post('/deliveries/{id}/complete', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'completeDelivery']);
+            Route::get('/statistics', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'statistics']);
+        });
+
+        // Customer Live Map Tracking
+        Route::get('/orders/{id}/live-tracking', [\App\Http\Controllers\Api\LiveTrackingController::class, 'getLiveTracking']);
+
         // Midtrans Core API Direct Payment
         Route::post('/payment/midtrans/charge', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'charge']);
         Route::get('/orders/{id}/payment-status', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'status']);
         Route::post('/orders/{id}/simulate-paid', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'simulatePaid']);
     });
 
-    // Public Polling & Webhook Status Check (No Auth needed for client poll)
+    // Public Polling & Live Map Tracking Fallback
+    Route::get('/orders/{id}/live-tracking', [\App\Http\Controllers\Api\LiveTrackingController::class, 'getLiveTracking']);
     Route::get('/orders/{id}/payment-status', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'status']);
     Route::post('/orders/{id}/simulate-paid', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'simulatePaid']);
     Route::post('/payment/midtrans/charge', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'charge']);
