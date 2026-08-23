@@ -50,6 +50,13 @@ class PaymentCallbackController extends Controller
             abort(403);
         }
 
+        if (app()->isProduction() && !in_array(Auth::user()?->role, ['admin', 'super_admin'])) {
+            if ($request->wantsJson()) {
+                return response()->json(['status' => 'error', 'message' => 'Simulasi pembayaran hanya diizinkan pada mode pengujian lokal.'], 403);
+            }
+            return back()->with('error', 'Simulasi pembayaran dinonaktifkan pada lingkungan produksi.');
+        }
+
         $method = $request->input('method', 'qris');
         PaymentService::handlePaymentSuccess($order, 'SIM-' . time(), $method);
 

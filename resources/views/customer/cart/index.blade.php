@@ -222,7 +222,7 @@
                         </div>
                         <div>
                             <p class="text-[11px] font-bold text-slate-800 leading-none">Transaksi Aman</p>
-                            <p class="text-[10px] text-slate-400 mt-0.5">QRIS & VA Duitku</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">QRIS & VA Midtrans</p>
                         </div>
                     </div>
                 </div>

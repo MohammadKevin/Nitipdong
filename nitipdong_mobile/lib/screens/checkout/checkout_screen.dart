@@ -33,7 +33,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     {'name': 'Mandiri Virtual Account', 'icon': Icons.account_balance_rounded, 'badge': 'Otomatis'},
     {'name': 'BRI Virtual Account', 'icon': Icons.account_balance_rounded, 'badge': 'Otomatis'},
     {'name': 'GoPay / ShopeePay / DANA', 'icon': Icons.phone_android_rounded, 'badge': 'E-Wallet'},
-    {'name': 'Saldo NitipPay', 'icon': Icons.account_balance_wallet_outlined, 'badge': 'Bebas Admin'},
   ];
 
   final List<Map<String, dynamic>> _courierOptions = [

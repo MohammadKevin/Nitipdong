@@ -23,11 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _currentAddress = 'Jl. Raya Darmo No. 42, Wonokromo, Surabaya, Jawa Timur 60241';
   String _recipientName = 'Mohammad Kevin Arif Rudianto';
   String _recipientPhone = '081234567890';
-  double _walletBalance = 250000.0;
-  int _walletPoints = 1250;
-  List<Map<String, dynamic>> _walletTransactions = [];
   List<Map<String, dynamic>> _availableVouchers = [];
-  bool _isLoadingWallet = false;
 
   @override
   void initState() {
@@ -38,7 +34,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadInitialData() async {
     await Future.wait([
       _loadSavedAddress(),
-      _loadWalletData(),
       _loadVouchers(),
     ]);
   }
@@ -60,20 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _loadWalletData() async {
-    setState(() => _isLoadingWallet = true);
-    final data = await ApiService.getWalletData();
-    if (mounted) {
-      setState(() {
-        _walletBalance = (data['balance'] as num?)?.toDouble() ?? 250000.0;
-        _walletPoints = (data['points'] as num?)?.toInt() ?? 1250;
-        if (data['transactions'] != null && data['transactions'] is List) {
-          _walletTransactions = List<Map<String, dynamic>>.from(data['transactions']);
-        }
-        _isLoadingWallet = false;
-      });
-    }
-  }
+
 
   Future<void> _loadVouchers() async {
     final vouchers = await ApiService.getAvailableVouchers();
@@ -241,7 +223,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 12),
             ],
 
-            // 3. MAIN MENU LIST (Dompet, Kupon, Alamat, Bantuan AI, Toko)
+            // 3. MAIN MENU LIST (Kupon, Alamat, Bantuan AI, Toko)
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -250,16 +232,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               child: Column(
                 children: [
-                  // 1. Dompet NitipPay & Saldo
-                  _buildMenuItem(
-                    icon: Icons.account_balance_wallet_outlined,
-                    title: 'Dompet NitipPay & Saldo',
-                    badge: _formatCurrency(_walletBalance),
-                    onTap: () => _showNitipPaySheet(context),
-                  ),
-                  _buildMenuDivider(),
-
-                  // 2. Voucher & Kupon Saya
+                  // 1. Voucher & Kupon Saya
                   _buildMenuItem(
                     icon: Icons.confirmation_number_outlined,
                     title: 'Voucher & Kupon Saya',
@@ -422,182 +395,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // ══════════════════════════════════════════════════
-  // 1. NITIPPAY WALLET MODAL SHEET (REALIZED)
-  // ══════════════════════════════════════════════════
-  void _showNitipPaySheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(15))),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setSheetState) => Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(child: Container(width: 36, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)))),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Dompet NitipPay & Saldo', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              // Wallet Balance Card
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [AppTheme.accentNavy, Color(0xFF0E7490)]),
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(color: AppTheme.primary.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Saldo NitipPay Aktif', style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w600)),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(4)),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.stars, color: Colors.amber, size: 12),
-                              const SizedBox(width: 4),
-                              Text('$_walletPoints Poin', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _formatCurrency(_walletBalance),
-                      style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Quick Nominal Top Up
-              const Text('Isi Ulang Saldo Cepat (Top Up)', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [20000.0, 50000.0, 100000.0, 250000.0, 500000.0].map((nominal) {
-                  return ActionChip(
-                    backgroundColor: AppTheme.primaryLight,
-                    side: const BorderSide(color: AppTheme.border),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    label: Text(
-                      '+ Rp ${(nominal / 1000).toInt()}rb',
-                      style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppTheme.primaryDark),
-                    ),
-                    onPressed: () async {
-                      final res = await ApiService.topUpWallet(nominal);
-                      if (res['success'] == true) {
-                        setState(() {
-                          _walletBalance += nominal;
-                        });
-                        setSheetState(() {});
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Top Up Rp ${(nominal / 1000).toInt()}rb berhasil ditambahkan! 💳'),
-                              backgroundColor: AppTheme.success,
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        }
-                        _loadWalletData();
-                      }
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-
-              // Transaction History List
-              const Text('Riwayat Transaksi Terbaru', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 8),
-              _walletTransactions.isEmpty
-                  ? Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(10)),
-                      child: const Center(child: Text('Belum ada transaksi riwayat dompet.', style: TextStyle(fontSize: 11, color: AppTheme.textMuted))),
-                    )
-                  : ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _walletTransactions.length > 3 ? 3 : _walletTransactions.length,
-                      itemBuilder: (context, idx) {
-                        final txn = _walletTransactions[idx];
-                        final isCredit = ((txn['amount'] as num?)?.toDouble() ?? 0.0) >= 0;
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 6),
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey.shade200),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                isCredit ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
-                                color: isCredit ? AppTheme.success : Colors.red,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(txn['title'] ?? 'Transaksi', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
-                                    Text(txn['date'] ?? '', style: const TextStyle(fontSize: 9.5, color: AppTheme.textMuted)),
-                                  ],
-                                ),
-                              ),
-                              Text(
-                                '${isCredit ? '+' : ''}${_formatCurrency(((txn['amount'] as num?)?.toDouble() ?? 0).abs())}',
-                                style: TextStyle(
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: isCredit ? AppTheme.success : Colors.red,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Tutup'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ══════════════════════════════════════════════════
-  // 2. VOUCHER & KUPON SAYA SHEET (REALIZED WITH EXPIRY)
+  // 1. VOUCHER & KUPON SAYA SHEET (REALIZED WITH EXPIRY)
   // ══════════════════════════════════════════════════
   void _showVouchersSheet(BuildContext context) {
     showModalBottomSheet(

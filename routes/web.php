@@ -13,7 +13,6 @@ use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Customer\ReviewController as CustomerReviewController;
 use App\Http\Controllers\Customer\StoreRegistrationController;
 use App\Http\Controllers\Customer\WishlistController;
-use App\Http\Controllers\DuitkuPaymentController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MidtransPaymentController;
@@ -46,7 +45,6 @@ use Illuminate\Support\Facades\Route;
 // Public Webhook Payment Callbacks (Exempt from CSRF)
 Route::post('/api/midtrans/notification', [MidtransPaymentController::class, 'handleNotification'])->name('midtrans.notification');
 Route::post('/api/payment/notification', [MidtransPaymentController::class, 'handleNotification'])->name('payment.webhook');
-Route::post('/api/duitku/callback', [DuitkuPaymentController::class, 'handleCallback'])->name('duitku.callback');
 
 // Smart Download Route for Mobile Apps (Direct Fast Local Download from DomaiNesia)
 Route::get('/download/app', function (\Illuminate\Http\Request $request) {
@@ -122,6 +120,7 @@ Route::get('/download/android', function () {
 
 // Direct iOS Download Route
 Route::get('/download/ios', function () {
+    $version = env('APP_MOBILE_LATEST_VERSION', '1.1.1');
     $paths = [
         public_path('downloads/nitipdong.ipa'),
         public_path('downloads/NitipDong-latest.ipa'),
@@ -130,9 +129,9 @@ Route::get('/download/ios', function () {
     ];
     foreach ($paths as $p) {
         if (file_exists($p)) {
-            return response()->download($p, 'NitipDong-v1.0.1.ipa', [
+            return response()->download($p, "NitipDong-v{$version}.ipa", [
                 'Content-Type' => 'application/octet-stream',
-                'Content-Disposition' => 'attachment; filename="NitipDong-v1.0.1.ipa"',
+                'Content-Disposition' => "attachment; filename=\"NitipDong-v{$version}.ipa\"",
             ]);
         }
     }
@@ -143,9 +142,6 @@ Route::get('/download/ios', function () {
 Route::get('/apps', function () {
     return view('app-download');
 })->name('app.landing');
-
-// Return URL Redirect after Duitku Payment
-Route::get('/payment/finish', [DuitkuPaymentController::class, 'handleReturn'])->name('duitku.return');
 
 // Public Home
 Route::get('/', function () {
@@ -363,7 +359,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/orders/{order}/payment', [OrderController::class, 'confirmPayment'])->name('order.confirm_payment');
         Route::post('/orders/{order}/change-payment-method', [OrderController::class, 'changePaymentMethod'])->name('order.change_payment_method');
         Route::match(['get', 'post'], '/orders/{order}/midtrans/snap-token', [MidtransPaymentController::class, 'getSnapToken'])->name('order.midtrans_snap_token');
-        Route::match(['get', 'post'], '/orders/{order}/duitku/create', [MidtransPaymentController::class, 'getSnapToken'])->name('order.duitku_create');
         Route::post('/orders/{order}/simulate-payment', [PaymentCallbackController::class, 'simulateInstantPayment'])->name('order.simulate_payment');
         Route::post('/orders/{order}/confirm-received', [OrderController::class, 'confirmReceived'])->name('order.confirm_received');
         Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('order.cancel');
