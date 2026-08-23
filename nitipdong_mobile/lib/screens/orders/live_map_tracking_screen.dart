@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../theme/app_theme.dart';
 import '../../services/api_service.dart';
+import '../../widgets/in_app_notification.dart';
 
 class LiveMapTrackingScreen extends StatefulWidget {
   final dynamic orderId;
@@ -49,6 +50,34 @@ class _LiveMapTrackingScreenState extends State<LiveMapTrackingScreen> with Sing
     if (!isSilent) setState(() => _isLoading = true);
     final data = await ApiService.getOrderLiveTracking(widget.orderId);
     if (mounted) {
+      if (_trackingData != null && data != null) {
+        final oldStatus = _trackingData!['order_status'];
+        final newStatus = data['order_status'];
+        if (oldStatus != newStatus) {
+          // Status updated! Trigger notification banner
+          String title = 'Update Pengiriman 📦';
+          String message = 'Status pesanan Anda kini telah berubah.';
+          IconData icon = Icons.local_shipping_rounded;
+          
+          if (newStatus == 'shipped') {
+            title = 'Pesanan Sedang Dikirim! 🚚';
+            message = 'Kurir telah mengambil paket Anda dan sedang dalam perjalanan.';
+            icon = Icons.local_shipping_rounded;
+          } else if (newStatus == 'completed') {
+            title = 'Pesanan Selesai! 🎉';
+            message = 'Paket Anda telah selesai dikirim dan diterima oleh pembeli.';
+            icon = Icons.check_circle_rounded;
+          }
+          
+          InAppNotification.show(
+            context,
+            title: title,
+            message: message,
+            icon: icon,
+          );
+        }
+      }
+
       setState(() {
         _trackingData = data;
         _isLoading = false;

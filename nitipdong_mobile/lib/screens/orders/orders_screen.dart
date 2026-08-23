@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +11,7 @@ import '../../services/api_service.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/login_screen.dart';
 import 'live_map_tracking_screen.dart';
+import '../../widgets/in_app_notification.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({Key? key}) : super(key: key);
@@ -22,6 +24,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   List<OrderModel> _orders = [];
   bool _isLoading = true;
   String _selectedStatus = 'all';
+  Timer? _pollingTimer;
 
   final List<Map<String, String>> _statusTabs = [
     {'label': 'Semua', 'value': 'all'},
@@ -36,12 +39,57 @@ class _OrdersScreenState extends State<OrdersScreen> {
   void initState() {
     super.initState();
     _fetchOrders();
+    // Auto-refresh order list every 10 seconds to check for delivery status updates
+    _pollingTimer = Timer.periodic(const Duration(seconds: 10), (_) => _fetchOrders(isSilent: true));
   }
 
-  Future<void> _fetchOrders() async {
-    setState(() => _isLoading = true);
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _fetchOrders({bool isSilent = false}) async {
+    if (!isSilent) setState(() => _isLoading = true);
     final orders = await ApiService.getOrders(status: _selectedStatus);
     if (mounted) {
+      if (isSilent && _orders.isNotEmpty && orders.isNotEmpty) {
+        // Compare status to trigger in-app notification banner
+        for (var newOrder in orders) {
+          try {
+            final oldOrder = _orders.firstWhere((o) => o.id == newOrder.id);
+            if (oldOrder.status != newOrder.status) {
+              String statusLabel = newOrder.status;
+              IconData icon = Icons.notifications_active_rounded;
+              String message = 'Status pesanan #${newOrder.invoiceNumber} berubah menjadi $statusLabel.';
+
+              if (newOrder.status == 'shipped') {
+                statusLabel = 'Sedang Dikirim 🚚';
+                icon = Icons.local_shipping_rounded;
+                message = 'Pesanan #${newOrder.invoiceNumber} sedang dikirim oleh kurir.';
+              } else if (newOrder.status == 'completed') {
+                statusLabel = 'Selesai 🎉';
+                icon = Icons.check_circle_rounded;
+                message = 'Pesanan #${newOrder.invoiceNumber} telah selesai dikirim.';
+              } else if (newOrder.status == 'processing') {
+                statusLabel = 'Diproses 📦';
+                icon = Icons.hourglass_bottom_rounded;
+                message = 'Pesanan #${newOrder.invoiceNumber} sedang diproses penjual.';
+              }
+
+              InAppNotification.show(
+                context,
+                title: 'Status Pesanan: $statusLabel',
+                message: message,
+                icon: icon,
+              );
+            }
+          } catch (_) {
+            // New order added, ignore
+          }
+        }
+      }
+
       setState(() {
         _orders = orders;
         _isLoading = false;
