@@ -412,47 +412,119 @@ class LiveMapPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Road Path
-    final roadPaint = Paint()
-      ..color = Colors.white.withOpacity(0.12)
+    // 1. Draw Land Background (Light Warm Gray/Blue)
+    final landPaint = Paint()..color = const Color(0xFFF1F5F9);
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), landPaint);
+
+    // 2. Draw Green Parks (Green Zones)
+    final parkPaint = Paint()..color = const Color(0xFFDCFCE7);
+    // Park 1
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(size.width * 0.05, size.height * 0.1, size.width * 0.22, size.height * 0.35),
+        const Radius.circular(16),
+      ),
+      parkPaint,
+    );
+    // Park 2
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(size.width * 0.72, size.height * 0.55, size.width * 0.23, size.height * 0.38),
+        const Radius.circular(16),
+      ),
+      parkPaint,
+    );
+
+    // 3. Draw River / Water Flow (Light Sky Blue)
+    final waterPaint = Paint()
+      ..color = const Color(0xFFBAE6FD)
+      ..strokeWidth = 32
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final riverPath = Path()
+      ..moveTo(-30, size.height * 0.45)
+      ..cubicTo(size.width * 0.35, size.height * 0.35, size.width * 0.65, size.height * 0.75, size.width + 30, size.height * 0.65);
+    canvas.drawPath(riverPath, waterPaint);
+
+    // 4. Draw City Streets / Road Grid (White lines with grey borders)
+    final roadBasePaint = Paint()
+      ..color = const Color(0xFFCBD5E1)
       ..strokeWidth = 14
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    final glowPaint = Paint()
-      ..color = Colors.cyanAccent.withOpacity(0.5)
-      ..strokeWidth = 4
-      ..style = PaintingStyle.stroke;
+    final roadMiddlePaint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 10
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
 
-    final start = Offset(size.width * 0.15, size.height * 0.75);
-    final end = Offset(size.width * 0.85, size.height * 0.25);
+    final streets = <Path>[
+      // Vertical streets
+      Path()..moveTo(size.width * 0.25, -20)..lineTo(size.width * 0.25, size.height + 20),
+      Path()..moveTo(size.width * 0.5, -20)..lineTo(size.width * 0.5, size.height + 20),
+      Path()..moveTo(size.width * 0.75, -20)..lineTo(size.width * 0.75, size.height + 20),
+      // Horizontal streets
+      Path()..moveTo(-20, size.height * 0.2)..lineTo(size.width + 20, size.height * 0.2),
+      Path()..moveTo(-20, size.height * 0.5)..lineTo(size.width + 20, size.height * 0.5),
+      Path()..moveTo(-20, size.height * 0.8)..lineTo(size.width + 20, size.height * 0.8),
+    ];
+
+    for (var street in streets) {
+      canvas.drawPath(street, roadBasePaint);
+      canvas.drawPath(street, roadMiddlePaint);
+    }
+
+    // 5. Draw Active Courier Route Path (Vibrant blue with semi-transparent shadow)
+    final startPoint = Offset(size.width * 0.15, size.height * 0.75);
+    final endPoint = Offset(size.width * 0.85, size.height * 0.25);
     final cp1 = Offset(size.width * 0.4, size.height * 0.9);
     final cp2 = Offset(size.width * 0.6, size.height * 0.1);
 
-    final path = Path()
-      ..moveTo(start.dx, start.dy)
-      ..cubicTo(cp1.dx, cp1.dy, cp2.dx, cp2.dy, end.dx, end.dy);
+    final routePath = Path()
+      ..moveTo(startPoint.dx, startPoint.dy)
+      ..cubicTo(cp1.dx, cp1.dy, cp2.dx, cp2.dy, endPoint.dx, endPoint.dy);
 
-    canvas.drawPath(path, roadPaint);
-    canvas.drawPath(path, glowPaint);
+    final routeShadowPaint = Paint()
+      ..color = AppTheme.primary.withOpacity(0.2)
+      ..strokeWidth = 8
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
 
-    // Store Marker (Origin)
-    canvas.drawCircle(start, 12, Paint()..color = const Color(0xFF0E7490));
-    canvas.drawCircle(start, 5, Paint()..color = Colors.white);
+    final routeLinePaint = Paint()
+      ..color = AppTheme.primary
+      ..strokeWidth = 4
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
 
-    // Home Marker (Destination)
-    canvas.drawCircle(end, 12, Paint()..color = Colors.redAccent);
-    canvas.drawCircle(end, 5, Paint()..color = Colors.white);
+    canvas.drawPath(routePath, routeShadowPaint);
+    canvas.drawPath(routePath, routeLinePaint);
 
-    // Moving Courier Marker with Radar Pulse
-    final courierX = start.dx + (end.dx - start.dx) * progress;
-    final courierY = start.dy + (end.dy - start.dy) * progress;
+    // 6. Draw Store Marker (Origin)
+    final storePaint = Paint()..color = const Color(0xFF0F172A);
+    canvas.drawCircle(startPoint, 14, storePaint);
+    canvas.drawCircle(startPoint, 10, Paint()..color = const Color(0xFF0E7490));
+    canvas.drawCircle(startPoint, 4, Paint()..color = Colors.white);
+
+    // 7. Draw Home Marker (Destination)
+    final destPaint = Paint()..color = const Color(0xFF0F172A);
+    canvas.drawCircle(endPoint, 14, destPaint);
+    canvas.drawCircle(endPoint, 10, Paint()..color = Colors.redAccent);
+    canvas.drawCircle(endPoint, 4, Paint()..color = Colors.white);
+
+    // 8. Draw Moving Courier Marker with Pulse
+    final courierX = startPoint.dx + (endPoint.dx - startPoint.dx) * progress;
+    final courierY = startPoint.dy + (endPoint.dy - startPoint.dy) * progress;
     final courierPos = Offset(courierX, courierY);
 
     // Radar Ripple
-    canvas.drawCircle(courierPos, 14 + (pulseScale * 8), Paint()..color = Colors.cyanAccent.withOpacity(0.25 * (1 - pulseScale)));
-    canvas.drawCircle(courierPos, 10, Paint()..color = Colors.cyanAccent);
-    canvas.drawCircle(courierPos, 4, Paint()..color = Colors.white);
+    final pulseRadius = 14.0 + (pulseScale * 8.0);
+    canvas.drawCircle(courierPos, pulseRadius, Paint()..color = Colors.cyanAccent.withOpacity(0.3 * (1.0 - pulseScale)));
+    
+    canvas.drawCircle(courierPos, 12, Paint()..color = const Color(0xFF0F172A));
+    canvas.drawCircle(courierPos, 8, Paint()..color = Colors.cyanAccent);
+    canvas.drawCircle(courierPos, 3, Paint()..color = Colors.white);
   }
 
   @override
