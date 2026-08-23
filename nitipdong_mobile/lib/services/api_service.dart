@@ -1343,17 +1343,49 @@ class ApiService {
     }
   }
 
-  /// Toggle maintenance mode platform-wide
-  static Future<bool> toggleAdminMaintenance(bool isDown) async {
+  /// Get current maintenance status of all targets (web, mobile, all)
+  static Future<Map<String, dynamic>?> getMaintenanceStatus() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/admin/system/maintenance'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) return data['data'];
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Toggle maintenance mode (target: 'web' | 'mobile' | 'all')
+  static Future<Map<String, dynamic>> toggleAdminMaintenance({
+    required String target,
+    required bool isDown,
+    String? title,
+    String? message,
+  }) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/admin/system/maintenance'),
         headers: await _getHeaders(),
-        body: jsonEncode({'is_down': isDown}),
+        body: jsonEncode({
+          'target': target,
+          'is_down': isDown,
+          'title': title,
+          'message': message,
+        }),
       );
-      return response.statusCode == 200;
-    } catch (_) {
-      return false;
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Status sistem berhasil diubah.',
+        'data': data,
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
     }
   }
 

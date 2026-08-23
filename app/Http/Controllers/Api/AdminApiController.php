@@ -140,17 +140,96 @@ class AdminApiController extends Controller
     }
 
     /**
-     * 5. Toggle Maintenance Mode Platform
+     * 5. Get Live Maintenance Status
+     */
+    public function getMaintenanceStatus(): JsonResponse
+    {
+        $webFile = storage_path('framework/maintenance_web.json');
+        $mobileFile = storage_path('framework/maintenance_app.json');
+        $downFile = storage_path('framework/down');
+
+        $isWebDown = file_exists($webFile) || env('APP_WEB_MAINTENANCE', false);
+        $isMobileDown = file_exists($mobileFile) || env('APP_MOBILE_MAINTENANCE', false);
+        $isAllDown = file_exists($downFile);
+
+        $msgData = [];
+        if (file_exists($mobileFile)) {
+            $msgData = json_decode(@file_get_contents($mobileFile), true) ?: [];
+        } elseif (file_exists($webFile)) {
+            $msgData = json_decode(@file_get_contents($webFile), true) ?: [];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'web_maintenance'    => (bool) $isWebDown,
+                'mobile_maintenance' => (bool) $isMobileDown,
+                'full_lockdown'      => (bool) $isAllDown,
+                'title'              => $msgData['title'] ?? 'Mode Pemeliharaan Sistem 🛠️',
+                'message'            => $msgData['message'] ?? 'Sistem sedang dalam optimalisasi server terjadwal.',
+            ],
+        ]);
+    }
+
+    /**
+     * 6. Toggle Maintenance Mode Platform (Web, Mobile, or All)
      */
     public function toggleMaintenance(Request $request): JsonResponse
     {
+        $target = $request->input('target', 'all'); // 'web', 'mobile', 'all'
         $isDown = $request->boolean('is_down');
+        $title  = $request->input('title', 'Mode Pemeliharaan Sistem 🛠️');
+        $msg    = $request->input('message', 'Sistem sedang dalam optimalisasi server terjadwal.');
+
+        $payload = json_encode([
+            'title'     => $title,
+            'message'   => $msg,
+            'time'      => time(),
+            'author'    => Auth::user()?->name ?? 'Super Admin',
+        ], JSON_PRETTY_PRINT);
+
+        $webFile = storage_path('framework/maintenance_web.json');
+        $mobileFile = storage_path('framework/maintenance_app.json');
+        $downFile = storage_path('framework/down');
+
+        if ($target === 'web' || $target === 'all') {
+            if ($isDown) {
+                @file_put_contents($webFile, $payload);
+            } else {
+                if (file_exists($webFile)) @unlink($webFile);
+            }
+        }
+
+        if ($target === 'mobile' || $target === 'all') {
+            if ($isDown) {
+                @file_put_contents($mobileFile, $payload);
+            } else {
+                if (file_exists($mobileFile)) @unlink($mobileFile);
+            }
+        }
+
+        if ($target === 'all') {
+            if ($isDown) {
+                @file_put_contents($downFile, $payload);
+            } else {
+                if (file_exists($downFile)) @unlink($downFile);
+            }
+        }
+
         cache()->forever('system_maintenance_mode', $isDown);
 
+        $targetLabel = match ($target) {
+            'web'    => 'Website',
+            'mobile' => 'Aplikasi Mobile',
+            default  => 'Seluruh Platform (Web & Mobile)',
+        };
+
         return response()->json([
-            'success'        => true,
-            'message'        => $isDown ? 'Mode pemeliharaan diaktifkan.' : 'Sistem kembali normal (Live).',
-            'is_maintenance' => $isDown,
+            'success'            => true,
+            'message'            => $isDown ? "Mode pemeliharaan $targetLabel berhasil DIAKTIFKAN 🛠️." : "Mode pemeliharaan $targetLabel berhasil DINONAKTIFKAN (Live Normal) 🟢.",
+            'web_maintenance'    => file_exists($webFile),
+            'mobile_maintenance' => file_exists($mobileFile),
+            'full_lockdown'      => file_exists($downFile),
         ]);
     }
 }

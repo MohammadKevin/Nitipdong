@@ -18,7 +18,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
   Map<String, dynamic>? _dashboardData;
   List<Map<String, dynamic>> _users = [];
   List<Map<String, dynamic>> _stores = [];
-  bool _isMaintenance = false;
+  bool _webMaintenance = false;
+  bool _mobileMaintenance = false;
+  bool _fullLockdown = false;
+  final TextEditingController _maintTitleController = TextEditingController(text: 'Mode Pemeliharaan & Optimalisasi Sistem 🛠️');
+  final TextEditingController _maintMsgController = TextEditingController(
+    text: 'Aplikasi NitipDong sedang dalam tahap pembaruan fitur & peningkatan performa server. Silakan coba kembali beberapa saat lagi.',
+  );
 
   @override
   void initState() {
@@ -30,6 +36,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
   @override
   void dispose() {
     _tabController.dispose();
+    _maintTitleController.dispose();
+    _maintMsgController.dispose();
     super.dispose();
   }
 
@@ -40,9 +48,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
         ApiService.getAdminDashboard(),
         ApiService.getAdminUsers(),
         ApiService.getAdminStores(),
+        ApiService.getMaintenanceStatus(),
       ]);
 
       if (mounted) {
+        final maint = results[3] as Map<String, dynamic>?;
+        if (maint != null) {
+          _webMaintenance = maint['web_maintenance'] == true;
+          _mobileMaintenance = maint['mobile_maintenance'] == true;
+          _fullLockdown = maint['full_lockdown'] == true;
+          if (maint['title'] != null && maint['title'].toString().isNotEmpty) {
+            _maintTitleController.text = maint['title'];
+          }
+          if (maint['message'] != null && maint['message'].toString().isNotEmpty) {
+            _maintMsgController.text = maint['message'];
+          }
+        }
+
         setState(() {
           _dashboardData = results[0] as Map<String, dynamic>?;
           _users = results[1] as List<Map<String, dynamic>>;
@@ -69,16 +91,22 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
     }
   }
 
-  Future<void> _toggleMaintenance(bool val) async {
-    final success = await ApiService.toggleAdminMaintenance(val);
-    if (success && mounted) {
-      setState(() => _isMaintenance = val);
+  Future<void> _applyMaintenanceToggle({required String target, required bool isDown}) async {
+    final res = await ApiService.toggleAdminMaintenance(
+      target: target,
+      isDown: isDown,
+      title: _maintTitleController.text.trim(),
+      message: _maintMsgController.text.trim(),
+    );
+
+    if (res['success'] == true && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(val ? 'Mode Maintenance diaktifkan! 🛠️' : 'Sistem kembali normal (Live)! 🟢'),
-          backgroundColor: val ? Colors.orange : Colors.green,
+          content: Text(res['message'] ?? 'Status berhasil diubah.'),
+          backgroundColor: isDown ? Colors.orange.shade800 : Colors.green,
         ),
       );
+      _loadAdminData();
     }
   }
 
@@ -428,13 +456,142 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
     );
   }
 
-  // TAB 4: KONTROL SISTEM
+  // TAB 4: KONTROL SISTEM & MAINTENANCE SUPER ADMIN
   Widget _buildSystemTab() {
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const Text('Kontrol Mode Pemeliharaan Sistem 🛠️', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
+          const SizedBox(height: 4),
+          const Text('Kendalikan akses pengguna ke Website dan Aplikasi secara terpisah atau bersamaan langsung dari HP.', style: TextStyle(fontSize: 11.5, color: AppTheme.textSecondary)),
+          const SizedBox(height: 14),
+
+          // 1. Website Maintenance Switch
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: _webMaintenance ? Colors.orange.shade300 : AppTheme.border),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: _webMaintenance ? Colors.orange.shade50 : Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(Icons.language_rounded, color: _webMaintenance ? Colors.orange : Colors.blue, size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Maintenance Website 🌐', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
+                        Text(_webMaintenance ? 'Website terkunci (503 Page)' : 'Website Normal & Live 🟢', style: TextStyle(fontSize: 11, color: _webMaintenance ? Colors.orange : Colors.green, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ],
+                ),
+                Switch(
+                  value: _webMaintenance,
+                  activeColor: Colors.orange,
+                  onChanged: (val) => _applyMaintenanceToggle(target: 'web', isDown: val),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // 2. Mobile App Maintenance Switch
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: _mobileMaintenance ? Colors.orange.shade300 : AppTheme.border),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: _mobileMaintenance ? Colors.orange.shade50 : Colors.purple.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(Icons.phone_android_rounded, color: _mobileMaintenance ? Colors.orange : Colors.purple, size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Maintenance Aplikasi Mobile 📱', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
+                        Text(_mobileMaintenance ? 'Aplikasi terkunci (Layar 503)' : 'Aplikasi Normal & Live 🟢', style: TextStyle(fontSize: 11, color: _mobileMaintenance ? Colors.orange : Colors.green, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ],
+                ),
+                Switch(
+                  value: _mobileMaintenance,
+                  activeColor: Colors.orange,
+                  onChanged: (val) => _applyMaintenanceToggle(target: 'mobile', isDown: val),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // 3. Full Lockdown (Web + Mobile)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: _fullLockdown ? Colors.red.shade300 : AppTheme.border),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: _fullLockdown ? Colors.red.shade50 : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(Icons.lock_person_rounded, color: _fullLockdown ? Colors.red : Colors.grey, size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Lockdown Penuh (All) 🚨', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
+                        Text(_fullLockdown ? 'Semua Platform Terkunci' : 'Tidak Aktif', style: TextStyle(fontSize: 11, color: _fullLockdown ? Colors.red : Colors.grey, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ],
+                ),
+                Switch(
+                  value: _fullLockdown,
+                  activeColor: Colors.red,
+                  onChanged: (val) => _applyMaintenanceToggle(target: 'all', isDown: val),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // 4. Custom Message Configuration
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -442,32 +599,56 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppTheme.border),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
-                  children: [
-                    Icon(Icons.build_circle_outlined, color: Colors.orange, size: 24),
-                    SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Mode Pemeliharaan (Maintenance)', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
-                        Text('Kunci aplikasi saat sedang migrasi server', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
-                      ],
-                    ),
-                  ],
+                const Text('Pesan Pemeliharaan Kustom', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
+                const SizedBox(height: 4),
+                const Text('Pesan ini akan ditampilkan kepada pengguna saat mode maintenance aktif.', style: TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+                const SizedBox(height: 12),
+
+                TextFormField(
+                  controller: _maintTitleController,
+                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
+                  decoration: InputDecoration(
+                    labelText: 'Judul Pemeliharaan',
+                    prefixIcon: const Icon(Icons.title_rounded, size: 18, color: Colors.orange),
+                    filled: true,
+                    fillColor: const Color(0xFFF8FAFC),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppTheme.border)),
+                  ),
                 ),
-                Switch(
-                  value: _isMaintenance,
-                  activeColor: Colors.orange,
-                  onChanged: _toggleMaintenance,
+                const SizedBox(height: 10),
+
+                TextFormField(
+                  controller: _maintMsgController,
+                  maxLines: 3,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                  decoration: InputDecoration(
+                    labelText: 'Isi Pesan Detail',
+                    prefixIcon: const Icon(Icons.message_outlined, size: 18, color: Colors.orange),
+                    filled: true,
+                    fillColor: const Color(0xFFF8FAFC),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppTheme.border)),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.save_rounded, size: 16),
+                    label: const Text('Simpan & Perbarui Pesan', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                    style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, padding: const EdgeInsets.symmetric(vertical: 10)),
+                    onPressed: () => _applyMaintenanceToggle(target: _webMaintenance ? 'web' : (_mobileMaintenance ? 'mobile' : 'all'), isDown: _webMaintenance || _mobileMaintenance || _fullLockdown),
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
+          // 5. System Engine Info
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -487,6 +668,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
               ],
             ),
           ),
+          const SizedBox(height: 30),
         ],
       ),
     );

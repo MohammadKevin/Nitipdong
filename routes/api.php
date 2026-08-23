@@ -129,6 +129,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/users', [\App\Http\Controllers\Api\AdminApiController::class, 'users']);
             Route::get('/stores', [\App\Http\Controllers\Api\AdminApiController::class, 'stores']);
             Route::post('/stores/{id}/toggle-status', [\App\Http\Controllers\Api\AdminApiController::class, 'toggleStoreStatus']);
+            Route::get('/system/maintenance', [\App\Http\Controllers\Api\AdminApiController::class, 'getMaintenanceStatus']);
             Route::post('/system/maintenance', [\App\Http\Controllers\Api\AdminApiController::class, 'toggleMaintenance']);
         });
 
