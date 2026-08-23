@@ -75,7 +75,6 @@ class PaymentGatewayController extends Controller
         $paymentType = 'qris';
         $bankName = null;
 
-        // Routing Jenis Pembayaran ke Midtrans Core API
         if (str_contains($paymentMethod, 'qris')) {
             $paymentType = 'qris';
             $payload['payment_type'] = 'qris';
@@ -85,7 +84,7 @@ class PaymentGatewayController extends Controller
             $bankName = 'bca';
             $payload['payment_type'] = 'bank_transfer';
             $payload['bank_transfer'] = ['bank' => 'bca'];
-        } elseif (str_contains($paymentMethod, 'bri')) {
+        } elseif (str_contains($paymentMethod, 'bri') || str_contains($paymentMethod, 'briva')) {
             $paymentType = 'bank_transfer';
             $bankName = 'bri';
             $payload['payment_type'] = 'bank_transfer';
@@ -103,6 +102,11 @@ class PaymentGatewayController extends Controller
                 'bill_info1' => 'Pembayaran:',
                 'bill_info2' => 'Order ' . $order->invoice_number,
             ];
+        } elseif (str_contains($paymentMethod, 'manual') || str_contains($paymentMethod, 'struk')) {
+            $paymentType = 'bank_transfer';
+            $bankName = 'bca';
+            $payload['payment_type'] = 'bank_transfer';
+            $payload['bank_transfer'] = ['bank' => 'bca'];
         } elseif (str_contains($paymentMethod, 'shopee')) {
             $paymentType = 'shopeepay';
             $payload['payment_type'] = 'shopeepay';

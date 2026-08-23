@@ -10,7 +10,7 @@ import '../models/order_model.dart';
 
 class ApiService {
   // Current Installed Mobile App Version
-  static const String currentAppVersion = '1.1.1';
+  static const String currentAppVersion = '1.1.4';
 
   // Fixed Production Backend API URL (budayakita.com)
   static const String baseUrl = 'https://budayakita.com/api/v1';
@@ -975,7 +975,7 @@ class ApiService {
   }
 
   // ══════════════════════════════════════════════════
-  // COURIER OPERATIONS
+  // COURIER OPERATIONS & DELIVERY
   // ══════════════════════════════════════════════════
 
   /// Get list of orders ready for courier delivery
@@ -994,6 +994,61 @@ class ApiService {
       return [];
     } catch (_) {
       return [];
+    }
+  }
+
+  /// Fetch courier deliveries (type: 'active', 'available', 'completed')
+  static Future<List<Map<String, dynamic>>> getCourierDeliveries({String type = 'active'}) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/courier/deliveries?type=$type'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true && data['data'] != null) {
+          return List<Map<String, dynamic>>.from(data['data']);
+        }
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Fetch courier statistics
+  static Future<Map<String, dynamic>> getCourierStatistics() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/courier/statistics'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['data'] ?? {};
+      }
+      return {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  /// Accept delivery task by courier
+  static Future<Map<String, dynamic>> acceptCourierTask(int orderId, {double lat = -7.2575, double lng = 112.7521}) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/courier/deliveries/$orderId/accept'),
+        headers: await _getHeaders(),
+        body: jsonEncode({'lat': lat, 'lng': lng}),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Tugas berhasil diambil!',
+        'data': data['data'],
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
     }
   }
 
@@ -1016,6 +1071,41 @@ class ApiService {
     }
   }
 
+  /// Broadcast courier live GPS coordinates
+  static Future<bool> updateCourierGps(int orderId, double lat, double lng) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/courier/deliveries/$orderId/update-gps'),
+        headers: await _getHeaders(),
+        body: jsonEncode({'lat': lat, 'lng': lng}),
+      );
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Complete delivery with proof
+  static Future<Map<String, dynamic>> completeCourierDelivery(int orderId, {String? notes, String? proofBase64}) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/courier/deliveries/$orderId/complete'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'notes': notes ?? 'Paket telah diterima pembeli dengan baik.',
+          'proof_image_base64': proofBase64,
+        }),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Pengantaran selesai!',
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
   /// Mark order as delivered by courier (completed)
   static Future<Map<String, dynamic>> deliverCourierOrder(dynamic orderId) async {
     try {
@@ -1031,6 +1121,25 @@ class ApiService {
       };
     } catch (e) {
       return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Fetch live map tracking for buyer
+  static Future<Map<String, dynamic>?> getOrderLiveTracking(dynamic orderId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/orders/$orderId/live-tracking'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return data['data'];
+        }
+      }
+      return null;
+    } catch (_) {
+      return null;
     }
   }
 }

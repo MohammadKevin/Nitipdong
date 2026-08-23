@@ -1,295 +1,158 @@
-# 🛍️ SakserShop - Platform E-Commerce Modern
+# NitipDong
 
-<div align="center">
+Platform jual beli online berbasis Laravel. Dibangun buat belajar sekaligus dipakai sendiri — mendukung banyak toko (multi-seller), ada sistem approval dari admin, dan tampilannya sudah responsif dari HP sampai desktop.
 
-![SakserShop Logo](public/img/saksershop-logo.png)
+![NitipDong Logo](public/img/nitipdong-logo.png)
 
-**Platform jual beli online yang mudah, aman, dan terpercaya**
+![Laravel](https://img.shields.io/badge/Laravel-11.x-red.svg)
+![Tailwind](https://img.shields.io/badge/Tailwind-3.x-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-[![Laravel](https://img.shields.io/badge/Laravel-11.x-red.svg)](https://laravel.com)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.x-blue.svg)](https://tailwindcss.com)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+## Kenapa bikin ini
 
-</div>
+Awalnya cuma iseng bikin toko online sederhana, tapi lama-lama nambah fitur terus sampai jadi cukup lengkap: ada role customer, seller, admin, sampai super admin. Cocok buat yang mau belajar Laravel dari sistem yang beneran dipakai, bukan sekadar tutorial CRUD.
 
----
+## Role & fitur
 
-## ✨ Fitur Utama
+**Customer**
+- Cari produk pakai filter & pencarian
+- Keranjang belanja dan wishlist
+- Beberapa metode pembayaran
+- Lacak status pesanan
+- Kasih rating & review
+- Chat langsung sama seller
+- Notifikasi pesanan
 
-### 🎯 **Multi-Role System**
-- **Customer** - Belanja produk, kelola keranjang, tracking pesanan
-- **Seller** - Kelola toko, produk, dan pesanan
-- **Admin** - Moderasi produk dan persetujuan toko
-- **Super Admin** - Kontrol penuh sistem
+**Seller**
+- Dashboard toko sendiri
+- Upload beberapa foto produk sekaligus
+- Lihat statistik penjualan
+- Atur stok/inventory
+- Laporan keuangan
+- Kelola pesanan masuk
+- Chat sama pembeli
 
-### 🛒 **Fitur Customer**
-- 📱 Katalog produk dengan filter & pencarian
-- 🛍️ Keranjang belanja & wishlist
-- 💳 Multiple payment methods
-- 📦 Order tracking real-time
-- ⭐ Rating & review produk
-- 💬 Live chat dengan seller
-- 🔔 Notifikasi pesanan
+**Admin**
+- Approve toko baru
+- Moderasi produk yang di-upload
+- Kelola user
+- Analytics & reporting
+- Atur kategori produk
 
-### 🏪 **Fitur Seller**
-- 🎨 Dashboard toko yang intuitif
-- 📸 Upload multi-foto produk
-- 📊 Statistik penjualan
-- 📦 Manajemen stok & inventory
-- 💰 Laporan keuangan
-- 📮 Kelola pesanan masuk
-- 💬 Chat dengan pembeli
+## Soal tampilan
 
-### 🔧 **Fitur Admin**
-- ✅ Persetujuan toko baru
-- 🛡️ Moderasi produk
-- 👥 Manajemen user
-- 📈 Analytics & reporting
-- 🏷️ Kelola kategori
+Desainnya pakai Tailwind, dengan gradient dan efek glass (backdrop blur) di beberapa bagian, plus animasi kecil-kecil biar nggak kaku. Sudah responsif di semua ukuran layar. Untuk galeri produk, ada thumbnail navigation, zoom saat hover, dan lazy loading gambar biar loading-nya nggak berat.
 
----
+## Instalasi
 
-## 🎨 Design Highlights
-
-### 🌟 **Modern UI/UX**
-- **Gradient Design** - Colorful gradients untuk visual menarik
-- **Glass Morphism** - Efek kaca modern dengan backdrop blur
-- **Micro Interactions** - Animasi smooth untuk pengalaman yang engaging
-- **Responsive Layout** - Sempurna di semua device (mobile, tablet, desktop)
-- **Dark Mode Ready** - Siap untuk implementasi dark mode
-
-### 📸 **Professional Product Gallery**
-- Multi-image support dengan thumbnail navigation
-- Zoom on hover effect
-- Image lazy loading untuk performa optimal
-- Placeholder state yang elegan
-
-### 🎯 **Performance Optimized**
-- Tailwind CSS dengan purging untuk file size minimal
-- Image optimization
-- Lazy loading components
-- Efficient database queries
-
----
-
-## 🚀 Instalasi
-
-### Prerequisites
-- PHP >= 8.2
-- Composer
-- Node.js & NPM
-- MySQL/PostgreSQL
-
-### Step-by-Step Installation
+Butuh PHP 8.2+, Composer, Node.js, dan MySQL/PostgreSQL.
 
 ```bash
-# 1. Clone repository
-git clone https://github.com/yourusername/belanjain.git
-cd belanjain
+git clone https://github.com/MohammadKevin/nitipdong.git
+cd nitipdong
 
-# 2. Install dependencies
 composer install
 npm install
 
-# 3. Setup environment
 cp .env.example .env
 php artisan key:generate
+```
 
-# 4. Konfigurasi database di .env
+Isi konfigurasi database di `.env`:
+
+```
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=belanjain
+DB_DATABASE=nitipdong
 DB_USERNAME=root
 DB_PASSWORD=
+```
 
-# 5. Jalankan migration
+Lanjut jalankan migration, seed data (opsional), build assets, terus start servernya:
+
+```bash
 php artisan migrate
-
-# 6. (Optional) Seed data demo
-php artisan db:seed --class=ProductSeeder
-
-# 7. Build assets
+php artisan db:seed --class=ProductSeeder   # opsional, buat data contoh
 npm run build
-
-# 8. Jalankan server
 php artisan serve
 ```
 
-Akses aplikasi di: `http://localhost:8000`
+Kalau sudah jalan, buka `http://localhost:8000`.
 
----
+## Upload foto produk
 
-## 📸 Upload Foto Produk
+Format yang didukung: JPG, JPEG, PNG, WebP — maksimal 2MB per file. Resolusi minimal 800x800px, tapi disarankan 1200x1200px dengan rasio 1:1 biar hasilnya rapi di galeri.
 
-### Format yang Disupport
-- **Format**: JPG, JPEG, PNG, WebP
-- **Ukuran**: Max 2MB per file
-- **Resolusi**: Minimum 800x800px (Recommended: 1200x1200px)
-- **Ratio**: Square (1:1) untuk hasil terbaik
+Caranya: login sebagai seller → **Dashboard Toko** → **Kelola Produk** → **Tambah/Edit Produk** → upload foto utama plus maksimal 5 foto tambahan → simpan.
 
-### Cara Upload Foto
+Beberapa hal yang bikin foto produk lebih enak dilihat:
+- Pencahayaan cukup, jangan gelap atau blur
+- Background bersih, jangan terlalu ramai
+- Ambil dari beberapa sudut biar detailnya kelihatan
+- Hindari watermark yang kebesaran
 
-1. **Login sebagai Seller**
-2. Buka **Dashboard Toko**
-3. Pilih **Kelola Produk**
-4. Klik **Tambah/Edit Produk**
-5. Upload **Foto Utama** dan **Foto Tambahan** (maks 5 foto)
-6. Simpan
+## Struktur data produk
 
-### 💡 Tips Foto Produk Berkualitas
-
-✅ **DO's:**
-- Gunakan pencahayaan yang baik
-- Background bersih dan minimalis
-- Foto dari berbagai sudut
-- Tampilkan detail produk
-- Gunakan resolusi tinggi
-
-❌ **DON'TS:**
-- Foto blur atau gelap
-- Watermark berlebihan
-- Background yang terlalu ramai
-- Foto yang distorsi
-
----
-
-## 🎨 Struktur Database Produk
-
-### Field Produk Baru
+Field tambahan di tabel produk:
 
 ```php
-// Migration telah menambahkan field berikut:
-- images (JSON)              // Array foto tambahan
-- is_featured (boolean)      // Produk unggulan
-- badge (string)             // Badge: new, sale, hot, bestseller
-- discount_percentage (int)  // Persentase diskon
-- rating (decimal)           // Rating produk
-- sold_count (int)          // Jumlah terjual
+images                // JSON, array foto tambahan
+is_featured            // boolean, produk unggulan
+badge                  // string: new / sale / hot / bestseller
+discount_percentage    // int
+rating                 // decimal
+sold_count              // int
 ```
 
-### Helper Methods di Model Product
+Beberapa helper method di model `Product`:
 
 ```php
-$product->getAllImages()        // Dapatkan semua foto (utama + tambahan)
-$product->getDiscountedPrice()  // Harga setelah diskon
-$product->getOriginalPrice()    // Harga asli
+$product->getAllImages()        // gabungan foto utama + tambahan
+$product->getDiscountedPrice()  // harga setelah diskon
+$product->getOriginalPrice()    // harga asli
 ```
 
----
+## Kustomisasi
 
-## 🎯 Customization Guide
+**Ganti warna brand** — edit `resources/css/app.css`, misalnya ganti gradient `from-cyan-500 to-blue-600` sesuai warna yang kamu mau.
 
-### 🎨 **Mengubah Warna Brand**
+**Ganti logo** — replace `public/img/icon.jpg`, lalu update referensinya di `welcome.blade.php` dan `app.blade.php`.
 
-Edit file `resources/css/app.css`:
+**Tambah payment gateway** — tambahkan konfigurasi di `config/services.php`, buat implementasinya di `app/Services/PaymentService.php`, lalu sambungkan ke view checkout.
 
-```css
-/* Ganti dari cyan/blue ke warna brand Anda */
-.from-cyan-500  → .from-purple-500
-.to-blue-600    → .to-pink-600
-```
+## Keamanan
 
-### 🖼️ **Mengubah Logo**
+Sudah ada proteksi standar: CSRF, pencegahan SQL injection & XSS, autentikasi/otorisasi berbasis role, password di-hash pakai Bcrypt, rate limiting, dan validasi upload file.
 
-1. Replace file `public/img/icon.jpg` dengan logo Anda
-2. Update di `welcome.blade.php` dan `app.blade.php`
+## Stack yang dipakai
 
-### 📱 **Menambah Payment Gateway**
+- **Backend**: Laravel 11, MySQL/PostgreSQL, Laravel Breeze buat auth
+- **Frontend**: Tailwind CSS, Alpine.js, Heroicons, font Plus Jakarta Sans & Inter
+- **Tools**: Composer, NPM, Vite
 
-1. Tambah konfigurasi di `config/services.php`
-2. Implementasi di `app/Services/PaymentService.php`
-3. Update view checkout
+## Masih dikerjain
 
----
-
-## 🔒 Security Features
-
-- ✅ CSRF Protection
-- ✅ SQL Injection Prevention
-- ✅ XSS Protection
-- ✅ Authentication & Authorization
-- ✅ Password Hashing (Bcrypt)
-- ✅ Rate Limiting
-- ✅ Secure File Upload
-
----
-
-## 📊 Tech Stack
-
-### Backend
-- **Framework**: Laravel 11.x
-- **Database**: MySQL/PostgreSQL
-- **Authentication**: Laravel Breeze
-- **Storage**: Local/S3
-
-### Frontend
-- **CSS Framework**: Tailwind CSS 3.x
-- **Icons**: Heroicons
-- **Fonts**: Plus Jakarta Sans, Inter
-- **JS**: Alpine.js
-
-### Tools
-- **Version Control**: Git
-- **Package Manager**: Composer, NPM
-- **Build Tool**: Vite
-
----
-
-## 📝 Todo List
-
-- [ ] Implementasi payment gateway (Midtrans/Xendit)
-- [ ] Export laporan PDF
-- [ ] Email notifications
-- [ ] Push notifications
-- [ ] Advanced search filters
-- [ ] Wishlist functionality
-- [ ] Product comparison
-- [ ] Voucher & discount system
+- [✔️] Payment gateway (Midtrans/Xendit)
+- [ ] Export laporan ke PDF
+- [ ] Email notification
+- [ ] Push notification
+- [ ] Filter pencarian yang lebih detail
+- [ ] Voucher & sistem diskon
 - [ ] Loyalty points
-- [ ] Social media integration
+- [ ] Integrasi media sosial
 
----
+## Kontribusi
 
-## 🤝 Contributing
+Kalau mau bantu develop, silakan fork repo ini, bikin branch baru, dan ajukan pull request. Bug report atau saran fitur juga boleh banget lewat Issues.
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+## Lisensi
 
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+MIT — bebas dipakai, silakan cek file [LICENSE](LICENSE) untuk detailnya.
 
----
+## Kontak
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 👨‍💻 Developer
-
-**Your Name**
-- Website: [yourwebsite.com](https://corecraft.my.id)
-- Email: kvn4.200581@gmail.com
-- GitHub: [@yourusername](https://github.com/MohammadKevin)
-
----
-
-## 🙏 Acknowledgments
-
-- Laravel Team for the amazing framework
-- Tailwind Labs for Tailwind CSS
-- All open-source contributors
-
----
-
-<div align="center">
-
-**⭐ Star this repo if you like it! ⭐**
-
-Made with ❤️ in Indonesia 🇮🇩
-
-</div>
+**Kevin**
+Website: [corecraft.my.id](https://corecraft.my.id)
+Email: kvn4.200581@gmail.com
+GitHub: [@MohammadKevin](https://github.com/MohammadKevin)

@@ -168,6 +168,17 @@
                                         {{ $order->tracking_number }}
                                     </span>
                                 @endif
+                                @if($order->courier)
+                                    <span class="inline-flex items-center gap-1 text-[9px] font-bold text-cyan-800 bg-cyan-50 px-1.5 py-0.5 rounded border border-cyan-200" title="Diantar oleh {{ $order->courier->name }}">
+                                        <i class="fa-solid fa-motorcycle text-cyan-600"></i> {{ Str::limit($order->courier->name, 10) }}
+                                    </span>
+                                @endif
+                                @if($order->delivery_proof_image)
+                                    <a href="{{ asset('storage/' . $order->delivery_proof_image) }}" target="_blank"
+                                       class="inline-flex items-center gap-1 text-[9.5px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-300 transition-colors" title="Lihat Foto Bukti Serah Terima Paket">
+                                        <i class="fa-solid fa-camera text-emerald-600"></i> Bukti Antar
+                                    </a>
+                                @endif
                             </div>
                         </td>
                         <td class="px-5 py-3.5 text-center">

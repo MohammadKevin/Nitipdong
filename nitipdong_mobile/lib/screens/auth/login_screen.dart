@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../main_nav_screen.dart';
+import '../courier/courier_home_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -48,7 +49,14 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      if (widget.isFromSplash) {
+      final role = authProvider.user?.role?.toLowerCase() ?? 'customer';
+      if (role == 'courier' || role == 'kurir') {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const CourierHomeScreen()),
+          (route) => false,
+        );
+      } else if (widget.isFromSplash) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MainNavScreen()),

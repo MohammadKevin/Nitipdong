@@ -68,6 +68,8 @@ class OrderModel {
   final FirstProductPreview? firstProduct;
   final List<OrderItemModel> items;
 
+  String get invoiceNumber => orderNumber;
+
   OrderModel({
     required this.id,
     required this.orderNumber,

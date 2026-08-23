@@ -9,6 +9,7 @@ import '../../models/order_model.dart';
 import '../../services/api_service.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/login_screen.dart';
+import 'live_map_tracking_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({Key? key}) : super(key: key);
@@ -381,20 +382,32 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
                                           // 3. Shipped Actions
                                           if (st == 'shipped') ...[
-                                            OutlinedButton(
-                                              onPressed: () => _showTrackingSheet(order),
-                                              style: OutlinedButton.styleFrom(
+                                            ElevatedButton.icon(
+                                              icon: const Icon(Icons.map_rounded, size: 13, color: Colors.cyanAccent),
+                                              label: const Text('Live Tracking 🗺️', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white)),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: AppTheme.accentNavy,
                                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                                 minimumSize: Size.zero,
                                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                               ),
-                                              child: const Text('Lacak Paket', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (_) => LiveMapTrackingScreen(
+                                                      orderId: order.id,
+                                                      invoiceNumber: order.orderNumber,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
                                             ),
                                             ElevatedButton(
                                               onPressed: () => _confirmReceiveOrder(order),
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: AppTheme.success,
-                                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                                 minimumSize: Size.zero,
                                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                               ),

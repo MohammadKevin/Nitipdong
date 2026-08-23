@@ -6,6 +6,7 @@ import '../services/api_service.dart';
 import '../screens/main_nav_screen.dart';
 import '../screens/maintenance_screen.dart';
 import '../screens/auth/login_screen.dart';
+import '../screens/courier/courier_home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -50,11 +51,20 @@ class _SplashScreenState extends State<SplashScreen> {
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     if (authProvider.isAuthenticated) {
-      // User already logged in -> Go straight to Home
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainNavScreen()),
-      );
+      final role = authProvider.user?.role?.toLowerCase() ?? 'customer';
+      if (role == 'courier' || role == 'kurir') {
+        // Direct courier to Courier Hub
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const CourierHomeScreen()),
+        );
+      } else {
+        // User/Buyer goes to Marketplace Home
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainNavScreen()),
+        );
+      }
     } else {
       // New download / Not logged in -> Go to Login / Register Screen
       Navigator.pushReplacement(

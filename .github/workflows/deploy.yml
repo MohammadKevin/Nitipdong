@@ -68,8 +68,9 @@ jobs:
             rm -f /home/${{ secrets.CPANEL_USER }}/public_html/storage
             ln -sfn /home/${{ secrets.CPANEL_USER }}/laravel_app/storage/app/public /home/${{ secrets.CPANEL_USER }}/public_html/storage
 
-            # 4. Jalankan migrasi dan bersihkan cache
+            # 4. Jalankan migrasi, seeder dan bersihkan cache
             php artisan migrate --force
+            php artisan db:seed --force
             php artisan optimize:clear
 
             echo "✅ Deployment Successful & Live!"
