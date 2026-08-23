@@ -169,6 +169,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
 
     int selectedQty = _quantity;
+    bool isAdding = false;
 
     showModalBottomSheet(
       context: context,
@@ -246,7 +247,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   : null,
                             ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
                               child: Text(
                                 '$selectedQty',
                                 style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
@@ -273,36 +274,42 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      onPressed: () async {
-                        Navigator.pop(ctx);
-                        final success = await cartProvider.addToCart(p.id, selectedQty);
+                      onPressed: isAdding
+                          ? null
+                          : () async {
+                              setModalState(() => isAdding = true);
+                              final success = await cartProvider.addToCart(p.id, selectedQty);
+                              setModalState(() => isAdding = false);
 
-                        if (isBuyNow) {
-                          if (mounted) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const CheckoutScreen()),
-                            );
-                          }
-                        } else {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(success ? 'Berhasil ditambahkan ke keranjang!' : 'Gagal menambahkan'),
-                                backgroundColor: success ? AppTheme.primaryDark : Colors.red,
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      child: Text(
-                        isBuyNow ? 'Lanjut ke Pembayaran' : 'Masukkan ke Keranjang',
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
-                      ),
+                              if (!mounted) return;
+                              Navigator.pop(ctx);
+
+                              if (isBuyNow) {
+                                // Direct jump straight to Checkout & Payment Screen!
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const CheckoutScreen()),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(success ? 'Berhasil ditambahkan ke keranjang!' : 'Gagal menambahkan'),
+                                    backgroundColor: success ? AppTheme.primaryDark : Colors.red,
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              }
+                            },
+                      child: isAdding
+                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          : Text(
+                              isBuyNow ? 'Lanjut ke Pembayaran' : 'Masukkan ke Keranjang',
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white),
+                            ),
                     ),
                   ),
                 ],
