@@ -77,18 +77,22 @@ class _AppUpdateProgressScreenState extends State<AppUpdateProgressScreen> with 
     });
   }
 
+  bool _hasTriggeredInstall = false;
+
   Future<void> _installAndRestart() async {
+    setState(() => _hasTriggeredInstall = true);
     try {
       final uri = Uri.parse(widget.downloadUrl);
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
+    } catch (_) {}
 
-      // Small delay to allow Android package installer to take foreground, then exit old instance
-      await Future.delayed(const Duration(milliseconds: 1200));
-      SystemNavigator.pop();
-    } catch (_) {
-      SystemNavigator.pop();
+    if (mounted) {
+      setState(() {
+        _statusText = 'Mengunduh Paket APK v${widget.newVersion} 📥';
+        _detailText = 'Sistem Android sedang mengunduh berkas pembaruan. Silakan tarik bilah notifikasi di atas layar HP dan tekan berkas unduhan untuk memasang (Update).';
+      });
     }
   }
 
@@ -284,11 +288,15 @@ class _AppUpdateProgressScreenState extends State<AppUpdateProgressScreen> with 
                   height: 52,
                   child: ElevatedButton.icon(
                     icon: Icon(
-                      _isCompleted ? Icons.restart_alt_rounded : Icons.hourglass_top_rounded,
+                      _hasTriggeredInstall
+                          ? Icons.download_rounded
+                          : (_isCompleted ? Icons.restart_alt_rounded : Icons.hourglass_top_rounded),
                       size: 20,
                     ),
                     label: Text(
-                      _isCompleted ? 'Pasang & Restart Aplikasi 🔄' : 'Sedang Mengunduh... ($percentInt%)',
+                      _hasTriggeredInstall
+                          ? 'Unduh Ulang / Buka Berkas APK 📥'
+                          : (_isCompleted ? 'Pasang & Restart Aplikasi 🔄' : 'Sedang Mengunduh... ($percentInt%)'),
                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -301,6 +309,16 @@ class _AppUpdateProgressScreenState extends State<AppUpdateProgressScreen> with 
                     onPressed: _isCompleted ? _installAndRestart : null,
                   ),
                 ),
+                if (_hasTriggeredInstall) ...[
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: () => SystemNavigator.pop(),
+                      child: const Text('Tutup Aplikasi Lama', style: TextStyle(color: Colors.white60, fontSize: 12)),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 10),
               ],
             ),
