@@ -1,8 +1,8 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../theme/app_theme.dart';
+import '../../services/api_service.dart';
 
 class AppUpdateProgressScreen extends StatefulWidget {
   final String newVersion;
@@ -19,11 +19,7 @@ class AppUpdateProgressScreen extends StatefulWidget {
 }
 
 class _AppUpdateProgressScreenState extends State<AppUpdateProgressScreen> with SingleTickerProviderStateMixin {
-  double _progress = 0.0;
-  String _statusText = 'Menghubungkan ke Server NitipDong...';
-  String _detailText = 'Mempersiapkan saluran pengunduhan berkecepatan tinggi.';
-  bool _isCompleted = false;
-  Timer? _progressTimer;
+  bool _isDownloading = false;
   late AnimationController _pulseController;
 
   @override
@@ -33,313 +29,278 @@ class _AppUpdateProgressScreenState extends State<AppUpdateProgressScreen> with 
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     )..repeat(reverse: true);
-
-    _startDownloadSimulation();
   }
 
   @override
   void dispose() {
-    _progressTimer?.cancel();
     _pulseController.dispose();
     super.dispose();
   }
 
-  void _startDownloadSimulation() {
-    // Smooth progress simulation from 1% to 100%
-    const totalTicks = 80;
-    int tick = 0;
-
-    _progressTimer = Timer.periodic(const Duration(milliseconds: 60), (timer) {
-      if (!mounted) return;
-      tick++;
-      final currentProgress = (tick / totalTicks).clamp(0.0, 1.0);
-
-      setState(() {
-        _progress = currentProgress;
-
-        if (_progress < 0.25) {
-          _statusText = 'Menghubungkan ke Server DomaiNesia...';
-          _detailText = 'Mengamankan koneksi SSL & sinkronisasi token.';
-        } else if (_progress < 0.70) {
-          _statusText = 'Mengunduh Paket Pembaruan (APK v${widget.newVersion})...';
-          final mb = (_progress * 24.5).toStringAsFixed(1);
-          _detailText = 'Mengunduh berkas: $mb MB dari 24.5 MB (Kecepatan: 4.8 MB/s)';
-        } else if (_progress < 0.95) {
-          _statusText = 'Memverifikasi Integritas & Fitur Baru...';
-          _detailText = 'Pemeriksaan keamanan paket dan konfigurasi rilis.';
-        } else {
-          _statusText = 'Pembaruan Berhasil Diunduh! 100% 🎉';
-          _detailText = 'Paket versi v${widget.newVersion} siap dipasang ke sistem Android.';
-          _isCompleted = true;
-          timer.cancel();
-        }
-      });
-    });
-  }
-
-  bool _hasTriggeredInstall = false;
-
-  Future<void> _installAndRestart() async {
-    setState(() => _hasTriggeredInstall = true);
+  Future<void> _startDownload() async {
+    setState(() => _isDownloading = true);
     try {
       final uri = Uri.parse(widget.downloadUrl);
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        final fallbackUri = Uri.parse('https://budayakita.com/download/app');
+        await launchUrl(fallbackUri, mode: LaunchMode.externalApplication);
+      }
+    } catch (_) {
+      final fallbackUri = Uri.parse('https://budayakita.com/apps');
+      await launchUrl(fallbackUri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Future<void> _openWebLanding() async {
+    try {
+      final uri = Uri.parse('https://budayakita.com/apps');
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     } catch (_) {}
-
-    if (mounted) {
-      setState(() {
-        _statusText = 'Mengunduh Paket APK v${widget.newVersion} 📥';
-        _detailText = 'Sistem Android sedang mengunduh berkas pembaruan. Silakan tarik bilah notifikasi di atas layar HP dan tekan berkas unduhan untuk memasang (Update).';
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final percentInt = (_progress * 100).toInt();
+    final currentVer = ApiService.currentAppVersion;
 
-    return WillPopScope(
-      onWillPop: () async => _isCompleted,
-      child: Scaffold(
-        backgroundColor: const Color(0xFF0B1528),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: Column(
-              children: [
-                // Top Header Info
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Scaffold(
+      backgroundColor: const Color(0xFF0B1528),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white70, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Pusat Pembaruan Sistem',
+          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+        ),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+
+              // Animated Rocket Icon in pulsing container
+              Center(
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white12),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: _isCompleted ? Colors.greenAccent : Colors.cyanAccent,
-                              shape: BoxShape.circle,
-                            ),
+                    AnimatedBuilder(
+                      animation: _pulseController,
+                      builder: (context, child) {
+                        return Container(
+                          width: 120 + (_pulseController.value * 16),
+                          height: 120 + (_pulseController.value * 16),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0xFF06B6D4).withOpacity(0.08 * (1 - _pulseController.value)),
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            _isCompleted ? 'SIAP DIPASANG' : 'MENGUNDUH OTA',
-                            style: TextStyle(
-                              color: _isCompleted ? Colors.greenAccent : Colors.cyanAccent,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 0.5,
-                            ),
+                        );
+                      },
+                    ),
+                    Container(
+                      width: 90,
+                      height: 90,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF0E7490), Color(0xFF06B6D4)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF06B6D4).withOpacity(0.4),
+                            blurRadius: 25,
+                            offset: const Offset(0, 8),
                           ),
                         ],
                       ),
-                    ),
-                    Text(
-                      'Target: v${widget.newVersion}',
-                      style: const TextStyle(color: Colors.white60, fontSize: 11, fontWeight: FontWeight.bold),
+                      child: const Icon(
+                        Icons.rocket_launch_rounded,
+                        color: Colors.white,
+                        size: 42,
+                      ),
                     ),
                   ],
                 ),
+              ),
 
-                const Spacer(),
+              const SizedBox(height: 24),
 
-                // Central Visual Circular Progress
-                Center(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Pulsing outer ripple
-                      AnimatedBuilder(
-                        animation: _pulseController,
-                        builder: (context, child) {
-                          return Container(
-                            width: 200 + (_pulseController.value * 20),
-                            height: 200 + (_pulseController.value * 20),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: (_isCompleted ? Colors.greenAccent : Colors.cyanAccent).withOpacity(0.05 * (1 - _pulseController.value)),
-                            ),
-                          );
-                        },
-                      ),
+              // Title
+              Text(
+                'Pembaruan NitipDong v${widget.newVersion} 🎉',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Versi saat ini: v$currentVer ➔ Tersedia: v${widget.newVersion}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white60, fontSize: 12),
+              ),
 
-                      // Progress Circle
-                      SizedBox(
-                        width: 170,
-                        height: 170,
-                        child: CircularProgressIndicator(
-                          value: _progress,
-                          strokeWidth: 10,
-                          backgroundColor: Colors.white.withOpacity(0.08),
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            _isCompleted ? const Color(0xFF10B981) : const Color(0xFF06B6D4),
-                          ),
+              const SizedBox(height: 20),
+
+              // Changelog Box
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white.withOpacity(0.08)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.auto_awesome_rounded, color: Colors.amberAccent, size: 16),
+                        SizedBox(width: 8),
+                        Text(
+                          'Peningkatan & Fitur Baru:',
+                          style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w800),
                         ),
-                      ),
-
-                      // Center Content (Percentage or Checkmark)
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (_isCompleted) ...[
-                            const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 54),
-                            const SizedBox(height: 4),
-                            const Text(
-                              '100%',
-                              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
-                            ),
-                          ] else ...[
-                            const Icon(Icons.cloud_download_rounded, color: Colors.cyanAccent, size: 36),
-                            const SizedBox(height: 6),
-                            Text(
-                              '$percentInt%',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 32,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 36),
-
-                // Status Texts
-                Text(
-                  _statusText,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _detailText,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white60,
-                    fontSize: 12,
-                    height: 1.4,
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Linear Progress Bar
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: LinearProgressIndicator(
-                    value: _progress,
-                    minHeight: 8,
-                    backgroundColor: Colors.white.withOpacity(0.08),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      _isCompleted ? const Color(0xFF10B981) : const Color(0xFF06B6D4),
+                      ],
                     ),
-                  ),
+                    const SizedBox(height: 12),
+                    _buildChangelogItem('🚚 Modul Driver & Live GPS Route Tracking Mitra Kurir'),
+                    _buildChangelogItem('💳 Sinkronisasi Pembayaran QRIS & Virtual Account Midtrans'),
+                    _buildChangelogItem('⚡ Fast-Track Checkout Instant Tanpa Keranjang'),
+                    _buildChangelogItem('🛡️ Peningkatan Keamanan & Optimalisasi Performa Aplikasi'),
+                  ],
                 ),
+              ),
 
-                const Spacer(),
+              const SizedBox(height: 16),
 
-                // Change Summary Card
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.white.withOpacity(0.08)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Pembaruan yang Termasuk:',
-                        style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w800),
-                      ),
-                      const SizedBox(height: 8),
-                      _buildFeatureItem('🚚 Modul Driver & Role Kurir Khusus Mobile'),
-                      _buildFeatureItem('🗺️ Live GPS Route & Map Tracking Real-Time'),
-                      _buildFeatureItem('💳 Sinkronisasi Pembayaran QRIS & VA Midtrans'),
-                      _buildFeatureItem('⚡ Fast-Track Checkout Langsung Tanpa Keranjang'),
-                    ],
-                  ),
+              // 3 Easy Steps Guide
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0F172A),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.cyan.withOpacity(0.2)),
                 ),
-
-                const SizedBox(height: 24),
-
-                // Bottom Action Button (Restart & Install)
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton.icon(
-                    icon: Icon(
-                      _hasTriggeredInstall
-                          ? Icons.download_rounded
-                          : (_isCompleted ? Icons.restart_alt_rounded : Icons.hourglass_top_rounded),
-                      size: 20,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '📌 3 Langkah Mudah Memasang:',
+                      style: TextStyle(color: Colors.cyanAccent, fontSize: 12, fontWeight: FontWeight.w800),
                     ),
-                    label: Text(
-                      _hasTriggeredInstall
-                          ? 'Unduh Ulang / Buka Berkas APK 📥'
-                          : (_isCompleted ? 'Pasang & Restart Aplikasi 🔄' : 'Sedang Mengunduh... ($percentInt%)'),
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _isCompleted ? const Color(0xFF10B981) : Colors.white12,
-                      foregroundColor: Colors.white,
-                      elevation: _isCompleted ? 6 : 0,
-                      shadowColor: const Color(0xFF10B981).withOpacity(0.5),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                    ),
-                    onPressed: _isCompleted ? _installAndRestart : null,
-                  ),
+                    const SizedBox(height: 8),
+                    _buildStepItem('1', 'Tekan tombol "Unduh Pembaruan Sekarang" di bawah.'),
+                    _buildStepItem('2', 'Tarik bilah notifikasi di atas layar HP saat unduhan selesai.'),
+                    _buildStepItem('3', 'Tekan file unduhan APK untuk langsung memasang (Update).'),
+                  ],
                 ),
-                if (_hasTriggeredInstall) ...[
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextButton(
-                      onPressed: () => SystemNavigator.pop(),
-                      child: const Text('Tutup Aplikasi Lama', style: TextStyle(color: Colors.white60, fontSize: 12)),
+              ),
+
+              const Spacer(),
+
+              // Action Buttons
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  icon: Icon(_isDownloading ? Icons.cloud_download_rounded : Icons.download_rounded, size: 22),
+                  label: Text(
+                    _isDownloading ? 'Sedang Mengunduh... (Buka Notifikasi HP) 📥' : 'Unduh Pembaruan Sekarang 🚀',
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF06B6D4),
+                    foregroundColor: Colors.white,
+                    elevation: 4,
+                    shadowColor: const Color(0xFF06B6D4).withOpacity(0.4),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                  onPressed: _startDownload,
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Alternative Web Download Hub Link
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton.icon(
+                    icon: const Icon(Icons.language_rounded, size: 16, color: Colors.white54),
+                    label: const Text(
+                      'Buka Halaman Download Web (Apps Hub)',
+                      style: TextStyle(color: Colors.white54, fontSize: 12),
                     ),
+                    onPressed: _openWebLanding,
                   ),
                 ],
-                const SizedBox(height: 10),
-              ],
-            ),
+              ),
+              const SizedBox(height: 6),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFeatureItem(String text) {
+  Widget _buildChangelogItem(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.check_rounded, color: Colors.greenAccent, size: 14),
-          const SizedBox(width: 6),
+          const Text('✨ ', style: TextStyle(fontSize: 11)),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
-              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white70, fontSize: 12, height: 1.3),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepItem(String number, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 16,
+            height: 16,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.cyan.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              number,
+              style: const TextStyle(color: Colors.cyanAccent, fontSize: 10, fontWeight: FontWeight.w900),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(color: Colors.white60, fontSize: 11, height: 1.3),
             ),
           ),
         ],
