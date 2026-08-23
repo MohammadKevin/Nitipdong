@@ -850,7 +850,7 @@
             <div class="lg:col-span-7 space-y-5">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-cyan-300 text-xs font-extrabold uppercase tracking-wider">
                     <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-                    Rilis Terbaru v1.1.7 Tersedia
+                    Rilis Terbaru v2.0.1 Major Tersedia
                 </div>
 
                 <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
@@ -885,7 +885,7 @@
                 <div class="flex flex-wrap items-center gap-3 pt-2">
                     <a href="{{ route('app.download') }}" class="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-extrabold text-xs sm:text-sm flex items-center gap-2.5 shadow-lg shadow-cyan-500/25 transition-all hover:scale-[1.02]">
                         <i class="fa-brands fa-android text-base"></i>
-                        <span>Download Android APK (v1.1.7)</span>
+                        <span>Download Android APK (v2.0.1)</span>
                     </a>
                     <a href="{{ route('app.download') }}" class="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-all">
                         <i class="fa-brands fa-apple text-base"></i>
@@ -908,10 +908,10 @@
                     </div>
 
                     <h4 class="font-extrabold text-xs text-slate-900 mb-0.5">Scan untuk Unduh APK</h4>
-                    <p class="text-[10px] text-slate-500 leading-tight">Arahkan kamera smartphone Anda ke QR code di atas untuk mengunduh versi 1.1.7.</p>
+                    <p class="text-[10px] text-slate-500 leading-tight">Arahkan kamera smartphone Anda ke QR code di atas untuk mengunduh versi 2.0.1.</p>
 
                     <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-semibold">
-                        <span>APK v1.1.7</span>
+                        <span>APK v2.0.1</span>
                         <span class="text-emerald-600 font-bold">✓ Bebas Iklan &amp; Aman</span>
                     </div>
                 </div>
