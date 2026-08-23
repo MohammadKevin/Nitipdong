@@ -542,7 +542,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       itemCount: _walletTransactions.length > 3 ? 3 : _walletTransactions.length,
                       itemBuilder: (context, idx) {
                         final txn = _walletTransactions[idx];
-                        final isCredit = (txn['amount'] as num?)?.toDouble() ?? 0 > 0;
+                        final isCredit = ((txn['amount'] as num?)?.toDouble() ?? 0.0) >= 0;
                         return Container(
                           margin: const EdgeInsets.only(bottom: 6),
                           padding: const EdgeInsets.all(8),
