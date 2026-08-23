@@ -247,6 +247,34 @@
                     </div>
                 </div>
 
+                {{-- Proof of Delivery Card (If available) --}}
+                @if($order->delivery_proof_image)
+                <div class="bg-emerald-50/80 rounded-2xl border border-emerald-200/90 p-4.5 shadow-card text-xs">
+                    <div class="flex items-center justify-between mb-2.5">
+                        <div class="flex items-center gap-2 font-extrabold text-emerald-950">
+                            <i class="fa-solid fa-camera text-emerald-600 text-sm"></i>
+                            <span>Foto Bukti Penerimaan Paket</span>
+                        </div>
+                        <span class="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-300/60">
+                            ✓ Serah Terima Selesai
+                        </span>
+                    </div>
+
+                    <div class="rounded-xl overflow-hidden border border-emerald-200 bg-black/5 relative group cursor-pointer" onclick="window.open('{{ asset('storage/' . $order->delivery_proof_image) }}', '_blank')">
+                        <img src="{{ asset('storage/' . $order->delivery_proof_image) }}" alt="Bukti Penerimaan Paket" class="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300">
+                        <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white font-bold text-xs gap-1.5">
+                            <i class="fa-solid fa-magnifying-glass-plus"></i> Klik untuk Perbesar
+                        </div>
+                    </div>
+
+                    @if($order->delivery_notes)
+                        <p class="text-[11px] text-emerald-900 mt-2.5 font-medium bg-white/90 p-2.5 rounded-xl border border-emerald-100 leading-relaxed">
+                            <strong class="text-emerald-950"><i class="fa-solid fa-clipboard-check mr-1"></i>Catatan Kurir:</strong> {{ $order->delivery_notes }}
+                        </p>
+                    @endif
+                </div>
+                @endif
+
                 {{-- Delivery Timeline Logs Card (Shopee / Tokopedia Style) --}}
                 <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-card">
                     <h3 class="text-xs font-extrabold text-slate-900 mb-4 flex items-center gap-2">
