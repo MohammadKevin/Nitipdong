@@ -209,7 +209,7 @@ class _LiveMapTrackingScreenState extends State<LiveMapTrackingScreen> with Sing
                             ),
                           const SizedBox(height: 16),
 
-                          // 3. Pickup & Destination Points
+                          // 3. Pickup, Hub DC & Destination Points
                           Container(
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
@@ -237,6 +237,22 @@ class _LiveMapTrackingScreenState extends State<LiveMapTrackingScreen> with Sing
                                 ),
                                 Row(
                                   children: [
+                                    const Icon(Icons.warehouse_rounded, color: Colors.amber, size: 18),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Gudang Hub: ${_trackingData?['locations']?['hub_warehouse']?['name'] ?? 'NitipDong Hub DC Regional'}',
+                                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.amber),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 6),
+                                  child: Divider(height: 1, indent: 26),
+                                ),
+                                Row(
+                                  children: [
                                     const Icon(Icons.location_on_rounded, color: Colors.redAccent, size: 18),
                                     const SizedBox(width: 8),
                                     Expanded(
@@ -252,7 +268,59 @@ class _LiveMapTrackingScreenState extends State<LiveMapTrackingScreen> with Sing
                               ],
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
+
+                          // 3.5. Proof of Delivery Card (If available)
+                          if (_trackingData != null && _trackingData!['delivery_proof_url'] != null)
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 16),
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade50,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: Colors.green.shade200),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Row(
+                                        children: [
+                                          Icon(Icons.camera_alt_rounded, color: Colors.green, size: 16),
+                                          SizedBox(width: 6),
+                                          Text('Foto Bukti Penerimaan Barang', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.green)),
+                                        ],
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(6)),
+                                        child: const Text('TERKIRIM', style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w900)),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.network(
+                                      _trackingData!['delivery_proof_url'],
+                                      height: 160,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => const SizedBox(),
+                                    ),
+                                  ),
+                                  if (_trackingData!['delivery_notes'] != null) ...[
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      'Catatan: ${_trackingData!['delivery_notes']}',
+                                      style: TextStyle(fontSize: 11, color: Colors.green.shade900, fontStyle: FontStyle.italic),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
 
                           // 4. Timeline Section
                           const Text('Timeline Perjalanan Paket ⏱️', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
