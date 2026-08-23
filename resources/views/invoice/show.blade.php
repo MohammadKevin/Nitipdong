@@ -21,7 +21,7 @@
 
     {{-- Top Action Bar --}}
     <div class="max-w-3xl mx-auto mb-4 px-4 flex items-center justify-between no-print">
-        <a href="javascript:history.back()" class="text-xs font-semibold text-slate-600 hover:text-cyan-700 flex items-center gap-1.5">
+        <a href="javascript:void(0);" onclick="if (window.history.length > 1 && document.referrer) { window.history.back(); } else { window.close(); setTimeout(function() { window.location.href = '{{ url('/') }}'; }, 150); }" class="text-xs font-semibold text-slate-600 hover:text-cyan-700 flex items-center gap-1.5">
             <i class="fa-solid fa-arrow-left"></i> Kembali
         </a>
         <div class="flex items-center gap-2">
