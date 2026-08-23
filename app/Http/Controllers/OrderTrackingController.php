@@ -91,14 +91,29 @@ class OrderTrackingController extends Controller
             $courierLng = $originLng;
         }
 
-        // Generate realistic courier data
-        $courierDrivers = [
-            ['name' => 'Budi Santoso', 'plate' => 'B 4821 KEV', 'phone' => '0812-8921-3829', 'exp' => 'NitipDong Express (Instant)'],
-            ['name' => 'Rian Pratama', 'plate' => 'B 6291 TRZ', 'phone' => '0857-1928-4721', 'exp' => 'NitipDong Express (Reguler)'],
-            ['name' => 'Ahmad Fauzi', 'plate' => 'B 3019 WQA', 'phone' => '0878-3921-8840', 'exp' => 'J&T Express Cargo'],
-            ['name' => 'Hendra Setiawan', 'plate' => 'B 5512 PLM', 'phone' => '0813-7721-9042', 'exp' => 'SiCepat Reguler'],
-        ];
-        $courier = $courierDrivers[$seed % count($courierDrivers)];
+        $warehouse = $order->warehouse ?: \App\Models\Warehouse::findNearestForCity($order->shipping_address ?? $order->store?->city);
+        if ($warehouse) {
+            $hubLat = (float) $warehouse->lat;
+            $hubLng = (float) $warehouse->lng;
+        }
+
+        // Use real assigned courier if present, otherwise fallback to seed courier
+        if ($order->courier) {
+            $courier = [
+                'name'  => $order->courier->name,
+                'plate' => 'L 4242 NK',
+                'phone' => $order->courier->phone ?? '0812-3456-7890',
+                'exp'   => $order->shipping_courier ?? 'NitipDong Express (Mitra Kurir)',
+            ];
+        } else {
+            $courierDrivers = [
+                ['name' => 'Mas Kevin (Kurir Mitra)', 'plate' => 'L 4242 NK', 'phone' => '0812-3456-7890', 'exp' => 'NitipDong Express (Mitra Kurir)'],
+                ['name' => 'Budi Santoso', 'plate' => 'B 4821 KEV', 'phone' => '0812-8921-3829', 'exp' => 'NitipDong Express (Instant)'],
+                ['name' => 'Rian Pratama', 'plate' => 'B 6291 TRZ', 'phone' => '0857-1928-4721', 'exp' => 'NitipDong Express (Reguler)'],
+                ['name' => 'Ahmad Fauzi', 'plate' => 'B 3019 WQA', 'phone' => '0878-3921-8840', 'exp' => 'J&T Express Cargo'],
+            ];
+            $courier = $courierDrivers[$seed % count($courierDrivers)];
+        }
 
         // Generate detailed checkpoint logs
         $checkpoints = [];
@@ -116,23 +131,23 @@ class OrderTrackingController extends Controller
 
         if (in_array($order->status, ['shipped', 'completed'])) {
             $checkpoints[] = [
-                'title'     => 'Kurir sedang membawa paket menuju alamat penerima',
-                'location'  => 'Hub Terakhir - Menuju ' . ($order->user->name ?? 'Penerima'),
+                'title'     => 'Kurir ' . $courier['name'] . ' sedang membawa paket menuju alamat penerima',
+                'location'  => ($warehouse?->name ?? 'Gudang Hub DC') . ' - Menuju ' . ($order->user->name ?? 'Penerima'),
                 'time'      => now()->subMinutes(25)->format('d M Y, H:i'),
                 'icon'      => 'fa-motorcycle',
                 'status'    => 'done',
                 'is_current'=> $order->status === 'shipped',
             ];
             $checkpoints[] = [
-                'title'     => 'Paket telah tiba di Hub Transit Distribusi',
-                'location'  => 'DC Sortir Logistik Barat',
+                'title'     => 'Paket telah tiba di Gudang Hub Transit Distribusi',
+                'location'  => $warehouse?->name ?? 'NitipDong Hub DC Regional',
                 'time'      => now()->subHours(2)->format('d M Y, H:i'),
                 'icon'      => 'fa-warehouse',
                 'status'    => 'done',
                 'is_current'=> false,
             ];
             $checkpoints[] = [
-                'title'     => 'Paket diserahkan oleh penjual ke ekspedisi',
+                'title'     => 'Paket diserahkan oleh penjual ke kurir/gudang',
                 'location'  => $order->store->name ?? 'Gudang Toko',
                 'time'      => now()->subHours(5)->format('d M Y, H:i'),
                 'icon'      => 'fa-box-open',

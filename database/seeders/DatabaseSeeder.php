@@ -41,5 +41,8 @@ class DatabaseSeeder extends Seeder
                 'phone'             => '081234567890',
             ]
         );
+
+        // Regional Warehouse Hubs (1 Kota 1 Gudang)
+        $this->call(WarehouseSeeder::class);
     }
 }

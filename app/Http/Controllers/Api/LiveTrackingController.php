@@ -29,10 +29,11 @@ class LiveTrackingController extends Controller
 
         $courier = $order->courier;
         $store = $order->store;
+        $warehouse = $order->warehouse ?: \App\Models\Warehouse::findNearestForCity($order->shipping_address ?? $store?->city);
 
-        // Default Surabaya Map Coordinates
-        $storeLat = -7.2575;
-        $storeLng = 112.7521;
+        // Map Coordinates (Using Warehouse Hub or Store as anchor)
+        $storeLat = (float) ($store?->latitude ?: ($warehouse?->lat ?? -7.2575));
+        $storeLng = (float) ($store?->longitude ?: ($warehouse?->lng ?? 112.7521));
         $destLat = -7.2892;
         $destLng = 112.7344;
 
@@ -103,6 +104,15 @@ class LiveTrackingController extends Controller
                         'address' => $store?->address ?? ($store?->city ?? 'Pusat Distribusi Toko'),
                         'lat'     => $storeLat,
                         'lng'     => $storeLng,
+                    ],
+                    'hub_warehouse' => [
+                        'code'    => $warehouse?->code ?? 'DC-SBY-01',
+                        'name'    => $warehouse?->name ?? 'NitipDong Hub DC Surabaya',
+                        'city'    => $warehouse?->city ?? 'Surabaya',
+                        'address' => $warehouse?->address ?? 'Pusat Distribusi Regional',
+                        'lat'     => (float) ($warehouse?->lat ?? -7.3201),
+                        'lng'     => (float) ($warehouse?->lng ?? 112.7677),
+                        'phone'   => $warehouse?->phone ?? '0812-3111-9001',
                     ],
                     'destination' => [
                         'recipient' => $order->user?->name ?? 'Penerima Paket',

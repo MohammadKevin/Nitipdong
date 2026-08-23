@@ -47,6 +47,7 @@ class Order extends Model
         'snap_token',
         'tracking_number',
         'courier_id',
+        'warehouse_id',
         'courier_lat',
         'courier_lng',
         'courier_location_updated_at',
@@ -77,6 +78,11 @@ class Order extends Model
     public function courier(): BelongsTo
     {
         return $this->belongsTo(User::class, 'courier_id');
+    }
+
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class);
     }
 
     public function store(): BelongsTo
