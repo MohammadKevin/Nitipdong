@@ -339,7 +339,7 @@ class _CartScreenState extends State<CartScreen> {
                                                   borderRadius: const BorderRadius.horizontal(left: Radius.circular(8)),
                                                   child: Padding(
                                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                    child: Icon(Icons.remove, size: 14, color: item.quantity > 1 ? Colors.black82 : Colors.grey.shade400),
+                                                    child: Icon(Icons.remove, size: 14, color: item.quantity > 1 ? Colors.black87 : Colors.grey.shade400),
                                                   ),
                                                 ),
                                                 Padding(
@@ -356,7 +356,7 @@ class _CartScreenState extends State<CartScreen> {
                                                   borderRadius: const BorderRadius.horizontal(right: Radius.circular(8)),
                                                   child: Padding(
                                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                    child: Icon(Icons.add, size: 14, color: item.quantity < item.stock ? Colors.black82 : Colors.grey.shade400),
+                                                    child: Icon(Icons.add, size: 14, color: item.quantity < item.stock ? Colors.black87 : Colors.grey.shade400),
                                                   ),
                                                 ),
                                               ],

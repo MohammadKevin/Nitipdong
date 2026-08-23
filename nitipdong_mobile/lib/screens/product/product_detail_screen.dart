@@ -611,7 +611,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => StoreScreen(storeId: p.storeId, storeName: p.storeName),
+                          builder: (context) => StoreScreen(
+                            storeId: p.storeId,
+                            storeName: p.storeName,
+                            city: p.city,
+                          ),
                         ),
                       );
                     },

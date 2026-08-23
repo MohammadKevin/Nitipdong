@@ -13,7 +13,7 @@ class StoreScreen extends StatefulWidget {
     Key? key,
     required this.storeId,
     required this.storeName,
-    required this.city,
+    this.city = 'Jakarta',
   }) : super(key: key);
 
   @override
