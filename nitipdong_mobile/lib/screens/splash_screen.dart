@@ -74,10 +74,9 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             // Logo Container
             Container(
-              width: 90,
-              height: 90,
+              width: 96,
+              height: 96,
               decoration: BoxDecoration(
-                color: AppTheme.surface,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
@@ -87,11 +86,23 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                 ],
               ),
-              child: const Center(
-                child: Icon(
-                  Icons.shopping_bag,
-                  color: AppTheme.primary,
-                  size: 48,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Image.asset(
+                  'assets/icon/app_icon.png',
+                  width: 96,
+                  height: 96,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: AppTheme.surface,
+                    child: const Center(
+                      child: Icon(
+                        Icons.shopping_bag,
+                        color: AppTheme.primary,
+                        size: 48,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),

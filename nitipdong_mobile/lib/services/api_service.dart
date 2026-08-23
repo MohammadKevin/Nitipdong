@@ -10,7 +10,7 @@ import '../models/order_model.dart';
 
 class ApiService {
   // Current Installed Mobile App Version
-  static const String currentAppVersion = '1.0.6';
+  static const String currentAppVersion = '1.0.7';
 
   // Fixed Production Backend API URL (budayakita.com)
   static const String baseUrl = 'https://budayakita.com/api/v1';
