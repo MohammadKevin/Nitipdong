@@ -249,7 +249,7 @@
             </div>
 
             <p class="text-center text-[11px] text-ink/35 font-medium mt-5">
-                NitipDong Mobile &bull; Versi 2.0.1 Major
+                NitipDong Mobile &bull; Versi {{ env('APP_MOBILE_LATEST_VERSION', '2.0.2') }} Major
             </p>
         </div>
     </main>

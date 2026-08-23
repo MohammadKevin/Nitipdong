@@ -662,7 +662,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
                 const Text('Informasi Engine Server', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 8),
                 _buildInfoRow('Backend Endpoint', 'https://budayakita.com/api/v1'),
-                _buildInfoRow('Versi Rilis Mobile', 'v2.0.1+20 (Major)'),
+                _buildInfoRow('Versi Rilis Mobile', 'v${ApiService.currentAppVersion}+21 (Latest)'),
                 _buildInfoRow('Midtrans Status', 'Production Core API Active 🟢'),
                 _buildInfoRow('Gudang Regional Hub', '10 Kota Utama Terdaftar 🏢'),
               ],
