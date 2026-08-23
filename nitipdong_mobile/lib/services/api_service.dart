@@ -10,7 +10,7 @@ import '../models/order_model.dart';
 
 class ApiService {
   // Current Installed Mobile App Version
-  static const String currentAppVersion = '1.1.5';
+  static const String currentAppVersion = '1.1.6';
 
   // Fixed Production Backend API URL (budayakita.com)
   static const String baseUrl = 'https://budayakita.com/api/v1';
@@ -978,6 +978,39 @@ class ApiService {
   // COURIER OPERATIONS & DELIVERY
   // ══════════════════════════════════════════════════
 
+
+  /// Register customer as a courier partner
+  static Future<Map<String, dynamic>> registerCourier({
+    required String nik,
+    required String simNumber,
+    required String vehicleType,
+    required String plateNumber,
+    required String phone,
+    String? city,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/courier/register'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'nik': nik,
+          'sim_number': simNumber,
+          'vehicle_type': vehicleType,
+          'plate_number': plateNumber,
+          'phone': phone,
+          'city': city ?? 'Surabaya',
+        }),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Pendaftaran berhasil!',
+        'user': data['user'],
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
 
   /// Fetch courier deliveries (type: 'active', 'available', 'completed')
   static Future<List<Map<String, dynamic>>> getCourierDeliveries({String type = 'active'}) async {

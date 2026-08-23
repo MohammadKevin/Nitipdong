@@ -249,7 +249,7 @@
             </div>
 
             <p class="text-center text-[11px] text-ink/35 font-medium mt-5">
-                NitipDong Mobile &bull; Versi 1.1.5
+                NitipDong Mobile &bull; Versi 1.1.6
             </p>
         </div>
     </main>

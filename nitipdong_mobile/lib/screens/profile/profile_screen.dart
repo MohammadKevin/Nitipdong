@@ -13,6 +13,8 @@ import '../orders/orders_screen.dart';
 import 'ai_support_screen.dart';
 import '../update/app_update_progress_screen.dart';
 import '../admin/admin_dashboard_screen.dart';
+import '../courier/courier_home_screen.dart';
+import '../courier/courier_registration_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -273,6 +275,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     badge: 'Gratis 🛍️',
                     onTap: () => _showSellerCenterDialog(context),
                   ),
+                  _buildMenuDivider(),
+
+                  // 6. Mitra Kurir NitipDong (Mode Driver / Pendaftaran)
+                  if (user?.role?.toLowerCase() == 'courier' || user?.role?.toLowerCase() == 'kurir')
+                    _buildMenuItem(
+                      icon: Icons.delivery_dining_rounded,
+                      title: 'Dashboard Mitra Kurir (Mode Driver)',
+                      badge: 'Aktif 🛵',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const CourierHomeScreen()),
+                        );
+                      },
+                    )
+                  else
+                    _buildMenuItem(
+                      icon: Icons.two_wheeler_rounded,
+                      title: 'Gabung Jadi Mitra Kurir',
+                      badge: 'Daftar 🛵',
+                      onTap: () {
+                        if (!authProvider.isAuthenticated) {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+                          return;
+                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const CourierRegistrationScreen()),
+                        );
+                      },
+                    ),
 
                   // 6. Operational Admin Panel
                   if (authProvider.isAuthenticated && user != null && (user.role == 'admin' || user.role == 'super_admin')) ...[

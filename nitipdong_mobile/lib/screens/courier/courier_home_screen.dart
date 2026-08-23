@@ -5,6 +5,7 @@ import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
 import '../auth/login_screen.dart';
+import '../main_nav_screen.dart';
 import 'courier_delivery_detail_screen.dart';
 
 class CourierHomeScreen extends StatefulWidget {
@@ -125,8 +126,38 @@ class _CourierHomeScreenState extends State<CourierHomeScreen> with SingleTicker
                 ],
               ),
             ),
+            // Switch to Marketplace / Shopping Mode
+            Container(
+              margin: const EdgeInsets.only(right: 6),
+              child: InkWell(
+                onTap: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MainNavScreen()),
+                  );
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.shopping_bag_outlined, color: Colors.amberAccent, size: 14),
+                      SizedBox(width: 4),
+                      Text('Belanja 🛍️', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             IconButton(
               icon: const Icon(Icons.logout_rounded, color: Colors.white70, size: 20),
+              tooltip: 'Keluar Akun',
               onPressed: () async {
                 final confirm = await showDialog<bool>(
                   context: context,

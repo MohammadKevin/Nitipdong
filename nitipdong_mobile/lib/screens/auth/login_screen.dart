@@ -49,14 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      final role = authProvider.user?.role?.toLowerCase() ?? 'customer';
-      if (role == 'courier' || role == 'kurir') {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const CourierHomeScreen()),
-          (route) => false,
-        );
-      } else if (widget.isFromSplash) {
+      if (widget.isFromSplash) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MainNavScreen()),

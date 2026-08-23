@@ -51,20 +51,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     if (authProvider.isAuthenticated) {
-      final role = authProvider.user?.role?.toLowerCase() ?? 'customer';
-      if (role == 'courier' || role == 'kurir') {
-        // Direct courier to Courier Hub
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const CourierHomeScreen()),
-        );
-      } else {
-        // User/Buyer goes to Marketplace Home
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MainNavScreen()),
-        );
-      }
+      // User/Buyer always lands on standard Marketplace Dashboard Home
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainNavScreen()),
+      );
     } else {
       // New download / Not logged in -> Go to Login / Register Screen
       Navigator.pushReplacement(
