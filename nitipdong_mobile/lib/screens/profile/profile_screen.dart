@@ -12,6 +12,7 @@ import '../cart/cart_screen.dart';
 import '../orders/orders_screen.dart';
 import 'ai_support_screen.dart';
 import '../update/app_update_progress_screen.dart';
+import '../admin/admin_dashboard_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -272,6 +273,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     badge: 'Gratis 🛍️',
                     onTap: () => _showSellerCenterDialog(context),
                   ),
+
+                  // 6. Operational Admin Panel
+                  if (authProvider.isAuthenticated && user != null && (user.role == 'admin' || user.role == 'super_admin')) ...[
+                    _buildMenuDivider(),
+                    _buildMenuItem(
+                      icon: Icons.admin_panel_settings_outlined,
+                      title: 'Dashboard Admin Operasional',
+                      badge: 'Aktif 🛡️',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
+                        );
+                      },
+                    ),
+                  ],
 
                 ],
               ),
