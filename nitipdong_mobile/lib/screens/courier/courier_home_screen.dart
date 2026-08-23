@@ -106,14 +106,14 @@ class _CourierHomeScreenState extends State<CourierHomeScreen> with SingleTicker
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: _isOnline ? Colors.emerald.withOpacity(0.2) : Colors.red.withOpacity(0.2),
+                          color: _isOnline ? Colors.green.withOpacity(0.2) : Colors.red.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: _isOnline ? Colors.emerald : Colors.red, width: 0.8),
+                          border: Border.all(color: _isOnline ? Colors.green : Colors.red, width: 0.8),
                         ),
                         child: Text(
                           _isOnline ? 'ONLINE' : 'OFFLINE',
                           style: TextStyle(
-                            color: _isOnline ? Colors.emeraldAccent : Colors.redAccent,
+                            color: _isOnline ? Colors.greenAccent : Colors.redAccent,
                             fontSize: 9,
                             fontWeight: FontWeight.w900,
                           ),
