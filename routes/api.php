@@ -102,6 +102,26 @@ Route::prefix('v1')->group(function () {
             Route::get('/statistics', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'statistics']);
         });
 
+        // Seller Center Mobile Endpoints
+        Route::prefix('seller')->group(function () {
+            Route::post('/register', [\App\Http\Controllers\Api\SellerApiController::class, 'registerStore']);
+            Route::get('/dashboard', [\App\Http\Controllers\Api\SellerApiController::class, 'dashboard']);
+            Route::get('/products', [\App\Http\Controllers\Api\SellerApiController::class, 'products']);
+            Route::post('/products', [\App\Http\Controllers\Api\SellerApiController::class, 'storeProduct']);
+            Route::delete('/products/{id}', [\App\Http\Controllers\Api\SellerApiController::class, 'deleteProduct']);
+            Route::get('/orders', [\App\Http\Controllers\Api\SellerApiController::class, 'orders']);
+            Route::patch('/orders/{id}/status', [\App\Http\Controllers\Api\SellerApiController::class, 'updateOrderStatus']);
+        });
+
+        // Admin & Super Admin Mobile Endpoints
+        Route::prefix('admin')->group(function () {
+            Route::get('/dashboard', [\App\Http\Controllers\Api\AdminApiController::class, 'dashboard']);
+            Route::get('/users', [\App\Http\Controllers\Api\AdminApiController::class, 'users']);
+            Route::get('/stores', [\App\Http\Controllers\Api\AdminApiController::class, 'stores']);
+            Route::post('/stores/{id}/toggle-status', [\App\Http\Controllers\Api\AdminApiController::class, 'toggleStoreStatus']);
+            Route::post('/system/maintenance', [\App\Http\Controllers\Api\AdminApiController::class, 'toggleMaintenance']);
+        });
+
         // Customer Live Map Tracking
         Route::get('/orders/{id}/live-tracking', [\App\Http\Controllers\Api\LiveTrackingController::class, 'getLiveTracking']);
 
