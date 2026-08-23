@@ -624,19 +624,103 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _checkAppUpdate(BuildContext context) async {
-    final status = await ApiService.checkSystemStatus();
-    final latestVer = status['latest_version'] ?? '1.1.1';
-    if (!mounted) return;
-
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        title: const Text('Status Versi Aplikasi 📱', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-        content: Text('Aplikasi Anda saat ini adalah versi v${ApiService.currentAppVersion} (Terbaru). Sistem siap digunakan secara optimal.'),
-        actions: [
-          ElevatedButton(onPressed: () => Navigator.pop(ctx), child: const Text('Oke')),
-        ],
+      barrierDismissible: false,
+      builder: (ctx) => const Center(child: CircularProgressIndicator(color: AppTheme.primary)),
+    );
+
+    final status = await ApiService.checkSystemStatus();
+    if (!mounted) return;
+    Navigator.pop(context);
+
+    final latestVer = status['latest_version']?.toString() ?? ApiService.currentAppVersion;
+    final currentVer = ApiService.currentAppVersion;
+    final hasUpdate = latestVer.isNotEmpty && latestVer != currentVer;
+    final updateUrl = status['update_url']?.toString() ?? 'https://budayakita.com/download/app';
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 30),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: 16),
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: hasUpdate ? AppTheme.primaryLight : Colors.green.shade50,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                hasUpdate ? Icons.system_update_rounded : Icons.check_circle_rounded,
+                color: hasUpdate ? AppTheme.primary : Colors.green,
+                size: 28,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              hasUpdate ? 'Pembaruan Tersedia (v$latestVer) 🚀' : 'Versi Aplikasi Terbaru (v$currentVer) ✅',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              hasUpdate
+                  ? 'Versi v$latestVer telah siap dipasang. Termasuk pembaruan performa sistem, pembersihan menu, dan peningkatan stabilitas pembayaran.'
+                  : 'Aplikasi NitipDong Anda sudah menggunakan versi paling mutakhir (v$currentVer). Semua fitur berjalan lancar dan optimal.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary, height: 1.4),
+            ),
+            const SizedBox(height: 20),
+            if (hasUpdate) ...[
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.download_rounded, size: 18),
+                  label: const Text('Pasang Pembaruan Sekarang', style: TextStyle(fontWeight: FontWeight.w800)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: () async {
+                    Navigator.pop(ctx);
+                    final uri = Uri.parse(updateUrl);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Nanti Saja', style: TextStyle(color: AppTheme.textMuted)),
+                ),
+              ),
+            ] else ...[
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: const Text('Tutup'),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
