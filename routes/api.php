@@ -90,10 +90,6 @@ Route::prefix('v1')->group(function () {
         Route::post('/vouchers/validate', [OrderController::class, 'validateVoucher']);
         Route::post('/products/{id}/discussions', [ProductController::class, 'storeDiscussion']);
         Route::post('/products/{id}/discussions/{discussion_id}/reply', [ProductController::class, 'replyDiscussion']);
-        // Courier Delivery Routes
-        Route::get('/courier/orders', [\App\Http\Controllers\Api\CourierApiController::class, 'index']);
-        Route::post('/courier/orders/{id}/pickup', [\App\Http\Controllers\Api\CourierApiController::class, 'pickup']);
-        Route::post('/courier/orders/{id}/deliver', [\App\Http\Controllers\Api\CourierApiController::class, 'deliver']);
 
         // Courier Delivery Partner Endpoints
         Route::prefix('courier')->group(function () {

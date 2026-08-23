@@ -11,7 +11,6 @@ import '../auth/login_screen.dart';
 import '../cart/cart_screen.dart';
 import '../orders/orders_screen.dart';
 import 'ai_support_screen.dart';
-import 'courier_dashboard_screen.dart';
 import '../update/app_update_progress_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -273,21 +272,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     badge: 'Gratis 🛍️',
                     onTap: () => _showSellerCenterDialog(context),
                   ),
-                  if (authProvider.isAuthenticated && user != null) ...[
-                    _buildMenuDivider(),
-                    // 6. Layanan Kurir (Mode Kurir)
-                    _buildMenuItem(
-                      icon: Icons.local_shipping_outlined,
-                      title: 'Layanan Kurir (Deliveries)',
-                      badge: user.role == 'courier' || user.role == 'admin' ? 'Aktif' : 'Simulasi 🚚',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const CourierDashboardScreen()),
-                        );
-                      },
-                    ),
-                  ],
+
                 ],
               ),
             ),
