@@ -11,6 +11,7 @@ import '../auth/login_screen.dart';
 import '../cart/cart_screen.dart';
 import '../orders/orders_screen.dart';
 import 'ai_support_screen.dart';
+import '../update/app_update_progress_screen.dart';
 import '../courier/courier_home_screen.dart';
 import '../courier/courier_registration_screen.dart';
 import '../seller/seller_dashboard_screen.dart';
@@ -331,7 +332,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
 
                   // 7. Super Admin / Admin Platform Control Panel
-                  if (user?.role?.toLowerCase() == 'super_admin' || user?.role?.toLowerCase() == 'admin') ...[
+                  if (authProvider.isAuthenticated && user != null && (user.role?.toLowerCase() == 'admin' || user.role?.toLowerCase() == 'super_admin')) ...[
                     _buildMenuDivider(),
                     _buildMenuItem(
                       icon: Icons.admin_panel_settings_rounded,

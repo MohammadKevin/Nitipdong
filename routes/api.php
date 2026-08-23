@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\SystemConfigController;
+use App\Http\Controllers\Api\AdminApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -129,6 +130,28 @@ Route::prefix('v1')->group(function () {
         Route::post('/payment/midtrans/charge', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'charge']);
         Route::get('/orders/{id}/payment-status', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'status']);
         Route::post('/orders/{id}/simulate-paid', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'simulatePaid']);
+
+        // Operational Admin Endpoints
+        Route::prefix('admin')->group(function () {
+            Route::get('/stats', [AdminApiController::class, 'dashboardStats']);
+            Route::get('/stores', [AdminApiController::class, 'getPendingStores']);
+            Route::post('/stores/{id}/approve', [AdminApiController::class, 'approveStore']);
+            Route::post('/stores/{id}/reject', [AdminApiController::class, 'rejectStore']);
+            
+            Route::get('/products', [AdminApiController::class, 'getProducts']);
+            Route::post('/products/{id}/toggle', [AdminApiController::class, 'toggleProductStatus']);
+            
+            Route::get('/categories', [AdminApiController::class, 'getCategories']);
+            Route::post('/categories', [AdminApiController::class, 'storeCategory']);
+            Route::put('/categories/{id}', [AdminApiController::class, 'updateCategory']);
+            Route::delete('/categories/{id}', [AdminApiController::class, 'deleteCategory']);
+            
+            Route::get('/flash-sales', [AdminApiController::class, 'getFlashSales']);
+            Route::post('/flash-sales', [AdminApiController::class, 'storeFlashSale']);
+            Route::post('/flash-sales/{id}/toggle', [AdminApiController::class, 'toggleFlashSale']);
+            Route::post('/flash-sales/{id}/items', [AdminApiController::class, 'addFlashSaleItem']);
+            Route::delete('/flash-sales/{id}/items/{itemId}', [AdminApiController::class, 'removeFlashSaleItem']);
+        });
     });
 
     // Public Polling & Live Map Tracking Fallback

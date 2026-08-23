@@ -1356,6 +1356,268 @@ class ApiService {
       return false;
     }
   }
+
+  /// Fetch admin dashboard statistics
+  static Future<Map<String, dynamic>> getAdminStats() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/admin/stats'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {'success': true, 'data': data['data']};
+      }
+      return {'success': false, 'message': 'Gagal memuat statistik admin'};
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Fetch pending store registration requests
+  static Future<List<dynamic>> getAdminPendingStores() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/admin/stores'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return data['data'] ?? [];
+        }
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Approve store registration request
+  static Future<Map<String, dynamic>> approveStore(int id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/admin/stores/$id/approve'),
+        headers: await _getHeaders(),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Toko berhasil disetujui.',
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Reject store registration request
+  static Future<Map<String, dynamic>> rejectStore(int id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/admin/stores/$id/reject'),
+        headers: await _getHeaders(),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Toko berhasil ditolak.',
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Fetch all products for moderation
+  static Future<List<dynamic>> getAdminProducts() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/admin/products'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return data['data'] ?? [];
+        }
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Toggle product visibility status (ban/unban)
+  static Future<Map<String, dynamic>> toggleProductStatus(int id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/admin/products/$id/toggle'),
+        headers: await _getHeaders(),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Status produk berhasil diperbarui.',
+        'is_active': data['is_active'] ?? false,
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Fetch all categories for admin
+  static Future<List<dynamic>> getAdminCategories() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/admin/categories'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return data['data'] ?? [];
+        }
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Create new category
+  static Future<Map<String, dynamic>> createCategory(String name, {String? icon}) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/admin/categories'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'name': name,
+          'icon': icon ?? 'category',
+        }),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Kategori baru berhasil ditambahkan.',
+        'data': data['data'],
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Update existing category
+  static Future<Map<String, dynamic>> updateCategory(int id, String name, {String? icon}) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/admin/categories/$id'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'name': name,
+          'icon': icon ?? 'category',
+        }),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Kategori berhasil diperbarui.',
+        'data': data['data'],
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Delete category
+  static Future<Map<String, dynamic>> deleteCategory(int id) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/admin/categories/$id'),
+        headers: await _getHeaders(),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Kategori berhasil dihapus.',
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Fetch all flash sales for admin
+  static Future<List<dynamic>> getAdminFlashSales() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/admin/flash-sales'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return data['data'] ?? [];
+        }
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Toggle flash sale status
+  static Future<Map<String, dynamic>> toggleFlashSale(int id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/admin/flash-sales/$id/toggle'),
+        headers: await _getHeaders(),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Status flash sale berhasil diperbarui.',
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Add item to flash sale
+  static Future<Map<String, dynamic>> addFlashSaleItem(int flashSaleId, int productId, double price, int stock) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/admin/flash-sales/$flashSaleId/items'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'product_id': productId,
+          'flash_sale_price': price,
+          'stock_allocated': stock,
+        }),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Produk berhasil ditambahkan ke Flash Sale.',
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Remove item from flash sale
+  static Future<Map<String, dynamic>> removeFlashSaleItem(int flashSaleId, int itemId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/admin/flash-sales/$flashSaleId/items/$itemId'),
+        headers: await _getHeaders(),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Produk berhasil dihapus dari Flash Sale.',
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
 }
 
 

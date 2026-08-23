@@ -3,19 +3,34 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
+use App\Models\FlashSale;
+use App\Models\FlashSaleItem;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\Store;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class AdminApiController extends Controller
 {
+    private function checkAdmin(Request $request)
+    {
+        $user = $request->user();
+        if (!$user || !in_array($user->role, ['admin', 'super_admin'])) {
+            return false;
+        }
+        return true;
+    }
+
     /**
      * 1. Dashboard Ringkasan Metrik Platform untuk Admin & Super Admin
      */
-    public function dashboard(): JsonResponse
+    public function dashboard(Request $request): JsonResponse
     {
         $totalUsers = User::count();
         $totalCustomers = User::where('role', 'customer')->count();
@@ -40,14 +55,18 @@ class AdminApiController extends Controller
         return response()->json([
             'success' => true,
             'data'    => [
-                'total_gmv'       => (float) $totalGmv,
-                'total_users'     => $totalUsers,
-                'total_customers' => $totalCustomers,
-                'total_sellers'   => $totalSellers,
-                'total_couriers'  => $totalCouriers,
-                'total_stores'    => $totalStores,
-                'total_orders'    => $totalOrders,
-                'recent_orders'   => $recentOrders,
+                'total_gmv'          => (float) $totalGmv,
+                'total_users'        => $totalUsers,
+                'total_customers'    => $totalCustomers,
+                'total_sellers'      => $totalSellers,
+                'total_couriers'     => $totalCouriers,
+                'total_stores'       => $totalStores,
+                'total_orders'       => $totalOrders,
+                'recent_orders'      => $recentOrders,
+                'pending_stores'     => Store::where('is_active', false)->count(),
+                'total_products'     => Product::count(),
+                'total_categories'   => Category::count(),
+                'active_flash_sales' => FlashSale::count(),
             ],
         ]);
     }
@@ -84,7 +103,7 @@ class AdminApiController extends Controller
     /**
      * 3. Daftar Toko Platform
      */
-    public function stores(): JsonResponse
+    public function stores(Request $request): JsonResponse
     {
         $stores = Store::with('user')->latest()->take(50)->get()->map(function ($s) {
             return [
@@ -126,7 +145,6 @@ class AdminApiController extends Controller
     public function toggleMaintenance(Request $request): JsonResponse
     {
         $isDown = $request->boolean('is_down');
-        // Save in cache or system flag
         cache()->forever('system_maintenance_mode', $isDown);
 
         return response()->json([
