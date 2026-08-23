@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import '../screens/update/app_update_progress_screen.dart';
 
 class InAppUpdateBanner extends StatefulWidget {
   final VoidCallback? onDismissed;
@@ -60,25 +61,16 @@ class _InAppUpdateBannerState extends State<InAppUpdateBanner> with SingleTicker
     } catch (_) {}
   }
 
-  Future<void> _launchUpdate() async {
-    try {
-      final uri = Uri.parse(_updateUrl);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Silakan unduh update di: $_updateUrl')),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal membuka link unduhan: $e')),
-        );
-      }
-    }
+  void _launchUpdate() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AppUpdateProgressScreen(
+          newVersion: _latestVersion,
+          downloadUrl: _updateUrl,
+        ),
+      ),
+    );
   }
 
   void _dismissBanner() {

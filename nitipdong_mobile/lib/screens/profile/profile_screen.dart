@@ -11,6 +11,7 @@ import '../auth/login_screen.dart';
 import '../cart/cart_screen.dart';
 import '../orders/orders_screen.dart';
 import 'ai_support_screen.dart';
+import '../update/app_update_progress_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -689,12 +690,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  onPressed: () async {
+                  onPressed: () {
                     Navigator.pop(ctx);
-                    final uri = Uri.parse(updateUrl);
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri, mode: LaunchMode.externalApplication);
-                    }
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => AppUpdateProgressScreen(
+                          newVersion: latestVer,
+                          downloadUrl: updateUrl,
+                        ),
+                      ),
+                    );
                   },
                 ),
               ),
