@@ -40,9 +40,13 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp']);
     Route::post('/auth/resend-otp', [AuthController::class, 'resendOtp']);
 
-    // 2. Banners & Categories
+    // 2. Banners & Categories & Vouchers
     Route::get('/banners', [BannerController::class, 'index']);
     Route::get('/categories', [CategoryController::class, 'index']);
+    Route::get('/vouchers/available', [\App\Http\Controllers\Api\VoucherApiController::class, 'available']);
+
+    // 2.1 AI Customer Support Assistant (Powered by Gemini)
+    Route::post('/ai-chat', [\App\Http\Controllers\AiAssistantController::class, 'chat']);
 
     // 3. Products Catalog & Flash Sale
     Route::get('/products', [ProductController::class, 'index']);
@@ -59,6 +63,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/auth/profile', [AuthController::class, 'profile']);
         Route::post('/auth/logout', [AuthController::class, 'logout']);
 
+        // User Wallet (NitipPay)
+        Route::get('/wallet', [\App\Http\Controllers\Api\WalletApiController::class, 'index']);
+        Route::post('/wallet/topup', [\App\Http\Controllers\Api\WalletApiController::class, 'topUp']);
+
         // User Shipping Address
         Route::get('/addresses/primary', [AddressController::class, 'primary']);
         Route::post('/addresses', [AddressController::class, 'storeOrUpdate']);
@@ -73,9 +81,12 @@ Route::prefix('v1')->group(function () {
         // Orders & Checkout
         Route::get('/orders', [OrderController::class, 'index']);
         Route::get('/orders/{id}', [OrderController::class, 'show']);
+        Route::get('/orders/{id}/tracking', [OrderController::class, 'tracking']);
         Route::post('/orders/checkout', [OrderController::class, 'checkout']);
         Route::post('/orders/{id}/pay', [OrderController::class, 'pay']);
         Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel']);
+        Route::post('/orders/{id}/confirm', [OrderController::class, 'confirmReceived']);
+        Route::post('/orders/{id}/reviews', [OrderController::class, 'storeReview']);
         Route::post('/vouchers/validate', [OrderController::class, 'validateVoucher']);
         Route::post('/products/{id}/discussions', [ProductController::class, 'storeDiscussion']);
         Route::post('/products/{id}/discussions/{discussion_id}/reply', [ProductController::class, 'replyDiscussion']);

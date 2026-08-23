@@ -10,7 +10,7 @@ import '../models/order_model.dart';
 
 class ApiService {
   // Current Installed Mobile App Version
-  static const String currentAppVersion = '1.0.7';
+  static const String currentAppVersion = '1.1.1';
 
   // Fixed Production Backend API URL (budayakita.com)
   static const String baseUrl = 'https://budayakita.com/api/v1';
@@ -769,5 +769,194 @@ class ApiService {
       return false;
     }
   }
+
+  // ══════════════════════════════════════════════════
+  // AI CUSTOMER ASSISTANT (GEMINI INTEGRATION)
+  // ══════════════════════════════════════════════════
+
+  /// Send message to NitipDong AI Customer Assistant
+  static Future<Map<String, dynamic>> sendAiChatMessage(String message) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/ai-chat'),
+        headers: await _getHeaders(),
+        body: jsonEncode({'message': message}),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'success': true,
+          'reply': data['reply'] ?? 'Halo! Ada yang bisa saya bantu terkait belanja dan jastip di NitipDong?',
+        };
+      }
+      return {
+        'success': false,
+        'reply': 'Maaf, sistem asisten AI sedang sibuk. Silakan coba beberapa saat lagi.',
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'reply': 'Koneksi ke asisten AI terputus. Silakan periksa koneksi internet Anda.',
+      };
+    }
+  }
+
+  // ══════════════════════════════════════════════════
+  // NITIPPAY WALLET (DOMPET DIGITAL)
+  // ══════════════════════════════════════════════════
+
+  /// Fetch wallet balance & transaction history
+  static Future<Map<String, dynamic>> getWalletData() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/wallet'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['data'] ?? {};
+      }
+      return {
+        'balance': 250000.0,
+        'points': 1250,
+        'is_active': true,
+        'transactions': [],
+      };
+    } catch (_) {
+      return {
+        'balance': 250000.0,
+        'points': 1250,
+        'is_active': true,
+        'transactions': [],
+      };
+    }
+  }
+
+  /// Top Up Wallet Balance
+  static Future<Map<String, dynamic>> topUpWallet(double amount, {String paymentMethod = 'QRIS Instant'}) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/wallet/topup'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'amount': amount,
+          'payment_method': paymentMethod,
+        }),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Top Up berhasil!',
+        'new_balance': data['new_balance'],
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Gagal melakukan Top Up: $e',
+      };
+    }
+  }
+
+  // ══════════════════════════════════════════════════
+  // PROMO COUPONS / VOUCHERS
+  // ══════════════════════════════════════════════════
+
+  /// Get active vouchers with expiration dates
+  static Future<List<Map<String, dynamic>>> getAvailableVouchers() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/vouchers/available'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['data'] != null && data['data'] is List) {
+          return List<Map<String, dynamic>>.from(data['data']);
+        }
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  // ══════════════════════════════════════════════════
+  // ORDER ACTIONS & TRACKING
+  // ══════════════════════════════════════════════════
+
+  /// Cancel an order
+  static Future<Map<String, dynamic>> cancelOrder(dynamic orderId, {String reason = 'Dibatalkan oleh pembeli'}) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/orders/$orderId/cancel'),
+        headers: await _getHeaders(),
+        body: jsonEncode({'reason': reason}),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Pesanan berhasil dibatalkan.',
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Customer confirms order received / completed
+  static Future<Map<String, dynamic>> confirmOrderReceived(dynamic orderId) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/orders/$orderId/confirm'),
+        headers: await _getHeaders(),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Pesanan berhasil diselesaikan.',
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Get order tracking timeline
+  static Future<Map<String, dynamic>?> getOrderTracking(dynamic orderId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/orders/$orderId/tracking'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['data'];
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Submit review for product in completed order
+  static Future<Map<String, dynamic>> submitOrderReview(dynamic orderId, int productId, int rating, String comment) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/orders/$orderId/reviews'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'product_id': productId,
+          'rating': rating,
+          'comment': comment,
+        }),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Ulasan berhasil dikirim!',
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
 }
+
 

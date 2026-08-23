@@ -94,23 +94,39 @@ class ProductCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Category Pill
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryLight,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      product.categoryName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppTheme.primaryDark,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
+                  // Store & Category Tag Row
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryLight,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: AppTheme.primary.withOpacity(0.2), width: 0.5),
+                        ),
+                        child: const Text(
+                          'MALL',
+                          style: TextStyle(
+                            color: AppTheme.primaryDark,
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          product.storeName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: AppTheme.textMuted,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 5),
 
@@ -123,32 +139,38 @@ class ProductCard extends StatelessWidget {
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: AppTheme.textPrimary,
-                      height: 1.2,
+                      height: 1.25,
                     ),
                   ),
                   const SizedBox(height: 6),
 
-                  // Price
-                  Text(
-                    _formatCurrency(product.finalPrice),
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w900,
-                      color: AppTheme.primaryDark,
-                    ),
-                  ),
-                  if (product.hasDiscount)
-                    Text(
-                      _formatCurrency(product.price),
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: AppTheme.textMuted,
-                        decoration: TextDecoration.lineThrough,
+                  // Price Row
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _formatCurrency(product.finalPrice),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w900,
+                          color: AppTheme.primaryDark,
+                          letterSpacing: -0.2,
+                        ),
                       ),
-                    ),
-                  const SizedBox(height: 6),
+                      if (product.hasDiscount)
+                        Text(
+                          _formatCurrency(product.price),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: AppTheme.textMuted,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
 
-                  // Rating & Sold Count
+                  // Rating & Sold Count Row
                   Row(
                     children: [
                       const Icon(Icons.star_rounded, size: 14, color: Colors.amber),
@@ -156,17 +178,18 @@ class ProductCard extends StatelessWidget {
                       Text(
                         product.rating.toStringAsFixed(1),
                         style: const TextStyle(
-                          fontSize: 10,
+                          fontSize: 10.5,
                           fontWeight: FontWeight.w700,
                           color: AppTheme.textPrimary,
                         ),
                       ),
                       const Spacer(),
                       Text(
-                        '${product.formattedSold} terjual',
+                        '${product.formattedSold.isNotEmpty ? product.formattedSold : (product.soldCount > 0 ? product.soldCount.toString() : '0')} terjual',
                         style: const TextStyle(
                           fontSize: 10,
-                          color: AppTheme.textMuted,
+                          color: AppTheme.textSecondary,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],

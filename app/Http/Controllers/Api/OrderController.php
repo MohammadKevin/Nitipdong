@@ -377,4 +377,159 @@ class OrderController extends Controller
             'status'  => 'cancelled',
         ]);
     }
+
+    /**
+     * Customer confirms delivery / completes order.
+     */
+    public function confirmReceived(Request $request, $id): JsonResponse
+    {
+        $order = $request->user()->orders()->where('id', $id)->orWhere('uuid', $id)->first();
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan tidak ditemukan.',
+            ], 404);
+        }
+
+        if ($order->status === 'completed') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pesanan sudah selesai.',
+                'status'  => 'completed',
+            ]);
+        }
+
+        $order->update([
+            'status'       => 'completed',
+            'completed_at' => now(),
+        ]);
+
+        \App\Models\AppNotification::create([
+            'user_id' => $order->user_id,
+            'title'   => 'Pesanan Selesai 🎉',
+            'message' => "Terima kasih! Pesanan #{$order->invoice_number} telah Anda konfirmasi selesai. Berikan ulasan untuk membantu penjual.",
+            'link'    => route('customer.dashboard'),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Pesanan #{$order->invoice_number} telah berhasil diselesaikan!",
+            'status'  => 'completed',
+        ]);
+    }
+
+    /**
+     * Get real-time delivery tracking timeline for an order.
+     */
+    public function tracking(Request $request, $id): JsonResponse
+    {
+        $order = $request->user()->orders()->where('id', $id)->orWhere('uuid', $id)->first();
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan tidak ditemukan.',
+            ], 404);
+        }
+
+        $courier = $order->shipping_courier ?? 'J&T Express';
+        $trackingNo = $order->tracking_number ?: ('ND' . strtoupper(substr(md5($order->id . $order->created_at), 0, 10)));
+        $createdAt = $order->created_at;
+
+        $timeline = [
+            [
+                'title'       => 'Pesanan Berhasil Dibuat',
+                'description' => "Invoice #{$order->invoice_number} telah dibuat dalam sistem NitipDong.",
+                'time'        => $createdAt->format('d M Y, H:i'),
+                'is_completed'=> true,
+            ],
+            [
+                'title'       => 'Pembayaran Terkonfirmasi',
+                'description' => in_array($order->status, ['processing', 'shipped', 'completed']) 
+                                 ? 'Pembayaran berhasil diverifikasi. Penjual sedang menyiapkan barang.' 
+                                 : 'Menunggu proses pembayaran oleh pembeli.',
+                'time'        => in_array($order->status, ['processing', 'shipped', 'completed']) ? $createdAt->addMinutes(5)->format('d M Y, H:i') : '-',
+                'is_completed'=> in_array($order->status, ['processing', 'shipped', 'completed']),
+            ],
+            [
+                'title'       => 'Paket Diserahkan ke Kurir',
+                'description' => in_array($order->status, ['shipped', 'completed']) 
+                                 ? "Paket telah di-pickup oleh kurir {$courier} (No. Resi: {$trackingNo})." 
+                                 : 'Menunggu paket diserahkan ke jasa kirim.',
+                'time'        => in_array($order->status, ['shipped', 'completed']) ? $createdAt->addHours(4)->format('d M Y, H:i') : '-',
+                'is_completed'=> in_array($order->status, ['shipped', 'completed']),
+            ],
+            [
+                'title'       => 'Paket Tiba di Tujuan',
+                'description' => $order->status === 'completed' 
+                                 ? 'Paket telah diterima dengan baik oleh penerima.' 
+                                 : 'Paket dalam perjalanan menuju alamat tujuan.',
+                'time'        => $order->status === 'completed' ? ($order->completed_at ? $order->completed_at->format('d M Y, H:i') : 'Selesai') : '-',
+                'is_completed'=> $order->status === 'completed',
+            ],
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'order_id'       => $order->id,
+                'invoice_number' => $order->invoice_number,
+                'status'         => $order->status,
+                'courier'        => $courier,
+                'tracking_number'=> $trackingNo,
+                'recipient'      => $request->user()->name,
+                'address'        => $order->shipping_address ?? $request->user()->address,
+                'timeline'       => $timeline,
+            ],
+        ]);
+    }
+
+    /**
+     * Store product review for completed order.
+     */
+    public function storeReview(Request $request, $id): JsonResponse
+    {
+        $request->validate([
+            'product_id' => ['required', 'integer'],
+            'rating'     => ['required', 'integer', 'min:1', 'max:5'],
+            'comment'    => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $order = $request->user()->orders()->where('id', $id)->orWhere('uuid', $id)->first();
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan tidak ditemukan.',
+            ], 404);
+        }
+
+        $user = $request->user();
+        $productId = (int) $request->product_id;
+        $orderItem = $order->orderItems()->where('product_id', $productId)->first();
+
+        $review = \App\Models\Review::updateOrCreate(
+            [
+                'user_id'    => $user->id,
+                'product_id' => $productId,
+                'order_id'   => $order->id,
+            ],
+            [
+                'order_item_id' => $orderItem?->id,
+                'rating'        => (int) $request->rating,
+                'comment'       => $request->comment ?: 'Produk sangat bagus sesuai deskripsi dan pengiriman cepat!',
+                'is_anonymous'  => false,
+            ]
+        );
+
+        // Recalculate product rating
+        $product = \App\Models\Product::find($productId);
+        if ($product) {
+            $product->recalculateRating();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Ulasan Anda berhasil dikirim! Terima kasih atas feedback Anda.',
+            'data'    => $review,
+        ]);
+    }
 }

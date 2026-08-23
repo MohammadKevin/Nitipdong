@@ -131,7 +131,7 @@ class ProductController extends Controller
      */
     public function show($id): JsonResponse
     {
-        $product = Product::with(['category', 'store', 'discussions.replies.user', 'discussions.user'])
+        $product = Product::with(['category', 'store', 'discussions.replies.user', 'discussions.user', 'reviews.user'])
             ->where('id', $id)
             ->orWhere('slug', $id)
             ->firstOrFail();
@@ -166,6 +166,8 @@ class ProductController extends Controller
                 'description'         => $product->description,
                 'rating'              => (float) $product->effective_rating,
                 'sold_count'          => (int) $product->sold_count,
+                'formatted_sold'      => (string) ($product->formatted_sold_count ?: $product->sold_count),
+                'formatted_sold_count'=> (string) ($product->formatted_sold_count ?: $product->sold_count),
                 'images'              => $formattedImages,
                 'variants'            => $product->variants ?? [],
                 'category'            => [
@@ -181,7 +183,19 @@ class ProductController extends Controller
                     'rating'      => (float) ($product->store->rating ?? 3.5),
                     'is_official' => true,
                     'logo_url'    => $product->store->logo_url,
+                    'phone'       => $product->store->phone ?? '081234567890',
                 ],
+                'reviews'             => $product->reviews->map(function ($rev) {
+                    return [
+                        'id'           => $rev->id,
+                        'user_name'    => $rev->is_anonymous ? 'Pengguna NitipDong' : ($rev->user?->name ?? 'Pembeli'),
+                        'user_avatar'  => $rev->user?->avatar_url ?? null,
+                        'rating'       => (int) $rev->rating,
+                        'comment'      => $rev->comment ?? 'Produk sangat bagus sesuai deskripsi dan pengiriman cepat!',
+                        'created_at'   => $rev->created_at ? $rev->created_at->format('d M Y') : 'Baru saja',
+                        'seller_reply' => $rev->seller_reply,
+                    ];
+                })->values(),
                 'discussions'         => $product->discussions->map(function ($disc) {
                     return [
                         'id'         => $disc->id,
@@ -220,7 +234,8 @@ class ProductController extends Controller
             'discount_percentage' => (int) $product->discount_percentage_effective,
             'rating'              => (float) $product->effective_rating,
             'sold_count'          => (int) $product->sold_count,
-            'formatted_sold'      => (string) $product->formatted_sold,
+            'formatted_sold'      => (string) ($product->formatted_sold_count ?: $product->sold_count),
+            'formatted_sold_count'=> (string) ($product->formatted_sold_count ?: $product->sold_count),
             'stock'               => (int) $product->stock,
             'image_url'           => $product->image_url,
             'images'              => $product->images_urls,
