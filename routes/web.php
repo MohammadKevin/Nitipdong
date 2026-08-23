@@ -50,7 +50,7 @@ Route::post('/api/payment/notification', [MidtransPaymentController::class, 'han
 Route::get('/download/app', function (\Illuminate\Http\Request $request) {
     $userAgent = strtolower($request->header('User-Agent', ''));
     $isIos = str_contains($userAgent, 'iphone') || str_contains($userAgent, 'ipad') || str_contains($userAgent, 'ipod');
-    $version = env('APP_MOBILE_LATEST_VERSION', '1.1.6');
+    $version = env('APP_MOBILE_LATEST_VERSION', '2.0.1');
 
     if ($isIos) {
         $paths = [
@@ -97,7 +97,7 @@ Route::get('/download/app', function (\Illuminate\Http\Request $request) {
 
 // Direct Android Download Route
 Route::get('/download/android', function () {
-    $version = env('APP_MOBILE_LATEST_VERSION', '1.1.6');
+    $version = env('APP_MOBILE_LATEST_VERSION', '2.0.1');
     $paths = [
         public_path('downloads/nitipdong.apk'),
         public_path('downloads/NitipDong-latest.apk'),
@@ -120,7 +120,7 @@ Route::get('/download/android', function () {
 
 // Direct iOS Download Route
 Route::get('/download/ios', function () {
-    $version = env('APP_MOBILE_LATEST_VERSION', '1.1.6');
+    $version = env('APP_MOBILE_LATEST_VERSION', '2.0.1');
     $paths = [
         public_path('downloads/nitipdong.ipa'),
         public_path('downloads/NitipDong-latest.ipa'),

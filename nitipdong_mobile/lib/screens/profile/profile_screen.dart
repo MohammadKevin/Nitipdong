@@ -12,9 +12,11 @@ import '../cart/cart_screen.dart';
 import '../orders/orders_screen.dart';
 import 'ai_support_screen.dart';
 import '../update/app_update_progress_screen.dart';
-import '../admin/admin_dashboard_screen.dart';
 import '../courier/courier_home_screen.dart';
 import '../courier/courier_registration_screen.dart';
+import '../seller/seller_dashboard_screen.dart';
+import '../seller/seller_registration_screen.dart';
+import '../admin/admin_dashboard_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -268,13 +270,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   _buildMenuDivider(),
 
-                  // 5. Buka Toko Jualan di NitipDong
-                  _buildMenuItem(
-                    icon: Icons.storefront_outlined,
-                    title: 'Buka Toko Jualan (Seller Center)',
-                    badge: 'Gratis 🛍️',
-                    onTap: () => _showSellerCenterDialog(context),
-                  ),
+                  // 5. Buka Toko / Seller Center
+                  if (user?.role?.toLowerCase() == 'seller')
+                    _buildMenuItem(
+                      icon: Icons.storefront_rounded,
+                      title: 'Seller Center (Toko Saya)',
+                      badge: 'Toko Aktif 🛍️',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const SellerDashboardScreen()),
+                        );
+                      },
+                    )
+                  else
+                    _buildMenuItem(
+                      icon: Icons.storefront_outlined,
+                      title: 'Buka Toko Jualan (Seller Center)',
+                      badge: 'Gratis 🛍️',
+                      onTap: () {
+                        if (!authProvider.isAuthenticated) {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+                          return;
+                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const SellerRegistrationScreen()),
+                        );
+                      },
+                    ),
                   _buildMenuDivider(),
 
                   // 6. Mitra Kurir NitipDong (Mode Driver / Pendaftaran)
@@ -307,13 +331,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       },
                     ),
 
-                  // 6. Operational Admin Panel
-                  if (authProvider.isAuthenticated && user != null && (user.role == 'admin' || user.role == 'super_admin')) ...[
+                  // 7. Super Admin / Admin Platform Control Panel
+                  if (authProvider.isAuthenticated && user != null && (user.role?.toLowerCase() == 'admin' || user.role?.toLowerCase() == 'super_admin')) ...[
                     _buildMenuDivider(),
                     _buildMenuItem(
-                      icon: Icons.admin_panel_settings_outlined,
-                      title: 'Dashboard Admin Operasional',
-                      badge: 'Aktif 🛡️',
+                      icon: Icons.admin_panel_settings_rounded,
+                      title: 'Panel Kontrol Admin Platform',
+                      badge: 'Admin 👑',
                       onTap: () {
                         Navigator.push(
                           context,

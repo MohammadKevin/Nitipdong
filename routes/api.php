@@ -19,7 +19,16 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+// Midtrans Public Webhook Notification Endpoints (Accessible via https://budayakita.com/api/midtrans/notification)
+Route::match(['get', 'post'], '/midtrans/notification', [\App\Http\Controllers\MidtransPaymentController::class, 'handleNotification'])->name('api.midtrans.notification');
+Route::match(['get', 'post'], '/midtrans/callback', [\App\Http\Controllers\MidtransPaymentController::class, 'handleNotification'])->name('api.midtrans.callback');
+Route::match(['get', 'post'], '/payment/notification', [\App\Http\Controllers\MidtransPaymentController::class, 'handleNotification'])->name('api.payment.notification');
+
 Route::prefix('v1')->group(function () {
+
+    // Midtrans Notification v1 alias
+    Route::match(['get', 'post'], '/midtrans/notification', [\App\Http\Controllers\MidtransPaymentController::class, 'handleNotification']);
+    Route::match(['get', 'post'], '/payment/notification', [\App\Http\Controllers\MidtransPaymentController::class, 'handleNotification']);
 
     // ══════════════════════════════════════════════════
     // PUBLIC API ENDPOINTS
@@ -101,6 +110,27 @@ Route::prefix('v1')->group(function () {
             Route::post('/deliveries/{id}/update-gps', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'updateGps']);
             Route::post('/deliveries/{id}/complete', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'completeDelivery']);
             Route::get('/statistics', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'statistics']);
+        });
+
+        // Seller Center Mobile Endpoints
+        Route::prefix('seller')->group(function () {
+            Route::post('/register', [\App\Http\Controllers\Api\SellerApiController::class, 'registerStore']);
+            Route::get('/dashboard', [\App\Http\Controllers\Api\SellerApiController::class, 'dashboard']);
+            Route::get('/products', [\App\Http\Controllers\Api\SellerApiController::class, 'products']);
+            Route::post('/products', [\App\Http\Controllers\Api\SellerApiController::class, 'storeProduct']);
+            Route::delete('/products/{id}', [\App\Http\Controllers\Api\SellerApiController::class, 'deleteProduct']);
+            Route::get('/orders', [\App\Http\Controllers\Api\SellerApiController::class, 'orders']);
+            Route::patch('/orders/{id}/status', [\App\Http\Controllers\Api\SellerApiController::class, 'updateOrderStatus']);
+        });
+
+        // Admin & Super Admin Mobile Endpoints
+        Route::prefix('admin')->group(function () {
+            Route::get('/dashboard', [\App\Http\Controllers\Api\AdminApiController::class, 'dashboard']);
+            Route::get('/users', [\App\Http\Controllers\Api\AdminApiController::class, 'users']);
+            Route::get('/stores', [\App\Http\Controllers\Api\AdminApiController::class, 'stores']);
+            Route::post('/stores/{id}/toggle-status', [\App\Http\Controllers\Api\AdminApiController::class, 'toggleStoreStatus']);
+            Route::get('/system/maintenance', [\App\Http\Controllers\Api\AdminApiController::class, 'getMaintenanceStatus']);
+            Route::post('/system/maintenance', [\App\Http\Controllers\Api\AdminApiController::class, 'toggleMaintenance']);
         });
 
         // Customer Live Map Tracking

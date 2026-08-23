@@ -6,16 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\FlashSale;
 use App\Models\FlashSaleItem;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\Store;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class AdminApiController extends Controller
 {
-    // Check if user is admin
     private function checkAdmin(Request $request)
     {
         $user = $request->user();
@@ -26,375 +28,208 @@ class AdminApiController extends Controller
     }
 
     /**
-     * Get dashboard stats
+     * 1. Dashboard Ringkasan Metrik Platform untuk Admin & Super Admin
      */
-    public function dashboardStats(Request $request): JsonResponse
+    public function dashboard(Request $request): JsonResponse
     {
-        if (!$this->checkAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
+        $totalUsers = User::count();
+        $totalCustomers = User::where('role', 'customer')->count();
+        $totalSellers = User::where('role', 'seller')->count();
+        $totalCouriers = User::where('role', 'courier')->count();
+        $totalStores = Store::count();
+        $totalOrders = Order::count();
+        $totalGmv = Order::where('status', 'completed')->sum('total_amount');
 
-        $pendingStoresCount = Store::where('status', 'pending')->count();
-        $totalProductsCount = Product::count();
-        $totalCategoriesCount = Category::count();
-        $activeFlashSalesCount = FlashSale::active()->count();
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'pending_stores' => $pendingStoresCount,
-                'total_products' => $totalProductsCount,
-                'total_categories' => $totalCategoriesCount,
-                'active_flash_sales' => $activeFlashSalesCount,
-            ]
-        ]);
-    }
-
-    /**
-     * Get pending stores
-     */
-    public function getPendingStores(Request $request): JsonResponse
-    {
-        if (!$this->checkAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $stores = Store::with('user')
-            ->where('status', 'pending')
-            ->latest()
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $stores
-        ]);
-    }
-
-    /**
-     * Approve store
-     */
-    public function approveStore(Request $request, $id): JsonResponse
-    {
-        if (!$this->checkAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $store = Store::findOrFail($id);
-        
-        DB::transaction(function () use ($store) {
-            $store->update(['status' => 'approved']);
-            $store->user->update(['role' => 'seller']);
+        $recentOrders = Order::with(['user', 'store'])->latest()->take(10)->get()->map(function ($order) {
+            return [
+                'id'             => $order->id,
+                'invoice_number' => $order->invoice_number,
+                'status'         => $order->status,
+                'total_amount'   => (float) $order->total_amount,
+                'customer_name'  => $order->user?->name ?? 'Pembeli',
+                'store_name'     => $order->store?->name ?? 'Toko',
+                'created_at'     => $order->created_at?->format('d M Y, H:i'),
+            ];
         });
 
         return response()->json([
             'success' => true,
-            'message' => "Toko {$store->name} berhasil disetujui."
-        ]);
-    }
-
-    /**
-     * Reject store
-     */
-    public function rejectStore(Request $request, $id): JsonResponse
-    {
-        if (!$this->checkAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $store = Store::findOrFail($id);
-        $store->update(['status' => 'rejected']);
-
-        return response()->json([
-            'success' => true,
-            'message' => "Pengajuan toko {$store->name} ditolak."
-        ]);
-    }
-
-    /**
-     * Get all products for moderation
-     */
-    public function getProducts(Request $request): JsonResponse
-    {
-        if (!$this->checkAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $products = Product::with(['store', 'category'])
-            ->latest()
-            ->get()
-            ->map(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'obfuscated_id' => $product->obfuscated_id,
-                    'name' => $product->name,
-                    'price' => (double)$product->price,
-                    'stock' => (int)$product->stock,
-                    'is_active' => (bool)$product->is_active,
-                    'image' => $product->image ? asset('storage/' . $product->image) : null,
-                    'store_name' => $product->store->name ?? 'Toko',
-                    'category_name' => $product->category->name ?? 'Kategori',
-                ];
-            });
-
-        return response()->json([
-            'success' => true,
-            'data' => $products
-        ]);
-    }
-
-    /**
-     * Toggle product status
-     */
-    public function toggleProductStatus(Request $request, $id): JsonResponse
-    {
-        if (!$this->checkAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $product = Product::findOrFail($id);
-        $product->update([
-            'is_active' => !$product->is_active
-        ]);
-
-        $status = $product->is_active ? 'diaktifkan' : 'dinonaktifkan';
-
-        return response()->json([
-            'success' => true,
-            'message' => "Produk '{$product->name}' berhasil {$status}.",
-            'is_active' => (bool)$product->is_active
-        ]);
-    }
-
-    /**
-     * Get categories
-     */
-    public function getCategories(Request $request): JsonResponse
-    {
-        if (!$this->checkAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $categories = Category::withCount('products')
-            ->latest()
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $categories
-        ]);
-    }
-
-    /**
-     * Create category
-     */
-    public function storeCategory(Request $request): JsonResponse
-    {
-        if (!$this->checkAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:categories,name'],
-            'icon' => ['nullable', 'string', 'max:255'],
-        ]);
-
-        $validated['slug'] = Str::slug($validated['name']);
-
-        $category = Category::create($validated);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Kategori baru berhasil ditambahkan.',
-            'data' => $category
-        ]);
-    }
-
-    /**
-     * Update category
-     */
-    public function updateCategory(Request $request, $id): JsonResponse
-    {
-        if (!$this->checkAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $category = Category::findOrFail($id);
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:categories,name,' . $category->id],
-            'icon' => ['nullable', 'string', 'max:255'],
-        ]);
-
-        $validated['slug'] = Str::slug($validated['name']);
-
-        $category->update($validated);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Kategori berhasil diperbarui.',
-            'data' => $category
-        ]);
-    }
-
-    /**
-     * Delete category
-     */
-    public function deleteCategory(Request $request, $id): JsonResponse
-    {
-        if (!$this->checkAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $category = Category::findOrFail($id);
-
-        if ($category->products()->count() > 0) {
-            return response()->json([
-                'success' => false,
-                'message' => "Kategori '{$category->name}' masih digunakan oleh {$category->products()->count()} produk."
-            ], 422);
-        }
-
-        $category->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => "Kategori '{$category->name}' berhasil dihapus."
-        ]);
-    }
-
-    /**
-     * Get Flash Sales
-     */
-    public function getFlashSales(Request $request): JsonResponse
-    {
-        if (!$this->checkAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $flashSales = FlashSale::with(['items.product.store'])
-            ->latest()
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $flashSales
-        ]);
-    }
-
-    /**
-     * Create Flash Sale
-     */
-    public function storeFlashSale(Request $request): JsonResponse
-    {
-        if (!$this->checkAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $validated = $request->validate([
-            'title'      => ['required', 'string', 'max:255'],
-            'start_time' => ['required', 'date'],
-            'end_time'   => ['required', 'date', 'after:start_time'],
-        ]);
-
-        $flashSale = FlashSale::create([
-            'title'      => $validated['title'],
-            'start_time' => $validated['start_time'],
-            'end_time'   => $validated['end_time'],
-            'is_active'  => true,
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => "Flash Sale '{$flashSale->title}' berhasil dibuat.",
-            'data' => $flashSale
-        ]);
-    }
-
-    /**
-     * Toggle Flash Sale state
-     */
-    public function toggleFlashSale(Request $request, $id): JsonResponse
-    {
-        if (!$this->checkAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $flashSale = FlashSale::findOrFail($id);
-        $flashSale->update([
-            'is_active' => !$flashSale->is_active
-        ]);
-
-        $status = $flashSale->is_active ? 'diaktifkan' : 'dinonaktifkan';
-
-        return response()->json([
-            'success' => true,
-            'message' => "Flash Sale '{$flashSale->title}' berhasil {$status}."
-        ]);
-    }
-
-    /**
-     * Add product to flash sale
-     */
-    public function addFlashSaleItem(Request $request, $id): JsonResponse
-    {
-        if (!$this->checkAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $flashSale = FlashSale::findOrFail($id);
-
-        $validated = $request->validate([
-            'product_id'       => ['required', 'exists:products,id'],
-            'flash_sale_price' => ['required', 'numeric', 'min:1'],
-            'stock_allocated'  => ['required', 'integer', 'min:1'],
-        ]);
-
-        $product = Product::findOrFail($validated['product_id']);
-
-        if ($validated['flash_sale_price'] >= $product->price) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Harga Flash Sale harus lebih rendah dari harga normal produk.'
-            ], 422);
-        }
-
-        $discountPct = (int) round((($product->price - $validated['flash_sale_price']) / $product->price) * 100);
-
-        $item = FlashSaleItem::updateOrCreate(
-            [
-                'flash_sale_id' => $flashSale->id,
-                'product_id'    => $product->id,
+            'data'    => [
+                'total_gmv'          => (float) $totalGmv,
+                'total_users'        => $totalUsers,
+                'total_customers'    => $totalCustomers,
+                'total_sellers'      => $totalSellers,
+                'total_couriers'     => $totalCouriers,
+                'total_stores'       => $totalStores,
+                'total_orders'       => $totalOrders,
+                'recent_orders'      => $recentOrders,
+                'pending_stores'     => Store::where('is_active', false)->count(),
+                'total_products'     => Product::count(),
+                'total_categories'   => Category::count(),
+                'active_flash_sales' => FlashSale::count(),
             ],
-            [
-                'flash_sale_price'    => $validated['flash_sale_price'],
-                'discount_percentage' => max(1, $discountPct),
-                'stock_allocated'     => $validated['stock_allocated'],
-                'is_active'           => true,
-            ]
-        );
-
-        return response()->json([
-            'success' => true,
-            'message' => "Produk '{$product->name}' berhasil ditambahkan ke Flash Sale.",
-            'data' => $item
         ]);
     }
 
     /**
-     * Remove product from flash sale
+     * 2. Daftar Pengguna Platform
      */
-    public function removeFlashSaleItem(Request $request, $id, $itemId): JsonResponse
+    public function users(Request $request): JsonResponse
     {
-        if (!$this->checkAdmin($request)) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        $role = $request->query('role');
+        $query = User::latest();
+
+        if ($role && $role !== 'all') {
+            $query->where('role', $role);
         }
 
-        $item = FlashSaleItem::where('flash_sale_id', $id)->where('id', $itemId)->firstOrFail();
-        $item->delete();
+        $users = $query->take(50)->get()->map(function ($u) {
+            return [
+                'id'         => $u->id,
+                'name'       => $u->name,
+                'email'      => $u->email,
+                'phone'      => $u->phone ?? '-',
+                'role'       => $u->role,
+                'created_at' => $u->created_at?->format('d M Y'),
+            ];
+        });
 
         return response()->json([
             'success' => true,
-            'message' => 'Produk berhasil dihapus dari Flash Sale.'
+            'data'    => $users,
+        ]);
+    }
+
+    /**
+     * 3. Daftar Toko Platform
+     */
+    public function stores(Request $request): JsonResponse
+    {
+        $stores = Store::with('user')->latest()->take(50)->get()->map(function ($s) {
+            return [
+                'id'          => $s->id,
+                'name'        => $s->name,
+                'owner_name'  => $s->user?->name ?? 'Pemilik',
+                'city'        => $s->city ?? 'Indonesia',
+                'phone'       => $s->phone ?? '-',
+                'is_active'   => (bool) ($s->is_active ?? true),
+                'created_at'  => $s->created_at?->format('d M Y'),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data'    => $stores,
+        ]);
+    }
+
+    /**
+     * 4. Toggle Status Toko (Aktif / Suspend)
+     */
+    public function toggleStoreStatus($id): JsonResponse
+    {
+        $store = Store::findOrFail($id);
+        $store->is_active = !$store->is_active;
+        $store->save();
+
+        return response()->json([
+            'success'   => true,
+            'message'   => 'Status toko berhasil diubah.',
+            'is_active' => (bool) $store->is_active,
+        ]);
+    }
+
+    /**
+     * 5. Get Live Maintenance Status
+     */
+    public function getMaintenanceStatus(): JsonResponse
+    {
+        $webFile = storage_path('framework/maintenance_web.json');
+        $mobileFile = storage_path('framework/maintenance_app.json');
+        $downFile = storage_path('framework/down');
+
+        $isWebDown = file_exists($webFile) || env('APP_WEB_MAINTENANCE', false);
+        $isMobileDown = file_exists($mobileFile) || env('APP_MOBILE_MAINTENANCE', false);
+        $isAllDown = file_exists($downFile);
+
+        $msgData = [];
+        if (file_exists($mobileFile)) {
+            $msgData = json_decode(@file_get_contents($mobileFile), true) ?: [];
+        } elseif (file_exists($webFile)) {
+            $msgData = json_decode(@file_get_contents($webFile), true) ?: [];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'web_maintenance'    => (bool) $isWebDown,
+                'mobile_maintenance' => (bool) $isMobileDown,
+                'full_lockdown'      => (bool) $isAllDown,
+                'title'              => $msgData['title'] ?? 'Mode Pemeliharaan Sistem 🛠️',
+                'message'            => $msgData['message'] ?? 'Sistem sedang dalam optimalisasi server terjadwal.',
+            ],
+        ]);
+    }
+
+    /**
+     * 6. Toggle Maintenance Mode Platform (Web, Mobile, or All)
+     */
+    public function toggleMaintenance(Request $request): JsonResponse
+    {
+        $target = $request->input('target', 'all'); // 'web', 'mobile', 'all'
+        $isDown = $request->boolean('is_down');
+        $title  = $request->input('title', 'Mode Pemeliharaan Sistem 🛠️');
+        $msg    = $request->input('message', 'Sistem sedang dalam optimalisasi server terjadwal.');
+
+        $payload = json_encode([
+            'title'     => $title,
+            'message'   => $msg,
+            'time'      => time(),
+            'author'    => Auth::user()?->name ?? 'Super Admin',
+        ], JSON_PRETTY_PRINT);
+
+        $webFile = storage_path('framework/maintenance_web.json');
+        $mobileFile = storage_path('framework/maintenance_app.json');
+        $downFile = storage_path('framework/down');
+
+        if ($target === 'web' || $target === 'all') {
+            if ($isDown) {
+                @file_put_contents($webFile, $payload);
+            } else {
+                if (file_exists($webFile)) @unlink($webFile);
+            }
+        }
+
+        if ($target === 'mobile' || $target === 'all') {
+            if ($isDown) {
+                @file_put_contents($mobileFile, $payload);
+            } else {
+                if (file_exists($mobileFile)) @unlink($mobileFile);
+            }
+        }
+
+        if ($target === 'all') {
+            if ($isDown) {
+                @file_put_contents($downFile, $payload);
+            } else {
+                if (file_exists($downFile)) @unlink($downFile);
+            }
+        }
+
+        cache()->forever('system_maintenance_mode', $isDown);
+
+        $targetLabel = match ($target) {
+            'web'    => 'Website',
+            'mobile' => 'Aplikasi Mobile',
+            default  => 'Seluruh Platform (Web & Mobile)',
+        };
+
+        return response()->json([
+            'success'            => true,
+            'message'            => $isDown ? "Mode pemeliharaan $targetLabel berhasil DIAKTIFKAN 🛠️." : "Mode pemeliharaan $targetLabel berhasil DINONAKTIFKAN (Live Normal) 🟢.",
+            'web_maintenance'    => file_exists($webFile),
+            'mobile_maintenance' => file_exists($mobileFile),
+            'full_lockdown'      => file_exists($downFile),
         ]);
     }
 }

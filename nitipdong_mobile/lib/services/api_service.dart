@@ -10,7 +10,7 @@ import '../models/order_model.dart';
 
 class ApiService {
   // Current Installed Mobile App Version
-  static const String currentAppVersion = '1.1.6';
+  static const String currentAppVersion = '2.0.1';
 
   // Fixed Production Backend API URL (budayakita.com)
   static const String baseUrl = 'https://budayakita.com/api/v1';
@@ -1124,8 +1124,270 @@ class ApiService {
   }
 
   // ══════════════════════════════════════════════════
-  // OPERATIONAL ADMIN API ENDPOINTS
+  // SELLER CENTER (TOKO) OPERATIONS
   // ══════════════════════════════════════════════════
+
+  /// Register customer as a store seller
+  static Future<Map<String, dynamic>> registerSellerStore({
+    required String name,
+    required String address,
+    required String city,
+    required String phone,
+    String? description,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/seller/register'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'name': name,
+          'address': address,
+          'city': city,
+          'phone': phone,
+          'description': description ?? 'Toko Resmi di NitipDong',
+        }),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Toko berhasil dibuka!',
+        'store': data['store'],
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Get seller dashboard metrics
+  static Future<Map<String, dynamic>?> getSellerDashboard() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/seller/dashboard'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) return data['data'];
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Get seller products list
+  static Future<List<Map<String, dynamic>>> getSellerProducts() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/seller/products'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true && data['data'] != null) {
+          return List<Map<String, dynamic>>.from(data['data']);
+        }
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Add new product by seller
+  static Future<Map<String, dynamic>> addSellerProduct({
+    required String name,
+    required double price,
+    required int stock,
+    required String description,
+    String? imageUrl,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/seller/products'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'name': name,
+          'price': price,
+          'stock': stock,
+          'description': description,
+          'image_url': imageUrl,
+        }),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Produk berhasil ditambahkan!',
+        'data': data['data'],
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Delete product by seller
+  static Future<bool> deleteSellerProduct(int id) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/seller/products/$id'),
+        headers: await _getHeaders(),
+      );
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Get seller incoming orders
+  static Future<List<Map<String, dynamic>>> getSellerOrders({String status = 'all'}) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/seller/orders?status=$status'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true && data['data'] != null) {
+          return List<Map<String, dynamic>>.from(data['data']);
+        }
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Update order status by seller
+  static Future<bool> updateSellerOrderStatus(int id, String status) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('$baseUrl/seller/orders/$id/status'),
+        headers: await _getHeaders(),
+        body: jsonEncode({'status': status}),
+      );
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // ══════════════════════════════════════════════════
+  // ADMIN & SUPER ADMIN OPERATIONS
+  // ══════════════════════════════════════════════════
+
+  /// Get admin dashboard platform metrics
+  static Future<Map<String, dynamic>?> getAdminDashboard() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/admin/dashboard'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) return data['data'];
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Get all platform users
+  static Future<List<Map<String, dynamic>>> getAdminUsers({String role = 'all'}) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/admin/users?role=$role'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true && data['data'] != null) {
+          return List<Map<String, dynamic>>.from(data['data']);
+        }
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Get all platform stores
+  static Future<List<Map<String, dynamic>>> getAdminStores() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/admin/stores'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true && data['data'] != null) {
+          return List<Map<String, dynamic>>.from(data['data']);
+        }
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// Toggle store active/suspend status
+  static Future<bool> toggleAdminStoreStatus(int id) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/admin/stores/$id/toggle-status'),
+        headers: await _getHeaders(),
+      );
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Get current maintenance status of all targets (web, mobile, all)
+  static Future<Map<String, dynamic>?> getMaintenanceStatus() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/admin/system/maintenance'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) return data['data'];
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Toggle maintenance mode (target: 'web' | 'mobile' | 'all')
+  static Future<Map<String, dynamic>> toggleAdminMaintenance({
+    required String target,
+    required bool isDown,
+    String? title,
+    String? message,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/admin/system/maintenance'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'target': target,
+          'is_down': isDown,
+          'title': title,
+          'message': message,
+        }),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 && data['success'] == true,
+        'message': data['message'] ?? 'Status sistem berhasil diubah.',
+        'data': data,
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
 
   /// Fetch admin dashboard statistics
   static Future<Map<String, dynamic>> getAdminStats() async {
@@ -1389,5 +1651,6 @@ class ApiService {
     }
   }
 }
+
 
 
