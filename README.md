@@ -133,7 +133,7 @@ Sudah ada proteksi standar: CSRF, pencegahan SQL injection & XSS, autentikasi/ot
 
 ## Masih dikerjain
 
-- [ ] Payment gateway (Midtrans/Xendit)
+- [✔️] Payment gateway (Midtrans/Xendit)
 - [ ] Export laporan ke PDF
 - [ ] Email notification
 - [ ] Push notification
