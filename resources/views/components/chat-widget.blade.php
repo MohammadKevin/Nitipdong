@@ -15,7 +15,7 @@
          x-transition:leave="transition ease-in duration-150 transform"
          x-transition:leave-start="opacity-100 translate-y-0 scale-100"
          x-transition:leave-end="opacity-0 translate-y-4 scale-95"
-         class="fixed bottom-20 right-4 sm:bottom-20 sm:right-5 z-50 bg-white rounded-2xl shadow-2xl border border-slate-200 w-[calc(100vw-2rem)] sm:w-96 overflow-hidden flex flex-col h-[500px] max-h-[calc(100vh-6.5rem)] text-xs font-sans">
+         class="fixed bottom-36 md:bottom-20 right-4 md:right-5 z-50 bg-white rounded-2xl shadow-2xl border border-slate-200 w-[calc(100vw-2rem)] sm:w-96 overflow-hidden flex flex-col h-[500px] max-h-[calc(100vh-10.5rem)] md:max-h-[calc(100vh-6.5rem)] text-xs font-sans">
 
         {{-- Header --}}
         <div class="bg-slate-900 px-4 py-3 text-white flex justify-between items-center shrink-0 border-b border-slate-800 select-none">
@@ -98,7 +98,7 @@
 
     {{-- Fallback Standalone Trigger (Only displayed if unified dock is not present on the page) --}}
     <div x-show="!hasUnifiedDock"
-         class="fixed bottom-5 right-5 z-40">
+         class="fixed bottom-20 md:bottom-5 right-5 z-40">
         <button @click="toggleAiChat()"
                 class="h-11 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-full shadow-lg border border-slate-700 flex items-center gap-2 transition-all hover:scale-105 active:scale-95 text-xs font-bold cursor-pointer group"
                 title="Tanya Asisten AI">

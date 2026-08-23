@@ -7,7 +7,7 @@
      class="relative">
 
     {{-- Unified Floating Dock (Bottom Right): AI Button + Chat Button Side-by-Side --}}
-    <div class="fixed bottom-5 right-4 sm:right-5 z-40 flex items-center gap-2 select-none">
+    <div class="fixed bottom-20 md:bottom-5 right-4 sm:right-5 z-40 flex items-center gap-2 select-none">
         {{-- Button 1: Asisten AI --}}
         <button type="button"
                 @click="$dispatch('toggle-ai-chat')"
@@ -46,7 +46,7 @@
          x-transition:leave="transition ease-in duration-150 transform"
          x-transition:leave-start="opacity-100 translate-y-0 scale-100"
          x-transition:leave-end="opacity-0 translate-y-4 scale-95"
-         class="fixed bottom-20 right-4 sm:bottom-20 sm:right-5 z-50 w-[calc(100vw-2rem)] sm:w-96 h-[500px] max-h-[calc(100vh-6.5rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col text-xs font-sans">
+         class="fixed bottom-36 md:bottom-20 right-4 md:right-5 z-50 w-[calc(100vw-2rem)] sm:w-96 h-[500px] max-h-[calc(100vh-10.5rem)] md:max-h-[calc(100vh-6.5rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col text-xs font-sans">
 
         {{-- 1. HEADER --}}
         <div class="bg-cyan-700 text-white px-4 py-3 flex items-center justify-between shadow-xs shrink-0 select-none">
