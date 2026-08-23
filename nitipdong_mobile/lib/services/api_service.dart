@@ -252,6 +252,29 @@ class ApiService {
     return {'success': false, 'is_maintenance': false};
   }
 
+  /// Compares semantic versions (e.g. '2.0.2' vs '2.0.3').
+  /// Returns true if currentVersion is strictly lower than minVersion.
+  static bool isVersionLower(String currentVersion, String minVersion) {
+    try {
+      final curClean = currentVersion.split('+')[0].trim();
+      final minClean = minVersion.split('+')[0].trim();
+
+      final curParts = curClean.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+      final minParts = minClean.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+
+      while (curParts.length < 3) curParts.add(0);
+      while (minParts.length < 3) minParts.add(0);
+
+      for (int i = 0; i < 3; i++) {
+        if (curParts[i] < minParts[i]) return true;
+        if (curParts[i] > minParts[i]) return false;
+      }
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   // ══════════════════════════════════════════════════
   // AUTHENTICATION & OTP
   // ══════════════════════════════════════════════════

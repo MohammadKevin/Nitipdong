@@ -7,11 +7,13 @@ import '../../services/api_service.dart';
 class AppUpdateProgressScreen extends StatefulWidget {
   final String newVersion;
   final String downloadUrl;
+  final bool isForceUpdate;
 
   const AppUpdateProgressScreen({
     Key? key,
     required this.newVersion,
     required this.downloadUrl,
+    this.isForceUpdate = false,
   }) : super(key: key);
 
   @override
@@ -66,22 +68,30 @@ class _AppUpdateProgressScreenState extends State<AppUpdateProgressScreen> with 
   Widget build(BuildContext context) {
     final currentVer = ApiService.currentAppVersion;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF0B1528),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white70, size: 20),
-          onPressed: () => Navigator.pop(context),
+    return WillPopScope(
+      onWillPop: () async => !widget.isForceUpdate,
+      child: Scaffold(
+        backgroundColor: const Color(0xFF0B1528),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: widget.isForceUpdate
+              ? IconButton(
+                  icon: const Icon(Icons.power_settings_new_rounded, color: Colors.redAccent, size: 22),
+                  tooltip: 'Keluar Aplikasi',
+                  onPressed: () => SystemNavigator.pop(),
+                )
+              : IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white70, size: 20),
+                  onPressed: () => Navigator.pop(context),
+                ),
+          title: Text(
+            widget.isForceUpdate ? 'Pembaruan Wajib Sistem 🔒' : 'Pusat Pembaruan Sistem',
+            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+          centerTitle: true,
         ),
-        title: const Text(
-          'Pusat Pembaruan Sistem',
-          style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
+        body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           child: Column(

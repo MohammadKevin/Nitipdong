@@ -5,6 +5,7 @@ import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 import '../screens/main_nav_screen.dart';
 import '../screens/maintenance_screen.dart';
+import '../screens/update/app_update_progress_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/courier/courier_home_screen.dart';
 
@@ -40,6 +41,26 @@ class _SplashScreenState extends State<SplashScreen> {
             builder: (context) => MaintenanceScreen(
               title: systemStatus['maintenance_title'] ?? 'Mode Pemeliharaan & Pengembangan 🛠️',
               message: systemStatus['maintenance_message'] ?? 'Aplikasi sedang dalam tahap peningkatan sistem.',
+            ),
+          ),
+        );
+        return;
+      }
+
+      // KAI-Style Version Gate (Mandatory Force Update Check)
+      final String minVersion = systemStatus['min_version']?.toString() ?? '1.0.0';
+      final String latestVersion = systemStatus['latest_version']?.toString() ?? ApiService.currentAppVersion;
+      final String downloadUrl = systemStatus['update_url']?.toString() ?? 'https://budayakita.com/download/app';
+
+      if (ApiService.isVersionLower(ApiService.currentAppVersion, minVersion)) {
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AppUpdateProgressScreen(
+              newVersion: latestVersion,
+              downloadUrl: downloadUrl,
+              isForceUpdate: true,
             ),
           ),
         );

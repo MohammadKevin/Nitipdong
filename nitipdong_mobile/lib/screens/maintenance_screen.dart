@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import 'main_nav_screen.dart';
+import 'update/app_update_progress_screen.dart';
 
 class MaintenanceScreen extends StatefulWidget {
   final String title;
@@ -63,10 +64,28 @@ class _MaintenanceScreenState extends State<MaintenanceScreen> with SingleTicker
     });
 
     if (status['is_maintenance'] == false && mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainNavScreen()),
-      );
+      final String minVersion = status['min_version']?.toString() ?? '1.0.0';
+      final String latestVersion = status['latest_version']?.toString() ?? ApiService.currentAppVersion;
+      final String downloadUrl = status['update_url']?.toString() ?? 'https://budayakita.com/download/app';
+
+      if (ApiService.isVersionLower(ApiService.currentAppVersion, minVersion)) {
+        // Maintenance ended AND new required version is released -> Go straight to Force Update
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AppUpdateProgressScreen(
+              newVersion: latestVersion,
+              downloadUrl: downloadUrl,
+              isForceUpdate: true,
+            ),
+          ),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainNavScreen()),
+        );
+      }
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
