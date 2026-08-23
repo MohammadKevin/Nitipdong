@@ -19,7 +19,16 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+// Midtrans Public Webhook Notification Endpoints (Accessible via https://budayakita.com/api/midtrans/notification)
+Route::match(['get', 'post'], '/midtrans/notification', [\App\Http\Controllers\MidtransPaymentController::class, 'handleNotification'])->name('api.midtrans.notification');
+Route::match(['get', 'post'], '/midtrans/callback', [\App\Http\Controllers\MidtransPaymentController::class, 'handleNotification'])->name('api.midtrans.callback');
+Route::match(['get', 'post'], '/payment/notification', [\App\Http\Controllers\MidtransPaymentController::class, 'handleNotification'])->name('api.payment.notification');
+
 Route::prefix('v1')->group(function () {
+
+    // Midtrans Notification v1 alias
+    Route::match(['get', 'post'], '/midtrans/notification', [\App\Http\Controllers\MidtransPaymentController::class, 'handleNotification']);
+    Route::match(['get', 'post'], '/payment/notification', [\App\Http\Controllers\MidtransPaymentController::class, 'handleNotification']);
 
     // ══════════════════════════════════════════════════
     // PUBLIC API ENDPOINTS

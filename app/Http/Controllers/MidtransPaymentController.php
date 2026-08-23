@@ -138,8 +138,8 @@ class MidtransPaymentController extends Controller
                 ->first();
 
             if (!$order) {
-                Log::error("Midtrans: Order #{$orderId} not found.");
-                return response()->json(['status' => 'error', 'message' => 'Order not found.'], 404);
+                Log::warning("Midtrans Notification: Order #{$orderId} not found in database. Returning 200 OK to acknowledge.");
+                return response()->json(['status' => 'ok', 'message' => 'Notification received and acknowledged.'], 200);
             }
 
             if ($transactionStatus === 'capture' && $fraudStatus === 'accept') {
