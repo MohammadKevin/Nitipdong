@@ -71,6 +71,30 @@ class _CourierDeliveryDetailScreenState extends State<CourierDeliveryDetailScree
     }
   }
 
+  Future<void> _openGoogleMapsNavigation({required bool isToCustomer}) async {
+    final lat = isToCustomer
+        ? (widget.orderData['dropoff_lat'] as num?)?.toDouble()
+        : (widget.orderData['pickup_lat'] as num?)?.toDouble();
+    final lng = isToCustomer
+        ? (widget.orderData['dropoff_lng'] as num?)?.toDouble()
+        : (widget.orderData['pickup_lng'] as num?)?.toDouble();
+
+    final address = isToCustomer
+        ? (widget.orderData['shipping_address'] ?? 'Alamat Pembeli')
+        : (widget.orderData['store_address'] ?? 'Alamat Toko Penjual');
+
+    Uri uri;
+    if (lat != null && lng != null && lat != 0 && lng != 0) {
+      uri = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving');
+    } else {
+      uri = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=${Uri.encodeComponent(address)}&travelmode=driving');
+    }
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   void _showPhotoSourceDialog(BuildContext parentCtx, StateSetter setModalState) {
     showDialog(
       context: parentCtx,
@@ -375,6 +399,35 @@ class _CourierDeliveryDetailScreenState extends State<CourierDeliveryDetailScree
                       ),
                     ),
                   ),
+
+                  // Google Maps Nav Button Overlay
+                  Positioned(
+                    top: 16,
+                    right: 16,
+                    child: InkWell(
+                      onTap: () => _openGoogleMapsNavigation(isToCustomer: true),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.white30),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.directions_rounded, color: Colors.cyanAccent, size: 13),
+                            SizedBox(width: 4),
+                            Text(
+                              'Google Maps 🧭',
+                              style: TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w800),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -414,6 +467,20 @@ class _CourierDeliveryDetailScreenState extends State<CourierDeliveryDetailScree
                         const SizedBox(height: 6),
                         Text(order['store_name'] ?? 'Toko Official', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
                         Text(order['store_address'] ?? 'Alamat toko', style: const TextStyle(fontSize: 11.5, color: AppTheme.textSecondary)),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            icon: const Icon(Icons.turn_right_rounded, size: 16, color: AppTheme.primary),
+                            label: const Text('Navigasi ke Toko di Google Maps 🧭', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppTheme.primary)),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: AppTheme.primary.withOpacity(0.3)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                            ),
+                            onPressed: () => _openGoogleMapsNavigation(isToCustomer: false),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -449,6 +516,20 @@ class _CourierDeliveryDetailScreenState extends State<CourierDeliveryDetailScree
                         const SizedBox(height: 6),
                         Text('${order['recipient_name']} (${order['recipient_phone']})', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
                         Text(order['shipping_address'] ?? 'Alamat penerima', style: const TextStyle(fontSize: 11.5, color: AppTheme.textSecondary)),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.navigation_rounded, size: 16, color: Colors.white),
+                            label: const Text('Navigasi ke Pembeli di Google Maps 🧭', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.redAccent,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                            ),
+                            onPressed: () => _openGoogleMapsNavigation(isToCustomer: true),
+                          ),
+                        ),
                       ],
                     ),
                   ),

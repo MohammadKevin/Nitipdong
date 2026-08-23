@@ -268,4 +268,37 @@ class CourierDeliveryController extends Controller
             'items'               => $items,
         ];
     }
+
+    /**
+     * 6. Pendaftaran Customer Menjadi Mitra Kurir
+     */
+    public function registerCourier(Request $request): JsonResponse
+    {
+        $request->validate([
+            'nik'          => 'required|string|max:30',
+            'sim_number'   => 'required|string|max:30',
+            'vehicle_type' => 'required|string|max:50',
+            'plate_number' => 'required|string|max:20',
+            'phone'        => 'required|string|max:20',
+        ]);
+
+        $user = Auth::user();
+        $user->role = 'courier';
+        if ($request->filled('phone')) {
+            $user->phone = $request->input('phone');
+        }
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Selamat! Pendaftaran Mitra Kurir berhasil. Akun Anda kini aktif sebagai Mitra Kurir NitipDong.',
+            'user'    => [
+                'id'    => $user->id,
+                'name'  => $user->name,
+                'email' => $user->email,
+                'role'  => $user->role,
+                'phone' => $user->phone,
+            ],
+        ]);
+    }
 }

@@ -96,6 +96,30 @@ class _LiveMapTrackingScreenState extends State<LiveMapTrackingScreen> with Sing
     }
   }
 
+  Future<void> _openGoogleMapsLiveRoute() async {
+    final dest = _trackingData?['locations']?['destination']?['address'] ?? 'Alamat Tujuan';
+    final destLat = _trackingData?['locations']?['destination']?['lat'];
+    final destLng = _trackingData?['locations']?['destination']?['lng'];
+
+    final storeLat = _trackingData?['locations']?['store']?['lat'];
+    final storeLng = _trackingData?['locations']?['store']?['lng'];
+
+    Uri uri;
+    if (destLat != null && destLng != null && (destLat as num) != 0 && (destLng as num) != 0) {
+      if (storeLat != null && storeLng != null && (storeLat as num) != 0 && (storeLng as num) != 0) {
+        uri = Uri.parse('https://www.google.com/maps/dir/?api=1&origin=$storeLat,$storeLng&destination=$destLat,$destLng&travelmode=driving');
+      } else {
+        uri = Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$destLat,$destLng&travelmode=driving');
+      }
+    } else {
+      uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(dest)}');
+    }
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -110,6 +134,13 @@ class _LiveMapTrackingScreenState extends State<LiveMapTrackingScreen> with Sing
             Text(widget.invoiceNumber, style: const TextStyle(fontSize: 11, color: Colors.white60)),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.map_rounded, color: Colors.cyanAccent),
+            tooltip: 'Buka di Google Maps',
+            onPressed: _openGoogleMapsLiveRoute,
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
@@ -158,6 +189,35 @@ class _LiveMapTrackingScreenState extends State<LiveMapTrackingScreen> with Sing
                                     style: TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w800),
                                   ),
                                 ],
+                              ),
+                            ),
+                          ),
+
+                          // Google Maps Action Button Overlay
+                          Positioned(
+                            top: 16,
+                            right: 16,
+                            child: InkWell(
+                              onTap: _openGoogleMapsLiveRoute,
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.7),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: Colors.white30),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.open_in_new_rounded, color: Colors.amberAccent, size: 13),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      'Google Maps 📍',
+                                      style: TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w800),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),

@@ -93,6 +93,7 @@ Route::prefix('v1')->group(function () {
 
         // Courier Delivery Partner Endpoints
         Route::prefix('courier')->group(function () {
+            Route::post('/register', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'registerCourier']);
             Route::get('/deliveries', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'index']);
             Route::get('/deliveries/{id}', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'show']);
             Route::post('/deliveries/{id}/accept', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'acceptTask']);
