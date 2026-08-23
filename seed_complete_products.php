@@ -19,15 +19,15 @@ $categoryList = [
     ['name' => 'Handphone & Tablet', 'slug' => 'handphone-tablet', 'icon' => 'fa-solid fa-mobile-screen-button'],
     ['name' => 'Gaming', 'slug' => 'gaming', 'icon' => 'fa-solid fa-gamepad'],
     ['name' => 'Komputer & Laptop', 'slug' => 'komputer-laptop', 'icon' => 'fa-solid fa-laptop'],
-    ['name' => 'Fashion Pria', 'slug' => 'fashion-pria', 'icon' => 'fa-solid fa-shirt'],
-    ['name' => 'Fashion Wanita', 'slug' => 'fashion-wanita', 'icon' => 'fa-solid fa-user-tie'],
+    ['name' => 'Fashion Pria', 'slug' => 'fashion-pria', 'icon' => 'fa-solid fa-user-tie'],
+    ['name' => 'Fashion Wanita', 'slug' => 'fashion-wanita', 'icon' => 'fa-solid fa-person-dress'],
     ['name' => 'Kecantikan', 'slug' => 'kecantikan', 'icon' => 'fa-solid fa-spa'],
     ['name' => 'Kesehatan', 'slug' => 'kesehatan', 'icon' => 'fa-solid fa-heart-pulse'],
     ['name' => 'Olahraga', 'slug' => 'olahraga', 'icon' => 'fa-solid fa-dumbbell'],
     ['name' => 'Makanan & Minuman', 'slug' => 'makanan-minuman', 'icon' => 'fa-solid fa-utensils'],
     ['name' => 'Buku & Alat Tulis', 'slug' => 'buku-alat-tulis', 'icon' => 'fa-solid fa-book'],
     ['name' => 'Otomotif', 'slug' => 'otomotif', 'icon' => 'fa-solid fa-car'],
-    ['name' => 'Elektronik', 'slug' => 'elektronik', 'icon' => 'fa-solid fa-bolt'],
+    ['name' => 'Elektronik', 'slug' => 'elektronik', 'icon' => 'fa-solid fa-plug'],
 ];
 
 foreach ($categoryList as $cData) {

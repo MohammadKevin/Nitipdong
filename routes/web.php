@@ -185,7 +185,9 @@ Route::get('/', function () {
         $officialProducts = $products;
     }
 
-    $categories = Category::all();
+    $categories = Category::withCount(['products' => function($q) {
+        $q->where('is_active', true);
+    }])->orderByDesc('products_count')->get();
     $activeFlashSale = FlashSale::active()->with(['items.product'])->first();
     $vouchers = Voucher::where('is_active', true)->latest()->take(6)->get();
 

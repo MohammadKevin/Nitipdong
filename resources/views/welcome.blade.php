@@ -249,7 +249,7 @@
 
             <div class="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3 text-center">
                 @if(isset($categories) && $categories->count() > 0)
-                    @foreach($categories->take(8) as $cat)
+                    @foreach($categories as $cat)
                     <a href="{{ route('products.index', ['category' => $cat->slug]) }}" 
                        class="flex flex-col items-center p-2 rounded-xl hover:bg-cyan-50/70 border border-transparent hover:border-cyan-200 transition-all group">
                         <div class="w-11 h-11 rounded-xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center text-lg mb-1.5 group-hover:bg-cyan-600 group-hover:text-white transition-colors">

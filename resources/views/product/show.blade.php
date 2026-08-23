@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="page-container py-5">
+    <div class="page-container py-5" x-data="{}">
         <nav class="flex text-xs text-slate-400 mb-4 items-center gap-1.5 flex-wrap" aria-label="Breadcrumb">
             <a href="{{ url('/') }}" class="hover:text-cyan-700 transition-colors">Beranda</a>
             <i class="fa-solid fa-chevron-right text-[8px] text-slate-300"></i>

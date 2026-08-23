@@ -44,12 +44,12 @@ $store = Store::create([
 
 // Create Categories
 $categories = [
-    ['name' => 'Elektronik', 'slug' => 'elektronik', 'icon' => 'fa-solid fa-bolt'],
+    ['name' => 'Elektronik', 'slug' => 'elektronik', 'icon' => 'fa-solid fa-plug'],
     ['name' => 'Handphone & Tablet', 'slug' => 'handphone-tablet', 'icon' => 'fa-solid fa-mobile-screen-button'],
     ['name' => 'Komputer & Laptop', 'slug' => 'komputer-laptop', 'icon' => 'fa-solid fa-laptop'],
     ['name' => 'Gaming', 'slug' => 'gaming', 'icon' => 'fa-solid fa-gamepad'],
-    ['name' => 'Fashion Pria', 'slug' => 'fashion-pria', 'icon' => 'fa-solid fa-shirt'],
-    ['name' => 'Fashion Wanita', 'slug' => 'fashion-wanita', 'icon' => 'fa-solid fa-user-tie'],
+    ['name' => 'Fashion Pria', 'slug' => 'fashion-pria', 'icon' => 'fa-solid fa-user-tie'],
+    ['name' => 'Fashion Wanita', 'slug' => 'fashion-wanita', 'icon' => 'fa-solid fa-person-dress'],
     ['name' => 'Kesehatan', 'slug' => 'kesehatan', 'icon' => 'fa-solid fa-heart-pulse'],
     ['name' => 'Kecantikan', 'slug' => 'kecantikan', 'icon' => 'fa-solid fa-spa'],
     ['name' => 'Olahraga', 'slug' => 'olahraga', 'icon' => 'fa-solid fa-dumbbell'],
