@@ -147,6 +147,22 @@ class ApiService {
     } catch (_) {}
   }
 
+  static Future<void> saveAddressLocally({
+    required String fullAddress,
+    String? recipientName,
+    String? phone,
+    String? city,
+    String? notes,
+  }) async {
+    return saveAddress(
+      fullAddress: fullAddress,
+      recipientName: recipientName,
+      phone: phone,
+      city: city,
+      notes: notes,
+    );
+  }
+
   static Future<Map<String, dynamic>?> fetchRemoteAddress() async {
     try {
       final token = await getToken();

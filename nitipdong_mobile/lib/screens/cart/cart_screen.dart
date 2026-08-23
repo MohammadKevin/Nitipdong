@@ -239,7 +239,7 @@ class _CartScreenState extends State<CartScreen> {
                                 const SizedBox(width: 4),
                                 Expanded(
                                   child: Text(
-                                    item.product?.storeName ?? 'NitipDong Official Store',
+                                    item.storeName.isNotEmpty ? item.storeName : 'NitipDong Official Store',
                                     style: const TextStyle(
                                       fontSize: 11.5,
                                       fontWeight: FontWeight.w700,
