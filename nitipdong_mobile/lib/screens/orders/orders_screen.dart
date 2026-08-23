@@ -397,7 +397,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                                   MaterialPageRoute(
                                                     builder: (_) => LiveMapTrackingScreen(
                                                       orderId: order.id,
-                                                      invoiceNumber: order.invoiceNumber,
+                                                      invoiceNumber: order.orderNumber,
                                                     ),
                                                   ),
                                                 );
