@@ -21,18 +21,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _addressController = TextEditingController();
   final _voucherController = TextEditingController();
 
-  String _selectedPayment = 'QRIS Instant (Semua Bank & E-Wallet)';
+  String _selectedPayment = 'QRIS (Semua E-Wallet & M-Banking)';
   String _selectedCourier = 'J&T Express (Gratis Ongkir Rp0)';
   bool _isProcessing = false;
   double _discountAmount = 0.0;
   String? _appliedVoucherCode;
 
   final List<Map<String, dynamic>> _paymentOptions = [
-    {'name': 'QRIS Instant (Semua Bank & E-Wallet)', 'icon': Icons.qr_code_scanner_rounded, 'badge': 'Instan'},
-    {'name': 'BCA Virtual Account', 'icon': Icons.account_balance_rounded, 'badge': 'Otomatis'},
-    {'name': 'Mandiri Virtual Account', 'icon': Icons.account_balance_rounded, 'badge': 'Otomatis'},
-    {'name': 'BRI Virtual Account', 'icon': Icons.account_balance_rounded, 'badge': 'Otomatis'},
-    {'name': 'GoPay / ShopeePay / DANA', 'icon': Icons.phone_android_rounded, 'badge': 'E-Wallet'},
+    {'name': 'QRIS (Semua E-Wallet & M-Banking)', 'icon': Icons.qr_code_scanner_rounded, 'badge': 'Otomatis & Instan'},
+    {'name': 'BCA Virtual Account', 'icon': Icons.account_balance_rounded, 'badge': 'Verifikasi Otomatis'},
+    {'name': 'Mandiri Virtual Account', 'icon': Icons.account_balance_rounded, 'badge': 'Verifikasi Otomatis'},
+    {'name': 'BNI Virtual Account', 'icon': Icons.account_balance_rounded, 'badge': 'Verifikasi Otomatis'},
+    {'name': 'BRI Virtual Account (BRIVA)', 'icon': Icons.account_balance_rounded, 'badge': 'Verifikasi Otomatis'},
+    {'name': 'Transfer Bank Manual (Struk)', 'icon': Icons.receipt_long_rounded, 'badge': 'Verifikasi Struk'},
   ];
 
   final List<Map<String, dynamic>> _courierOptions = [
