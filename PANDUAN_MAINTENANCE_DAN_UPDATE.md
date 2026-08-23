@@ -6,15 +6,41 @@ Dokumen ini adalah Standar Operasional Prosedur (SOP) untuk melakukan pemelihara
 
 ---
 
-## 🎯 1. Konsep & Cara Kerja Sistem
+## ⚡ 1. CARA INSTAN 1 PERINTAH (OTOMATISASI PENUH)
+
+Untuk memudahkan developer agar **tidak perlu ubah banyak file secara manual**, gunakan salah satu perintah otomatis ini:
+
+### 🌟 Opsi A: 1-Click All-in-One Release Script (Paling Mudah)
+Cukup jalankan script ini di terminal PowerShell root project:
+```powershell
+.\release_app.ps1 2.0.3
+```
+*Script ini otomatis melakukan 5 hal sekaligus:*
+1. Mengubah versi di `.env` (`APP_MOBILE_LATEST_VERSION=2.0.3` & `APP_MOBILE_MIN_VERSION=2.0.3`).
+2. Mengubah versi di `nitipdong_mobile/pubspec.yaml` (auto-increment build number).
+3. Mengubah versi di `nitipdong_mobile/lib/services/api_service.dart`.
+4. Membangun APK Release (`flutter build apk --release`).
+5. Menyalin file APK ke `public/downloads/nitipdong.apk` dan membersihkan cache sistem.
+
+---
+
+### 🌟 Opsi B: Menggunakan Artisan Command
+Jika kamu hanya ingin menyinkronkan seluruh versi sistem (Web, API, Flutter, dan .env):
+```bash
+php artisan app:release 2.0.3 --force
+```
+
+---
+
+## 🎯 2. Konsep & Cara Kerja Sistem
 
 Sistem ini meniru arsitektur enterprise aplikasi besar (seperti **KAI Access**, **Perbankan/BCA**, dan **E-Commerce**):
 
 ```mermaid
 graph TD
     A[Mulai Maintenance] -->|php artisan app:down --mobile| B[Aplikasi Mobile Terkunci: Layar Pemeliharaan 🛠️]
-    B --> C[Developer Upload APK Rilis Baru ke Server]
-    C --> D[Ubah APP_MOBILE_MIN_VERSION di .env]
+    B --> C[Developer Jalankan .\release_app.ps1 2.0.3]
+    C -->|Otomatis Sinkron & Build APK| D[Versi Baru Siap di Server]
     D -->|php artisan app:up| E[Matikan Maintenance: Server Dibuka Kembali]
     E --> F[User Buka Aplikasi]
     F -->|Versi HP < Versi Minimal| G[Aplikasi Otomatis Kunci Layar: Pembaruan Wajib 🔒]
@@ -24,7 +50,7 @@ graph TD
 
 ---
 
-## 🕒 2. SOP Skenario Nyata (Contoh: Maintenance Jam 22.00 - 00.30 WIB)
+## 🕒 3. SOP Skenario Nyata (Contoh: Maintenance Jam 22.00 - 00.30 WIB)
 
 ### 📌 Langkah 1: Pukul 22.00 WIB (Nyalakan Maintenance)
 Jalankan perintah ini di terminal server:
@@ -35,42 +61,12 @@ php artisan app:down --mobile --message="Pemeliharaan server sedang berlangsung 
 
 ---
 
-### 📌 Langkah 2: Pukul 00.00 - 00.20 WIB (Build & Deploy Versi Baru)
-
-1. **Ubah Versi di Flutter** (`nitipdong_mobile`):
-   * Buka file `pubspec.yaml` ➔ naikkan versi, contoh:
-     ```yaml
-     version: 2.0.3+22
-     ```
-   * Buka file `lib/services/api_service.dart` line 13:
-     ```dart
-     static const String currentAppVersion = '2.0.3';
-     ```
-
-2. **Build APK Rilis**:
-   Buka terminal di folder `nitipdong_mobile`:
-   ```bash
-   flutter build apk --release
-   ```
-
-3. **Upload File APK ke Server Hosting**:
-   Ambil file dari `nitipdong_mobile/build/app/outputs/flutter-apk/app-release.apk`, lalu ganti file di server:
-   * 📁 `public/downloads/nitipdong.apk`
-   * 📁 `public/downloads/NitipDong-latest.apk`
-
-4. **Kunci Versi di `.env` Server**:
-   Buka file `.env` di server/cPanel, ubah baris ini:
-   ```env
-   # Versi terbaru yang ada di server
-   APP_MOBILE_LATEST_VERSION=2.0.3
-
-   # Batas versi MINIMAL yang diizinkan membuka aplikasi (Pemicu Force Update)
-   APP_MOBILE_MIN_VERSION=2.0.3
-   ```
-   Lalu bersihkan cache config:
-   ```bash
-   php artisan config:clear
-   ```
+### 📌 Langkah 2: Pukul 00.00 - 00.20 WIB (Build & Deploy Otomatis)
+Cukup jalankan 1 perintah:
+```powershell
+.\release_app.ps1 2.0.3
+```
+*Semua versi di Flutter, `.env`, landing web, QR code, dan file APK di server akan tersinkronisasi 100% otomatis.*
 
 ---
 
@@ -89,11 +85,11 @@ php artisan app:up
 2. **Pengguna Menekan Tombol "Unduh Pembaruan Sekarang 🚀"**:
    * Browser HP (Chrome/Safari) langsung mengunduh file `NitipDong-v2.0.3.apk` dengan kecepatan penuh.
    * Pengguna tap notifikasi unduhan selesai untuk memasang APK baru menimpa versi lama.
-   * **Data akun, keranjang, dan login pengguna tetap aman!**
+   * **Data akun, keranjang, dan login pengguna tetap aman tanpa perlu login ulang!**
 
 ---
 
-## 📋 3. Ringkasan Variabel Konfigurasi (`.env`)
+## 📋 4. Ringkasan Variabel Konfigurasi (`.env`)
 
 | Variabel `.env` | Deskripsi | Contoh Nilai |
 | :--- | :--- | :--- |
@@ -105,19 +101,15 @@ php artisan app:up
 
 ---
 
-## 🗂️ 4. Referensi File Kunci Terkait
+## 🗂️ 5. Perintah-Perintah Penting Developer
 
-### Backend (Laravel):
-* `app/Http/Controllers/Api/SystemConfigController.php` *(API status sistem, maintenance, dan versi)*
-* `routes/web.php` *(Route pintar pengunduhan `/download/app` & `/download/android`)*
-* `resources/views/welcome.blade.php` *(Halaman landing web & QR Code otomatis)*
-* `resources/views/errors/503.blade.php` *(Halaman maintenance web publik)*
-
-### Frontend Mobile (Flutter):
-* `nitipdong_mobile/lib/services/api_service.dart` *(Helper perbandingan versi `isVersionLower`)*
-* `nitipdong_mobile/lib/screens/splash_screen.dart` *(Version Gate interceptor saat awal buka aplikasi)*
-* `nitipdong_mobile/lib/screens/maintenance_screen.dart` *(Layar pemeliharaan & deteksi otomatis pasca-maintenance)*
-* `nitipdong_mobile/lib/screens/update/app_update_progress_screen.dart` *(Layar pembaruan wajib & download stream)*
+| Perintah | Fungsi |
+| :--- | :--- |
+| `.\release_app.ps1 [versi]` | **1-Click**: Otomatisasi versi, build APK, deploy ke downloads, clear cache |
+| `php artisan app:release [versi] --force` | Otomatisasi sinkronisasi nomor versi ke seluruh file backend & mobile |
+| `php artisan app:down --mobile` | Mengaktifkan mode maintenance khusus aplikasi mobile |
+| `php artisan app:down --web` | Mengaktifkan mode maintenance khusus website |
+| `php artisan app:up` | Mematikan mode maintenance dan membuka kembali seluruh sistem |
 
 ---
 
