@@ -239,7 +239,11 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:super_admin'])->prefix('super-admin')->name('super_admin.')->group(function () {
         Route::get('/dashboard', [SuperAdminController::class, 'index'])->name('dashboard');
         Route::get('/dashboard/chart-data', [SuperAdminController::class, 'chartData'])->name('dashboard.chart-data');
+        // Users Management
         Route::get('/users', [SuperAdminController::class, 'users'])->name('users.index');
+        Route::post('/users/{user}/toggle-ban', [SuperAdminController::class, 'toggleBanUser'])->name('users.toggle_ban');
+        Route::delete('/users/{user}', [SuperAdminController::class, 'destroyUser'])->name('users.destroy');
+
         Route::get('/stores', [SuperAdminController::class, 'stores'])->name('stores.index');
         Route::post('/stores/{store}/toggle-ban', [SuperAdminController::class, 'toggleBan'])->name('stores.toggle_ban');
 

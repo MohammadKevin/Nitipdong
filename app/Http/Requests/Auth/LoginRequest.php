@@ -37,6 +37,16 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+        if ($user && $user->is_banned) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => 'Akun Anda telah dinonaktifkan/diblokir oleh Administrator.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

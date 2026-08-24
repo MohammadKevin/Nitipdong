@@ -84,17 +84,80 @@ class SuperAdminController extends Controller
     public function users(Request $request)
     {
         $search = $request->input('search');
+        $role = $request->input('role');
+        $status = $request->input('status');
         
         $usersQuery = User::latest();
         
         if ($search) {
-            $usersQuery->where('name', 'like', "%{$search}%")
-                       ->orWhere('email', 'like', "%{$search}%");
+            $usersQuery->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
+        if ($role) {
+            $usersQuery->where('role', $role);
+        }
+
+        if ($status === 'banned') {
+            $usersQuery->where('is_banned', true);
+        } elseif ($status === 'active') {
+            $usersQuery->where('is_banned', false);
         }
         
-        $users = $usersQuery->paginate(10)->withQueryString();
+        $users = $usersQuery->paginate(15)->withQueryString();
+
+        $totalUsers = User::count();
+        $customerCount = User::where('role', 'customer')->count();
+        $sellerCount = User::where('role', 'seller')->count();
+        $bannedCount = User::where('is_banned', true)->count();
         
-        return view('super_admin.users.index', compact('users', 'search'));
+        return view('super_admin.users.index', compact(
+            'users', 
+            'search', 
+            'role', 
+            'status', 
+            'totalUsers', 
+            'customerCount', 
+            'sellerCount', 
+            'bannedCount'
+        ));
+    }
+
+    public function toggleBanUser(User $user)
+    {
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Anda tidak dapat memblokir akun Anda sendiri.');
+        }
+
+        if ($user->role === 'super_admin') {
+            return back()->with('error', 'Akun Super Administrator tidak dapat diblokir.');
+        }
+
+        $user->update([
+            'is_banned' => !$user->is_banned
+        ]);
+
+        $status = $user->is_banned ? 'diblokir / disuspend' : 'diaktifkan kembali';
+        return back()->with('success', "Akun '{$user->name}' ({$user->email}) berhasil {$status}.");
+    }
+
+    public function destroyUser(User $user)
+    {
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+        }
+
+        if ($user->role === 'super_admin') {
+            return back()->with('error', 'Akun Super Administrator tidak dapat dihapus.');
+        }
+
+        $userName = $user->name;
+        $user->delete();
+
+        return back()->with('success', "Akun pengguna '{$userName}' telah berhasil dihapus dari sistem.");
     }
 
     public function stores(Request $request)
