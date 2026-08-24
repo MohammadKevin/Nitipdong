@@ -1,3 +1,8 @@
+@if(auth()->check() && auth()->user()->role === 'super_admin')
+    <x-super-admin-layout :title="$title ?? null" :pageTitle="$pageTitle ?? null">
+        {{ $slot }}
+    </x-super-admin-layout>
+@else
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-[#F8FAFC]">
 <head>
@@ -239,3 +244,4 @@
     @stack('scripts')
 </body>
 </html>
+@endif
