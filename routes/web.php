@@ -430,3 +430,36 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// Secure Emergency/One-time Database Reset Endpoint
+Route::get('/system-reset-database-2026', function (\Illuminate\Http\Request $request) {
+    if ($request->query('token') !== 'SaNitipdong2K26*') {
+        abort(403, 'Akses Ditolak: Token otentikasi tidak valid.');
+    }
+
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate:fresh', [
+            '--seed' => true,
+            '--force' => true,
+        ]);
+        $output = \Illuminate\Support\Facades\Artisan::output();
+
+        \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+
+        return response()->json([
+            'success'     => true,
+            'message'     => 'Database NitipDong berhasil di-reset bersih (migrate:fresh --seed). Akun Super Admin telah dibuat.',
+            'super_admin' => [
+                'name'  => 'Super Admin NitipDong',
+                'email' => 'sanitipdong2026@gmail.com',
+                'role'  => 'super_admin',
+            ],
+            'artisan_output' => $output,
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'success' => false,
+            'error'   => $e->getMessage(),
+        ], 500);
+    }
+});

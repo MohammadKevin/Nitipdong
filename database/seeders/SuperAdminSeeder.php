@@ -6,14 +6,13 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class DatabaseSeeder extends Seeder
+class SuperAdminSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * Run the database seeds.
      */
     public function run(): void
     {
-        // Akun Utama Super Admin NitipDong
         User::updateOrCreate(
             ['email' => 'sanitipdong2026@gmail.com'],
             [
