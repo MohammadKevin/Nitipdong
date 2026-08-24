@@ -274,8 +274,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/withdrawals/{withdrawal}/approve', [SuperAdminWithdrawalController::class, 'approve'])->name('withdrawals.approve');
         Route::post('/withdrawals/{withdrawal}/reject', [SuperAdminWithdrawalController::class, 'reject'])->name('withdrawals.reject');
 
-        // Reports Export
+        // Financial & Platform Reports
+        Route::get('/reports', [ExportController::class, 'superAdminReportsPage'])->name('reports.index');
         Route::get('/reports/revenue/export', [ExportController::class, 'superAdminRevenueReport'])->name('reports.revenue.export');
+        Route::get('/reports/print', [ExportController::class, 'superAdminPrintReport'])->name('reports.print');
     });
 
     // Admin & Super Admin Routes

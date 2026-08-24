@@ -162,10 +162,10 @@
                                 <span class="flex-1">Payout Toko</span>
                             </a>
 
-                            <a href="{{ route('super_admin.reports.revenue.export') }}"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium">
-                                <i class="fa-solid fa-file-arrow-down w-4 h-4 text-center text-xs text-slate-400 group-hover:text-blue-400"></i>
-                                <span class="flex-1">Ekspor Laporan</span>
+                            <a href="{{ route('super_admin.reports.index') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('super_admin.reports.*') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
+                                <i class="fa-solid fa-file-invoice-dollar w-4 h-4 text-center text-xs {{ request()->routeIs('super_admin.reports.*') ? 'text-blue-400' : 'text-slate-400 group-hover:text-blue-400' }}"></i>
+                                <span class="flex-1">Laporan & Ekspor</span>
                             </a>
                         </nav>
                     </div>
@@ -266,11 +266,11 @@
                     </a>
 
                     <!-- Primary Solid Button: Ekspor Laporan Keuangan -->
-                    <a href="{{ route('super_admin.reports.revenue.export') }}"
+                    <a href="{{ route('super_admin.reports.index') }}"
                        class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-xs transition-colors shrink-0">
-                        <i class="fa-solid fa-file-excel text-[11px]"></i>
-                        <span class="hidden md:inline">Ekspor Laporan Keuangan</span>
-                        <span class="md:hidden">Ekspor</span>
+                        <i class="fa-solid fa-file-invoice-dollar text-[11px]"></i>
+                        <span class="hidden md:inline">Laporan & Ekspor</span>
+                        <span class="md:hidden">Laporan</span>
                     </a>
                 </div>
             </header>

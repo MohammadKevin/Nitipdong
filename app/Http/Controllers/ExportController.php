@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Store;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExportController extends Controller
 {
+    /**
+     * Seller Sales CSV Export
+     */
     public function sellerSalesReport(Request $request): StreamedResponse
     {
         $store = Auth::user()->store;
@@ -77,14 +82,67 @@ class ExportController extends Controller
         }, 200, $headers);
     }
 
+    /**
+     * Super Admin Reports Interactive Web Page
+     */
+    public function superAdminReportsPage(Request $request)
+    {
+        $parsed = $this->buildReportQuery($request);
+        $query = $parsed['query'];
+        $startDate = $parsed['startDate'];
+        $endDate = $parsed['endDate'];
+        $period = $parsed['period'];
+        $status = $parsed['status'];
+        $storeId = $parsed['storeId'];
+        $search = $parsed['search'];
+
+        // Aggregated Metrics
+        $totalOrdersCount = (clone $query)->count();
+        $totalGrossRevenue = (float) (clone $query)->sum('total_amount');
+        $totalPlatformFee = round($totalGrossRevenue * 0.05);
+        $totalSellerEarnings = $totalGrossRevenue - $totalPlatformFee;
+
+        // Paginated records for table view
+        $orders = $query->with(['store', 'user', 'orderItems.product'])
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        $stores = Store::where('status', 'approved')->orderBy('name')->get();
+
+        return view('super_admin.reports.index', compact(
+            'orders',
+            'stores',
+            'period',
+            'startDate',
+            'endDate',
+            'status',
+            'storeId',
+            'search',
+            'totalOrdersCount',
+            'totalGrossRevenue',
+            'totalPlatformFee',
+            'totalSellerEarnings'
+        ));
+    }
+
+    /**
+     * Super Admin Revenue Report CSV / Excel Download
+     */
     public function superAdminRevenueReport(Request $request): StreamedResponse
     {
-        $fileName = 'laporan_keuntungan_marketplace_' . date('Y-m-d_His') . '.csv';
+        $parsed = $this->buildReportQuery($request);
+        $query = $parsed['query'];
+        $startDate = $parsed['startDate'];
+        $endDate = $parsed['endDate'];
+        $period = $parsed['period'];
 
-        $orders = Order::where('status', 'completed')
-            ->with(['store', 'user'])
-            ->latest()
-            ->get();
+        $orders = $query->with(['store', 'user', 'orderItems.product'])->latest()->get();
+
+        $periodLabel = $startDate && $endDate 
+            ? Carbon::parse($startDate)->format('d-m-Y') . '_sd_' . Carbon::parse($endDate)->format('d-m-Y') 
+            : 'semua_waktu';
+        $fileName = 'laporan_keuangan_nitipdong_' . $periodLabel . '_' . date('His') . '.csv';
 
         $headers = [
             'Content-Type'        => 'text/csv; charset=UTF-8',
@@ -94,54 +152,184 @@ class ExportController extends Controller
             'Expires'             => '0',
         ];
 
-        return response()->stream(function () use ($orders) {
+        return response()->stream(function () use ($orders, $startDate, $endDate, $period) {
             $handle = fopen('php://output', 'w');
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
 
+            // Metadata Headers
+            fputcsv($handle, ['LAPORAN KEUANGAN & KOMISI PLATFORM NITIPDONG']);
+            fputcsv($handle, ['Waktu Unduh', date('d/m/Y H:i:s') . ' WIB']);
+            fputcsv($handle, ['Filter Periode', ($startDate && $endDate ? "{$startDate} s/d {$endDate}" : 'Semua Data')]);
+            fputcsv($handle, ['Total Data', count($orders) . ' Transaksi']);
+            fputcsv($handle, []);
+
+            // Data Table Headers
             fputcsv($handle, [
+                'No',
                 'No Invoice',
-                'Tanggal Selesai',
-                'Nama Toko',
+                'Tanggal Transaksi',
+                'Merchant / Toko',
                 'Nama Pembeli',
-                'Nilai Transaksi GMV (Rp)',
+                'Status Pesanan',
+                'Item Produk Terjual',
+                'Gross Volume GMV (Rp)',
                 'Laba Komisi Platform 5% (Rp)',
-                'Bagian Penjual 95% (Rp)'
+                'Hak Pembayaran Toko 95% (Rp)'
             ]);
 
             $totalGMV = 0;
             $totalPlatformFee = 0;
+            $totalSellerShare = 0;
+            $rowNum = 1;
 
             foreach ($orders as $order) {
+                $isCompleted = in_array($order->status, ['completed', 'shipped', 'processing']);
                 $platformFee = round($order->total_amount * 0.05);
                 $sellerShare = $order->total_amount - $platformFee;
 
                 $totalGMV += $order->total_amount;
                 $totalPlatformFee += $platformFee;
+                $totalSellerShare += $sellerShare;
+
+                $itemsList = $order->orderItems->map(fn($it) => ($it->product->name ?? 'Produk') . " ({$it->quantity}x)")->join('; ');
 
                 fputcsv($handle, [
+                    $rowNum++,
                     $order->invoice_number,
-                    $order->completed_at ? $order->completed_at->format('d/m/Y H:i') : $order->updated_at->format('d/m/Y H:i'),
-                    $order->store ? $order->store->name : 'N/A',
-                    $order->user ? $order->user->name : 'N/A',
+                    $order->created_at->format('d/m/Y H:i'),
+                    $order->store->name ?? 'N/A',
+                    $order->user->name ?? 'N/A',
+                    strtoupper($order->status),
+                    $itemsList,
                     $order->total_amount,
                     $platformFee,
                     $sellerShare
                 ]);
             }
 
-            // Summary Row
+            // Summary Footer Row
             fputcsv($handle, []);
             fputcsv($handle, [
-                'TOTAL KESELURUHAN',
+                'RINGKASAN TOTAL',
+                '',
+                '',
+                '',
                 '',
                 '',
                 '',
                 $totalGMV,
                 $totalPlatformFee,
-                $totalGMV - $totalPlatformFee
+                $totalSellerShare
             ]);
 
             fclose($handle);
         }, 200, $headers);
+    }
+
+    /**
+     * Printable / PDF View
+     */
+    public function superAdminPrintReport(Request $request)
+    {
+        $parsed = $this->buildReportQuery($request);
+        $query = $parsed['query'];
+        $startDate = $parsed['startDate'];
+        $endDate = $parsed['endDate'];
+        $period = $parsed['period'];
+
+        $orders = $query->with(['store', 'user', 'orderItems.product'])->latest()->get();
+
+        $totalGMV = (float) $orders->sum('total_amount');
+        $totalPlatformFee = round($totalGMV * 0.05);
+        $totalSellerEarnings = $totalGMV - $totalPlatformFee;
+        $totalOrders = $orders->count();
+
+        return view('super_admin.reports.print', compact(
+            'orders',
+            'startDate',
+            'endDate',
+            'period',
+            'totalGMV',
+            'totalPlatformFee',
+            'totalSellerEarnings',
+            'totalOrders'
+        ));
+    }
+
+    /**
+     * Helper to parse and build standard report query
+     */
+    private function buildReportQuery(Request $request): array
+    {
+        $period = $request->query('period', 'this_month');
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
+        $status = $request->query('status', 'completed');
+        $storeId = $request->query('store_id');
+        $search = $request->query('search');
+
+        // Resolve dates based on preset period
+        if ($period === 'today') {
+            $startDate = now()->startOfDay()->format('Y-m-d');
+            $endDate = now()->endOfDay()->format('Y-m-d');
+        } elseif ($period === '7days') {
+            $startDate = now()->subDays(6)->startOfDay()->format('Y-m-d');
+            $endDate = now()->endOfDay()->format('Y-m-d');
+        } elseif ($period === 'this_month') {
+            $startDate = now()->startOfMonth()->format('Y-m-d');
+            $endDate = now()->endOfMonth()->format('Y-m-d');
+        } elseif ($period === 'last_month') {
+            $startDate = now()->subMonth()->startOfMonth()->format('Y-m-d');
+            $endDate = now()->subMonth()->endOfMonth()->format('Y-m-d');
+        } elseif ($period === 'this_year') {
+            $startDate = now()->startOfYear()->format('Y-m-d');
+            $endDate = now()->endOfYear()->format('Y-m-d');
+        } elseif ($period === 'all') {
+            $startDate = null;
+            $endDate = null;
+        }
+
+        $query = Order::query();
+
+        // Status Filter
+        if ($status && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        // Store Filter
+        if ($storeId) {
+            $query->where('store_id', $storeId);
+        }
+
+        // Date Filter
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [
+                Carbon::parse($startDate)->startOfDay(),
+                Carbon::parse($endDate)->endOfDay()
+            ]);
+        } elseif ($startDate) {
+            $query->where('created_at', '>=', Carbon::parse($startDate)->startOfDay());
+        } elseif ($endDate) {
+            $query->where('created_at', '<=', Carbon::parse($endDate)->endOfDay());
+        }
+
+        // Search Filter
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('invoice_number', 'like', "%{$search}%")
+                  ->orWhereHas('user', fn($u) => $u->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%"))
+                  ->orWhereHas('store', fn($s) => $s->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        return [
+            'query'     => $query,
+            'period'    => $period,
+            'startDate' => $startDate,
+            'endDate'   => $endDate,
+            'status'    => $status,
+            'storeId'   => $storeId,
+            'search'    => $search,
+        ];
     }
 }
