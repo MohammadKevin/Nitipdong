@@ -58,7 +58,7 @@ class ComplaintController extends Controller
             if ($isApproved) {
                 // If the order was completed, adjust seller balance
                 if ($order->status === 'completed') {
-                    $refundedAmount = $order->total_amount * 0.95;
+                    $refundedAmount = $order->total_amount * 0.85;
                     $complaint->store->decrement('balance', min($complaint->store->balance, $refundedAmount));
                 }
                 $order->update(['status' => 'cancelled']);

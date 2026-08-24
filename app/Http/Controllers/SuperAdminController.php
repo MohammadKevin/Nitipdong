@@ -14,7 +14,7 @@ class SuperAdminController extends Controller
     public function index()
     {
         $grossVolume = (float) Order::where('status', 'completed')->sum('total_amount');
-        $totalKeuntunganPlatform = round($grossVolume * 0.05);
+        $totalKeuntunganPlatform = round($grossVolume * 0.15);
 
         // Status Counts
         $pendingOrders = Order::where('status', 'pending')->count();
@@ -40,7 +40,7 @@ class SuperAdminController extends Controller
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('total_amount');
-        $thisMonthProfit = round($thisMonthGross * 0.05);
+        $thisMonthProfit = round($thisMonthGross * 0.15);
 
         $lastMonthGross = (float) Order::where('status', 'completed')
             ->whereMonth('created_at', now()->subMonth()->month)
@@ -244,7 +244,7 @@ class SuperAdminController extends Controller
             ->pluck('total', 'tanggal');
 
         $gmv = $days->map(fn ($d) => (float) ($totals[$d->format('Y-m-d')] ?? 0))->toArray();
-        $commission = array_map(fn ($v) => round($v * 0.05), $gmv);
+        $commission = array_map(fn ($v) => round($v * 0.15), $gmv);
 
         return [
             'labels' => $labels,
@@ -268,7 +268,7 @@ class SuperAdminController extends Controller
                 ->whereBetween('created_at', [$weekStart, $weekEnd])
                 ->sum('total_amount');
             $gmv[] = $volume;
-            $commission[] = round($volume * 0.05);
+            $commission[] = round($volume * 0.15);
             $weekStart = $weekStart->copy()->addWeek();
             $i++;
         }
@@ -293,7 +293,7 @@ class SuperAdminController extends Controller
                 ->whereMonth('created_at', $m)
                 ->sum('total_amount');
             $gmv[] = $volume;
-            $commission[] = round($volume * 0.05);
+            $commission[] = round($volume * 0.15);
         }
 
         return [
@@ -311,7 +311,7 @@ class SuperAdminController extends Controller
             fn ($y) => (float) Order::where('status', 'completed')->whereYear('created_at', $y)->sum('total_amount'),
             $years
         );
-        $commission = array_map(fn ($v) => round($v * 0.05), $gmv);
+        $commission = array_map(fn ($v) => round($v * 0.15), $gmv);
 
         return [
             'labels' => $labels,

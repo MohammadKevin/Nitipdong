@@ -73,7 +73,7 @@
         <div class="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center text-xs">
             <div>
                 <span class="font-bold text-slate-800 uppercase tracking-wider text-[11px]">Laporan: </span>
-                <span class="text-slate-700 font-medium">Rekapitulasi Penjualan &amp; Pembagian Komisi Platform (5%)</span>
+                <span class="text-slate-700 font-medium">Rekapitulasi Penjualan &amp; Pembagian Komisi Platform (15%)</span>
             </div>
             <div class="font-mono-num">
                 <span class="font-bold text-slate-800 uppercase tracking-wider text-[11px]">Periode: </span>
@@ -95,11 +95,11 @@
             <span class="text-base font-extrabold text-slate-900 mt-1 block">Rp {{ number_format($totalGMV, 0, ',', '.') }}</span>
         </div>
         <div class="p-3.5 bg-emerald-50/60 rounded-lg border border-emerald-200">
-            <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Laba Komisi Platform 5%</span>
+            <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Laba Komisi Platform 15%</span>
             <span class="text-base font-extrabold text-emerald-800 mt-1 block">Rp {{ number_format($totalPlatformFee, 0, ',', '.') }}</span>
         </div>
         <div class="p-3.5 bg-purple-50/60 rounded-lg border border-purple-200">
-            <span class="text-[10px] font-bold text-purple-800 uppercase tracking-wider block">Hak Pembayaran Toko 95%</span>
+            <span class="text-[10px] font-bold text-purple-800 uppercase tracking-wider block">Hak Pembayaran Toko 85%</span>
             <span class="text-base font-extrabold text-purple-900 mt-1 block">Rp {{ number_format($totalSellerEarnings, 0, ',', '.') }}</span>
         </div>
         <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
@@ -118,14 +118,14 @@
                 <th class="p-2.5 border-r border-slate-300">Nama Pembeli</th>
                 <th class="p-2.5 border-r border-slate-300">Ringkasan Produk</th>
                 <th class="p-2.5 border-r border-slate-300 text-right">Nilai GMV (Rp)</th>
-                <th class="p-2.5 border-r border-slate-300 text-right">Komisi 5% (Rp)</th>
-                <th class="p-2.5 text-right">Hak Toko 95% (Rp)</th>
+                <th class="p-2.5 border-r border-slate-300 text-right">Komisi 15% (Rp)</th>
+                <th class="p-2.5 text-right">Hak Toko 85% (Rp)</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-slate-200 font-mono-num text-[11px]">
             @forelse($orders as $idx => $order)
             @php
-                $fee = round($order->total_amount * 0.05);
+                $fee = round($order->total_amount * 0.15);
                 $sellerNet = $order->total_amount - $fee;
             @endphp
             <tr class="{{ $idx % 2 === 1 ? 'bg-slate-50/50' : 'bg-white' }}">

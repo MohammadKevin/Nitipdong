@@ -79,7 +79,7 @@
                     <p class="text-[10px] text-slate-400 mt-0.5">Dari seluruh pesanan selesai</p>
                 </div>
                 <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-500">
-                    Komisi Platform 5%: <strong class="text-rose-600">-Rp {{ number_format($platformCommission, 0, ',', '.') }}</strong>
+                    Komisi Platform 15%: <strong class="text-rose-600">-Rp {{ number_format($platformCommission, 0, ',', '.') }}</strong>
                 </div>
             </div>
 

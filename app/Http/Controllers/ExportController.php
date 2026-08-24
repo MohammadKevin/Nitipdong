@@ -50,8 +50,8 @@ class ExportController extends Controller
                 'Daftar Produk & Qty',
                 'Diskon Voucher (Rp)',
                 'Total Transaksi (Rp)',
-                'Komisi Platform 5% (Rp)',
-                'Pendapatan Bersih Toko (Rp)',
+                'Komisi Platform 15% (Rp)',
+                'Pendapatan Bersih Toko 85% (Rp)',
                 'No Resi Pengiriman'
             ]);
 
@@ -61,7 +61,7 @@ class ExportController extends Controller
                 })->join('; ');
 
                 $isCompleted = $order->status === 'completed';
-                $platformFee = $isCompleted ? round($order->total_amount * 0.05) : 0;
+                $platformFee = $isCompleted ? round($order->total_amount * 0.15) : 0;
                 $netEarnings = $isCompleted ? ($order->total_amount - $platformFee) : 0;
 
                 fputcsv($handle, [
@@ -99,7 +99,7 @@ class ExportController extends Controller
         // Aggregated Metrics
         $totalOrdersCount = (clone $query)->count();
         $totalGrossRevenue = (float) (clone $query)->sum('total_amount');
-        $totalPlatformFee = round($totalGrossRevenue * 0.05);
+        $totalPlatformFee = round($totalGrossRevenue * 0.15);
         $totalSellerEarnings = $totalGrossRevenue - $totalPlatformFee;
 
         // Paginated records for table view
@@ -149,7 +149,7 @@ class ExportController extends Controller
             : 'Semua Waktu Historis';
 
         $totalGMV = (float) $orders->sum('total_amount');
-        $totalPlatformFee = round($totalGMV * 0.05);
+        $totalPlatformFee = round($totalGMV * 0.15);
         $totalSellerEarnings = $totalGMV - $totalPlatformFee;
 
         // 1. FORMAT: EXCEL SPREADSHEET (.xls) with multi-column styles & gridlines
@@ -205,8 +205,8 @@ class ExportController extends Controller
                 'Status Pesanan',
                 'Item Produk Terjual',
                 'Gross Volume GMV (Rp)',
-                'Laba Komisi Platform 5% (Rp)',
-                'Hak Pembayaran Toko 95% (Rp)'
+                'Laba Komisi Platform 15% (Rp)',
+                'Hak Pembayaran Toko 85% (Rp)'
             ]);
 
             $totalGMV = 0;
@@ -215,7 +215,7 @@ class ExportController extends Controller
             $rowNum = 1;
 
             foreach ($orders as $order) {
-                $platformFee = round($order->total_amount * 0.05);
+                $platformFee = round($order->total_amount * 0.15);
                 $sellerShare = $order->total_amount - $platformFee;
 
                 $totalGMV += $order->total_amount;
@@ -273,7 +273,7 @@ class ExportController extends Controller
         $orders = $query->with(['store', 'user', 'orderItems.product'])->latest()->get();
 
         $totalGMV = (float) $orders->sum('total_amount');
-        $totalPlatformFee = round($totalGMV * 0.05);
+        $totalPlatformFee = round($totalGMV * 0.15);
         $totalSellerEarnings = $totalGMV - $totalPlatformFee;
         $totalOrders = $orders->count();
 

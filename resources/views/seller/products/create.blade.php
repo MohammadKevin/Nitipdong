@@ -57,7 +57,7 @@
                             price: {{ old('price', 0) }},
                             discount: {{ old('discount_percentage', 0) }},
                             get markupPrice() {
-                                return Math.round(this.price * 1.05);
+                                return Math.round(this.price * 1.15);
                             },
                             get finalPrice() {
                                 if (this.discount > 0 && this.markupPrice > 0) {
@@ -135,7 +135,7 @@
                                     <span class="text-cyan-900 font-semibold flex items-center gap-1.5">
                                         <i class="fa-solid fa-calculator text-cyan-700 text-[11px]"></i>
                                         Harga Tayang Pembeli: <span class="text-xs font-bold text-cyan-800" x-text="formatRupiah(markupPrice)"></span>
-                                        <span class="text-[10px] text-cyan-700 font-medium">(Termasuk Komisi Platform 5%: <span x-text="formatRupiah(markupPrice - price)"></span>)</span>
+                                        <span class="text-[10px] text-cyan-700 font-medium">(Termasuk Komisi Platform 15%: <span x-text="formatRupiah(markupPrice - price)"></span>)</span>
                                     </span>
                                     <p class="text-[11px] text-slate-500 mt-0.5">Pendapatan bersih yang diterima toko: <strong class="text-slate-800" x-text="formatRupiah(price)"></strong></p>
                                 </div>

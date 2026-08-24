@@ -100,14 +100,14 @@
             <th class="th-header" style="width: 250px;">Item Produk &amp; Qty</th>
             <th class="th-header" style="width: 110px;">Status</th>
             <th class="th-header" style="width: 150px;">Gross Volume GMV (Rp)</th>
-            <th class="th-header" style="width: 150px;">Komisi Platform 5% (Rp)</th>
-            <th class="th-header" style="width: 150px;">Hak Penjual 95% (Rp)</th>
+            <th class="th-header" style="width: 150px;">Komisi Platform 15% (Rp)</th>
+            <th class="th-header" style="width: 150px;">Hak Penjual 85% (Rp)</th>
         </tr>
 
         <!-- Data Rows -->
         @foreach($orders as $idx => $order)
         @php
-            $fee = round($order->total_amount * 0.05);
+            $fee = round($order->total_amount * 0.15);
             $sellerNet = $order->total_amount - $fee;
             $itemsList = $order->orderItems 
                 ? $order->orderItems->map(fn($it) => ($it->product->name ?? 'Produk') . " ({$it->quantity}x)")->join(', ')

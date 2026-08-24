@@ -87,7 +87,7 @@ class SellerApiController extends Controller
                 'total_sales'      => (float) $totalSales,
                 'pending_orders'   => $pendingOrders,
                 'completed_orders' => $completedOrders,
-                'wallet_balance'   => (float) ($store->balance ?? $totalSales * 0.95),
+                'wallet_balance'   => (float) ($store->balance ?? $totalSales * 0.85),
             ],
         ]);
     }

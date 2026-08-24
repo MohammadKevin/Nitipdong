@@ -204,7 +204,7 @@
                             <th class="px-3 py-3.5 bg-slate-50">Produk</th>
                             <th class="px-4 py-3.5 bg-slate-50">Kategori</th>
                             <th class="px-4 py-3.5 bg-slate-50">Harga Dasar Toko</th>
-                            <th class="px-4 py-3.5 bg-slate-50">Harga Tayang Konsumen (+5%)</th>
+                            <th class="px-4 py-3.5 bg-slate-50">Harga Tayang Konsumen (+15%)</th>
                             <th class="px-4 py-3.5 text-center bg-slate-50">Stok</th>
                             <th class="px-4 py-3.5 text-center bg-slate-50">Status</th>
                             <th class="px-4 py-3.5 text-center bg-slate-50">Aksi</th>

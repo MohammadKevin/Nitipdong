@@ -26,7 +26,7 @@ class WalletController extends Controller
             ->where('status', 'completed')
             ->sum('total_amount');
 
-        $platformCommission = round($grossSales * 0.05);
+        $platformCommission = round($grossSales * 0.15);
         $totalNetEarnings = $grossSales - $platformCommission;
 
         $totalWithdrawn = Withdrawal::where('store_id', $store->id)

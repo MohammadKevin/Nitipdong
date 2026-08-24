@@ -12,7 +12,7 @@
             <h1 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                 Laporan Keuangan & Ekspor Transaksi
             </h1>
-            <p class="text-xs text-slate-500 mt-0.5">Analisis pendapatan komisi 5%, volume GMV, dan pembagian hasil penjualan seluruh merchant marketplace.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Analisis pendapatan komisi 15%, volume GMV, dan pembagian hasil penjualan seluruh merchant marketplace.</p>
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
@@ -155,26 +155,26 @@
             </div>
         </div>
 
-        <!-- Komisi Platform 5% -->
+        <!-- Komisi Platform 15% -->
         <div class="bg-white rounded-lg p-4 sm:p-4.5 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
             <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center text-base shrink-0 font-mono-num">
                 <i class="fa-solid fa-coins"></i>
             </div>
             <div class="min-w-0">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono-num truncate">Laba Komisi Platform (5%)</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono-num truncate">Laba Komisi Platform (15%)</p>
                 <h4 class="text-lg sm:text-xl font-bold text-emerald-700 mt-0.5 font-mono-num truncate" title="Rp {{ number_format($totalPlatformFee, 0, ',', '.') }}">
                     Rp {{ number_format($totalPlatformFee, 0, ',', '.') }}
                 </h4>
             </div>
         </div>
 
-        <!-- Hak Penjual 95% -->
+        <!-- Hak Penjual 85% -->
         <div class="bg-white rounded-lg p-4 sm:p-4.5 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
             <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-700 border border-purple-200/60 flex items-center justify-center text-base shrink-0 font-mono-num">
                 <i class="fa-solid fa-hand-holding-dollar"></i>
             </div>
             <div class="min-w-0">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono-num truncate">Hak Penjual (95%)</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono-num truncate">Hak Penjual (85%)</p>
                 <h4 class="text-lg sm:text-xl font-bold text-slate-900 mt-0.5 font-mono-num truncate" title="Rp {{ number_format($totalSellerEarnings, 0, ',', '.') }}">
                     Rp {{ number_format($totalSellerEarnings, 0, ',', '.') }}
                 </h4>
@@ -226,15 +226,15 @@
                         <th class="px-4 py-3 font-semibold">Pembeli</th>
                         <th class="px-4 py-3 font-semibold">Item Belanja</th>
                         <th class="px-4 py-3 font-semibold text-right">Nilai GMV (Rp)</th>
-                        <th class="px-4 py-3 font-semibold text-right">Komisi 5% (Rp)</th>
-                        <th class="px-4 py-3 font-semibold text-right">Bagian Toko 95% (Rp)</th>
+                        <th class="px-4 py-3 font-semibold text-right">Komisi 15% (Rp)</th>
+                        <th class="px-4 py-3 font-semibold text-right">Bagian Toko 85% (Rp)</th>
                         <th class="px-4 py-3 font-semibold text-center">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($orders as $order)
                     @php
-                        $fee = round($order->total_amount * 0.05);
+                        $fee = round($order->total_amount * 0.15);
                         $sellerNet = $order->total_amount - $fee;
                     @endphp
                     <tr class="hover:bg-slate-50/70 transition-colors">
@@ -253,7 +253,7 @@
                         <td class="px-4 py-3.5">
                             <div class="text-[11px] text-slate-600 max-w-[180px]">
                                 @foreach($order->orderItems->take(2) as $item)
-                                    <p class="truncate">&bull; {{ $item->product->name ?? 'Item' }} <span class="text-slate-400 font-mono-num">({{ $item->quantity }}x)</span></p>
+                                    <p class="truncate">&bull; {{ $item->product->name ?? 'Item' }} <span class="text-slate-400 font-mono-num">({{ $item->quantity}x)</span></p>
                                 @endforeach
                                 @if($order->orderItems->count() > 2)
                                     <span class="text-[10px] text-blue-600 font-semibold font-mono-num">+{{ $order->orderItems->count() - 2 }} produk lainnya</span>
@@ -309,10 +309,10 @@
                             Rp {{ number_format($orders->sum('total_amount'), 0, ',', '.') }}
                         </td>
                         <td class="px-4 py-3 text-right text-emerald-700 font-bold">
-                            Rp {{ number_format(round($orders->sum('total_amount') * 0.05), 0, ',', '.') }}
+                            Rp {{ number_format(round($orders->sum('total_amount') * 0.15), 0, ',', '.') }}
                         </td>
                         <td class="px-4 py-3 text-right text-slate-800 font-bold">
-                            Rp {{ number_format($orders->sum('total_amount') - round($orders->sum('total_amount') * 0.05), 0, ',', '.') }}
+                            Rp {{ number_format($orders->sum('total_amount') - round($orders->sum('total_amount') * 0.15), 0, ',', '.') }}
                         </td>
                         <td></td>
                     </tr>

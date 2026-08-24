@@ -119,12 +119,12 @@ class Product extends Model
 
     public function getPlatformFeeAttribute(): float
     {
-        return round($this->seller_price * 0.05);
+        return round($this->seller_price * 0.15);
     }
 
     public function getCustomerBasePriceAttribute(): float
     {
-        return round($this->seller_price * 1.05);
+        return round($this->seller_price * 1.15);
     }
 
     public function getPriceAttribute(): float

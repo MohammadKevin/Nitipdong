@@ -60,9 +60,9 @@ class OrderManagementController extends Controller
             if ($newStatus === 'completed' && !$order->completed_at) {
                 $updates['completed_at'] = now();
 
-                // If not yet credited, credit 95%
+                // If not yet credited, credit 85%
                 if ($oldStatus !== 'completed') {
-                    $sellerEarnings = round($order->total_amount * 0.95);
+                    $sellerEarnings = round($order->total_amount * 0.85);
                     $order->store->increment('balance', $sellerEarnings);
                 }
             }

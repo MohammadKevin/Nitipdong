@@ -453,8 +453,8 @@ class OrderController extends Controller
                 'completed_at' => now(),
             ]);
 
-            // Auto-credit 95% balance to seller store (5% platform commission kept)
-            $sellerEarnings = round($order->total_amount * 0.95);
+            // Auto-credit 85% balance to seller store (15% platform commission kept)
+            $sellerEarnings = round($order->total_amount * 0.85);
             $order->store->increment('balance', $sellerEarnings);
 
             // Notify seller

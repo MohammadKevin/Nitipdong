@@ -19,7 +19,7 @@
                 </span>
             </div>
             <p class="text-xs text-slate-500 max-w-2xl mt-0.5">
-                Monitoring real-time perputaran transaksi marketplace, pendapatan komisi 5%, dan performa operasional toko.
+                Monitoring real-time perputaran transaksi marketplace, pendapatan komisi 15%, dan performa operasional toko.
             </p>
         </div>
 
@@ -32,11 +32,11 @@
     <!-- 4 KEY METRIC CARDS (Enterprise Flat Grid with 6px-8px Radius & Tabular Numbers) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5 sm:gap-4">
         
-        <!-- CARD 1: KOMISI PLATFORM 5% -->
+        <!-- CARD 1: KOMISI PLATFORM 15% -->
         <div class="bg-white p-4 sm:p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div>
                 <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
-                    <span class="uppercase tracking-wider text-[10px] font-bold text-slate-400 font-mono-num truncate">Komisi Platform (5%)</span>
+                    <span class="uppercase tracking-wider text-[10px] font-bold text-slate-400 font-mono-num truncate">Komisi Platform (15%)</span>
                     <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 font-mono-num shrink-0">
                         Laba Bersih
                     </span>
@@ -137,7 +137,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
                 <div>
                     <h3 class="text-sm font-bold text-slate-900 tracking-tight">Tren Pendapatan & Volume Transaksi</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Analisis pendapatan komisi 5% dan gross merchandise volume (GMV)</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Analisis pendapatan komisi 15% dan gross merchandise volume (GMV)</p>
                 </div>
 
                 <!-- Timeframe Segmented Controls -->
@@ -165,7 +165,7 @@
                 <div class="flex items-center gap-4 flex-wrap">
                     <div class="flex items-center gap-1.5">
                         <span class="w-2.5 h-2.5 rounded-xs bg-blue-600"></span>
-                        <span class="font-medium text-slate-700">Komisi Platform (5%)</span>
+                        <span class="font-medium text-slate-700">Komisi Platform (15%)</span>
                     </div>
                     <div class="flex items-center gap-1.5">
                         <span class="w-2.5 h-2.5 rounded-xs bg-slate-300"></span>
@@ -198,73 +198,68 @@
                     $cancPct = round(($cancelledOrders / $safeTotal) * 100);
                 @endphp
 
-                <!-- Selesai (17%) -->
+                <!-- Selesai -->
                 <div>
-                    <div class="flex justify-between text-xs mb-1 font-medium">
-                        <span class="text-slate-700 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-xs bg-emerald-600"></span>
-                            Pesanan Selesai
+                    <div class="flex justify-between text-xs font-medium text-slate-700 mb-1">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Selesai
                         </span>
-                        <span class="text-slate-900 font-mono-num font-semibold">{{ $completedOrders }} ({{ $compPct }}%)</span>
+                        <span class="font-mono-num font-bold text-slate-900">{{ $completedOrders }} ({{ $compPct }}%)</span>
                     </div>
-                    <div class="w-full bg-slate-100 rounded-xs h-1.5 overflow-hidden">
-                        <div class="bg-emerald-600 h-full rounded-xs transition-all duration-300" style="width: {{ $compPct }}%"></div>
+                    <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-emerald-500 h-full rounded-full" style="width: {{ $compPct }}%"></div>
                     </div>
                 </div>
 
-                <!-- Sedang Dikirim (17%) -->
+                <!-- Sedang Dikirim -->
                 <div>
-                    <div class="flex justify-between text-xs mb-1 font-medium">
-                        <span class="text-slate-700 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-xs bg-blue-600"></span>
-                            Sedang Dikirim
+                    <div class="flex justify-between text-xs font-medium text-slate-700 mb-1">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-sky-500"></span> Sedang Dikirim
                         </span>
-                        <span class="text-slate-900 font-mono-num font-semibold">{{ $shippedOrders }} ({{ $shipPct }}%)</span>
+                        <span class="font-mono-num font-bold text-slate-900">{{ $shippedOrders }} ({{ $shipPct }}%)</span>
                     </div>
-                    <div class="w-full bg-slate-100 rounded-xs h-1.5 overflow-hidden">
-                        <div class="bg-blue-600 h-full rounded-xs transition-all duration-300" style="width: {{ $shipPct }}%"></div>
+                    <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-sky-500 h-full rounded-full" style="width: {{ $shipPct }}%"></div>
                     </div>
                 </div>
 
-                <!-- Diproses Toko (17%) -->
+                <!-- Diproses Toko -->
                 <div>
-                    <div class="flex justify-between text-xs mb-1 font-medium">
-                        <span class="text-slate-700 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-xs bg-sky-500"></span>
-                            Diproses Toko
+                    <div class="flex justify-between text-xs font-medium text-slate-700 mb-1">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span> Diproses Penjual
                         </span>
-                        <span class="text-slate-900 font-mono-num font-semibold">{{ $processingOrders }} ({{ $procPct }}%)</span>
+                        <span class="font-mono-num font-bold text-slate-900">{{ $processingOrders }} ({{ $procPct }}%)</span>
                     </div>
-                    <div class="w-full bg-slate-100 rounded-xs h-1.5 overflow-hidden">
-                        <div class="bg-sky-500 h-full rounded-xs transition-all duration-300" style="width: {{ $procPct }}%"></div>
+                    <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-blue-500 h-full rounded-full" style="width: {{ $procPct }}%"></div>
                     </div>
                 </div>
 
-                <!-- Menunggu Konfirmasi (0%) -->
+                <!-- Menunggu Konfirmasi -->
                 <div>
-                    <div class="flex justify-between text-xs mb-1 font-medium">
-                        <span class="text-slate-700 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-xs bg-amber-500"></span>
-                            Menunggu Konfirmasi
+                    <div class="flex justify-between text-xs font-medium text-slate-700 mb-1">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span> Menunggu Pembayaran
                         </span>
-                        <span class="text-slate-900 font-mono-num font-semibold">{{ $pendingOrders }} ({{ $pendPct }}%)</span>
+                        <span class="font-mono-num font-bold text-slate-900">{{ $pendingOrders }} ({{ $pendPct }}%)</span>
                     </div>
-                    <div class="w-full bg-slate-100 rounded-xs h-1.5 overflow-hidden">
-                        <div class="bg-amber-500 h-full rounded-xs transition-all duration-300" style="width: {{ $pendPct }}%"></div>
+                    <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-amber-500 h-full rounded-full" style="width: {{ $pendPct }}%"></div>
                     </div>
                 </div>
 
-                <!-- Dibatalkan / Gagal (50%) -->
+                <!-- Dibatalkan / Gagal -->
                 <div>
-                    <div class="flex justify-between text-xs mb-1 font-medium">
-                        <span class="text-slate-700 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-xs bg-rose-500"></span>
-                            Dibatalkan / Gagal
+                    <div class="flex justify-between text-xs font-medium text-slate-700 mb-1">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-rose-500"></span> Dibatalkan / Gagal
                         </span>
-                        <span class="text-slate-900 font-mono-num font-semibold">{{ $cancelledOrders }} ({{ $cancPct }}%)</span>
+                        <span class="font-mono-num font-bold text-slate-900">{{ $cancelledOrders }} ({{ $cancPct }}%)</span>
                     </div>
-                    <div class="w-full bg-slate-100 rounded-xs h-1.5 overflow-hidden">
-                        <div class="bg-rose-500 h-full rounded-xs transition-all duration-300" style="width: {{ $cancPct }}%"></div>
+                    <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-rose-500 h-full rounded-full" style="width: {{ $cancPct }}%"></div>
                     </div>
                 </div>
             </div>
@@ -272,7 +267,7 @@
             <!-- Operational Notice -->
             <div class="p-3 bg-slate-50 rounded-lg border border-slate-200/80 text-xs text-slate-600">
                 <p class="leading-relaxed">
-                    Setiap transaksi sukses secara otomatis dipotong komisi <strong class="text-slate-900 font-semibold">5%</strong> untuk kas operasional platform.
+                    Setiap transaksi sukses secara otomatis dipotong komisi <strong class="text-slate-900 font-semibold">15%</strong> untuk kas operasional platform.
                 </p>
             </div>
         </div>
@@ -314,7 +309,7 @@
                         <th class="px-5 py-3">Merchant / Toko</th>
                         <th class="px-5 py-3">Pembeli</th>
                         <th class="px-5 py-3">Total Belanja (GMV)</th>
-                        <th class="px-5 py-3">Komisi Platform (5%)</th>
+                        <th class="px-5 py-3">Komisi Platform (15%)</th>
                         <th class="px-5 py-3">Status Pesanan</th>
                         <th class="px-5 py-3">Waktu</th>
                     </tr>
@@ -352,10 +347,10 @@
                             Rp {{ number_format($order->total_amount, 0, ',', '.') }}
                         </td>
 
-                        <!-- Komisi 5% -->
+                        <!-- Komisi 15% -->
                         <td class="px-5 py-3.5">
                             <span class="inline-flex items-center gap-1 font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200/60 font-mono-num">
-                                Rp {{ number_format(round($order->total_amount * 0.05), 0, ',', '.') }}
+                                Rp {{ number_format(round($order->total_amount * 0.15), 0, ',', '.') }}
                             </span>
                         </td>
 
@@ -425,7 +420,7 @@
                     labels: labels,
                     datasets: [
                         {
-                            label: 'Komisi Platform (5%)',
+                            label: 'Komisi Platform (15%)',
                             data: commissionData,
                             borderColor: '#2563eb',
                             borderWidth: 2,
