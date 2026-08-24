@@ -3,13 +3,13 @@
         Executive Dashboard - {{ config('app.name', 'NitipDong') }}
     </x-slot>
     <x-slot name="pageTitle">
-        Executive Overview & Financial Metrics
+        Executive Overview & Platform Analytics
     </x-slot>
 
-    <!-- CURATED ENTERPRISE HEADER -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+    <!-- HERO / STATUS BAR (Compact Enterprise Style) -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
         <div>
-            <div class="flex items-center gap-2 mb-1">
+            <div class="flex items-center gap-2">
                 <h1 class="text-xl font-bold text-slate-900 tracking-tight">
                     Ringkasan Eksekutif & Analisis Finansial
                 </h1>
@@ -18,36 +18,22 @@
                     Q3 {{ now()->year }}
                 </span>
             </div>
-            <p class="text-xs text-slate-500 max-w-2xl">
-                Monitoring real-time perputaran transaksi marketplace, pendapatan laba komisi 5%, dan status operasional toko.
+            <p class="text-xs text-slate-500 max-w-2xl mt-0.5">
+                Monitoring real-time perputaran transaksi marketplace, pendapatan komisi 5%, dan performa operasional toko.
             </p>
         </div>
 
-        <div class="flex items-center gap-2 flex-wrap shrink-0">
-            <a href="{{ route('super_admin.withdrawals.index') }}" 
-               class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold shadow-xs transition-colors">
-                <i class="fa-solid fa-money-bill-transfer text-emerald-600 text-[11px]"></i>
-                <span>Tinjau Payout</span>
-                @if($pendingWithdrawalsCount > 0)
-                    <span class="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 font-bold text-[10px] font-mono-num">
-                        {{ $pendingWithdrawalsCount }}
-                    </span>
-                @endif
-            </a>
-
-            <a href="{{ route('super_admin.reports.revenue.export') }}" 
-               class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs transition-colors">
-                <i class="fa-solid fa-file-excel text-[11px]"></i>
-                <span>Ekspor Laporan</span>
-            </a>
+        <div class="flex items-center gap-2 text-xs font-mono-num text-slate-500 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-xs">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Platform Status: <strong class="text-slate-800 font-semibold">Operational (99.9%)</strong></span>
         </div>
     </div>
 
-    <!-- CONNECTED KPI METRIC GRID (Enterprise Linear Style) -->
+    <!-- 4 KEY METRIC CARDS (Enterprise Flat Grid with 6px-8px Radius & Tabular Numbers) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        <!-- METRIC 1: KOMISI PLATFORM (5%) -->
-        <div class="bg-white p-4.5 rounded-xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
+        <!-- CARD 1: KOMISI PLATFORM 5% -->
+        <div class="bg-white p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div>
                 <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
                     <span class="uppercase tracking-wider text-[10px] font-bold text-slate-400 font-mono-num">Komisi Platform (5%)</span>
@@ -68,8 +54,8 @@
             </div>
         </div>
 
-        <!-- METRIC 2: GROSS MERCHANDISE VOLUME (GMV) -->
-        <div class="bg-white p-4.5 rounded-xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
+        <!-- CARD 2: GROSS MERCHANDISE VOLUME (GMV) -->
+        <div class="bg-white p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div>
                 <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
                     <span class="uppercase tracking-wider text-[10px] font-bold text-slate-400 font-mono-num">Gross Volume (GMV)</span>
@@ -90,8 +76,8 @@
             </div>
         </div>
 
-        <!-- METRIC 3: VOLUME PESANAN -->
-        <div class="bg-white p-4.5 rounded-xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
+        <!-- CARD 3: VOLUME PESANAN -->
+        <div class="bg-white p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div>
                 <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
                     <span class="uppercase tracking-wider text-[10px] font-bold text-slate-400 font-mono-num">Volume Pesanan</span>
@@ -108,15 +94,15 @@
 
             <div class="mt-4 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                 <span>Pesanan Berjalan:</span>
-                <span class="font-bold text-blue-700 font-mono-num">{{ number_format($activeOrders, 0, ',', '.') }} Aktif</span>
+                <span class="font-bold text-blue-700 font-mono-num">{{ number_format($activeOrders, 0, ',', '.') }} Transaksi Aktif</span>
             </div>
         </div>
 
-        <!-- METRIC 4: EKOSISTEM PENGGUNA & TOKO -->
-        <div class="bg-white p-4.5 rounded-xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
+        <!-- CARD 4: EKOSISTEM PLATFORM -->
+        <div class="bg-white p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div>
                 <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
-                    <span class="uppercase tracking-wider text-[10px] font-bold text-slate-400 font-mono-num">Pengguna Terdaftar</span>
+                    <span class="uppercase tracking-wider text-[10px] font-bold text-slate-400 font-mono-num">Ekosistem Platform</span>
                     <span class="text-[10px] font-semibold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded font-mono-num">
                         Akun
                     </span>
@@ -129,9 +115,9 @@
             </div>
 
             <div class="mt-4 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span>Toko Resmi:</span>
+                <span>Toko Terdaftar:</span>
                 <div class="flex items-center gap-1.5 font-mono-num">
-                    <span class="font-bold text-slate-800">{{ $totalToko }} Mitra</span>
+                    <span class="font-bold text-slate-800">{{ $totalToko }} Toko Resmi</span>
                     @if($pendingStoresCount > 0)
                         <span class="text-[9px] font-bold text-amber-700 bg-amber-50 px-1 py-0.2 rounded border border-amber-200">
                             +{{ $pendingStoresCount }} Review
@@ -143,27 +129,27 @@
 
     </div>
 
-    <!-- DATA ANALYTICS & STATUS DISTRIBUTION -->
+    <!-- ANALYTICS CHART & TRANSACTION STATUS WIDGET -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
         
-        <!-- ANALYTICAL REVENUE & GMV CHART -->
-        <div class="lg:col-span-8 bg-white p-5 rounded-xl border border-slate-200/90 shadow-xs flex flex-col justify-between">
+        <!-- ANALYTICS CHART: TREN PENDAPATAN & VOLUME TRANSAKSI -->
+        <div class="lg:col-span-8 bg-white p-5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
                 <div>
-                    <h3 class="text-sm font-bold text-slate-900 tracking-tight">Tren Finansial Platform</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Analisis pendapatan komisi 5% dan gross merchandise volume</p>
+                    <h3 class="text-sm font-bold text-slate-900 tracking-tight">Tren Pendapatan & Volume Transaksi</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Analisis pendapatan komisi 5% dan gross merchandise volume (GMV)</p>
                 </div>
 
-                <!-- Minimalist Enterprise Period Tabs -->
-                <div class="inline-flex p-0.5 bg-slate-100 rounded-lg text-xs font-medium font-mono-num" id="chart-period-tabs">
-                    <button type="button" onclick="loadChartData('day')" class="period-btn px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-colors" data-period="day">7 Hari</button>
-                    <button type="button" onclick="loadChartData('week')" class="period-btn px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-colors active bg-white text-blue-700 font-bold shadow-xs" data-period="week">Mingguan</button>
-                    <button type="button" onclick="loadChartData('month')" class="period-btn px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-colors" data-period="month">Bulan Ini</button>
-                    <button type="button" onclick="loadChartData('year')" class="period-btn px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900 transition-colors" data-period="year">Tahunan</button>
+                <!-- Timeframe Segmented Controls -->
+                <div class="inline-flex p-0.5 bg-slate-100 rounded-md text-xs font-medium font-mono-num" id="chart-period-tabs">
+                    <button type="button" onclick="loadChartData('day')" class="period-btn px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 transition-colors" data-period="day">7 Hari</button>
+                    <button type="button" onclick="loadChartData('week')" class="period-btn px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 transition-colors active bg-white text-blue-700 font-bold shadow-xs" data-period="week">Mingguan</button>
+                    <button type="button" onclick="loadChartData('month')" class="period-btn px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 transition-colors" data-period="month">Bulan Ini</button>
+                    <button type="button" onclick="loadChartData('year')" class="period-btn px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 transition-colors" data-period="year">Tahunan</button>
                 </div>
             </div>
 
-            <!-- Canvas Area -->
+            <!-- Canvas Area with Precision Gridlines -->
             <div class="relative w-full h-64 sm:h-72 pt-3">
                 <canvas id="revenueChart"></canvas>
                 <div id="chart-loader" class="absolute inset-0 bg-white/80 flex items-center justify-center hidden">
@@ -174,7 +160,7 @@
                 </div>
             </div>
 
-            <!-- Footnote Legend -->
+            <!-- Legend & Subtext -->
             <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-1.5">
@@ -190,8 +176,8 @@
             </div>
         </div>
 
-        <!-- TRANSACTION STATUS DISTRIBUTION -->
-        <div class="lg:col-span-4 bg-white p-5 rounded-xl border border-slate-200/90 shadow-xs flex flex-col justify-between">
+        <!-- TRANSACTION STATUS BREAKDOWN WIDGET -->
+        <div class="lg:col-span-4 bg-white p-5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between">
             <div class="pb-3 border-b border-slate-100 flex items-center justify-between">
                 <div>
                     <h3 class="text-sm font-bold text-slate-900 tracking-tight">Status Transaksi</h3>
@@ -212,7 +198,7 @@
                     $cancPct = round(($cancelledOrders / $safeTotal) * 100);
                 @endphp
 
-                <!-- Selesai -->
+                <!-- Selesai (17%) -->
                 <div>
                     <div class="flex justify-between text-xs mb-1 font-medium">
                         <span class="text-slate-700 flex items-center gap-1.5">
@@ -226,7 +212,7 @@
                     </div>
                 </div>
 
-                <!-- Dikirim -->
+                <!-- Sedang Dikirim (17%) -->
                 <div>
                     <div class="flex justify-between text-xs mb-1 font-medium">
                         <span class="text-slate-700 flex items-center gap-1.5">
@@ -240,7 +226,7 @@
                     </div>
                 </div>
 
-                <!-- Diproses -->
+                <!-- Diproses Toko (17%) -->
                 <div>
                     <div class="flex justify-between text-xs mb-1 font-medium">
                         <span class="text-slate-700 flex items-center gap-1.5">
@@ -254,7 +240,7 @@
                     </div>
                 </div>
 
-                <!-- Pending -->
+                <!-- Menunggu Konfirmasi (0%) -->
                 <div>
                     <div class="flex justify-between text-xs mb-1 font-medium">
                         <span class="text-slate-700 flex items-center gap-1.5">
@@ -268,7 +254,7 @@
                     </div>
                 </div>
 
-                <!-- Batal -->
+                <!-- Dibatalkan / Gagal (50%) -->
                 <div>
                     <div class="flex justify-between text-xs mb-1 font-medium">
                         <span class="text-slate-700 flex items-center gap-1.5">
@@ -294,7 +280,7 @@
     </div>
 
     <!-- RECENT TRANSACTIONS ENTERPRISE LEDGER TABLE -->
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden" x-data="{ tableSearch: '' }">
+    <div class="bg-white rounded-lg border border-slate-200/90 shadow-xs overflow-hidden" x-data="{ tableSearch: '' }">
         
         <!-- Table Header & Fast Search -->
         <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
