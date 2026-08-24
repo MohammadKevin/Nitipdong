@@ -2,115 +2,120 @@
     <x-slot name="title">
         Kelola Kategori Produk - {{ config('app.name', 'NitipDong') }}
     </x-slot>
+    <x-slot name="pageTitle">
+        Kategori Produk
+    </x-slot>
 
-    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-2">
+    <!-- HEADER / ACTION BAR -->
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-1">
         <div>
             <h1 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                <i class="fa-solid fa-tags text-cyan-700"></i>
                 Kelola Kategori Produk
             </h1>
             <p class="text-xs text-slate-500 mt-0.5">Kelola seluruh kategori produk untuk klasifikasi storefront dan navigasi pembeli.</p>
         </div>
         
         <div class="flex items-center gap-3">
-            <a href="{{ route('admin.categories.create') }}" class="btn-primary text-xs h-9 px-4 rounded-md bg-cyan-700 hover:bg-cyan-800 flex items-center gap-1.5">
+            <a href="{{ route('admin.categories.create') }}" class="h-8.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-xs transition-colors">
                 <i class="fa-solid fa-plus text-[10px]"></i>
-                Tambah Kategori
+                <span>Tambah Kategori</span>
             </a>
         </div>
     </div>
 
+    <!-- 3 SUMMARY CARDS -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-card flex items-center gap-4">
-            <div class="w-11 h-11 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center text-lg border border-cyan-200 shrink-0">
+        <div class="bg-white rounded-lg p-4 border border-slate-200/90 shadow-xs flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center justify-center text-base shrink-0 font-mono-num">
                 <i class="fa-solid fa-layer-group"></i>
             </div>
             <div>
-                <p class="text-xs font-medium text-slate-500">Total Kategori</p>
-                <h4 class="text-xl font-extrabold text-slate-900 mt-0.5">{{ number_format($totalCategories, 0, ',', '.') }} Kategori</h4>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono-num">Total Kategori</p>
+                <h4 class="text-xl font-bold text-slate-900 mt-0.5 font-mono-num">{{ number_format($totalCategories, 0, ',', '.') }} Kategori</h4>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-card flex items-center gap-4">
-            <div class="w-11 h-11 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-lg border border-emerald-200 shrink-0">
+        <div class="bg-white rounded-lg p-4 border border-slate-200/90 shadow-xs flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center text-base shrink-0 font-mono-num">
                 <i class="fa-solid fa-box-open"></i>
             </div>
             <div>
-                <p class="text-xs font-medium text-slate-500">Kategori Aktif (Ada Produk)</p>
-                <h4 class="text-xl font-extrabold text-slate-900 mt-0.5">{{ number_format($categoriesWithProducts, 0, ',', '.') }} Kategori</h4>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono-num">Kategori Aktif (Ada Produk)</p>
+                <h4 class="text-xl font-bold text-slate-900 mt-0.5 font-mono-num">{{ number_format($categoriesWithProducts, 0, ',', '.') }} Kategori</h4>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl p-5 border border-slate-200/80 shadow-card flex items-center gap-4">
-            <div class="w-11 h-11 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-lg border border-amber-200 shrink-0">
+        <div class="bg-white rounded-lg p-4 border border-slate-200/90 shadow-xs flex items-center gap-3.5">
+            <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-700 border border-amber-200/60 flex items-center justify-center text-base shrink-0 font-mono-num">
                 <i class="fa-solid fa-folder-open"></i>
             </div>
             <div>
-                <p class="text-xs font-medium text-slate-500">Kategori Kosong</p>
-                <h4 class="text-xl font-extrabold text-slate-900 mt-0.5">{{ number_format($totalCategories - $categoriesWithProducts, 0, ',', '.') }} Kategori</h4>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono-num">Kategori Kosong</p>
+                <h4 class="text-xl font-bold text-slate-900 mt-0.5 font-mono-num">{{ number_format($totalCategories - $categoriesWithProducts, 0, ',', '.') }} Kategori</h4>
             </div>
         </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-card border border-slate-200/80 overflow-hidden">
-        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-slate-50/50">
+    <!-- CATEGORIES LEDGER TABLE -->
+    <div class="bg-white rounded-lg shadow-xs border border-slate-200/90 overflow-hidden">
+        <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-slate-50/50">
             <div>
-                <h3 class="font-bold text-xs sm:text-sm text-slate-900 uppercase tracking-wider">Daftar Semua Kategori</h3>
+                <h3 class="font-bold text-xs sm:text-sm text-slate-900 uppercase tracking-wider font-mono-num">Daftar Semua Kategori</h3>
                 <p class="text-xs text-slate-400 mt-0.5">Klasifikasi produk yang aktif di marketplace NitipDong</p>
             </div>
             <form action="{{ route('admin.categories.index') }}" method="GET" class="relative">
-                <input type="text" name="search" value="{{ $search }}" class="input text-xs pl-8 pr-4 h-8.5 rounded-md w-full sm:w-64" placeholder="Cari nama atau slug...">
+                <input type="text" name="search" value="{{ $search }}" class="w-full sm:w-60 h-8.5 pl-8 pr-3 text-xs rounded-lg border border-slate-200 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-mono-num transition-colors placeholder:text-slate-400" placeholder="Cari nama atau slug...">
                 <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 text-xs"></i>
             </form>
         </div>
         
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
+                <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-100 font-mono-num">
                     <tr>
-                        <th class="px-5 py-3.5 font-semibold">Ikon</th>
-                        <th class="px-5 py-3.5 font-semibold">Nama Kategori</th>
-                        <th class="px-5 py-3.5 font-semibold">Slug URL</th>
-                        <th class="px-5 py-3.5 font-semibold text-center">Jumlah Produk</th>
-                        <th class="px-5 py-3.5 font-semibold">Tanggal Dibuat</th>
-                        <th class="px-5 py-3.5 font-semibold text-center">Aksi</th>
+                        <th class="px-5 py-3 font-semibold">Ikon</th>
+                        <th class="px-5 py-3 font-semibold">Nama Kategori</th>
+                        <th class="px-5 py-3 font-semibold">Slug URL</th>
+                        <th class="px-5 py-3 font-semibold text-center">Jumlah Produk</th>
+                        <th class="px-5 py-3 font-semibold">Tanggal Dibuat</th>
+                        <th class="px-5 py-3 font-semibold text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
                     @forelse($categories as $category)
-                    <tr class="hover:bg-slate-50/80 transition-colors">
+                    <tr class="hover:bg-slate-50/70 transition-colors">
                         <td class="px-5 py-3.5">
-                            <div class="w-8 h-8 rounded-md bg-cyan-50 text-cyan-800 border border-cyan-200 flex items-center justify-center text-sm shadow-xs">
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center justify-center text-sm shadow-2xs font-mono-num">
                                 <i class="{{ $category->icon ?: 'fa-solid fa-tag' }}"></i>
                             </div>
                         </td>
                         <td class="px-5 py-3.5">
                             <span class="font-bold text-slate-900 text-xs block">{{ $category->name }}</span>
-                            <span class="text-[10px] text-slate-400 font-mono">ID: #{{ $category->id }}</span>
+                            <span class="text-[10px] text-slate-400 font-mono-num">ID: #{{ $category->id }}</span>
                         </td>
                         <td class="px-5 py-3.5">
-                            <span class="font-mono text-[11px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                            <span class="font-mono-num text-[11px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                                 /products?category={{ $category->slug }}
                             </span>
                         </td>
                         <td class="px-5 py-3.5 text-center">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold {{ $category->products_count > 0 ? 'bg-cyan-50 text-cyan-800 border border-cyan-200' : 'bg-slate-100 text-slate-500 border border-slate-200' }}">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold font-mono-num {{ $category->products_count > 0 ? 'bg-blue-50 text-blue-700 border border-blue-200/60' : 'bg-slate-100 text-slate-500 border border-slate-200' }}">
                                 <i class="fa-solid fa-box text-[9px]"></i>
                                 {{ $category->products_count }} Produk
                             </span>
                         </td>
-                        <td class="px-5 py-3.5 text-slate-400">
+                        <td class="px-5 py-3.5 text-slate-400 font-mono-num text-[11px]">
                             {{ $category->created_at ? $category->created_at->translatedFormat('d M Y') : '-' }}
                         </td>
                         <td class="px-5 py-3.5">
                             <div class="flex items-center justify-center gap-1.5">
-                                <a href="{{ route('admin.categories.edit', $category) }}" class="p-1.5 bg-slate-100 hover:bg-cyan-50 hover:text-cyan-700 text-slate-600 rounded-md transition-colors border border-slate-200" title="Edit Kategori">
+                                <a href="{{ route('admin.categories.edit', $category) }}" class="p-1.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 rounded-md transition-colors border border-slate-200 shadow-2xs" title="Edit Kategori">
                                     <i class="fa-solid fa-pen-to-square text-xs"></i>
                                 </a>
                                 <form action="{{ route('admin.categories.destroy', $category) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kategori \'{{ $category->name }}\'?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="p-1.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 rounded-md transition-colors border border-slate-200" title="Hapus Kategori">
+                                    <button type="submit" class="p-1.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 rounded-md transition-colors border border-slate-200 shadow-2xs cursor-pointer" title="Hapus Kategori">
                                         <i class="fa-solid fa-trash-can text-xs"></i>
                                     </button>
                                 </form>
