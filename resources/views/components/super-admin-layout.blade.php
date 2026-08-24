@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-[#F8FAFC]">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,243 +9,197 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" type="image/png" href="{{ asset('img/saksershop-logo.png') }}">
 
-    <!-- Chart.js for High-End Interactive Analytics -->
+    <!-- Chart.js for Precision Analytical Visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            letter-spacing: -0.011em;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            letter-spacing: -0.02em;
+        }
         .font-mono-num {
             font-family: 'JetBrains Mono', monospace;
-            font-feature-settings: "tnum" 1;
+            font-feature-settings: "tnum" 1, "lnum" 1;
         }
-        /* Custom Cyan Scrollbar */
-        .cyan-scrollbar::-webkit-scrollbar {
+        /* Custom Enterprise Scrollbar */
+        .slate-scrollbar::-webkit-scrollbar {
             width: 5px;
             height: 5px;
         }
-        .cyan-scrollbar::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.6);
+        .slate-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a;
         }
-        .cyan-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(6, 182, 212, 0.3);
-            border-radius: 9999px;
+        .slate-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
         }
-        .cyan-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(6, 182, 212, 0.6);
+        .slate-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #475569;
         }
     </style>
 </head>
-<body class="h-full bg-slate-900 font-sans antialiased text-slate-800" x-data="{ sidebarOpen: false }">
+<body class="h-full bg-[#F8FAFC] text-slate-800 antialiased" x-data="{ sidebarOpen: false }">
     <div class="flex h-screen overflow-hidden bg-[#F8FAFC]">
         
-        <!-- Mobile Sidebar Overlay Backdrop -->
+        <!-- Mobile Sidebar Backdrop -->
         <div x-show="sidebarOpen" 
              x-cloak
              @click="sidebarOpen = false"
-             x-transition:enter="transition-opacity ease-linear duration-200"
+             x-transition:enter="transition-opacity ease-linear duration-150"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
-             x-transition:leave="transition-opacity ease-linear duration-200"
+             x-transition:leave="transition-opacity ease-linear duration-150"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
-             class="fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm lg:hidden">
+             class="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-xs lg:hidden">
         </div>
 
-        <!-- ULTRA-SLEEK MODERN CYAN-SLATE SIDEBAR -->
+        <!-- ENTERPRISE SLATE SIDEBAR (Linear Style) -->
         <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-               class="fixed inset-y-0 left-0 z-50 w-72 bg-[#0A1128] text-slate-300 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 border-r border-cyan-950/80 shadow-2xl shadow-cyan-950/20">
+               class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0F172A] text-slate-300 flex flex-col justify-between transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 border-r border-slate-800 shrink-0">
             
-            <!-- Sidebar Header & Logo -->
+            <!-- Sidebar Header -->
             <div class="flex flex-col h-full">
-                <div class="p-5 pb-4 border-b border-slate-800/80 bg-[#060D20]/60">
-                    <div class="flex items-center justify-between">
-                        <a href="{{ route('super_admin.dashboard') }}" class="flex items-center gap-3 group">
-                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 via-cyan-600 to-cyan-800 p-0.5 shadow-lg shadow-cyan-500/25 group-hover:shadow-cyan-400/40 transition-all duration-300">
-                                <div class="w-full h-full bg-[#0A1128] rounded-[10px] flex items-center justify-center overflow-hidden">
-                                    <img src="{{ asset('img/saksershop-logo.png') }}" alt="Logo" class="w-6 h-6 object-contain">
-                                </div>
-                            </div>
-                            <div>
-                                <div class="flex items-center gap-1.5">
-                                    <span class="font-extrabold text-white text-base tracking-tight leading-none">Nitip<span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-cyan-500">Dong</span></span>
-                                </div>
-                                <div class="flex items-center gap-1.5 mt-1">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                                    <span class="text-[10px] font-bold tracking-wider uppercase text-cyan-400/90 font-mono-num">Super Control</span>
-                                </div>
-                            </div>
-                        </a>
-
-                        <!-- Close Button (Mobile Only) -->
-                        <button @click="sidebarOpen = false" class="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
-                            <i class="fa-solid fa-xmark text-base"></i>
-                        </button>
-                    </div>
-
-                    <!-- Live System Engine Status Pill -->
-                    <div class="mt-4 px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-950/60 to-slate-900/80 border border-cyan-500/20 flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="relative flex h-2 w-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
-                            </span>
-                            <span class="text-[11px] font-semibold text-slate-200">Engine v2.4</span>
+                <div class="h-16 px-5 border-b border-slate-800/90 flex items-center justify-between bg-[#0B1324]">
+                    <a href="{{ route('super_admin.dashboard') }}" class="flex items-center gap-2.5 group">
+                        <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs">
+                            <img src="{{ asset('img/saksershop-logo.png') }}" alt="Logo" class="w-5 h-5 object-contain">
                         </div>
-                        <span class="text-[10px] font-mono-num font-bold text-cyan-400 bg-cyan-950 px-1.5 py-0.5 rounded border border-cyan-800/60">LIVE PROD</span>
-                    </div>
+                        <div class="flex flex-col">
+                            <span class="font-extrabold text-white text-sm tracking-tight leading-none">Nitip<span class="text-blue-400">Dong</span></span>
+                            <span class="text-[10px] font-semibold tracking-wider uppercase text-slate-400 font-mono-num mt-0.5">Enterprise Admin</span>
+                        </div>
+                    </a>
+
+                    <!-- Mobile Close -->
+                    <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-white p-1">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
                 </div>
 
-                <!-- Navigation Links (Scrollable) -->
-                <div class="flex-1 overflow-y-auto cyan-scrollbar px-3.5 py-4 space-y-6">
+                <!-- Navigation List -->
+                <div class="flex-1 overflow-y-auto slate-scrollbar px-3 py-4 space-y-5">
                     
-                    <!-- Section: CORE ANALYTICS -->
+                    <!-- KATEGORI: UTAMA & ANALITIK -->
                     <div>
-                        <p class="text-[10px] font-bold tracking-wider uppercase text-cyan-400/70 px-3 mb-2 flex items-center gap-1.5">
-                            <i class="fa-solid fa-layer-group text-[9px]"></i>
-                            <span>Analitik & Utama</span>
+                        <p class="text-[10px] font-bold tracking-wider uppercase text-slate-400 px-3 mb-1.5 font-mono-num">
+                            Analitik & Utama
                         </p>
-                        <nav class="space-y-1">
+                        <nav class="space-y-0.5">
                             <a href="{{ route('super_admin.dashboard') }}"
-                               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('super_admin.dashboard') ? 'bg-gradient-to-r from-cyan-500/20 to-cyan-500/5 text-cyan-300 border-l-4 border-cyan-400 shadow-sm shadow-cyan-500/10 pl-2.5' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                                <div class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors {{ request()->routeIs('super_admin.dashboard') ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800/80 text-slate-400 group-hover:text-cyan-300 group-hover:bg-slate-800' }}">
-                                    <i class="fa-solid fa-chart-line text-xs"></i>
-                                </div>
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('super_admin.dashboard') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
+                                <i class="fa-solid fa-chart-pie w-4 h-4 text-center text-xs {{ request()->routeIs('super_admin.dashboard') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300' }}"></i>
                                 <span class="flex-1">Executive Dashboard</span>
-                                @if(request()->routeIs('super_admin.dashboard'))
-                                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-                                @endif
                             </a>
                         </nav>
                     </div>
 
-                    <!-- Section: OPERASIONAL MARKETPLACE -->
+                    <!-- KATEGORI: OPERASIONAL MARKETPLACE -->
                     <div>
-                        <p class="text-[10px] font-bold tracking-wider uppercase text-cyan-400/70 px-3 mb-2 flex items-center gap-1.5">
-                            <i class="fa-solid fa-store text-[9px]"></i>
-                            <span>Operasional Platform</span>
+                        <p class="text-[10px] font-bold tracking-wider uppercase text-slate-400 px-3 mb-1.5 font-mono-num">
+                            Operasional Platform
                         </p>
-                        <nav class="space-y-1">
+                        <nav class="space-y-0.5">
                             <a href="{{ route('super_admin.stores.index') }}"
-                               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('super_admin.stores.*') ? 'bg-gradient-to-r from-cyan-500/20 to-cyan-500/5 text-cyan-300 border-l-4 border-cyan-400 shadow-sm shadow-cyan-500/10 pl-2.5' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                                <div class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors {{ request()->routeIs('super_admin.stores.*') ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800/80 text-slate-400 group-hover:text-cyan-300 group-hover:bg-slate-800' }}">
-                                    <i class="fa-solid fa-shop text-xs"></i>
-                                </div>
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('super_admin.stores.*') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
+                                <i class="fa-solid fa-store w-4 h-4 text-center text-xs {{ request()->routeIs('super_admin.stores.*') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300' }}"></i>
                                 <span class="flex-1">Manajemen Toko</span>
                             </a>
 
                             <a href="{{ route('admin.categories.index') }}"
-                               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('admin.categories.*') ? 'bg-gradient-to-r from-cyan-500/20 to-cyan-500/5 text-cyan-300 border-l-4 border-cyan-400 shadow-sm shadow-cyan-500/10 pl-2.5' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                                <div class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors {{ request()->routeIs('admin.categories.*') ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800/80 text-slate-400 group-hover:text-cyan-300 group-hover:bg-slate-800' }}">
-                                    <i class="fa-solid fa-tags text-xs"></i>
-                                </div>
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('admin.categories.*') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
+                                <i class="fa-solid fa-tags w-4 h-4 text-center text-xs {{ request()->routeIs('admin.categories.*') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300' }}"></i>
                                 <span class="flex-1">Kategori Produk</span>
                             </a>
 
                             <a href="{{ route('admin.flash_sales.index') }}"
-                               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('admin.flash_sales.*') ? 'bg-gradient-to-r from-cyan-500/20 to-cyan-500/5 text-cyan-300 border-l-4 border-cyan-400 shadow-sm shadow-cyan-500/10 pl-2.5' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                                <div class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors {{ request()->routeIs('admin.flash_sales.*') ? 'bg-amber-500/20 text-amber-300' : 'bg-slate-800/80 text-slate-400 group-hover:text-amber-300 group-hover:bg-slate-800' }}">
-                                    <i class="fa-solid fa-bolt text-xs"></i>
-                                </div>
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('admin.flash_sales.*') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
+                                <i class="fa-solid fa-bolt w-4 h-4 text-center text-xs {{ request()->routeIs('admin.flash_sales.*') ? 'text-amber-400' : 'text-slate-400 group-hover:text-amber-400' }}"></i>
                                 <span class="flex-1">Flash Sale Platform</span>
-                                <span class="text-[9px] font-bold bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/30">PROMO</span>
+                                <span class="text-[9px] font-bold bg-amber-500/15 text-amber-400 px-1.5 py-0.2 rounded font-mono-num">PROMO</span>
                             </a>
                         </nav>
                     </div>
 
-                    <!-- Section: KEUANGAN & PAYOUT -->
+                    <!-- KATEGORI: KEUANGAN & PAYOUT -->
                     <div>
-                        <p class="text-[10px] font-bold tracking-wider uppercase text-cyan-400/70 px-3 mb-2 flex items-center gap-1.5">
-                            <i class="fa-solid fa-wallet text-[9px]"></i>
-                            <span>Keuangan & Payout</span>
+                        <p class="text-[10px] font-bold tracking-wider uppercase text-slate-400 px-3 mb-1.5 font-mono-num">
+                            Keuangan & Transaksi
                         </p>
-                        <nav class="space-y-1">
+                        <nav class="space-y-0.5">
                             <a href="{{ route('super_admin.withdrawals.index') }}"
-                               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('super_admin.withdrawals.*') ? 'bg-gradient-to-r from-cyan-500/20 to-cyan-500/5 text-cyan-300 border-l-4 border-cyan-400 shadow-sm shadow-cyan-500/10 pl-2.5' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                                <div class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors {{ request()->routeIs('super_admin.withdrawals.*') ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800/80 text-slate-400 group-hover:text-emerald-300 group-hover:bg-slate-800' }}">
-                                    <i class="fa-solid fa-money-bill-transfer text-xs"></i>
-                                </div>
-                                <span class="flex-1">Payout Toko</span>
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('super_admin.withdrawals.*') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
+                                <i class="fa-solid fa-money-bill-transfer w-4 h-4 text-center text-xs {{ request()->routeIs('super_admin.withdrawals.*') ? 'text-emerald-400' : 'text-slate-400 group-hover:text-emerald-400' }}"></i>
+                                <span class="flex-1">Payout & Penarikan Toko</span>
                             </a>
 
                             <a href="{{ route('super_admin.reports.revenue.export') }}"
-                               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group text-slate-400 hover:text-cyan-300 hover:bg-slate-800/50">
-                                <div class="w-7 h-7 rounded-lg flex items-center justify-center bg-slate-800/80 text-slate-400 group-hover:text-cyan-300 group-hover:bg-slate-800">
-                                    <i class="fa-solid fa-file-excel text-xs"></i>
-                                </div>
-                                <span class="flex-1">Ekspor Laporan</span>
-                                <i class="fa-solid fa-download text-[10px] text-slate-500 group-hover:text-cyan-300"></i>
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium">
+                                <i class="fa-solid fa-file-arrow-down w-4 h-4 text-center text-xs text-slate-400 group-hover:text-blue-400"></i>
+                                <span class="flex-1">Ekspor Laporan Finansial</span>
                             </a>
                         </nav>
                     </div>
 
-                    <!-- Section: USER & SECURITY -->
+                    <!-- KATEGORI: PENGGUNA & SISTEM -->
                     <div>
-                        <p class="text-[10px] font-bold tracking-wider uppercase text-cyan-400/70 px-3 mb-2 flex items-center gap-1.5">
-                            <i class="fa-solid fa-shield-halved text-[9px]"></i>
-                            <span>Pengguna & Keamanan</span>
+                        <p class="text-[10px] font-bold tracking-wider uppercase text-slate-400 px-3 mb-1.5 font-mono-num">
+                            Pengguna & Akses
                         </p>
-                        <nav class="space-y-1">
+                        <nav class="space-y-0.5">
                             <a href="{{ route('super_admin.users.index') }}"
-                               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('super_admin.users.*') ? 'bg-gradient-to-r from-cyan-500/20 to-cyan-500/5 text-cyan-300 border-l-4 border-cyan-400 shadow-sm shadow-cyan-500/10 pl-2.5' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                                <div class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors {{ request()->routeIs('super_admin.users.*') ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800/80 text-slate-400 group-hover:text-cyan-300 group-hover:bg-slate-800' }}">
-                                    <i class="fa-solid fa-users text-xs"></i>
-                                </div>
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('super_admin.users.*') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
+                                <i class="fa-solid fa-users w-4 h-4 text-center text-xs {{ request()->routeIs('super_admin.users.*') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300' }}"></i>
                                 <span class="flex-1">Daftar Pengguna</span>
                             </a>
 
                             <a href="{{ route('super_admin.admins.index') }}"
-                               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('super_admin.admins.*') ? 'bg-gradient-to-r from-cyan-500/20 to-cyan-500/5 text-cyan-300 border-l-4 border-cyan-400 shadow-sm shadow-cyan-500/10 pl-2.5' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                                <div class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors {{ request()->routeIs('super_admin.admins.*') ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800/80 text-slate-400 group-hover:text-cyan-300 group-hover:bg-slate-800' }}">
-                                    <i class="fa-solid fa-user-shield text-xs"></i>
-                                </div>
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('super_admin.admins.*') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
+                                <i class="fa-solid fa-user-shield w-4 h-4 text-center text-xs {{ request()->routeIs('super_admin.admins.*') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300' }}"></i>
                                 <span class="flex-1">Admin Operasional</span>
                             </a>
 
                             <a href="{{ route('chat.index') }}"
-                               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('chat.*') ? 'bg-gradient-to-r from-cyan-500/20 to-cyan-500/5 text-cyan-300 border-l-4 border-cyan-400 shadow-sm shadow-cyan-500/10 pl-2.5' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                                <div class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors {{ request()->routeIs('chat.*') ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800/80 text-slate-400 group-hover:text-cyan-300 group-hover:bg-slate-800' }}">
-                                    <i class="fa-regular fa-comment-dots text-xs"></i>
-                                </div>
-                                <span class="flex-1">Pusat Pesan / Chat</span>
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('chat.*') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
+                                <i class="fa-regular fa-comment-dots w-4 h-4 text-center text-xs {{ request()->routeIs('chat.*') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300' }}"></i>
+                                <span class="flex-1">Pesan / Live Chat</span>
                             </a>
 
                             <a href="{{ route('profile.edit') }}"
-                               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 group {{ request()->routeIs('profile.edit') ? 'bg-gradient-to-r from-cyan-500/20 to-cyan-500/5 text-cyan-300 border-l-4 border-cyan-400 shadow-sm shadow-cyan-500/10 pl-2.5' : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50' }}">
-                                <div class="w-7 h-7 rounded-lg flex items-center justify-center transition-colors {{ request()->routeIs('profile.edit') ? 'bg-cyan-500/20 text-cyan-300' : 'bg-slate-800/80 text-slate-400 group-hover:text-cyan-300 group-hover:bg-slate-800' }}">
-                                    <i class="fa-solid fa-sliders text-xs"></i>
-                                </div>
-                                <span class="flex-1">Pengaturan Profil</span>
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('profile.edit') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
+                                <i class="fa-solid fa-sliders w-4 h-4 text-center text-xs {{ request()->routeIs('profile.edit') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300' }}"></i>
+                                <span class="flex-1">Pengaturan Akun</span>
                             </a>
                         </nav>
                     </div>
 
                 </div>
 
-                <!-- Bottom User Profile Card -->
-                <div class="p-3.5 border-t border-slate-800/80 bg-[#060D20]/80">
-                    <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center gap-3">
-                        <div class="relative shrink-0">
-                            <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=0891b2&color=fff' }}" 
-                                 class="w-9 h-9 rounded-lg object-cover ring-1 ring-cyan-500/40" 
-                                 alt="{{ auth()->user()->name }}">
-                            <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-cyan-400 border-2 border-slate-900"></span>
-                        </div>
+                <!-- Profile Footer -->
+                <div class="p-3 border-t border-slate-800/90 bg-[#0B1324]">
+                    <div class="p-2 rounded-lg bg-slate-900 border border-slate-800/80 flex items-center gap-2.5">
+                        <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=2563eb&color=fff' }}" 
+                             class="w-7 h-7 rounded-md object-cover ring-1 ring-slate-700 shrink-0" 
+                             alt="{{ auth()->user()->name }}">
                         <div class="min-w-0 flex-1">
-                            <p class="text-xs font-bold text-white truncate">{{ auth()->user()->name }}</p>
-                            <span class="inline-block text-[9px] font-bold uppercase tracking-wider text-cyan-400 bg-cyan-950/80 border border-cyan-800/40 px-1.5 py-0.2 rounded font-mono-num">
-                                SUPER ADMIN
-                            </span>
+                            <p class="text-xs font-semibold text-slate-200 truncate leading-tight">{{ auth()->user()->name }}</p>
+                            <span class="text-[10px] text-slate-400 font-mono-num">Super Admin</span>
                         </div>
                         <form method="POST" action="{{ route('logout') }}" class="shrink-0">
                             @csrf
                             <button type="submit" 
-                                    class="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors" 
-                                    title="Keluar dari Akun">
+                                    class="p-1.5 rounded-md text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors" 
+                                    title="Keluar">
                                 <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
                             </button>
                         </form>
@@ -254,58 +208,54 @@
             </div>
         </aside>
 
-        <!-- MAIN CONTENT WRAPPER -->
+        <!-- MAIN LAYOUT WRAPPER -->
         <div class="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
             
-            <!-- STICKY TOP HEADER -->
-            <header class="h-16 shrink-0 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 flex items-center justify-between z-30 shadow-xs">
+            <!-- STICKY TOP APP HEADER (Linear Topbar Style) -->
+            <header class="h-14 shrink-0 bg-white border-b border-slate-200/90 px-4 sm:px-6 flex items-center justify-between z-30 shadow-xs">
                 
-                <!-- Left: Hamburger (Mobile) & Breadcrumbs -->
-                <div class="flex items-center gap-3 sm:gap-4">
-                    <button @click="sidebarOpen = true" class="lg:hidden p-2 rounded-xl text-slate-600 hover:text-cyan-600 hover:bg-slate-100 transition-colors">
-                        <i class="fa-solid fa-bars-staggered text-base"></i>
+                <!-- Left: Breadcrumbs -->
+                <div class="flex items-center gap-3">
+                    <button @click="sidebarOpen = true" class="lg:hidden p-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
+                        <i class="fa-solid fa-bars-staggered text-sm"></i>
                     </button>
 
                     <div class="flex items-center gap-2 text-xs">
-                        <span class="text-slate-400 font-medium hidden sm:inline-flex items-center gap-1.5">
-                            <i class="fa-solid fa-cube text-[11px] text-cyan-600"></i>
-                            Platform Control
-                        </span>
+                        <span class="text-slate-400 font-medium hidden sm:inline">Platform</span>
                         <span class="text-slate-300 hidden sm:inline">/</span>
-                        <span class="font-bold text-slate-800 tracking-tight flex items-center gap-1.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-cyan-600"></span>
+                        <span class="font-semibold text-slate-800 tracking-tight flex items-center gap-1.5">
                             {{ $pageTitle ?? 'Super Admin Control Center' }}
                         </span>
                     </div>
                 </div>
 
-                <!-- Right: Status Indicators & Quick Actions -->
-                <div class="flex items-center gap-2.5 sm:gap-3">
+                <!-- Right: Status Pill & Actions -->
+                <div class="flex items-center gap-2 sm:gap-3">
                     
                     <!-- Live Server Clock WIB -->
-                    <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 font-mono-num">
-                        <i class="fa-regular fa-clock text-cyan-600"></i>
+                    <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-xs text-slate-600 font-mono-num">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span id="super-admin-clock" class="font-semibold text-slate-700">--:--:-- WIB</span>
                     </div>
 
-                    <!-- Quick Payout Shortcut -->
+                    <!-- Payout Shortcut -->
                     <a href="{{ route('super_admin.withdrawals.index') }}" 
-                       class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-cyan-800 bg-cyan-50/80 hover:bg-cyan-100 border border-cyan-200 transition-colors">
-                        <i class="fa-solid fa-money-bill-transfer text-cyan-600"></i>
-                        <span>Payout Review</span>
+                       class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors">
+                        <i class="fa-solid fa-money-bill-transfer text-emerald-600 text-[11px]"></i>
+                        <span class="hidden md:inline">Payout Toko</span>
                     </a>
 
                     <!-- Fast Export Report -->
                     <a href="{{ route('super_admin.reports.revenue.export') }}"
-                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-white bg-cyan-600 hover:bg-cyan-700 shadow-sm shadow-cyan-600/20 transition-colors">
-                        <i class="fa-solid fa-file-excel text-xs"></i>
-                        <span class="hidden sm:inline">Ekspor Data</span>
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-xs transition-colors">
+                        <i class="fa-solid fa-file-excel text-[11px]"></i>
+                        <span>Ekspor Laporan</span>
                     </a>
                 </div>
             </header>
 
-            <!-- SCROLLABLE PAGE BODY -->
-            <main class="flex-1 overflow-y-auto bg-[#F8FAFC] p-4 sm:p-6 lg:p-8 space-y-6 pb-24 scroll-smooth">
+            <!-- SCROLLABLE WORKSPACE -->
+            <main class="flex-1 overflow-y-auto bg-[#F8FAFC] p-4 sm:p-6 lg:p-7 space-y-6 pb-24 scroll-smooth">
                 {{ $slot }}
             </main>
         </div>
