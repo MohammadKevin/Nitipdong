@@ -20,6 +20,8 @@ class AppServiceProvider extends ServiceProvider
         if (app()->environment('production') || str_contains((string) config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
+
+        \Illuminate\Pagination\Paginator::useTailwind();
     }
 }
 
