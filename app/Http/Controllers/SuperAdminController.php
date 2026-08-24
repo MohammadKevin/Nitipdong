@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Store;
 use App\Models\User;
+use App\Models\Withdrawal;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -15,16 +16,46 @@ class SuperAdminController extends Controller
         $grossVolume = (float) Order::where('status', 'completed')->sum('total_amount');
         $totalKeuntunganPlatform = round($grossVolume * 0.05);
 
-        $activeOrders = Order::whereIn('status', ['pending', 'processing', 'shipped'])->count();
+        // Status Counts
+        $pendingOrders = Order::where('status', 'pending')->count();
+        $processingOrders = Order::where('status', 'processing')->count();
+        $shippedOrders = Order::where('status', 'shipped')->count();
+        $completedOrders = Order::where('status', 'completed')->count();
+        $cancelledOrders = Order::whereIn('status', ['cancelled', 'rejected'])->count();
+        $activeOrders = $pendingOrders + $processingOrders + $shippedOrders;
+
         $pesananBaru = Order::whereMonth('created_at', now()->month)
                             ->whereYear('created_at', now()->year)
                             ->count();
+
+        // Ecosystem Counts
         $totalPengguna = User::count();
         $totalToko = Store::count();
+        $pendingStoresCount = Store::where('status', 'pending')->count();
+        $pendingWithdrawalsCount = class_exists(Withdrawal::class) ? Withdrawal::where('status', 'pending')->count() : 0;
         $totalPesanan = Order::count();
+
+        // Growth & Financial Metrics
+        $thisMonthGross = (float) Order::where('status', 'completed')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('total_amount');
+        $thisMonthProfit = round($thisMonthGross * 0.05);
+
+        $lastMonthGross = (float) Order::where('status', 'completed')
+            ->whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->sum('total_amount');
+        
+        $growthPercent = $lastMonthGross > 0 
+            ? round((($thisMonthGross - $lastMonthGross) / $lastMonthGross) * 100, 1) 
+            : ($thisMonthGross > 0 ? 100 : 0);
+
+        $averageOrderValue = $completedOrders > 0 ? round($grossVolume / $completedOrders) : 0;
+
         $recentOrders = Order::with(['user', 'store'])
                             ->latest()
-                            ->take(5)
+                            ->take(8)
                             ->get();
 
         return view('super_admin.dashboard', compact(
@@ -35,6 +66,17 @@ class SuperAdminController extends Controller
             'totalPengguna',
             'totalToko',
             'totalPesanan',
+            'pendingOrders',
+            'processingOrders',
+            'shippedOrders',
+            'completedOrders',
+            'cancelledOrders',
+            'pendingStoresCount',
+            'pendingWithdrawalsCount',
+            'thisMonthGross',
+            'thisMonthProfit',
+            'growthPercent',
+            'averageOrderValue',
             'recentOrders'
         ));
     }
@@ -85,23 +127,23 @@ class SuperAdminController extends Controller
 
     public function chartData(Request $request)
     {
-        $period = $request->query('period', 'week');
+        $period = $request->query('period', 'day');
 
-        [$labels, $data] = match ($period) {
+        $result = match ($period) {
             'day'   => $this->chartDaily(),
             'week'  => $this->chartWeekly(),
             'month' => $this->chartMonthly(),
             'year'  => $this->chartYearly(),
-            default => $this->chartWeekly(),
+            default => $this->chartDaily(),
         };
 
-        return response()->json(['labels' => $labels, 'data' => $data]);
+        return response()->json($result);
     }
 
     private function chartDaily(): array
     {
         $days = collect(range(6, 0))->map(fn ($i) => now()->subDays($i));
-        $labels = $days->map(fn ($d) => $d->translatedFormat('D'))->toArray();
+        $labels = $days->map(fn ($d) => $d->translatedFormat('d M'))->toArray();
 
         $totals = Order::where('status', 'completed')
             ->whereBetween('created_at', [now()->subDays(6)->startOfDay(), now()->endOfDay()])
@@ -109,58 +151,80 @@ class SuperAdminController extends Controller
             ->groupBy('tanggal')
             ->pluck('total', 'tanggal');
 
-        $data = $days->map(fn ($d) => round(((float) ($totals[$d->format('Y-m-d')] ?? 0)) * 0.05))->toArray();
+        $gmv = $days->map(fn ($d) => (float) ($totals[$d->format('Y-m-d')] ?? 0))->toArray();
+        $commission = array_map(fn ($v) => round($v * 0.05), $gmv);
 
-        return [$labels, $data];
+        return [
+            'labels' => $labels,
+            'data' => $commission,
+            'gmv' => $gmv,
+        ];
     }
 
     private function chartWeekly(): array
     {
         $labels = [];
-        $data = [];
+        $commission = [];
+        $gmv = [];
         $i = 1;
         $weekStart = now()->startOfMonth()->startOfWeek();
 
         while ($weekStart->lte(now())) {
             $weekEnd = $weekStart->copy()->endOfWeek()->min(now());
-            $labels[] = 'M' . $i;
+            $labels[] = 'Minggu ' . $i;
             $volume = (float) Order::where('status', 'completed')
                 ->whereBetween('created_at', [$weekStart, $weekEnd])
                 ->sum('total_amount');
-            $data[] = round($volume * 0.05);
+            $gmv[] = $volume;
+            $commission[] = round($volume * 0.05);
             $weekStart = $weekStart->copy()->addWeek();
             $i++;
         }
 
-        return [$labels, $data];
+        return [
+            'labels' => $labels,
+            'data' => $commission,
+            'gmv' => $gmv,
+        ];
     }
 
     private function chartMonthly(): array
     {
         $labels = [];
-        $data = [];
+        $commission = [];
+        $gmv = [];
 
         for ($m = 1; $m <= now()->month; $m++) {
-            $labels[] = Carbon::create(now()->year, $m, 1)->translatedFormat('M');
+            $labels[] = Carbon::create(now()->year, $m, 1)->translatedFormat('M Y');
             $volume = (float) Order::where('status', 'completed')
                 ->whereYear('created_at', now()->year)
                 ->whereMonth('created_at', $m)
                 ->sum('total_amount');
-            $data[] = round($volume * 0.05);
+            $gmv[] = $volume;
+            $commission[] = round($volume * 0.05);
         }
 
-        return [$labels, $data];
+        return [
+            'labels' => $labels,
+            'data' => $commission,
+            'gmv' => $gmv,
+        ];
     }
 
     private function chartYearly(): array
     {
         $years = range(now()->year - 4, now()->year);
         $labels = array_map('strval', $years);
-        $data = array_map(
-            fn ($y) => round(((float) Order::where('status', 'completed')->whereYear('created_at', $y)->sum('total_amount')) * 0.05),
+        $gmv = array_map(
+            fn ($y) => (float) Order::where('status', 'completed')->whereYear('created_at', $y)->sum('total_amount'),
             $years
         );
+        $commission = array_map(fn ($v) => round($v * 0.05), $gmv);
 
-        return [$labels, $data];
+        return [
+            'labels' => $labels,
+            'data' => $commission,
+            'gmv' => $gmv,
+        ];
     }
 }
