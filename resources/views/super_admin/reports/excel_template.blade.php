@@ -93,13 +93,7 @@
         </tr>
         <tr>
             <td colspan="2" class="meta-label">Periode Laporan:</td>
-            <td colspan="8" class="meta-val">
-                @if($startDate && $endDate)
-                    {{ Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') }} s/d {{ Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') }}
-                @else
-                    Semua Waktu Historis
-                @endif
-            </td>
+            <td colspan="8" class="meta-val">{{ $periodText ?? 'Semua Waktu Historis' }}</td>
         </tr>
         <tr>
             <td colspan="2" class="meta-label">Total Transaksi:</td>
@@ -128,16 +122,18 @@
         @php
             $fee = round($order->total_amount * 0.05);
             $sellerNet = $order->total_amount - $fee;
-            $itemsList = $order->orderItems->map(fn($it) => ($it->product->name ?? 'Produk') . " ({$it->quantity}x)")->join(', ');
+            $itemsList = $order->orderItems 
+                ? $order->orderItems->map(fn($it) => ($it->product->name ?? 'Produk') . " ({$it->quantity}x)")->join(', ')
+                : '-';
         @endphp
         <tr style="{{ $idx % 2 == 1 ? 'background-color: #F8FAFC;' : 'background-color: #FFFFFF;' }}">
             <td class="td-data td-center">{{ $idx + 1 }}</td>
             <td class="td-data td-center" style="font-weight: bold; mso-number-format: '\@';">{{ $order->invoice_number }}</td>
-            <td class="td-data td-date">{{ $order->created_at->format('d/m/Y H:i') }}</td>
+            <td class="td-data td-date">{{ $order->created_at ? $order->created_at->format('d/m/Y H:i') : '-' }}</td>
             <td class="td-data">{{ $order->store->name ?? '-' }}</td>
             <td class="td-data">{{ $order->user->name ?? '-' }}</td>
             <td class="td-data">{{ $itemsList ?: '-' }}</td>
-            <td class="td-data td-center" style="font-weight: bold;">{{ strtoupper($order->status) }}</td>
+            <td class="td-data td-center" style="font-weight: bold;">{{ strtoupper($order->status ?? '-') }}</td>
             <td class="td-data td-right">{{ $order->total_amount }}</td>
             <td class="td-data td-right highlight-fee">{{ $fee }}</td>
             <td class="td-data td-right">{{ $sellerNet }}</td>

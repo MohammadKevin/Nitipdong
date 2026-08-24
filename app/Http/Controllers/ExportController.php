@@ -138,19 +138,23 @@ class ExportController extends Controller
         $period = $parsed['period'];
         $format = $request->query('format', 'excel');
 
-        $orders = $query->with(['store.user', 'user', 'orderItems.product'])->latest()->get();
+        $orders = $query->with(['store', 'user', 'orderItems.product'])->latest()->get();
 
-        $periodLabel = $startDate && $endDate 
+        $periodLabel = ($startDate && $endDate)
             ? Carbon::parse($startDate)->format('d-m-Y') . '_sd_' . Carbon::parse($endDate)->format('d-m-Y') 
             : 'semua_waktu';
+
+        $periodText = ($startDate && $endDate)
+            ? Carbon::parse($startDate)->translatedFormat('d F Y') . ' s/d ' . Carbon::parse($endDate)->translatedFormat('d F Y')
+            : 'Semua Waktu Historis';
+
+        $totalGMV = (float) $orders->sum('total_amount');
+        $totalPlatformFee = round($totalGMV * 0.05);
+        $totalSellerEarnings = $totalGMV - $totalPlatformFee;
 
         // 1. FORMAT: EXCEL SPREADSHEET (.xls) with multi-column styles & gridlines
         if ($format === 'excel' || $format === 'xls') {
             $fileName = 'laporan_keuangan_nitipdong_' . $periodLabel . '_' . date('His') . '.xls';
-
-            $totalGMV = (float) $orders->sum('total_amount');
-            $totalPlatformFee = round($totalGMV * 0.05);
-            $totalSellerEarnings = $totalGMV - $totalPlatformFee;
 
             $headers = [
                 'Content-Type'        => 'application/vnd.ms-excel; charset=UTF-8',
@@ -164,6 +168,7 @@ class ExportController extends Controller
                 'orders',
                 'startDate',
                 'endDate',
+                'periodText',
                 'totalGMV',
                 'totalPlatformFee',
                 'totalSellerEarnings'
@@ -183,7 +188,7 @@ class ExportController extends Controller
             'Expires'             => '0',
         ];
 
-        return response()->stream(function () use ($orders, $startDate, $endDate) {
+        return response()->stream(function () use ($orders, $startDate, $endDate, $periodText) {
             $handle = fopen('php://output', 'w');
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
 
@@ -217,15 +222,17 @@ class ExportController extends Controller
                 $totalPlatformFee += $platformFee;
                 $totalSellerShare += $sellerShare;
 
-                $itemsList = $order->orderItems->map(fn($it) => ($it->product->name ?? 'Produk') . " ({$it->quantity}x)")->join('; ');
+                $itemsList = $order->orderItems 
+                    ? $order->orderItems->map(fn($it) => ($it->product->name ?? 'Produk') . " ({$it->quantity}x)")->join('; ')
+                    : '-';
 
                 fputcsv($handle, [
                     $rowNum++,
                     $order->invoice_number,
-                    $order->created_at->format('d/m/Y H:i'),
+                    $order->created_at ? $order->created_at->format('d/m/Y H:i') : '-',
                     $order->store->name ?? 'N/A',
                     $order->user->name ?? 'N/A',
-                    strtoupper($order->status),
+                    strtoupper($order->status ?? 'N/A'),
                     $itemsList,
                     $order->total_amount,
                     $platformFee,
