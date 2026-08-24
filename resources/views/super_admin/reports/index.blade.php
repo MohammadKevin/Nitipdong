@@ -15,25 +15,18 @@
             <p class="text-xs text-slate-500 mt-0.5">Analisis pendapatan komisi 15%, volume GMV, dan pembagian hasil penjualan seluruh merchant marketplace.</p>
         </div>
 
-        <div class="flex items-center gap-2 flex-wrap">
+        <div class="flex items-center gap-2.5 flex-wrap">
             <!-- Print / PDF Button -->
             <a href="{{ route('super_admin.reports.print', request()->query()) }}" target="_blank"
-               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200 shadow-xs transition-colors cursor-pointer">
-                <i class="fa-solid fa-print text-slate-500 text-[11px]"></i>
+               class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200 shadow-xs hover:border-slate-300 transition-all cursor-pointer" title="Cetak langsung atau simpan sebagai dokumen PDF">
+                <i class="fa-solid fa-file-pdf text-rose-600 text-sm"></i>
                 <span>Cetak / PDF</span>
-            </a>
-
-            <!-- Download CSV Button -->
-            <a href="{{ route('super_admin.reports.revenue.export', array_merge(request()->query(), ['format' => 'csv'])) }}" 
-               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200 shadow-xs transition-colors cursor-pointer" title="Format teks CSV standar">
-                <i class="fa-solid fa-file-lines text-slate-500 text-[11px]"></i>
-                <span>Unduh CSV</span>
             </a>
 
             <!-- Download Formatted Excel .xls Button -->
             <a href="{{ route('super_admin.reports.revenue.export', array_merge(request()->query(), ['format' => 'excel'])) }}" 
-               class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer" title="Format tabel Microsoft Excel berkolom rapi">
-                <i class="fa-solid fa-file-excel text-[12px]"></i>
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-xs hover:shadow transition-all cursor-pointer" title="Format tabel Microsoft Excel berkolom rapi">
+                <i class="fa-solid fa-file-excel text-white text-sm"></i>
                 <span>Unduh Excel (.xls)</span>
             </a>
         </div>
