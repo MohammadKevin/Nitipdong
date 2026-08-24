@@ -20,14 +20,21 @@
             <a href="{{ route('super_admin.reports.print', request()->query()) }}" target="_blank"
                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200 shadow-xs transition-colors cursor-pointer">
                 <i class="fa-solid fa-print text-slate-500 text-[11px]"></i>
-                <span>Cetak / Simpan PDF</span>
+                <span>Cetak / PDF</span>
             </a>
 
-            <!-- Download CSV / Excel Button -->
-            <a href="{{ route('super_admin.reports.revenue.export', request()->query()) }}" 
-               class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer">
-                <i class="fa-solid fa-file-csv text-[12px]"></i>
-                <span>Unduh File Excel (CSV)</span>
+            <!-- Download CSV Button -->
+            <a href="{{ route('super_admin.reports.revenue.export', array_merge(request()->query(), ['format' => 'csv'])) }}" 
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200 shadow-xs transition-colors cursor-pointer" title="Format teks CSV standar">
+                <i class="fa-solid fa-file-lines text-slate-500 text-[11px]"></i>
+                <span>Unduh CSV</span>
+            </a>
+
+            <!-- Download Formatted Excel .xls Button -->
+            <a href="{{ route('super_admin.reports.revenue.export', array_merge(request()->query(), ['format' => 'excel'])) }}" 
+               class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer" title="Format tabel Microsoft Excel berkolom rapi">
+                <i class="fa-solid fa-file-excel text-[12px]"></i>
+                <span>Unduh Excel (.xls)</span>
             </a>
         </div>
     </div>

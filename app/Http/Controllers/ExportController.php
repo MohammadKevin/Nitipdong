@@ -127,21 +127,52 @@ class ExportController extends Controller
     }
 
     /**
-     * Super Admin Revenue Report CSV / Excel Download
+     * Super Admin Revenue Report Export (Formatted Excel .xls & CSV)
      */
-    public function superAdminRevenueReport(Request $request): StreamedResponse
+    public function superAdminRevenueReport(Request $request)
     {
         $parsed = $this->buildReportQuery($request);
         $query = $parsed['query'];
         $startDate = $parsed['startDate'];
         $endDate = $parsed['endDate'];
         $period = $parsed['period'];
+        $format = $request->query('format', 'excel');
 
-        $orders = $query->with(['store', 'user', 'orderItems.product'])->latest()->get();
+        $orders = $query->with(['store.user', 'user', 'orderItems.product'])->latest()->get();
 
         $periodLabel = $startDate && $endDate 
             ? Carbon::parse($startDate)->format('d-m-Y') . '_sd_' . Carbon::parse($endDate)->format('d-m-Y') 
             : 'semua_waktu';
+
+        // 1. FORMAT: EXCEL SPREADSHEET (.xls) with multi-column styles & gridlines
+        if ($format === 'excel' || $format === 'xls') {
+            $fileName = 'laporan_keuangan_nitipdong_' . $periodLabel . '_' . date('His') . '.xls';
+
+            $totalGMV = (float) $orders->sum('total_amount');
+            $totalPlatformFee = round($totalGMV * 0.05);
+            $totalSellerEarnings = $totalGMV - $totalPlatformFee;
+
+            $headers = [
+                'Content-Type'        => 'application/vnd.ms-excel; charset=UTF-8',
+                'Content-Disposition' => "attachment; filename=\"{$fileName}\"",
+                'Pragma'              => 'no-cache',
+                'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
+                'Expires'             => '0',
+            ];
+
+            $content = view('super_admin.reports.excel_template', compact(
+                'orders',
+                'startDate',
+                'endDate',
+                'totalGMV',
+                'totalPlatformFee',
+                'totalSellerEarnings'
+            ))->render();
+
+            return response($content, 200, $headers);
+        }
+
+        // 2. FORMAT: RAW CSV (.csv) with UTF-8 BOM and standard delimiter
         $fileName = 'laporan_keuangan_nitipdong_' . $periodLabel . '_' . date('His') . '.csv';
 
         $headers = [
@@ -152,16 +183,12 @@ class ExportController extends Controller
             'Expires'             => '0',
         ];
 
-        return response()->stream(function () use ($orders, $startDate, $endDate, $period) {
+        return response()->stream(function () use ($orders, $startDate, $endDate) {
             $handle = fopen('php://output', 'w');
-            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF)); // UTF-8 BOM
 
-            // Metadata Headers
-            fputcsv($handle, ['LAPORAN KEUANGAN & KOMISI PLATFORM NITIPDONG']);
-            fputcsv($handle, ['Waktu Unduh', date('d/m/Y H:i:s') . ' WIB']);
-            fputcsv($handle, ['Filter Periode', ($startDate && $endDate ? "{$startDate} s/d {$endDate}" : 'Semua Data')]);
-            fputcsv($handle, ['Total Data', count($orders) . ' Transaksi']);
-            fputcsv($handle, []);
+            // Delimiter hint for Microsoft Excel
+            fwrite($handle, "sep=,\r\n");
 
             // Data Table Headers
             fputcsv($handle, [
@@ -183,7 +210,6 @@ class ExportController extends Controller
             $rowNum = 1;
 
             foreach ($orders as $order) {
-                $isCompleted = in_array($order->status, ['completed', 'shipped', 'processing']);
                 $platformFee = round($order->total_amount * 0.05);
                 $sellerShare = $order->total_amount - $platformFee;
 
@@ -210,7 +236,7 @@ class ExportController extends Controller
             // Summary Footer Row
             fputcsv($handle, []);
             fputcsv($handle, [
-                'RINGKASAN TOTAL',
+                'TOTAL KESELURUHAN',
                 '',
                 '',
                 '',
