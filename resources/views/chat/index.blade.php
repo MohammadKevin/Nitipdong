@@ -33,6 +33,9 @@
     <x-slot name="title">
         Pesan & Percakapan - {{ config('app.name', 'NitipDong') }}
     </x-slot>
+    <x-slot name="pageTitle">
+        Pusat Pesan & Komunikasi
+    </x-slot>
 
     <div class="{{ $isSidebarLayout ? 'space-y-4' : 'page-container py-4 sm:py-6 min-h-[80vh]' }}"
          x-data="fullChatPage({{ json_encode($conversationsData) }}, {{ request('conv') ? (int)request('conv') : 'null' }})">

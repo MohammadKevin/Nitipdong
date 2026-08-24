@@ -13,6 +13,9 @@
     <x-slot name="title">
         Pengaturan Profil & Akun - {{ config('app.name', 'NitipDong') }}
     </x-slot>
+    <x-slot name="pageTitle">
+        Pengaturan Profil & Akun
+    </x-slot>
 
     <div class="{{ $isSidebarLayout ? 'space-y-6' : 'page-container py-6 min-h-[75vh] space-y-6' }}">
         {{-- Profile Header Banner Card --}}

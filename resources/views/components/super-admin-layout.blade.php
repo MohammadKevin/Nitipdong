@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" type="image/png" href="{{ asset('img/saksershop-logo.png') }}">
 
-    <!-- Precision Chart.js -->
+    <!-- Chart.js CDN for Analytical Charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <style>
@@ -65,7 +65,7 @@
              class="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-xs lg:hidden">
         </div>
 
-        <!-- 1. SLATE DARK SIDEBAR (Enterprise Linear / Stripe Style #0F172A) -->
+        <!-- ENTERPRISE SLATE SIDEBAR (#0F172A) -->
         <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
                class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0F172A] text-slate-300 flex flex-col justify-between transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 border-r border-slate-800/90 shrink-0">
             
@@ -121,6 +121,18 @@
                                class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('super_admin.stores.*') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
                                 <i class="fa-solid fa-store w-4 h-4 text-center text-xs {{ request()->routeIs('super_admin.stores.*') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300' }}"></i>
                                 <span class="flex-1">Manajemen Toko</span>
+                            </a>
+
+                            <a href="{{ route('admin.dashboard') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('admin.dashboard') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
+                                <i class="fa-solid fa-clipboard-check w-4 h-4 text-center text-xs {{ request()->routeIs('admin.dashboard') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300' }}"></i>
+                                <span class="flex-1">Persetujuan Toko</span>
+                            </a>
+
+                            <a href="{{ route('admin.products.index') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('admin.products.*') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
+                                <i class="fa-solid fa-boxes-stacked w-4 h-4 text-center text-xs {{ request()->routeIs('admin.products.*') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300' }}"></i>
+                                <span class="flex-1">Moderasi Produk</span>
                             </a>
 
                             <a href="{{ route('admin.categories.index') }}"
@@ -263,6 +275,12 @@
 
             <!-- SCROLLABLE WORKSPACE -->
             <main class="flex-1 overflow-y-auto bg-[#F8FAFC] p-4 sm:p-6 lg:p-7 space-y-6 pb-24 scroll-smooth">
+                @if(session('success'))
+                    <div class="bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-lg p-3 flex gap-2.5 shadow-xs text-xs font-semibold" role="alert">
+                        <i class="fa-solid fa-circle-check text-emerald-600 text-sm mt-0.5"></i>
+                        <p>{{ session('success') }}</p>
+                    </div>
+                @endif
                 {{ $slot }}
             </main>
         </div>
