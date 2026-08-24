@@ -123,27 +123,27 @@
                                 <span class="flex-1">Manajemen Toko</span>
                             </a>
 
-                            <a href="{{ route('admin.dashboard') }}"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('admin.dashboard') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
-                                <i class="fa-solid fa-clipboard-check w-4 h-4 text-center text-xs {{ request()->routeIs('admin.dashboard') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300' }}"></i>
+                            <a href="{{ route('super_admin.approvals.index') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('super_admin.approvals.*') || request()->routeIs('admin.dashboard') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
+                                <i class="fa-solid fa-clipboard-check w-4 h-4 text-center text-xs {{ request()->routeIs('super_admin.approvals.*') || request()->routeIs('admin.dashboard') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300' }}"></i>
                                 <span class="flex-1">Persetujuan Toko</span>
                             </a>
 
-                            <a href="{{ route('admin.products.index') }}"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('admin.products.*') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
-                                <i class="fa-solid fa-boxes-stacked w-4 h-4 text-center text-xs {{ request()->routeIs('admin.products.*') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300' }}"></i>
+                            <a href="{{ route('super_admin.products.index') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('super_admin.products.*') || request()->routeIs('admin.products.*') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
+                                <i class="fa-solid fa-boxes-stacked w-4 h-4 text-center text-xs {{ request()->routeIs('super_admin.products.*') || request()->routeIs('admin.products.*') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300' }}"></i>
                                 <span class="flex-1">Moderasi Produk</span>
                             </a>
 
-                            <a href="{{ route('admin.categories.index') }}"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('admin.categories.*') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
-                                <i class="fa-solid fa-tags w-4 h-4 text-center text-xs {{ request()->routeIs('admin.categories.*') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300' }}"></i>
+                            <a href="{{ route('super_admin.categories.index') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('super_admin.categories.*') || request()->routeIs('admin.categories.*') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
+                                <i class="fa-solid fa-tags w-4 h-4 text-center text-xs {{ request()->routeIs('super_admin.categories.*') || request()->routeIs('admin.categories.*') ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-300' }}"></i>
                                 <span class="flex-1">Kategori Produk</span>
                             </a>
 
-                            <a href="{{ route('admin.flash_sales.index') }}"
-                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('admin.flash_sales.*') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
-                                <i class="fa-solid fa-bolt w-4 h-4 text-center text-xs {{ request()->routeIs('admin.flash_sales.*') ? 'text-amber-400' : 'text-slate-400 group-hover:text-amber-400' }}"></i>
+                            <a href="{{ route('super_admin.flash_sales.index') }}"
+                               class="flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-colors group {{ request()->routeIs('super_admin.flash_sales.*') || request()->routeIs('admin.flash_sales.*') ? 'bg-blue-600/15 text-blue-400 font-semibold border-l-2 border-blue-500 pl-2.5' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 font-medium' }}">
+                                <i class="fa-solid fa-bolt w-4 h-4 text-center text-xs {{ request()->routeIs('super_admin.flash_sales.*') || request()->routeIs('admin.flash_sales.*') ? 'text-amber-400' : 'text-slate-400 group-hover:text-amber-400' }}"></i>
                                 <span class="flex-1">Flash Sale Platform</span>
                                 <span class="text-[9px] font-bold bg-amber-500/15 text-amber-400 px-1.5 py-0.2 rounded font-mono-num">PROMO</span>
                             </a>

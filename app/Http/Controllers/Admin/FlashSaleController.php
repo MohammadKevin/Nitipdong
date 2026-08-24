@@ -93,7 +93,8 @@ class FlashSaleController extends Controller
             }
         }
 
-        return redirect()->route('admin.flash_sales.show', $flashSale)
+        $route = auth()->user()?->role === 'super_admin' ? 'super_admin.flash_sales.show' : 'admin.flash_sales.show';
+        return redirect()->route($route, $flashSale)
             ->with('success', "Flash Sale '{$flashSale->title}' berhasil dibuat! Silakan kelola produk yang diikutsertakan.");
     }
 
@@ -131,7 +132,8 @@ class FlashSaleController extends Controller
 
         $flashSale->update($validated);
 
-        return redirect()->route('admin.flash_sales.show', $flashSale)
+        $route = auth()->user()?->role === 'super_admin' ? 'super_admin.flash_sales.show' : 'admin.flash_sales.show';
+        return redirect()->route($route, $flashSale)
             ->with('success', "Informasi Flash Sale '{$flashSale->title}' berhasil diperbarui.");
     }
 
@@ -140,7 +142,8 @@ class FlashSaleController extends Controller
         $title = $flashSale->title;
         $flashSale->delete();
 
-        return redirect()->route('admin.flash_sales.index')
+        $route = auth()->user()?->role === 'super_admin' ? 'super_admin.flash_sales.index' : 'admin.flash_sales.index';
+        return redirect()->route($route)
             ->with('success', "Flash Sale '{$title}' berhasil dihapus.");
     }
 

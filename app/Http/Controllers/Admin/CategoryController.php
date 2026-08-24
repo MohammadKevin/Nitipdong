@@ -49,7 +49,8 @@ class CategoryController extends Controller
 
         Category::create($validated);
 
-        return redirect()->route('admin.categories.index')->with('success', 'Kategori baru berhasil ditambahkan.');
+        $route = auth()->user()?->role === 'super_admin' ? 'super_admin.categories.index' : 'admin.categories.index';
+        return redirect()->route($route)->with('success', 'Kategori baru berhasil ditambahkan.');
     }
 
     public function edit(Category $category): View
@@ -71,7 +72,8 @@ class CategoryController extends Controller
 
         $category->update($validated);
 
-        return redirect()->route('admin.categories.index')->with('success', 'Kategori berhasil diperbarui.');
+        $route = auth()->user()?->role === 'super_admin' ? 'super_admin.categories.index' : 'admin.categories.index';
+        return redirect()->route($route)->with('success', 'Kategori berhasil diperbarui.');
     }
 
     public function destroy(Category $category): RedirectResponse
@@ -82,6 +84,7 @@ class CategoryController extends Controller
 
         $category->delete();
 
-        return redirect()->route('admin.categories.index')->with('success', "Kategori '{$category->name}' berhasil dihapus.");
+        $route = auth()->user()?->role === 'super_admin' ? 'super_admin.categories.index' : 'admin.categories.index';
+        return redirect()->route($route)->with('success', "Kategori '{$category->name}' berhasil dihapus.");
     }
 }

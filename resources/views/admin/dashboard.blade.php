@@ -56,7 +56,7 @@
                 <h3 class="font-bold text-xs sm:text-sm text-slate-900 uppercase tracking-wider font-mono-num">Daftar Pengajuan Toko (Pending)</h3>
                 <p class="text-xs text-slate-400 mt-0.5">Toko yang membutuhkan verifikasi dokumen dan nama resmi</p>
             </div>
-            <form action="{{ route('admin.dashboard') }}" method="GET" class="relative">
+            <form action="{{ auth()->user()->role === 'super_admin' ? route('super_admin.approvals.index') : route('admin.dashboard') }}" method="GET" class="relative">
                 <input type="text" name="search" value="{{ $search }}" class="w-56 h-8.5 pl-8 pr-3 text-xs rounded-lg border border-slate-200 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-mono-num transition-colors" placeholder="Cari nama toko...">
                 <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 text-xs"></i>
             </form>

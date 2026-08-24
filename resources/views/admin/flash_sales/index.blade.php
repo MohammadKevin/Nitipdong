@@ -16,7 +16,7 @@
         </div>
         
         <div class="flex items-center gap-3">
-            <a href="{{ route('admin.flash_sales.create') }}" class="h-8.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-xs transition-colors">
+            <a href="{{ auth()->user()->role === 'super_admin' ? route('super_admin.flash_sales.create') : route('admin.flash_sales.create') }}" class="h-8.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-xs transition-colors">
                 <i class="fa-solid fa-plus text-[10px]"></i>
                 <span>Buat Flash Sale Baru</span>
             </a>
@@ -50,7 +50,7 @@
                 <i class="fa-solid fa-bolt"></i>
             </div>
             <div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono-num">Total Semua Sesi</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono-num">Total Event</p>
                 <h4 class="text-xl font-bold text-slate-900 mt-0.5 font-mono-num">{{ number_format($totalEvents, 0, ',', '.') }} Sesi</h4>
             </div>
         </div>
@@ -60,21 +60,24 @@
     <div class="bg-white rounded-lg shadow-xs border border-slate-200/90 overflow-hidden">
         <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-slate-50/50">
             <div class="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 font-mono-num">
-                <a href="{{ route('admin.flash_sales.index') }}" class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {{ empty($status) ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/60' }}">
+                @php
+                    $routeIndex = auth()->user()->role === 'super_admin' ? 'super_admin.flash_sales.index' : 'admin.flash_sales.index';
+                @endphp
+                <a href="{{ route($routeIndex) }}" class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {{ empty($status) ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/60' }}">
                     Semua
                 </a>
-                <a href="{{ route('admin.flash_sales.index', ['status' => 'running']) }}" class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {{ $status === 'running' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/60' }}">
+                <a href="{{ route($routeIndex, ['status' => 'running']) }}" class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {{ $status === 'running' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/60' }}">
                     Sedang Berlangsung
                 </a>
-                <a href="{{ route('admin.flash_sales.index', ['status' => 'upcoming']) }}" class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {{ $status === 'upcoming' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/60' }}">
+                <a href="{{ route($routeIndex, ['status' => 'upcoming']) }}" class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {{ $status === 'upcoming' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/60' }}">
                     Akan Datang
                 </a>
-                <a href="{{ route('admin.flash_sales.index', ['status' => 'ended']) }}" class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {{ $status === 'ended' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/60' }}">
+                <a href="{{ route($routeIndex, ['status' => 'ended']) }}" class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {{ $status === 'ended' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/60' }}">
                     Telah Berakhir
                 </a>
             </div>
 
-            <form action="{{ route('admin.flash_sales.index') }}" method="GET" class="relative">
+            <form action="{{ route($routeIndex) }}" method="GET" class="relative">
                 <input type="text" name="search" value="{{ $search }}" class="w-full sm:w-60 h-8.5 pl-8 pr-3 text-xs rounded-lg border border-slate-200 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-mono-num transition-colors placeholder:text-slate-400" placeholder="Cari nama event...">
                 <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 text-xs"></i>
             </form>
@@ -96,8 +99,8 @@
                     @forelse($flashSales as $fs)
                     <tr class="hover:bg-slate-50/70 transition-colors">
                         <td class="px-5 py-3.5">
-                            <a href="{{ route('admin.flash_sales.show', $fs) }}" class="font-semibold text-slate-900 text-xs hover:text-blue-600 transition-colors block">
-                                {{ $fs->name }}
+                            <a href="{{ auth()->user()->role === 'super_admin' ? route('super_admin.flash_sales.show', $fs) : route('admin.flash_sales.show', $fs) }}" class="font-semibold text-slate-900 text-xs hover:text-blue-600 transition-colors block">
+                                {{ $fs->title }}
                             </a>
                             <span class="text-[10px] text-slate-400 font-mono-num">ID: #{{ $fs->id }}</span>
                         </td>
@@ -127,7 +130,7 @@
                             </span>
                         </td>
                         <td class="px-5 py-3.5 text-center">
-                            <form action="{{ route('admin.flash_sales.toggle', $fs) }}" method="POST">
+                            <form action="{{ auth()->user()->role === 'super_admin' ? route('super_admin.flash_sales.toggle', $fs) : route('admin.flash_sales.toggle', $fs) }}" method="POST">
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit" class="px-2 py-0.5 rounded text-[10px] font-bold border transition-colors cursor-pointer font-mono-num {{ $fs->is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200' }}">
@@ -137,13 +140,13 @@
                         </td>
                         <td class="px-5 py-3.5">
                             <div class="flex items-center justify-center gap-1.5">
-                                <a href="{{ route('admin.flash_sales.show', $fs) }}" class="p-1.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 rounded-md transition-colors border border-slate-200 shadow-2xs" title="Kelola Produk Flash Sale">
+                                <a href="{{ auth()->user()->role === 'super_admin' ? route('super_admin.flash_sales.show', $fs) : route('admin.flash_sales.show', $fs) }}" class="p-1.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 rounded-md transition-colors border border-slate-200 shadow-2xs" title="Kelola Produk Flash Sale">
                                     <i class="fa-solid fa-boxes-stacked text-xs"></i>
                                 </a>
-                                <a href="{{ route('admin.flash_sales.edit', $fs) }}" class="p-1.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 rounded-md transition-colors border border-slate-200 shadow-2xs" title="Edit Jadwal">
+                                <a href="{{ auth()->user()->role === 'super_admin' ? route('super_admin.flash_sales.edit', $fs) : route('admin.flash_sales.edit', $fs) }}" class="p-1.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 rounded-md transition-colors border border-slate-200 shadow-2xs" title="Edit Jadwal">
                                     <i class="fa-solid fa-pen-to-square text-xs"></i>
                                 </a>
-                                <form action="{{ route('admin.flash_sales.destroy', $fs) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus sesi flash sale ini?')">
+                                <form action="{{ auth()->user()->role === 'super_admin' ? route('super_admin.flash_sales.destroy', $fs) : route('admin.flash_sales.destroy', $fs) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus sesi flash sale ini?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="p-1.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 rounded-md transition-colors border border-slate-200 shadow-2xs cursor-pointer" title="Hapus Flash Sale">

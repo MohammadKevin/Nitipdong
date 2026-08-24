@@ -243,6 +243,25 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/stores', [SuperAdminController::class, 'stores'])->name('stores.index');
         Route::post('/stores/{store}/toggle-ban', [SuperAdminController::class, 'toggleBan'])->name('stores.toggle_ban');
 
+        // Store Approvals
+        Route::get('/store-approvals', [StoreApprovalController::class, 'index'])->name('approvals.index');
+        Route::post('/store-approvals/{store}/approve', [StoreApprovalController::class, 'approve'])->name('approvals.approve');
+        Route::post('/store-approvals/{store}/reject', [StoreApprovalController::class, 'reject'])->name('approvals.reject');
+
+        // Product Moderation
+        Route::get('/products', [ProductModerationController::class, 'index'])->name('products.index');
+        Route::post('/products/{product}/toggle-status', [ProductModerationController::class, 'toggleStatus'])->name('products.toggle_status');
+
+        // Category Management
+        Route::resource('categories', CategoryController::class)->names('categories');
+
+        // Flash Sales Platform
+        Route::resource('flash-sales', FlashSaleController::class)->names('flash_sales');
+        Route::patch('/flash-sales/{flashSale}/toggle', [FlashSaleController::class, 'toggle'])->name('flash_sales.toggle');
+        Route::post('/flash-sales/{flashSale}/items', [FlashSaleController::class, 'addItem'])->name('flash_sales.items.add');
+        Route::patch('/flash-sales/{flashSale}/items/{item}', [FlashSaleController::class, 'updateItem'])->name('flash_sales.items.update');
+        Route::delete('/flash-sales/{flashSale}/items/{item}', [FlashSaleController::class, 'removeItem'])->name('flash_sales.items.remove');
+
         // Manage Operational Admins
         Route::resource('admins', AdminManagementController::class)->names('admins');
 

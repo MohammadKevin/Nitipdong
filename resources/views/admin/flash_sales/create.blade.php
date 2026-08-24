@@ -7,7 +7,7 @@
     </x-slot>
 
     <div class="mb-3">
-        <a href="{{ route('admin.flash_sales.index') }}" class="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-700 transition-colors font-medium">
+        <a href="{{ auth()->user()->role === 'super_admin' ? route('super_admin.flash_sales.index') : route('admin.flash_sales.index') }}" class="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-700 transition-colors font-medium">
             <i class="fa-solid fa-arrow-left text-[10px]"></i>
             Kembali ke Daftar Flash Sale
         </a>
@@ -32,7 +32,7 @@
             this.end = e.toISOString().slice(0, 16);
         }
     }">
-        <form action="{{ route('admin.flash_sales.store') }}" method="POST" class="p-6 space-y-4">
+        <form action="{{ auth()->user()->role === 'super_admin' ? route('super_admin.flash_sales.store') : route('admin.flash_sales.store') }}" method="POST" class="p-6 space-y-4">
             @csrf
 
             <div>
@@ -102,7 +102,7 @@
             </div>
 
             <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
-                <a href="{{ route('admin.flash_sales.index') }}" class="h-8.5 px-3.5 flex items-center justify-center rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold">
+                <a href="{{ auth()->user()->role === 'super_admin' ? route('super_admin.flash_sales.index') : route('admin.flash_sales.index') }}" class="h-8.5 px-3.5 flex items-center justify-center rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold">
                     Batal
                 </a>
                 <button type="submit" class="h-8.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer">

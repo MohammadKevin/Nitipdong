@@ -7,7 +7,7 @@
     </x-slot>
 
     <div class="mb-3">
-        <a href="{{ route('admin.flash_sales.index') }}" class="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-700 transition-colors font-medium">
+        <a href="{{ auth()->user()->role === 'super_admin' ? route('super_admin.flash_sales.index') : route('admin.flash_sales.index') }}" class="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-700 transition-colors font-medium">
             <i class="fa-solid fa-arrow-left text-[10px]"></i>
             Kembali ke Daftar Flash Sale
         </a>
@@ -34,11 +34,11 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <a href="{{ route('admin.flash_sales.edit', $flashSale) }}" class="text-xs h-8 px-3 rounded-lg bg-white/10 text-white hover:bg-white/20 border border-white/10 flex items-center gap-1.5 font-semibold transition-colors">
+                <a href="{{ auth()->user()->role === 'super_admin' ? route('super_admin.flash_sales.edit', $flashSale) : route('admin.flash_sales.edit', $flashSale) }}" class="text-xs h-8 px-3 rounded-lg bg-white/10 text-white hover:bg-white/20 border border-white/10 flex items-center gap-1.5 font-semibold transition-colors">
                     <i class="fa-solid fa-pen-to-square text-[10px]"></i>
                     Edit Jadwal
                 </a>
-                <form action="{{ route('admin.flash_sales.toggle', $flashSale) }}" method="POST">
+                <form action="{{ auth()->user()->role === 'super_admin' ? route('super_admin.flash_sales.toggle', $flashSale) : route('admin.flash_sales.toggle', $flashSale) }}" method="POST">
                     @csrf
                     @method('PATCH')
                     <button type="submit" class="text-xs h-8 px-3 rounded-lg font-semibold transition-colors flex items-center gap-1.5 cursor-pointer {{ $flashSale->is_active ? 'bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/30' : 'bg-blue-600 text-white hover:bg-blue-700' }}">
@@ -128,7 +128,7 @@
                 </div>
 
                 @if($availableProducts->count() > 0)
-                <form action="{{ route('admin.flash_sales.items.add', $flashSale) }}" method="POST" class="space-y-3.5">
+                <form action="{{ auth()->user()->role === 'super_admin' ? route('super_admin.flash_sales.items.add', $flashSale) : route('admin.flash_sales.items.add', $flashSale) }}" method="POST" class="space-y-3.5">
                     @csrf
 
                     <div>
@@ -290,7 +290,7 @@
                                             <button type="button" @click="isEditing = true" class="p-1.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 rounded-md transition-colors border border-slate-200 shadow-2xs" title="Edit Harga/Kuota">
                                                 <i class="fa-solid fa-pen text-xs"></i>
                                             </button>
-                                            <form action="{{ route('admin.flash_sales.items.remove', [$flashSale, $item]) }}" method="POST" onsubmit="return confirm('Hapus produk \'{{ $item->product->name }}\' dari Flash Sale?')">
+                                            <form action="{{ auth()->user()->role === 'super_admin' ? route('super_admin.flash_sales.items.remove', [$flashSale, $item]) : route('admin.flash_sales.items.remove', [$flashSale, $item]) }}" method="POST" onsubmit="return confirm('Hapus produk \'{{ $item->product->name }}\' dari Flash Sale?')">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="p-1.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 rounded-md transition-colors border border-slate-200 shadow-2xs cursor-pointer" title="Hapus dari Flash Sale">
@@ -301,7 +301,7 @@
                                     </template>
                                     <template x-if="isEditing">
                                         <div class="flex items-center justify-center gap-1">
-                                            <form action="{{ route('admin.flash_sales.items.update', [$flashSale, $item]) }}" method="POST">
+                                            <form action="{{ auth()->user()->role === 'super_admin' ? route('super_admin.flash_sales.items.update', [$flashSale, $item]) : route('admin.flash_sales.items.update', [$flashSale, $item]) }}" method="POST">
                                                 @csrf
                                                 @method('PATCH')
                                                 <input type="hidden" name="flash_sale_price" :value="flashPrice">

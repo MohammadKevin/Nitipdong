@@ -16,7 +16,7 @@
         </div>
         
         <div class="flex items-center gap-3">
-            <a href="{{ route('admin.categories.create') }}" class="h-8.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-xs transition-colors">
+            <a href="{{ auth()->user()->role === 'super_admin' ? route('super_admin.categories.create') : route('admin.categories.create') }}" class="h-8.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-xs transition-colors">
                 <i class="fa-solid fa-plus text-[10px]"></i>
                 <span>Tambah Kategori</span>
             </a>
@@ -63,7 +63,7 @@
                 <h3 class="font-bold text-xs sm:text-sm text-slate-900 uppercase tracking-wider font-mono-num">Daftar Semua Kategori</h3>
                 <p class="text-xs text-slate-400 mt-0.5">Klasifikasi produk yang aktif di marketplace NitipDong</p>
             </div>
-            <form action="{{ route('admin.categories.index') }}" method="GET" class="relative">
+            <form action="{{ auth()->user()->role === 'super_admin' ? route('super_admin.categories.index') : route('admin.categories.index') }}" method="GET" class="relative">
                 <input type="text" name="search" value="{{ $search }}" class="w-full sm:w-60 h-8.5 pl-8 pr-3 text-xs rounded-lg border border-slate-200 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-mono-num transition-colors placeholder:text-slate-400" placeholder="Cari nama atau slug...">
                 <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 text-xs"></i>
             </form>
@@ -109,10 +109,10 @@
                         </td>
                         <td class="px-5 py-3.5">
                             <div class="flex items-center justify-center gap-1.5">
-                                <a href="{{ route('admin.categories.edit', $category) }}" class="p-1.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 rounded-md transition-colors border border-slate-200 shadow-2xs" title="Edit Kategori">
+                                <a href="{{ auth()->user()->role === 'super_admin' ? route('super_admin.categories.edit', $category) : route('admin.categories.edit', $category) }}" class="p-1.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-600 rounded-md transition-colors border border-slate-200 shadow-2xs" title="Edit Kategori">
                                     <i class="fa-solid fa-pen-to-square text-xs"></i>
                                 </a>
-                                <form action="{{ route('admin.categories.destroy', $category) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kategori \'{{ $category->name }}\'?')">
+                                <form action="{{ auth()->user()->role === 'super_admin' ? route('super_admin.categories.destroy', $category) : route('admin.categories.destroy', $category) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kategori \'{{ $category->name }}\'?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="p-1.5 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 rounded-md transition-colors border border-slate-200 shadow-2xs cursor-pointer" title="Hapus Kategori">
