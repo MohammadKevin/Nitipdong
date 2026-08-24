@@ -163,16 +163,45 @@ class SuperAdminController extends Controller
     public function stores(Request $request)
     {
         $search = $request->input('search');
+        $status = $request->input('status');
         
         $storesQuery = Store::with('user')->latest();
         
         if ($search) {
-            $storesQuery->where('name', 'like', "%{$search}%");
+            $storesQuery->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('address', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($u) use ($search) {
+                      $u->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        if ($status === 'active' || $status === 'approved') {
+            $storesQuery->whereIn('status', ['approved', 'active']);
+        } elseif ($status === 'pending') {
+            $storesQuery->where('status', 'pending');
+        } elseif ($status === 'banned' || $status === 'rejected') {
+            $storesQuery->where('status', 'rejected');
         }
         
-        $stores = $storesQuery->paginate(10)->withQueryString();
+        $stores = $storesQuery->paginate(15)->withQueryString();
+
+        $totalStores = Store::count();
+        $activeStores = Store::whereIn('status', ['approved', 'active'])->count();
+        $pendingStores = Store::where('status', 'pending')->count();
+        $bannedStores = Store::where('status', 'rejected')->count();
         
-        return view('super_admin.stores.index', compact('stores', 'search'));
+        return view('super_admin.stores.index', compact(
+            'stores', 
+            'search', 
+            'status', 
+            'totalStores', 
+            'activeStores', 
+            'pendingStores', 
+            'bannedStores'
+        ));
     }
 
     public function toggleBan(Store $store)

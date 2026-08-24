@@ -52,24 +52,47 @@
         @endif
 
         {{-- Metrics Summary Grid --}}
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div class="bg-white rounded-lg p-4 border border-slate-200/90 shadow-xs">
-                <span class="text-xs text-slate-500 font-medium uppercase tracking-wider text-[10px] font-bold font-mono-num">Permohonan Pending</span>
-                <h3 class="text-xl font-bold {{ $pendingCount > 0 ? 'text-amber-600' : 'text-slate-900' }} mt-1 font-mono-num">
-                    {{ $pendingCount }} Pengajuan
-                </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+            <div class="bg-white rounded-lg p-4 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
+                <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 border border-amber-200/70 flex items-center justify-center text-base shrink-0 font-mono-num">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div class="min-w-0">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono-num truncate">Permohonan Pending</span>
+                    <h3 class="text-lg sm:text-xl font-bold {{ $pendingCount > 0 ? 'text-amber-600' : 'text-slate-900' }} mt-0.5 font-mono-num truncate">
+                        {{ number_format($pendingCount, 0, ',', '.') }} Pengajuan
+                    </h3>
+                </div>
             </div>
-            <div class="bg-white rounded-lg p-4 border border-slate-200/90 shadow-xs">
-                <span class="text-xs text-slate-500 font-medium uppercase tracking-wider text-[10px] font-bold font-mono-num">Payout Disetujui</span>
-                <h3 class="text-xl font-bold text-emerald-700 mt-1 font-mono-num">{{ $approvedCount }} Transaksi</h3>
+
+            <div class="bg-white rounded-lg p-4 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
+                <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/70 flex items-center justify-center text-base shrink-0 font-mono-num">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div class="min-w-0">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono-num truncate">Payout Disetujui</span>
+                    <h3 class="text-lg sm:text-xl font-bold text-emerald-700 mt-0.5 font-mono-num truncate">{{ number_format($approvedCount, 0, ',', '.') }} Transaksi</h3>
+                </div>
             </div>
-            <div class="bg-white rounded-lg p-4 border border-slate-200/90 shadow-xs">
-                <span class="text-xs text-slate-500 font-medium uppercase tracking-wider text-[10px] font-bold font-mono-num">Total Dana Ditransfer</span>
-                <h3 class="text-xl font-bold text-slate-900 mt-1 font-mono-num">Rp {{ number_format($totalPaidOut, 0, ',', '.') }}</h3>
+
+            <div class="bg-white rounded-lg p-4 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 border border-blue-200/70 flex items-center justify-center text-base shrink-0 font-mono-num">
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                </div>
+                <div class="min-w-0">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono-num truncate">Total Dana Ditransfer</span>
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mt-0.5 font-mono-num truncate" title="Rp {{ number_format($totalPaidOut, 0, ',', '.') }}">Rp {{ number_format($totalPaidOut, 0, ',', '.') }}</h3>
+                </div>
             </div>
-            <div class="bg-white rounded-lg p-4 border border-slate-200/90 shadow-xs">
-                <span class="text-xs text-slate-500 font-medium uppercase tracking-wider text-[10px] font-bold font-mono-num">Permohonan Ditolak</span>
-                <h3 class="text-xl font-bold text-rose-600 mt-1 font-mono-num">{{ $rejectedCount }} Ditolak</h3>
+
+            <div class="bg-white rounded-lg p-4 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
+                <div class="w-10 h-10 rounded-lg bg-rose-50 text-rose-700 border border-rose-200/70 flex items-center justify-center text-base shrink-0 font-mono-num">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </div>
+                <div class="min-w-0">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono-num truncate">Permohonan Ditolak</span>
+                    <h3 class="text-lg sm:text-xl font-bold text-rose-600 mt-0.5 font-mono-num truncate">{{ number_format($rejectedCount, 0, ',', '.') }} Ditolak</h3>
+                </div>
             </div>
         </div>
 

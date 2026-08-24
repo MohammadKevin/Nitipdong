@@ -62,14 +62,14 @@
         @endif
 
         {{-- Statistics & Search Toolbar --}}
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="bg-white p-4 rounded-lg border border-slate-200/90 shadow-xs flex items-center gap-3">
-                <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center justify-center text-sm shrink-0 font-mono-num">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
+            <div class="bg-white p-4 rounded-lg border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
+                <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center justify-center text-base shrink-0 font-mono-num">
                     <i class="fa-solid fa-users-gear"></i>
                 </div>
-                <div>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono-num">Total Admin</span>
-                    <span class="text-xl font-bold text-slate-900 font-mono-num">{{ $totalAdmins }} Staf</span>
+                <div class="min-w-0">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono-num truncate">Total Admin</span>
+                    <span class="text-lg sm:text-xl font-bold text-slate-900 font-mono-num truncate">{{ number_format($totalAdmins, 0, ',', '.') }} Staf</span>
                 </div>
             </div>
 
@@ -78,14 +78,14 @@
                     <div class="relative flex-1">
                         <input type="text" name="search" value="{{ request('search') }}"
                                placeholder="Cari nama admin, alamat email, atau no. telepon..."
-                               class="w-full h-8.5 pl-8 pr-3 rounded-lg border border-slate-200 bg-slate-50 text-xs focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-mono-num placeholder:text-slate-400 transition-colors">
+                               class="w-full h-8.5 pl-8 pr-3 rounded-lg border border-slate-200 bg-white text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-mono-num placeholder:text-slate-400 transition-colors">
                         <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 text-xs"></i>
                     </div>
                     <button type="submit" class="h-8.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg transition-colors cursor-pointer shrink-0 shadow-xs">
                         Cari
                     </button>
                     @if(request('search'))
-                        <a href="{{ route('super_admin.admins.index') }}" class="h-8.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg flex items-center justify-center transition-colors border border-slate-200">
+                        <a href="{{ route('super_admin.admins.index') }}" class="h-8.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg flex items-center justify-center transition-colors border border-slate-200 shrink-0">
                             Reset
                         </a>
                     @endif

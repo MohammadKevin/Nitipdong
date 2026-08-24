@@ -259,16 +259,18 @@
 
                     <!-- Secondary Outline Button: Tinjau Payout -->
                     <a href="{{ route('super_admin.withdrawals.index') }}" 
-                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-colors">
+                       class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-colors shrink-0">
                         <i class="fa-solid fa-money-bill-transfer text-emerald-600 text-[11px]"></i>
-                        <span>Tinjau Payout</span>
+                        <span class="hidden md:inline">Tinjau Payout</span>
+                        <span class="md:hidden">Payout</span>
                     </a>
 
                     <!-- Primary Solid Button: Ekspor Laporan Keuangan -->
                     <a href="{{ route('super_admin.reports.revenue.export') }}"
-                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-xs transition-colors">
+                       class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-xs transition-colors shrink-0">
                         <i class="fa-solid fa-file-excel text-[11px]"></i>
-                        <span>Ekspor Laporan Keuangan</span>
+                        <span class="hidden md:inline">Ekspor Laporan Keuangan</span>
+                        <span class="md:hidden">Ekspor</span>
                     </a>
                 </div>
             </header>

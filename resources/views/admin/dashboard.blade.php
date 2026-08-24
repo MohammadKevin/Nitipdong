@@ -9,7 +9,7 @@
     <!-- HEADER BAR -->
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-1">
         <div>
-            <h1 class="text-xl font-bold text-slate-900 tracking-tight">
+            <h1 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                 Persetujuan Toko & Moderasi Merchant
             </h1>
             <p class="text-xs text-slate-500 mt-0.5">Tinjau dan verifikasi permohonan pembukaan toko baru dari pengguna NitipDong.</p>
@@ -17,34 +17,34 @@
     </div>
 
     <!-- 3 SUMMARY CARDS -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white rounded-lg p-4.5 border border-slate-200/90 shadow-xs flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-base border border-amber-200 shrink-0 font-mono-num">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4">
+        <div class="bg-white rounded-lg p-4 sm:p-4.5 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
+            <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-base border border-amber-200/70 shrink-0 font-mono-num">
                 <i class="fa-solid fa-clock"></i>
             </div>
-            <div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono-num">Menunggu Review</p>
-                <h4 class="text-xl font-bold text-slate-900 mt-0.5 font-mono-num">{{ number_format($pendingCount, 0, ',', '.') }} Toko</h4>
+            <div class="min-w-0">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono-num truncate">Menunggu Review</p>
+                <h4 class="text-lg sm:text-xl font-bold text-slate-900 mt-0.5 font-mono-num truncate">{{ number_format($pendingCount, 0, ',', '.') }} Toko</h4>
             </div>
         </div>
 
-        <div class="bg-white rounded-lg p-4.5 border border-slate-200/90 shadow-xs flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center text-base border border-blue-200 shrink-0 font-mono-num">
+        <div class="bg-white rounded-lg p-4 sm:p-4.5 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
+            <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-base border border-emerald-200/70 shrink-0 font-mono-num">
                 <i class="fa-solid fa-circle-check"></i>
             </div>
-            <div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono-num">Toko Disetujui</p>
-                <h4 class="text-xl font-bold text-slate-900 mt-0.5 font-mono-num">{{ number_format($approvedCount, 0, ',', '.') }} Toko</h4>
+            <div class="min-w-0">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono-num truncate">Toko Disetujui</p>
+                <h4 class="text-lg sm:text-xl font-bold text-slate-900 mt-0.5 font-mono-num truncate">{{ number_format($approvedCount, 0, ',', '.') }} Toko</h4>
             </div>
         </div>
 
-        <div class="bg-white rounded-lg p-4.5 border border-slate-200/90 shadow-xs flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-base border border-rose-200 shrink-0 font-mono-num">
+        <div class="bg-white rounded-lg p-4 sm:p-4.5 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
+            <div class="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-base border border-rose-200/70 shrink-0 font-mono-num">
                 <i class="fa-solid fa-circle-xmark"></i>
             </div>
-            <div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono-num">Pengajuan Ditolak</p>
-                <h4 class="text-xl font-bold text-slate-900 mt-0.5 font-mono-num">{{ number_format($rejectedCount, 0, ',', '.') }} Toko</h4>
+            <div class="min-w-0">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono-num truncate">Pengajuan Ditolak</p>
+                <h4 class="text-lg sm:text-xl font-bold text-slate-900 mt-0.5 font-mono-num truncate">{{ number_format($rejectedCount, 0, ',', '.') }} Toko</h4>
             </div>
         </div>
     </div>
@@ -57,7 +57,7 @@
                 <p class="text-xs text-slate-400 mt-0.5">Toko yang membutuhkan verifikasi dokumen dan nama resmi</p>
             </div>
             <form action="{{ auth()->user()->role === 'super_admin' ? route('super_admin.approvals.index') : route('admin.dashboard') }}" method="GET" class="relative">
-                <input type="text" name="search" value="{{ $search }}" class="w-56 h-8.5 pl-8 pr-3 text-xs rounded-lg border border-slate-200 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-mono-num transition-colors" placeholder="Cari nama toko...">
+                <input type="text" name="search" value="{{ $search }}" class="w-full sm:w-60 h-8.5 pl-8 pr-3 text-xs rounded-lg border border-slate-200 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-mono-num transition-colors placeholder:text-slate-400" placeholder="Cari nama toko...">
                 <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 text-xs"></i>
             </form>
         </div>
@@ -93,15 +93,15 @@
                             <p class="truncate">{{ $store->description ?? 'Tidak ada deskripsi' }}</p>
                         </td>
                         <td class="px-5 py-3.5 text-center">
-                            <div class="flex items-center justify-center gap-2">
-                                <form action="{{ route('admin.stores.approve', $store) }}" method="POST">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <form action="{{ auth()->user()->role === 'super_admin' ? route('super_admin.approvals.approve', $store) : route('admin.stores.approve', $store) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="px-3 py-1.5 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold text-xs transition-colors border border-emerald-200 inline-flex items-center gap-1 shadow-2xs cursor-pointer">
                                         <i class="fa-solid fa-check text-[10px]"></i>
                                         Setujui
                                     </button>
                                 </form>
-                                <form action="{{ route('admin.stores.reject', $store) }}" method="POST">
+                                <form action="{{ auth()->user()->role === 'super_admin' ? route('super_admin.approvals.reject', $store) : route('admin.stores.reject', $store) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="px-3 py-1.5 rounded-md bg-rose-50 text-rose-700 hover:bg-rose-100 font-semibold text-xs transition-colors border border-rose-200 inline-flex items-center gap-1 shadow-2xs cursor-pointer">
                                         <i class="fa-solid fa-xmark text-[10px]"></i>

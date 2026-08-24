@@ -30,97 +30,97 @@
     </div>
 
     <!-- 4 KEY METRIC CARDS (Enterprise Flat Grid with 6px-8px Radius & Tabular Numbers) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5 sm:gap-4">
         
         <!-- CARD 1: KOMISI PLATFORM 5% -->
-        <div class="bg-white p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
+        <div class="bg-white p-4 sm:p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div>
                 <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
-                    <span class="uppercase tracking-wider text-[10px] font-bold text-slate-400 font-mono-num">Komisi Platform (5%)</span>
-                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 font-mono-num">
+                    <span class="uppercase tracking-wider text-[10px] font-bold text-slate-400 font-mono-num truncate">Komisi Platform (5%)</span>
+                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 font-mono-num shrink-0">
                         Laba Bersih
                     </span>
                 </div>
-                <div class="mt-3">
-                    <h3 class="text-2xl font-bold text-slate-900 tracking-tight font-mono-num">
+                <div class="mt-2.5 sm:mt-3">
+                    <h3 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight font-mono-num truncate" title="Rp {{ number_format($totalKeuntunganPlatform, 0, ',', '.') }}">
                         Rp {{ number_format($totalKeuntunganPlatform, 0, ',', '.') }}
                     </h3>
                 </div>
             </div>
 
-            <div class="mt-4 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <div class="mt-3.5 sm:mt-4 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] sm:text-xs text-slate-500">
                 <span>Bulan Ini:</span>
                 <span class="font-bold text-slate-800 font-mono-num">Rp {{ number_format($thisMonthProfit, 0, ',', '.') }}</span>
             </div>
         </div>
 
         <!-- CARD 2: GROSS MERCHANDISE VOLUME (GMV) -->
-        <div class="bg-white p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
+        <div class="bg-white p-4 sm:p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div>
                 <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
-                    <span class="uppercase tracking-wider text-[10px] font-bold text-slate-400 font-mono-num">Gross Volume (GMV)</span>
-                    <span class="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded font-mono-num">
+                    <span class="uppercase tracking-wider text-[10px] font-bold text-slate-400 font-mono-num truncate">Gross Volume (GMV)</span>
+                    <span class="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded font-mono-num shrink-0">
                         Total Sukses
                     </span>
                 </div>
-                <div class="mt-3">
-                    <h3 class="text-2xl font-bold text-slate-900 tracking-tight font-mono-num">
+                <div class="mt-2.5 sm:mt-3">
+                    <h3 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight font-mono-num truncate" title="Rp {{ number_format($grossVolume, 0, ',', '.') }}">
                         Rp {{ number_format($grossVolume, 0, ',', '.') }}
                     </h3>
                 </div>
             </div>
 
-            <div class="mt-4 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span>Rata-rata Order (AOV):</span>
+            <div class="mt-3.5 sm:mt-4 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] sm:text-xs text-slate-500">
+                <span>AOV (Rata-rata):</span>
                 <span class="font-bold text-slate-800 font-mono-num">Rp {{ number_format($averageOrderValue, 0, ',', '.') }}</span>
             </div>
         </div>
 
         <!-- CARD 3: VOLUME PESANAN -->
-        <div class="bg-white p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
+        <div class="bg-white p-4 sm:p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div>
                 <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
-                    <span class="uppercase tracking-wider text-[10px] font-bold text-slate-400 font-mono-num">Volume Pesanan</span>
-                    <span class="text-[10px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200/60 font-mono-num">
+                    <span class="uppercase tracking-wider text-[10px] font-bold text-slate-400 font-mono-num truncate">Volume Pesanan</span>
+                    <span class="text-[10px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200/60 font-mono-num shrink-0">
                         Bulan Ini
                     </span>
                 </div>
-                <div class="mt-3">
-                    <h3 class="text-2xl font-bold text-slate-900 tracking-tight font-mono-num">
+                <div class="mt-2.5 sm:mt-3">
+                    <h3 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight font-mono-num truncate">
                         {{ number_format($pesananBaru, 0, ',', '.') }} <span class="text-xs font-normal text-slate-400">Order</span>
                     </h3>
                 </div>
             </div>
 
-            <div class="mt-4 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+            <div class="mt-3.5 sm:mt-4 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] sm:text-xs text-slate-500">
                 <span>Pesanan Berjalan:</span>
-                <span class="font-bold text-blue-700 font-mono-num">{{ number_format($activeOrders, 0, ',', '.') }} Transaksi Aktif</span>
+                <span class="font-bold text-blue-700 font-mono-num">{{ number_format($activeOrders, 0, ',', '.') }} Aktif</span>
             </div>
         </div>
 
         <!-- CARD 4: EKOSISTEM PLATFORM -->
-        <div class="bg-white p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
+        <div class="bg-white p-4 sm:p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div>
                 <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
-                    <span class="uppercase tracking-wider text-[10px] font-bold text-slate-400 font-mono-num">Ekosistem Platform</span>
-                    <span class="text-[10px] font-semibold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded font-mono-num">
+                    <span class="uppercase tracking-wider text-[10px] font-bold text-slate-400 font-mono-num truncate">Ekosistem Platform</span>
+                    <span class="text-[10px] font-semibold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded font-mono-num shrink-0">
                         Akun
                     </span>
                 </div>
-                <div class="mt-3">
-                    <h3 class="text-2xl font-bold text-slate-900 tracking-tight font-mono-num">
+                <div class="mt-2.5 sm:mt-3">
+                    <h3 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight font-mono-num truncate">
                         {{ number_format($totalPengguna, 0, ',', '.') }} <span class="text-xs font-normal text-slate-400">User</span>
                     </h3>
                 </div>
             </div>
 
-            <div class="mt-4 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span>Toko Terdaftar:</span>
+            <div class="mt-3.5 sm:mt-4 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] sm:text-xs text-slate-500">
+                <span>Toko Resmi:</span>
                 <div class="flex items-center gap-1.5 font-mono-num">
-                    <span class="font-bold text-slate-800">{{ $totalToko }} Toko Resmi</span>
+                    <span class="font-bold text-slate-800">{{ $totalToko }} Toko</span>
                     @if($pendingStoresCount > 0)
                         <span class="text-[9px] font-bold text-amber-700 bg-amber-50 px-1 py-0.2 rounded border border-amber-200">
-                            +{{ $pendingStoresCount }} Review
+                            +{{ $pendingStoresCount }}
                         </span>
                     @endif
                 </div>
@@ -141,7 +141,7 @@
                 </div>
 
                 <!-- Timeframe Segmented Controls -->
-                <div class="inline-flex p-0.5 bg-slate-100 rounded-md text-xs font-medium font-mono-num" id="chart-period-tabs">
+                <div class="inline-flex p-0.5 bg-slate-100 rounded-md text-xs font-medium font-mono-num max-w-full overflow-x-auto shrink-0" id="chart-period-tabs">
                     <button type="button" onclick="loadChartData('day')" class="period-btn px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 transition-colors" data-period="day">7 Hari</button>
                     <button type="button" onclick="loadChartData('week')" class="period-btn px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 transition-colors active bg-white text-blue-700 font-bold shadow-xs" data-period="week">Mingguan</button>
                     <button type="button" onclick="loadChartData('month')" class="period-btn px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 transition-colors" data-period="month">Bulan Ini</button>
@@ -161,8 +161,8 @@
             </div>
 
             <!-- Legend & Subtext -->
-            <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <div class="flex items-center gap-4">
+            <div class="mt-3 pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500">
+                <div class="flex items-center gap-4 flex-wrap">
                     <div class="flex items-center gap-1.5">
                         <span class="w-2.5 h-2.5 rounded-xs bg-blue-600"></span>
                         <span class="font-medium text-slate-700">Komisi Platform (5%)</span>
