@@ -67,163 +67,148 @@
              class="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-xs lg:hidden">
         </div>
 
-        <!-- ENTERPRISE SLATE SIDEBAR (#0F172A) -->
         <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
-               class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0F172A] text-slate-300 flex flex-col justify-between transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 border-r border-slate-800 shrink-0">
-            
-            <div class="flex flex-col h-full">
-                
-                <!-- HEADER / BRANDING -->
-                <div class="h-16 px-4 border-b border-slate-800 flex items-center justify-between bg-[#0B1324]">
-                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs shrink-0">
-                            <img src="{{ asset('img/saksershop-logo.png') }}" alt="Logo" class="w-5 h-5 object-contain">
-                        </div>
-                        <div class="flex flex-col min-w-0">
-                            <span class="font-bold text-white text-sm tracking-tight leading-none">Nitip<span class="text-blue-400">Dong</span></span>
-                            <div class="flex items-center gap-1.5 mt-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
-                                <span class="text-xs text-slate-400 leading-none">Admin Panel</span>
-                            </div>
-                        </div>
+       class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0B0D10] text-[#C7CBD1] flex flex-col justify-between transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 border-r border-[#1B1F26] shrink-0">
+
+    <div class="flex flex-col h-full">
+
+        <!-- HEADER / BRANDING -->
+        <div class="h-16 px-4 border-b border-[#1B1F26] flex items-center justify-between bg-[#0E1116]">
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-sm border border-[#262B33] bg-[#12151A] flex items-center justify-center shrink-0 relative">
+                    <img src="{{ asset('img/saksershop-logo.png') }}" alt="Logo" class="w-5 h-5 object-contain opacity-90">
+                    <span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#B8441A] ring-2 ring-[#0E1116]"></span>
+                </div>
+                <div class="flex flex-col min-w-0">
+                    <span class="font-bold text-[#EDEEF0] text-sm tracking-tight leading-none">Nitip<span class="text-[#B8441A]">Dong</span></span>
+                    <div class="flex items-center gap-1.5 mt-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#4C9A6A] shrink-0"></span>
+                        <span class="text-[10px] font-mono uppercase tracking-wider text-[#5B6270] leading-none">Pusat Kendali</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Mobile Dismiss -->
+            <button @click="sidebarOpen = false" class="lg:hidden text-[#5B6270] hover:text-[#EDEEF0] p-1 rounded-sm hover:bg-white/5 transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- NAVIGATION ITEMS -->
+        <div class="flex-1 overflow-y-auto slate-scrollbar px-3 py-5 space-y-7">
+
+            <!-- SECTION 1: MODERASI & KONTROL -->
+            <div>
+                <div class="flex items-center gap-2 px-1 mb-2.5">
+                    <span class="font-mono text-[10px] text-[#4A505B]">I</span>
+                    <span class="text-[10px] font-medium tracking-wider text-[#5B6270] uppercase">Moderasi &amp; Kontrol</span>
+                    <span class="flex-1 h-px bg-[#1B1F26]"></span>
+                </div>
+                <nav class="space-y-1">
+                    @php $active = request()->routeIs('admin.dashboard'); @endphp
+                    <a href="{{ route('admin.dashboard') }}"
+                       class="group flex items-center gap-2.5 pl-2.5 pr-3 py-2 border-l-2 transition-colors {{ $active ? 'border-[#B8441A] bg-[#B8441A]/[0.06]' : 'border-transparent hover:border-[#2A2F38] hover:bg-white/[0.02]' }}">
+                        <span class="w-6 h-6 shrink-0 grid place-items-center rounded-sm border font-mono text-[10px] font-semibold {{ $active ? 'border-[#B8441A]/50 bg-[#B8441A]/10 text-[#D9682F]' : 'border-[#262B33] text-[#5B6270] group-hover:text-[#8A90A0] group-hover:border-[#333944]' }}">PT</span>
+                        <span class="flex-1 truncate text-xs {{ $active ? 'text-[#EDEEF0] font-medium' : 'text-[#8A90A0] group-hover:text-[#C7CBD1]' }}">Persetujuan Toko</span>
+                        @if($active)<span class="w-1.5 h-1.5 rounded-full bg-[#B8441A] shrink-0"></span>@endif
                     </a>
 
-                    <!-- Mobile Dismiss -->
-                    <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-800 transition-colors">
-                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                    @php $active = request()->routeIs('admin.products.*'); @endphp
+                    <a href="{{ route('admin.products.index') }}"
+                       class="group flex items-center gap-2.5 pl-2.5 pr-3 py-2 border-l-2 transition-colors {{ $active ? 'border-[#B8441A] bg-[#B8441A]/[0.06]' : 'border-transparent hover:border-[#2A2F38] hover:bg-white/[0.02]' }}">
+                        <span class="w-6 h-6 shrink-0 grid place-items-center rounded-sm border font-mono text-[10px] font-semibold {{ $active ? 'border-[#B8441A]/50 bg-[#B8441A]/10 text-[#D9682F]' : 'border-[#262B33] text-[#5B6270] group-hover:text-[#8A90A0] group-hover:border-[#333944]' }}">MP</span>
+                        <span class="flex-1 truncate text-xs {{ $active ? 'text-[#EDEEF0] font-medium' : 'text-[#8A90A0] group-hover:text-[#C7CBD1]' }}">Moderasi Produk</span>
+                        @if($active)<span class="w-1.5 h-1.5 rounded-full bg-[#B8441A] shrink-0"></span>@endif
+                    </a>
+                </nav>
+            </div>
+
+            <!-- SECTION 2: KATALOG & PROMOSI -->
+            <div>
+                <div class="flex items-center gap-2 px-1 mb-2.5">
+                    <span class="font-mono text-[10px] text-[#4A505B]">II</span>
+                    <span class="text-[10px] font-medium tracking-wider text-[#5B6270] uppercase">Katalog &amp; Promosi</span>
+                    <span class="flex-1 h-px bg-[#1B1F26]"></span>
+                </div>
+                <nav class="space-y-1">
+                    @php $active = request()->routeIs('admin.categories.*'); @endphp
+                    <a href="{{ route('admin.categories.index') }}"
+                       class="group flex items-center gap-2.5 pl-2.5 pr-3 py-2 border-l-2 transition-colors {{ $active ? 'border-[#B8441A] bg-[#B8441A]/[0.06]' : 'border-transparent hover:border-[#2A2F38] hover:bg-white/[0.02]' }}">
+                        <span class="w-6 h-6 shrink-0 grid place-items-center rounded-sm border font-mono text-[10px] font-semibold {{ $active ? 'border-[#B8441A]/50 bg-[#B8441A]/10 text-[#D9682F]' : 'border-[#262B33] text-[#5B6270] group-hover:text-[#8A90A0] group-hover:border-[#333944]' }}">KP</span>
+                        <span class="flex-1 truncate text-xs {{ $active ? 'text-[#EDEEF0] font-medium' : 'text-[#8A90A0] group-hover:text-[#C7CBD1]' }}">Kategori Produk</span>
+                        @if($active)<span class="w-1.5 h-1.5 rounded-full bg-[#B8441A] shrink-0"></span>@endif
+                    </a>
+
+                    @php $active = request()->routeIs('admin.flash_sales.*'); @endphp
+                    <a href="{{ route('admin.flash_sales.index') }}"
+                       class="group flex items-center gap-2.5 pl-2.5 pr-3 py-2 border-l-2 transition-colors {{ $active ? 'border-[#B8441A] bg-[#B8441A]/[0.06]' : 'border-transparent hover:border-[#2A2F38] hover:bg-white/[0.02]' }}">
+                        <span class="w-6 h-6 shrink-0 grid place-items-center rounded-sm border font-mono text-[10px] font-semibold {{ $active ? 'border-[#B8441A]/50 bg-[#B8441A]/10 text-[#D9682F]' : 'border-[#262B33] text-[#5B6270] group-hover:text-amber-400 group-hover:border-amber-500/40' }}">FS</span>
+                        <span class="flex-1 truncate text-xs {{ $active ? 'text-[#EDEEF0] font-medium' : 'text-[#8A90A0] group-hover:text-[#C7CBD1]' }}">Flash Sale Platform</span>
+                        <span class="text-[9px] font-mono uppercase tracking-wide px-1.5 py-0.5 rounded-sm border border-amber-500/30 text-amber-400 shrink-0">Promo</span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- SECTION 3: KOMUNIKASI & AKUN -->
+            <div>
+                <div class="flex items-center gap-2 px-1 mb-2.5">
+                    <span class="font-mono text-[10px] text-[#4A505B]">III</span>
+                    <span class="text-[10px] font-medium tracking-wider text-[#5B6270] uppercase">Komunikasi &amp; Akun</span>
+                    <span class="flex-1 h-px bg-[#1B1F26]"></span>
+                </div>
+                <nav class="space-y-1">
+                    @php $active = request()->routeIs('chat.*'); @endphp
+                    <a href="{{ route('chat.index') }}"
+                       class="group flex items-center gap-2.5 pl-2.5 pr-3 py-2 border-l-2 transition-colors {{ $active ? 'border-[#B8441A] bg-[#B8441A]/[0.06]' : 'border-transparent hover:border-[#2A2F38] hover:bg-white/[0.02]' }}">
+                        <span class="w-6 h-6 shrink-0 grid place-items-center rounded-sm border font-mono text-[10px] font-semibold {{ $active ? 'border-[#B8441A]/50 bg-[#B8441A]/10 text-[#D9682F]' : 'border-[#262B33] text-[#5B6270] group-hover:text-[#8A90A0] group-hover:border-[#333944]' }}">PC</span>
+                        <span class="flex-1 truncate text-xs {{ $active ? 'text-[#EDEEF0] font-medium' : 'text-[#8A90A0] group-hover:text-[#C7CBD1]' }}">Pesan Chat</span>
+                        @if($active)<span class="w-1.5 h-1.5 rounded-full bg-[#B8441A] shrink-0"></span>@endif
+                    </a>
+
+                    @php $active = request()->routeIs('profile.edit'); @endphp
+                    <a href="{{ route('profile.edit') }}"
+                       class="group flex items-center gap-2.5 pl-2.5 pr-3 py-2 border-l-2 transition-colors {{ $active ? 'border-[#B8441A] bg-[#B8441A]/[0.06]' : 'border-transparent hover:border-[#2A2F38] hover:bg-white/[0.02]' }}">
+                        <span class="w-6 h-6 shrink-0 grid place-items-center rounded-sm border font-mono text-[10px] font-semibold {{ $active ? 'border-[#B8441A]/50 bg-[#B8441A]/10 text-[#D9682F]' : 'border-[#262B33] text-[#5B6270] group-hover:text-[#8A90A0] group-hover:border-[#333944]' }}">PP</span>
+                        <span class="flex-1 truncate text-xs {{ $active ? 'text-[#EDEEF0] font-medium' : 'text-[#8A90A0] group-hover:text-[#C7CBD1]' }}">Pengaturan Profil</span>
+                        @if($active)<span class="w-1.5 h-1.5 rounded-full bg-[#B8441A] shrink-0"></span>@endif
+                    </a>
+                </nav>
+            </div>
+
+        </div>
+
+        <!-- FOOTER / USER PROFILE CARD (ID badge) -->
+        <div class="p-3 border-t border-[#1B1F26] bg-[#0E1116]">
+            <div class="relative p-2.5 rounded-sm border border-dashed border-[#2A2F38] bg-[#12151A] flex items-center gap-3">
+                <div class="w-8 h-8 rounded-sm overflow-hidden border border-[#262B33] shrink-0">
+                    <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=12151A&color=B8441A' }}"
+                         class="w-full h-full object-cover" alt="{{ auth()->user()->name }}">
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-xs font-semibold text-[#EDEEF0] truncate leading-snug">{{ auth()->user()->name }}</p>
+                    <div class="flex items-center gap-1.5 mt-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-[#4C9A6A] shrink-0"></span>
+                        <span class="text-[9px] font-mono uppercase tracking-wider text-[#5B6270]">Sesi Aktif</span>
+                    </div>
+                </div>
+                <form method="POST" action="{{ route('logout') }}" class="shrink-0">
+                    @csrf
+                    <button type="submit"
+                            class="p-1.5 rounded-sm text-[#5B6270] hover:text-[#D9682F] hover:bg-white/5 transition-colors"
+                            title="Keluar">
+                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" x2="9" y1="12" y2="12"/>
                         </svg>
                     </button>
-                </div>
-
-                <!-- NAVIGATION ITEMS -->
-                <div class="flex-1 overflow-y-auto slate-scrollbar px-3 py-5 space-y-6">
-                    
-                    <!-- SECTION 1: MODERASI & KONTROL -->
-                    <div>
-                        <p class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase px-3 mb-2">
-                            Moderasi &amp; Kontrol
-                        </p>
-                        <nav class="space-y-1">
-                            @php $active = request()->routeIs('admin.dashboard'); @endphp
-                            <a href="{{ route('admin.dashboard') }}"
-                               class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
-                                @if($active)
-                                    <span class="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-blue-500"></span>
-                                @endif
-                                <svg class="w-4 h-4 shrink-0 {{ $active ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-200 transition-colors' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>
-                                </svg>
-                                <span class="flex-1 truncate">Persetujuan Toko</span>
-                            </a>
-
-                            @php $active = request()->routeIs('admin.products.*'); @endphp
-                            <a href="{{ route('admin.products.index') }}"
-                               class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
-                                @if($active)
-                                    <span class="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-blue-500"></span>
-                                @endif
-                                <svg class="w-4 h-4 shrink-0 {{ $active ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-200 transition-colors' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>
-                                </svg>
-                                <span class="flex-1 truncate">Moderasi Produk</span>
-                            </a>
-                        </nav>
-                    </div>
-
-                    <!-- SECTION 2: KATALOG & PROMOSI -->
-                    <div>
-                        <p class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase px-3 mb-2">
-                            Katalog &amp; Promosi
-                        </p>
-                        <nav class="space-y-1">
-                            @php $active = request()->routeIs('admin.categories.*'); @endphp
-                            <a href="{{ route('admin.categories.index') }}"
-                               class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
-                                @if($active)
-                                    <span class="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-blue-500"></span>
-                                @endif
-                                <svg class="w-4 h-4 shrink-0 {{ $active ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-200 transition-colors' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/>
-                                </svg>
-                                <span class="flex-1 truncate">Kategori Produk</span>
-                            </a>
-
-                            @php $active = request()->routeIs('admin.flash_sales.*'); @endphp
-                            <a href="{{ route('admin.flash_sales.index') }}"
-                               class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
-                                @if($active)
-                                    <span class="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-blue-500"></span>
-                                @endif
-                                <svg class="w-4 h-4 shrink-0 {{ $active ? 'text-amber-400' : 'text-slate-400 group-hover:text-amber-400 transition-colors' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                                </svg>
-                                <span class="flex-1 truncate">Flash Sale Platform</span>
-                                <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">PROMO</span>
-                            </a>
-                        </nav>
-                    </div>
-
-                    <!-- SECTION 3: KOMUNIKASI & AKUN -->
-                    <div>
-                        <p class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase px-3 mb-2">
-                            Komunikasi &amp; Akun
-                        </p>
-                        <nav class="space-y-1">
-                            @php $active = request()->routeIs('chat.*'); @endphp
-                            <a href="{{ route('chat.index') }}"
-                               class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
-                                @if($active)
-                                    <span class="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-blue-500"></span>
-                                @endif
-                                <svg class="w-4 h-4 shrink-0 {{ $active ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-200 transition-colors' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                                </svg>
-                                <span class="flex-1 truncate">Pesan Chat</span>
-                            </a>
-
-                            @php $active = request()->routeIs('profile.edit'); @endphp
-                            <a href="{{ route('profile.edit') }}"
-                               class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
-                                @if($active)
-                                    <span class="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-blue-500"></span>
-                                @endif
-                                <svg class="w-4 h-4 shrink-0 {{ $active ? 'text-blue-400' : 'text-slate-400 group-hover:text-slate-200 transition-colors' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="1" x2="7" y1="14" y2="14"/><line x1="9" x2="15" y1="8" y2="8"/><line x1="17" x2="23" y1="16" y2="16"/>
-                                </svg>
-                                <span class="flex-1 truncate">Pengaturan Profil</span>
-                            </a>
-                        </nav>
-                    </div>
-
-                </div>
-
-                <!-- FOOTER / USER PROFILE CARD -->
-                <div class="p-3 border-t border-slate-800 bg-[#0B1324]/60">
-                    <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 transition-colors flex items-center gap-3">
-                        <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=2563eb&color=fff' }}" 
-                             class="w-8 h-8 rounded-lg object-cover ring-1 ring-slate-700 shrink-0" 
-                             alt="{{ auth()->user()->name }}">
-                        <div class="min-w-0 flex-1">
-                            <p class="text-xs font-semibold text-slate-200 truncate leading-snug">{{ auth()->user()->name }}</p>
-                            <span class="text-xs text-slate-400 block truncate">Admin Operasional</span>
-                        </div>
-                        <form method="POST" action="{{ route('logout') }}" class="shrink-0">
-                            @csrf
-                            <button type="submit" 
-                                    class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors" 
-                                    title="Keluar">
-                                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                                    <polyline points="16 17 21 12 16 7"/>
-                                    <line x1="21" x2="9" y1="12" y2="12"/>
-                                </svg>
-                            </button>
-                        </form>
-                    </div>
-                </div>
+                </form>
             </div>
-        </aside>
+        </div>
+    </div>
+</aside>
 
         <!-- MAIN LAYOUT WRAPPER -->
         <div class="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
