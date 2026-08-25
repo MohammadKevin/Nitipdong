@@ -31,6 +31,26 @@
             </div>
         </div>
 
+        <!-- HORIZONTAL CATEGORY PILL STRIP -->
+        <div class="mb-5 overflow-x-auto scrollbar-none pb-1">
+            <div class="flex items-center gap-2 text-xs">
+                <a href="{{ url('/products' . (request('q') ? '?q='.request('q') : '')) }}"
+                   class="px-3.5 py-1.5 rounded-full font-semibold shrink-0 transition-colors flex items-center gap-1.5 {{ !request('category') ? 'bg-cyan-700 text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50' }}">
+                    <i class="fa-solid fa-list text-[10px]"></i>
+                    <span>Semua Kategori</span>
+                </a>
+                @foreach($categories as $cat)
+                    <a href="{{ url('/products?'.http_build_query(array_merge(request()->except('category','page'), ['category' => $cat->slug]))) }}"
+                       class="px-3.5 py-1.5 rounded-full font-semibold shrink-0 transition-colors flex items-center gap-1.5 {{ request('category') == $cat->slug ? 'bg-cyan-700 text-white shadow-xs' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50' }}">
+                        @if($cat->icon)
+                            <i class="{{ $cat->icon }} text-[11px] {{ request('category') == $cat->slug ? 'text-white' : 'text-slate-400' }}"></i>
+                        @endif
+                        <span>{{ $cat->name }}</span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+
         <div class="flex flex-col lg:flex-row gap-5" x-data="{ filterMobile: false }">
             <aside class="w-full lg:w-64 shrink-0">
                 <div class="bg-white rounded-xl border border-slate-200/80 p-4 shadow-card sticky top-20 space-y-4">

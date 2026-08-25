@@ -237,82 +237,95 @@
             </div>
         </div>
 
-        {{-- Horizontal Quick-Access Category Chips with Sky-Blue Hover --}}
-        <div class="mt-3.5 bg-white rounded-2xl border border-sky-100 p-4 shadow-xs">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
-                <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Kategori Pilihan</span>
-                <a href="{{ url('/products') }}" class="text-xs font-bold text-cyan-700 hover:text-cyan-800 flex items-center gap-1">
-                    <span>Lihat Semua</span>
-                    <i class="fa-solid fa-chevron-right text-[9px]"></i>
-                </a>
+        {{-- Horizontal Quick-Access Category Chips with 2-Row Desktop & 1-Row Mobile Scroll --}}
+        <div class="mt-3.5 bg-white rounded-2xl border border-sky-100/90 p-4 shadow-xs" x-data="{
+            scrollLeft() {
+                this.$refs.categorySlider.scrollBy({ left: -320, behavior: 'smooth' });
+            },
+            scrollRight() {
+                this.$refs.categorySlider.scrollBy({ left: 320, behavior: 'smooth' });
+            }
+        }">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3.5">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Kategori Pilihan</span>
+                    @if(isset($categories) && $categories->count() > 0)
+                        <span class="text-[11px] font-semibold text-slate-400">({{ $categories->count() }})</span>
+                    @endif
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <!-- Navigation Arrows for Scroll -->
+                    <div class="flex items-center gap-1.5">
+                        <button type="button" 
+                                @click="scrollLeft()" 
+                                class="w-7 h-7 rounded-lg border border-slate-200 hover:border-cyan-500 hover:bg-cyan-50 hover:text-cyan-700 text-slate-500 flex items-center justify-center text-xs transition-colors cursor-pointer" 
+                                title="Geser Kiri"
+                                aria-label="Geser Kiri">
+                            <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                        </button>
+                        <button type="button" 
+                                @click="scrollRight()" 
+                                class="w-7 h-7 rounded-lg border border-slate-200 hover:border-cyan-500 hover:bg-cyan-50 hover:text-cyan-700 text-slate-500 flex items-center justify-center text-xs transition-colors cursor-pointer" 
+                                title="Geser Kanan"
+                                aria-label="Geser Kanan">
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </button>
+                    </div>
+
+                    <div class="h-4 w-px bg-slate-200 mx-1 hidden sm:block"></div>
+
+                    <a href="{{ url('/products') }}" class="text-xs font-bold text-cyan-700 hover:text-cyan-800 flex items-center gap-1 shrink-0">
+                        <span>Lihat Semua</span>
+                        <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                    </a>
+                </div>
             </div>
 
-            <div class="grid grid-cols-4 sm:grid-cols-8 gap-2 sm:gap-3 text-center">
+            <!-- 2-SHAF DESKTOP/TABLET, 1-SHAF MOBILE HORIZONTAL SCROLL -->
+            <div x-ref="categorySlider" 
+                 class="grid grid-rows-1 sm:grid-rows-2 grid-flow-col auto-cols-[100px] sm:auto-cols-[125px] gap-2.5 sm:gap-3 overflow-x-auto scrollbar-none scroll-smooth pb-1 text-center select-none">
                 @if(isset($categories) && $categories->count() > 0)
                     @foreach($categories as $cat)
                     <a href="{{ route('products.index', ['category' => $cat->slug]) }}" 
-                       class="flex flex-col items-center p-2 rounded-xl hover:bg-cyan-50/70 border border-transparent hover:border-cyan-200 transition-all group">
-                        <div class="w-11 h-11 rounded-xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center text-lg mb-1.5 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
+                       class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-50/50 hover:bg-cyan-50/70 border border-slate-100 hover:border-cyan-200 hover:shadow-xs transition-all group shrink-0">
+                        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center text-base sm:text-lg mb-1.5 group-hover:bg-cyan-600 group-hover:text-white transition-all shadow-2xs">
                             @if($cat->icon)
                                 <i class="{{ $cat->icon }}"></i>
                             @else
                                 <i class="fa-solid fa-box"></i>
                             @endif
                         </div>
-                        <span class="text-[11px] font-semibold text-slate-700 group-hover:text-cyan-800 transition-colors line-clamp-1 leading-tight">
+                        <span class="text-[11px] font-semibold text-slate-700 group-hover:text-cyan-800 transition-colors line-clamp-2 leading-tight w-full px-0.5">
                             {{ $cat->name }}
                         </span>
                     </a>
                     @endforeach
                 @else
-                    {{-- Default Chips --}}
-                    <a href="{{ url('/products') }}" class="flex flex-col items-center p-2 rounded-xl hover:bg-cyan-50/70 border border-transparent hover:border-cyan-200 transition-all group">
-                        <div class="w-11 h-11 rounded-xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center text-lg mb-1.5 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
-                            <i class="fa-solid fa-mobile-screen"></i>
+                    {{-- Fallback Chips --}}
+                    <a href="{{ url('/products') }}" class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-50/50 hover:bg-cyan-50/70 border border-slate-100 hover:border-cyan-200 hover:shadow-xs transition-all group shrink-0">
+                        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center text-base sm:text-lg mb-1.5 group-hover:bg-cyan-600 group-hover:text-white transition-all shadow-2xs">
+                            <i class="fa-solid fa-laptop"></i>
                         </div>
                         <span class="text-[11px] font-semibold text-slate-700 group-hover:text-cyan-800 leading-tight">Elektronik</span>
                     </a>
-                    <a href="{{ url('/products') }}" class="flex flex-col items-center p-2 rounded-xl hover:bg-cyan-50/70 border border-transparent hover:border-cyan-200 transition-all group">
-                        <div class="w-11 h-11 rounded-xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center text-lg mb-1.5 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
+                    <a href="{{ url('/products') }}" class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-50/50 hover:bg-cyan-50/70 border border-slate-100 hover:border-cyan-200 hover:shadow-xs transition-all group shrink-0">
+                        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center text-base sm:text-lg mb-1.5 group-hover:bg-cyan-600 group-hover:text-white transition-all shadow-2xs">
                             <i class="fa-solid fa-shirt"></i>
                         </div>
                         <span class="text-[11px] font-semibold text-slate-700 group-hover:text-cyan-800 leading-tight">Fashion</span>
                     </a>
-                    <a href="{{ url('/products') }}" class="flex flex-col items-center p-2 rounded-xl hover:bg-cyan-50/70 border border-transparent hover:border-cyan-200 transition-all group">
-                        <div class="w-11 h-11 rounded-xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center text-lg mb-1.5 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
+                    <a href="{{ url('/products') }}" class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-50/50 hover:bg-cyan-50/70 border border-slate-100 hover:border-cyan-200 hover:shadow-xs transition-all group shrink-0">
+                        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center text-base sm:text-lg mb-1.5 group-hover:bg-cyan-600 group-hover:text-white transition-all shadow-2xs">
                             <i class="fa-solid fa-utensils"></i>
                         </div>
                         <span class="text-[11px] font-semibold text-slate-700 group-hover:text-cyan-800 leading-tight">Kuliner</span>
                     </a>
-                    <a href="{{ url('/products') }}" class="flex flex-col items-center p-2 rounded-xl hover:bg-cyan-50/70 border border-transparent hover:border-cyan-200 transition-all group">
-                        <div class="w-11 h-11 rounded-xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center text-lg mb-1.5 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
+                    <a href="{{ url('/products') }}" class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-50/50 hover:bg-cyan-50/70 border border-slate-100 hover:border-cyan-200 hover:shadow-xs transition-all group shrink-0">
+                        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center text-base sm:text-lg mb-1.5 group-hover:bg-cyan-600 group-hover:text-white transition-all shadow-2xs">
                             <i class="fa-solid fa-spa"></i>
                         </div>
                         <span class="text-[11px] font-semibold text-slate-700 group-hover:text-cyan-800 leading-tight">Kecantikan</span>
-                    </a>
-                    <a href="{{ url('/products') }}" class="flex flex-col items-center p-2 rounded-xl hover:bg-cyan-50/70 border border-transparent hover:border-cyan-200 transition-all group">
-                        <div class="w-11 h-11 rounded-xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center text-lg mb-1.5 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
-                            <i class="fa-solid fa-couch"></i>
-                        </div>
-                        <span class="text-[11px] font-semibold text-slate-700 group-hover:text-cyan-800 leading-tight">Rumah Tangga</span>
-                    </a>
-                    <a href="{{ url('/products') }}" class="flex flex-col items-center p-2 rounded-xl hover:bg-cyan-50/70 border border-transparent hover:border-cyan-200 transition-all group">
-                        <div class="w-11 h-11 rounded-xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center text-lg mb-1.5 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
-                            <i class="fa-solid fa-motorcycle"></i>
-                        </div>
-                        <span class="text-[11px] font-semibold text-slate-700 group-hover:text-cyan-800 leading-tight">Otomotif</span>
-                    </a>
-                    <a href="{{ url('/products') }}" class="flex flex-col items-center p-2 rounded-xl hover:bg-cyan-50/70 border border-transparent hover:border-cyan-200 transition-all group">
-                        <div class="w-11 h-11 rounded-xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center text-lg mb-1.5 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
-                            <i class="fa-solid fa-laptop"></i>
-                        </div>
-                        <span class="text-[11px] font-semibold text-slate-700 group-hover:text-cyan-800 leading-tight">Komputer</span>
-                    </a>
-                    <a href="{{ url('/products') }}" class="flex flex-col items-center p-2 rounded-xl hover:bg-cyan-50/70 border border-transparent hover:border-cyan-200 transition-all group">
-                        <div class="w-11 h-11 rounded-xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center text-lg mb-1.5 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
-                            <i class="fa-solid fa-gamepad"></i>
-                        </div>
-                        <span class="text-[11px] font-semibold text-slate-700 group-hover:text-cyan-800 leading-tight">Hobi &amp; Mainan</span>
                     </a>
                 @endif
             </div>
