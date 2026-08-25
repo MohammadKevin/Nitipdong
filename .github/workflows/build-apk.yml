@@ -35,12 +35,10 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: ⚙️ Setup Android Platform Scaffold & Dependencies
+      - name: ⚙️ Setup Android Dependencies
         run: |
           cd nitipdong_mobile
-          flutter create --platforms=android --org=com.nitipdong .
           flutter pub get
-          dart run flutter_launcher_icons || flutter pub run flutter_launcher_icons || true
 
       - name: 🔨 Build Android Release APK
         run: |
@@ -60,6 +58,8 @@ jobs:
 
       - name: 🚀 Publish to GitHub Releases (Latest)
         uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: latest
           name: "NitipDong App — Latest Build"
