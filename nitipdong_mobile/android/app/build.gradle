@@ -58,18 +58,35 @@ android {
 
     signingConfigs {
         release {
+            def kFile = null
             if (keystorePropertiesFile.exists() && keystoreProperties.containsKey('storeFile')) {
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
-                storeFile file(keystoreProperties['storeFile'])
-                storePassword keystoreProperties['storePassword']
+                def sf = keystoreProperties['storeFile']
+                if (file(sf).exists()) {
+                    kFile = file(sf)
+                } else if (rootProject.file(sf).exists()) {
+                    kFile = rootProject.file(sf)
+                } else if (file("app/${sf}").exists()) {
+                    kFile = file("app/${sf}")
+                }
+                keyAlias = keystoreProperties['keyAlias']
+                keyPassword = keystoreProperties['keyPassword']
+                storePassword = keystoreProperties['storePassword']
             } else if (file('nitipdong-keystore.jks').exists()) {
-                keyAlias 'nitipdong'
-                keyPassword 'nitipdong123'
-                storeFile file('nitipdong-keystore.jks')
-                storePassword 'nitipdong123'
+                kFile = file('nitipdong-keystore.jks')
+                keyAlias = 'nitipdong'
+                keyPassword = 'nitipdong123'
+                storePassword = 'nitipdong123'
+            } else if (rootProject.file('nitipdong-keystore.jks').exists()) {
+                kFile = rootProject.file('nitipdong-keystore.jks')
+                keyAlias = 'nitipdong'
+                keyPassword = 'nitipdong123'
+                storePassword = 'nitipdong123'
+            }
+
+            if (kFile != null && kFile.exists()) {
+                storeFile = kFile
             } else {
-                signingConfig signingConfigs.debug
+                signingConfig = signingConfigs.debug
             }
         }
     }
