@@ -1,5 +1,4 @@
 <x-app-layout>
-    {{-- Flash Notifications & Welcome after Login --}}
     @if(session('success') || request('is_from_login'))
         <div class="page-container mt-3">
             <div class="flex items-center justify-between px-4 py-3 bg-cyan-50 border border-cyan-200/80 text-cyan-950 rounded-xl text-xs font-semibold shadow-xs animate-fade-up">
@@ -26,13 +25,9 @@
         </div>
     @endif
 
-    {{-- ══════════════════════════════════════════════════
-         1. MAIN PROMO BANNER & CATEGORY NAVIGATION
-    ══════════════════════════════════════════════════ --}}
     <section class="page-container py-3 sm:py-4">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
             
-            {{-- Left: Compact Banner Carousel with Light Cyan/Sky Accents (8 Cols) --}}
             <div class="lg:col-span-8" x-data="{
                 currentSlide: 0,
                 totalSlides: 3,
@@ -60,7 +55,6 @@
             }" @mouseenter="isPaused = true" @mouseleave="isPaused = false">
                 <div class="relative rounded-2xl overflow-hidden bg-slate-950 border border-sky-100 shadow-sm h-full min-h-[300px] sm:min-h-[340px] flex flex-col justify-between">
                     
-                    <!-- Slide 1: Promo Belanja & Jastip Pilihan -->
                     <div x-show="currentSlide === 0"
                          x-transition:enter="transition ease-out duration-400"
                          x-transition:enter-start="opacity-0 scale-99"
@@ -96,7 +90,6 @@
                         </div>
                     </div>
 
-                    <!-- Slide 2: Official Mall & Super Seller -->
                     <div x-show="currentSlide === 1"
                          x-cloak
                          x-transition:enter="transition ease-out duration-400"
@@ -128,7 +121,6 @@
                         </div>
                     </div>
 
-                    <!-- Slide 3: Seller Center & Jastiper Hub -->
                     <div x-show="currentSlide === 2"
                          x-cloak
                          x-transition:enter="transition ease-out duration-400"
@@ -160,7 +152,6 @@
                         </div>
                     </div>
 
-                    <!-- Slide Controls -->
                     <div class="relative z-30 flex items-center justify-between p-4 bg-gradient-to-t from-slate-950/80 to-transparent">
                         <div class="flex items-center gap-1.5">
                             <button @click="prevSlide()" class="w-7 h-7 rounded-lg bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors text-xs cursor-pointer" aria-label="Slide sebelumnya">
@@ -184,10 +175,7 @@
                 </div>
             </div>
 
-            {{-- Right: Dual Action Cards (4 Cols) --}}
             <div class="lg:col-span-4 flex flex-col gap-3">
-                
-                {{-- Promo Card 1: Voucher Gratis Ongkir --}}
                 <div class="flex-1 rounded-2xl p-4 bg-gradient-to-br from-cyan-600 to-sky-700 text-white flex flex-col justify-between border border-cyan-500/30 shadow-sm relative overflow-hidden">
                     <div class="relative z-10">
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-white/20 text-white border border-white/20 mb-2">
@@ -211,7 +199,6 @@
                     </div>
                 </div>
 
-                {{-- Promo Card 2: Proteksi Garansi Belanja --}}
                 <div class="flex-1 rounded-2xl p-4 bg-slate-900 text-white flex flex-col justify-between border border-slate-800 shadow-sm relative overflow-hidden">
                     <div class="relative z-10">
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-amber-500/20 text-amber-300 border border-amber-400/30 mb-2">
@@ -233,11 +220,9 @@
                         </a>
                     </div>
                 </div>
-
             </div>
         </div>
 
-        {{-- Horizontal Quick-Access Category Chips (1 Baris / 1 Row on Mobile & Desktop) --}}
         <div class="mt-3.5 bg-white rounded-2xl border border-sky-100/90 p-4 shadow-xs" x-data="{
             scrollLeft() {
                 this.$refs.categorySlider.scrollBy({ left: -320, behavior: 'smooth' });
@@ -255,7 +240,6 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <!-- Navigation Arrows for Scroll -->
                     <div class="flex items-center gap-1.5">
                         <button type="button" 
                                 @click="scrollLeft()" 
@@ -282,7 +266,6 @@
                 </div>
             </div>
 
-            <!-- 1 BARIS / 1 ROW HORIZONTAL SCROLL (DESKTOP & MOBILE) -->
             <div x-ref="categorySlider" 
                  class="grid grid-rows-1 grid-flow-col auto-cols-[95px] sm:auto-cols-[115px] gap-2.5 sm:gap-3 overflow-x-auto scrollbar-none scroll-smooth pb-1 text-center select-none">
                 @if(isset($categories) && $categories->count() > 0)
@@ -302,7 +285,6 @@
                     </a>
                     @endforeach
                 @else
-                    {{-- Fallback Chips --}}
                     <a href="{{ url('/products') }}" class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-slate-50/50 hover:bg-cyan-50/70 border border-slate-100 hover:border-cyan-200 hover:shadow-xs transition-all group shrink-0">
                         <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center text-base sm:text-lg mb-1.5 group-hover:bg-cyan-600 group-hover:text-white transition-all shadow-2xs">
                             <i class="fa-solid fa-laptop"></i>
@@ -332,9 +314,6 @@
         </div>
     </section>
 
-    {{-- ══════════════════════════════════════════════════
-         2. VALUE PROPOSITION STRIP (TRUST & CONVENIENCE)
-    ══════════════════════════════════════════════════ --}}
     <section class="page-container py-1.5">
         <div class="bg-white rounded-2xl border border-sky-100 p-3 sm:p-4 shadow-xs grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
             
@@ -381,9 +360,6 @@
         </div>
     </section>
 
-    {{-- ══════════════════════════════════════════════════
-         3. FLASH SALE / LIMITED-TIME DEALS (CORAL ACCENTS)
-    ══════════════════════════════════════════════════ --}}
     @if(isset($activeFlashSale) && $activeFlashSale->items->count() > 0)
     <section class="page-container py-3"
              x-data="{
@@ -411,7 +387,6 @@
              }">
         <div class="bg-white rounded-2xl border border-orange-200 p-4 shadow-xs">
             
-            {{-- Header with Coral/Orange Accent and Countdown --}}
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
                 <div class="flex items-center gap-2.5">
                     <span class="w-8 h-8 rounded-lg bg-orange-600 text-white flex items-center justify-center text-sm font-bold shadow-xs">
@@ -429,7 +404,6 @@
                     </div>
                 </div>
 
-                {{-- Countdown Timer --}}
                 <div class="flex items-center gap-2">
                     <span class="text-xs font-semibold text-slate-500">Berakhir dalam:</span>
                     <div class="flex items-center gap-1 font-mono text-xs font-bold text-white">
@@ -446,14 +420,12 @@
                 </div>
             </div>
 
-            {{-- Flash Sale Products Grid --}}
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 pt-3.5">
                 @foreach($activeFlashSale->items->take(6) as $item)
                 @php $prod = $item->product; @endphp
                 @if($prod)
                 <div class="bg-white rounded-xl p-2.5 border border-slate-200 hover:border-cyan-400 hover:shadow-md transition-all flex flex-col justify-between group">
                     <a href="{{ route('product.show', $prod) }}" class="block">
-                        {{-- Image Thumbnail with Coral Discount Badge --}}
                         <div class="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-100 mb-2">
                             <img src="{{ $prod->image_url }}" alt="{{ $prod->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" loading="lazy">
                             <span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-orange-600 text-white shadow-xs">
@@ -461,12 +433,10 @@
                             </span>
                         </div>
 
-                        {{-- Title --}}
                         <h3 class="text-xs font-bold text-slate-900 line-clamp-2 leading-snug group-hover:text-cyan-700 transition-colors">
                             {{ $prod->name }}
                         </h3>
 
-                        {{-- Price Section --}}
                         <div class="mt-2 flex flex-col">
                             <span class="text-sm font-black text-orange-600 leading-tight">
                                 Rp {{ number_format($item->discount_price, 0, ',', '.') }}
@@ -477,7 +447,6 @@
                         </div>
                     </a>
 
-                    {{-- Stock Progress Indicator with Cyan Fill --}}
                     <div class="mt-2.5 pt-2 border-t border-slate-100">
                         @php 
                             $soldCount = rand(8, 25);
@@ -490,7 +459,6 @@
                             Tersisa {{ rand(3, 12) }} item
                         </span>
 
-                        {{-- Quick Action Button --}}
                         <a href="{{ route('product.show', $prod) }}" class="mt-2 w-full h-7 bg-cyan-50 hover:bg-cyan-600 hover:text-white text-cyan-700 text-[11px] font-bold rounded-lg border border-cyan-200 hover:border-transparent flex items-center justify-center transition-colors">
                             Beli Sekarang
                         </a>
@@ -504,9 +472,6 @@
     </section>
     @endif
 
-    {{-- ══════════════════════════════════════════════════
-         4. FEATURED / OFFICIAL STORE BRANDS
-    ══════════════════════════════════════════════════ --}}
     @if(isset($officialStores) && $officialStores->count() > 0)
     <section class="page-container py-3">
         <div class="bg-white rounded-2xl border border-sky-100 p-4 shadow-xs">
@@ -549,12 +514,7 @@
     </section>
     @endif
 
-    {{-- ══════════════════════════════════════════════════
-         5. DYNAMIC PRODUCT FEED (REKOMENDASI UNTUK ANDA)
-    ══════════════════════════════════════════════════ --}}
     <section class="page-container py-3 mb-8" x-data="{ feedTab: 'all' }">
-        
-        {{-- Section Header with Filter Tabs --}}
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 mb-4">
             <div>
                 <h2 class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
@@ -585,12 +545,10 @@
             </div>
         </div>
 
-        {{-- Tab 1: All Products Feed --}}
         <div x-show="feedTab === 'all'" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3.5">
             @forelse($products as $prod)
             <div class="bg-white rounded-xl border border-sky-100 overflow-hidden shadow-xs hover:shadow-md hover:border-cyan-300 transition-all flex flex-col justify-between group relative">
                 
-                {{-- Wishlist Heart Button --}}
                 @auth
                     @if(auth()->user()->role === 'customer')
                         @php $isWish = $prod->isWishlistedBy(auth()->user()); @endphp
@@ -636,7 +594,6 @@
                 @endauth
 
                 <div>
-                    {{-- Product Image with Zoom Hover --}}
                     <a href="{{ route('product.show', $prod) }}" class="block relative aspect-square bg-slate-50 overflow-hidden border-b border-slate-100">
                         <img src="{{ $prod->image_url }}" 
                              alt="{{ $prod->name }}" 
@@ -649,15 +606,12 @@
                             </span>
                         @endif
 
-                        {{-- Free Shipping Badge --}}
                         <span class="absolute bottom-2 left-2 px-1.5 py-0.5 rounded text-[8px] font-bold bg-emerald-600 text-white">
                             <i class="fa-solid fa-truck-fast text-[7px]"></i> Bebas Ongkir
                         </span>
                     </a>
 
-                    {{-- Product Information --}}
                     <div class="p-3">
-                        {{-- Category Tag in Light Sky-Blue Pill --}}
                         <div class="flex items-center gap-1 mb-1 text-[10px] text-cyan-700 font-medium">
                             <span class="px-1.5 py-0.5 rounded bg-sky-50 border border-sky-200 text-[9px] font-bold truncate">
                                 {{ $prod->category->name ?? 'Produk' }}
@@ -671,7 +625,6 @@
                             </h3>
                         </a>
 
-                        {{-- Price Section --}}
                         <div class="mt-2 flex flex-col">
                             <span class="text-sm font-black text-slate-900 leading-tight">
                                 Rp {{ number_format($prod->final_price, 0, ',', '.') }}
@@ -685,7 +638,6 @@
                     </div>
                 </div>
 
-                {{-- Rating, Review Count, & Sold --}}
                 <div class="p-3 pt-0">
                     <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
                         <div class="flex items-center gap-1 text-amber-500 font-bold">
@@ -716,12 +668,10 @@
             @endforelse
         </div>
 
-        {{-- Tab 2: Top Selling Products --}}
         <div x-show="feedTab === 'top'" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3.5" x-cloak>
             @forelse($topProducts as $index => $prod)
             <div class="bg-white rounded-xl border border-sky-100 overflow-hidden shadow-xs hover:shadow-md hover:border-cyan-300 transition-all flex flex-col justify-between group relative">
                 
-                {{-- Sales Rank Tag --}}
                 @if($index < 3)
                     <div class="absolute top-2 left-2 z-20 px-2 py-0.5 rounded bg-amber-500 text-slate-950 font-extrabold text-[9px] shadow-xs flex items-center gap-1">
                         <i class="fa-solid fa-crown text-[8px]"></i> Top #{{ $index + 1 }}
@@ -789,12 +739,10 @@
             @endforelse
         </div>
 
-        {{-- Tab 3: Official Store Products --}}
         <div x-show="feedTab === 'official'" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3.5" x-cloak>
             @forelse($officialProducts as $prod)
             <div class="bg-white rounded-xl border border-cyan-200 overflow-hidden shadow-xs hover:shadow-md hover:border-cyan-400 transition-all flex flex-col justify-between group relative">
                 
-                {{-- Official Mall Tag --}}
                 <div class="absolute top-2 left-2 z-20 px-2 py-0.5 rounded bg-cyan-700 text-white font-extrabold text-[9px] shadow-xs flex items-center gap-1">
                     <i class="fa-solid fa-shield-check text-[8px]"></i> Official
                 </div>
@@ -857,7 +805,6 @@
             @endforelse
         </div>
 
-        {{-- Bottom Catalog Link Button (Only if products exist) --}}
         @if($products->count() > 0)
         <div class="mt-8 text-center">
             <a href="{{ url('/products') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition-all">
@@ -869,12 +816,10 @@
 
     </section>
 
-    {{-- Section: Natural Modern App Download Banner --}}
     <section class="page-container mt-10 mb-8">
         <div class="bg-gradient-to-r from-slate-900 via-[#0B1528] to-slate-900 rounded-3xl p-6 sm:p-8 lg:p-10 text-white shadow-xl relative overflow-hidden border border-slate-800/80">
             <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 
-                {{-- Left Content --}}
                 <div class="lg:col-span-7 space-y-4">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-400 text-xs font-semibold">
                         <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
@@ -904,7 +849,6 @@
                         </div>
                     </div>
 
-                    {{-- Download Buttons --}}
                     <div class="flex flex-wrap items-center gap-3 pt-2">
                         <a href="{{ route('app.download') }}" class="px-4.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-2 shadow-xs transition-colors">
                             <i class="fa-brands fa-android text-sm"></i>
@@ -917,7 +861,6 @@
                     </div>
                 </div>
 
-                {{-- Right QR Card --}}
                 <div class="lg:col-span-5 flex justify-center lg:justify-end">
                     <div class="bg-white p-5 rounded-2xl shadow-xl text-slate-900 text-center max-w-[240px] w-full border border-slate-200/80">
                         <div class="p-2 bg-slate-50 rounded-xl border border-slate-100 mb-2.5 inline-block">
