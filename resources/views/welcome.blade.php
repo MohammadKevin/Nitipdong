@@ -700,9 +700,18 @@
 
             </div>
             @empty
-            <div class="col-span-full py-16 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
-                <i class="fa-solid fa-boxes-stacked text-3xl mb-2 text-slate-300"></i>
-                <p class="text-xs font-bold text-slate-700">Belum ada produk yang tersedia</p>
+            <div class="col-span-full py-16 px-4 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+                <div class="w-12 h-12 rounded-2xl bg-sky-50 text-cyan-700 border border-sky-100 flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-boxes-stacked text-lg"></i>
+                </div>
+                <h4 class="text-sm font-bold text-slate-800">Belum Ada Produk Tersedia</h4>
+                <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Produk pilihan dari toko-toko terpercaya akan segera hadir untuk Anda.</p>
+                <div class="mt-4">
+                    <a href="{{ url('/products') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-cyan-700 hover:bg-cyan-800 text-white font-semibold text-xs rounded-xl shadow-xs transition-colors">
+                        <span>Jelajahi Katalog</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </a>
+                </div>
             </div>
             @endforelse
         </div>
@@ -770,9 +779,12 @@
                 </div>
             </div>
             @empty
-            <div class="col-span-full py-16 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
-                <i class="fa-solid fa-fire text-3xl mb-2 text-slate-300"></i>
-                <p class="text-xs font-bold text-slate-700">Belum ada produk terlaris</p>
+            <div class="col-span-full py-16 px-4 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-fire text-lg"></i>
+                </div>
+                <h4 class="text-sm font-bold text-slate-800">Belum Ada Produk Terlaris</h4>
+                <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Daftar produk paling laris akan ditampilkan setelah transaksi berlangsung.</p>
             </div>
             @endforelse
         </div>
@@ -835,99 +847,95 @@
                 </div>
             </div>
             @empty
-            <div class="col-span-full py-16 text-center text-slate-400 bg-white rounded-2xl border border-slate-200">
-                <i class="fa-solid fa-store text-3xl mb-2 text-slate-300"></i>
-                <p class="text-xs font-bold text-slate-700">Belum ada produk official store</p>
+            <div class="col-span-full py-16 px-4 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+                <div class="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-700 border border-cyan-100 flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-store text-lg"></i>
+                </div>
+                <h4 class="text-sm font-bold text-slate-800">Belum Ada Produk Official Store</h4>
+                <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Toko resmi terverifikasi sedang menyiapkan katalog produk terbaik.</p>
             </div>
             @endforelse
         </div>
 
-        {{-- Bottom Catalog Link Button --}}
+        {{-- Bottom Catalog Link Button (Only if products exist) --}}
+        @if($products->count() > 0)
         <div class="mt-8 text-center">
-            <a href="{{ url('/products') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-white hover:bg-cyan-50/50 text-slate-800 font-bold text-xs rounded-xl border border-sky-200 shadow-xs hover:border-cyan-300 transition-all">
-                <span>Muat Lebih Banyak Produk</span>
-                <i class="fa-solid fa-chevron-down text-[10px]"></i>
+            <a href="{{ url('/products') }}" class="inline-flex items-center gap-2 px-6 py-2.5 bg-white hover:bg-slate-50 text-slate-800 font-bold text-xs rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition-all">
+                <span>Lihat Semua Produk</span>
+                <i class="fa-solid fa-chevron-right text-[10px]"></i>
             </a>
         </div>
+        @endif
 
     </section>
 
-    {{-- Section: NitipDong Mobile App Download CTA & QR Code --}}
-    <section class="mt-14 mb-8 bg-gradient-to-br from-[#0b1528] via-[#0f2044] to-[#132448] rounded-3xl p-6 sm:p-10 text-white shadow-2xl relative overflow-hidden border border-white/10">
-        {{-- Background Glow Effects --}}
-        <div class="absolute -right-16 -top-16 w-80 h-80 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -left-16 -bottom-16 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {{-- Left Content (7 cols) --}}
-            <div class="lg:col-span-7 space-y-5">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-cyan-300 text-xs font-extrabold uppercase tracking-wider">
-                    <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-                    Rilis Terbaru v{{ env('APP_MOBILE_LATEST_VERSION', '2.0.2') }} Major Tersedia
-                </div>
-
-                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
-                    Belanja Lebih Praktis &amp; Lacak Kurir <span class="bg-gradient-to-r from-cyan-400 to-teal-300 bg-clip-text text-transparent">Live Real-Time</span> di Smartphone
-                </h2>
-
-                <p class="text-slate-300 text-sm leading-relaxed max-w-xl">
-                    Nikmati seluruh kemudahan bertransaksi: notifikasi instan status pesanan, integrasi live tracking GPS pergerakan kurir di peta, serta metode pembayaran lengkap QRIS &amp; Virtual Account otomatis.
-                </p>
-
-                {{-- Feature Badges --}}
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-2.5 text-center">
-                        <i class="fa-solid fa-map-location-dot text-cyan-400 text-base mb-1 block"></i>
-                        <span class="text-[11px] font-bold text-slate-200 block">Live GPS Map</span>
-                    </div>
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-2.5 text-center">
-                        <i class="fa-solid fa-motorcycle text-emerald-400 text-base mb-1 block"></i>
-                        <span class="text-[11px] font-bold text-slate-200 block">Role Mitra Kurir</span>
-                    </div>
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-2.5 text-center">
-                        <i class="fa-solid fa-qrcode text-amber-400 text-base mb-1 block"></i>
-                        <span class="text-[11px] font-bold text-slate-200 block">QRIS &amp; VA Midtrans</span>
-                    </div>
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-2.5 text-center">
-                        <i class="fa-solid fa-bolt text-purple-400 text-base mb-1 block"></i>
-                        <span class="text-[11px] font-bold text-slate-200 block">In-App Quick Update</span>
-                    </div>
-                </div>
-
-                {{-- CTA Buttons --}}
-                <div class="flex flex-wrap items-center gap-3 pt-2">
-                    <a href="{{ route('app.download') }}" class="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white font-extrabold text-xs sm:text-sm flex items-center gap-2.5 shadow-lg shadow-cyan-500/25 transition-all hover:scale-[1.02]">
-                        <i class="fa-brands fa-android text-base"></i>
-                        <span>Download Android APK (v{{ env('APP_MOBILE_LATEST_VERSION', '2.0.2') }})</span>
-                    </a>
-                    <a href="{{ route('app.download') }}" class="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-all">
-                        <i class="fa-brands fa-apple text-base"></i>
-                        <span>iOS IPA (iPhone)</span>
-                    </a>
-                </div>
-            </div>
-
-            {{-- Right QR Code Scanner Card (5 cols) --}}
-            <div class="lg:col-span-5 flex justify-center lg:justify-end">
-                <div class="bg-white p-6 rounded-2xl shadow-2xl text-slate-900 text-center max-w-[280px] w-full border border-slate-100 relative group">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-cyan-700 text-white text-[10px] font-extrabold shadow-sm whitespace-nowrap">
-                        📱 Scan Kamera HP
+    {{-- Section: Natural Modern App Download Banner --}}
+    <section class="page-container mt-10 mb-8">
+        <div class="bg-gradient-to-r from-slate-900 via-[#0B1528] to-slate-900 rounded-3xl p-6 sm:p-8 lg:p-10 text-white shadow-xl relative overflow-hidden border border-slate-800/80">
+            <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                
+                {{-- Left Content --}}
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-400 text-xs font-semibold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                        Aplikasi NitipDong
                     </div>
 
-                    <div class="p-2 bg-slate-50 rounded-xl border border-slate-200/80 mb-3 inline-block shadow-inner">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https%3A%2F%2Fbudayakita.com%2Fdownload%2Fapp&bgcolor=ffffff&color=0b1528&margin=4"
-                             alt="QR Code Download NitipDong APK"
-                             class="w-36 h-36 mx-auto object-contain rounded-lg">
+                    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
+                        Belanja &amp; Titip Beli Lebih Praktis Lewat Aplikasi
+                    </h2>
+
+                    <p class="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-lg">
+                        Dapatkan promo gratis ongkir eksklusif, notifikasi pesanan secara langsung, dan kemudahan transaksi belanja dari ribuan toko terpercaya.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs text-slate-300">
+                        <div class="flex items-center gap-2 bg-slate-800/50 px-3 py-2 rounded-xl border border-slate-700/50">
+                            <i class="fa-solid fa-truck-fast text-emerald-400 text-xs"></i>
+                            <span class="font-medium text-[11px]">Gratis Ongkir Rp0</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-slate-800/50 px-3 py-2 rounded-xl border border-slate-700/50">
+                            <i class="fa-solid fa-shield-check text-blue-400 text-xs"></i>
+                            <span class="font-medium text-[11px]">Garansi Aman 100%</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-slate-800/50 px-3 py-2 rounded-xl border border-slate-700/50">
+                            <i class="fa-solid fa-bell text-amber-400 text-xs"></i>
+                            <span class="font-medium text-[11px]">Update Status Real-Time</span>
+                        </div>
                     </div>
 
-                    <h4 class="font-extrabold text-xs text-slate-900 mb-0.5">Scan untuk Unduh APK</h4>
-                    <p class="text-[10px] text-slate-500 leading-tight">Arahkan kamera smartphone Anda ke QR code di atas untuk mengunduh versi {{ env('APP_MOBILE_LATEST_VERSION', '2.0.2') }}.</p>
-
-                    <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-semibold">
-                        <span>APK v{{ env('APP_MOBILE_LATEST_VERSION', '2.0.2') }}</span>
-                        <span class="text-emerald-600 font-bold">✓ Bebas Iklan &amp; Aman</span>
+                    {{-- Download Buttons --}}
+                    <div class="flex flex-wrap items-center gap-3 pt-2">
+                        <a href="{{ route('app.download') }}" class="px-4.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-2 shadow-xs transition-colors">
+                            <i class="fa-brands fa-android text-sm"></i>
+                            <span>Unduh APK Android</span>
+                        </a>
+                        <a href="{{ route('app.landing') }}" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs flex items-center gap-2 transition-colors">
+                            <i class="fa-solid fa-mobile-screen text-xs"></i>
+                            <span>Info Aplikasi</span>
+                        </a>
                     </div>
                 </div>
+
+                {{-- Right QR Card --}}
+                <div class="lg:col-span-5 flex justify-center lg:justify-end">
+                    <div class="bg-white p-5 rounded-2xl shadow-xl text-slate-900 text-center max-w-[240px] w-full border border-slate-200/80">
+                        <div class="p-2 bg-slate-50 rounded-xl border border-slate-100 mb-2.5 inline-block">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https%3A%2F%2Fbudayakita.com%2Fdownload%2Fapp&bgcolor=ffffff&color=0b1528&margin=2"
+                                 alt="QR Code NitipDong APK"
+                                 class="w-32 h-32 mx-auto object-contain rounded-lg">
+                        </div>
+
+                        <h4 class="font-bold text-xs text-slate-900">Scan untuk Download</h4>
+                        <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Arahkan kamera HP Anda untuk mengunduh aplikasi.</p>
+
+                        <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-center gap-1.5 text-[10px] text-slate-500 font-medium">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            <span>Android APK • Aman &amp; Gratis</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
