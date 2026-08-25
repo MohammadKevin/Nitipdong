@@ -6,88 +6,156 @@
         Pusat Resolusi Komplain
     </x-slot>
 
-    <!-- HEADER BAR -->
-    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-1">
+    <!-- HEADER / ACTION BAR -->
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-1">
         <div>
-            <h1 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                Pusat Resolusi Komplain &amp; Sengketa
-            </h1>
-            <p class="text-xs text-slate-500 mt-0.5">Mediasi kendala pesanan, verifikasi bukti unboxing, dan penentuan pengembalian dana transaksi.</p>
+            <div class="flex items-center gap-2.5">
+                <h1 class="text-xl font-bold text-slate-900 tracking-tight">
+                    Pusat Resolusi Komplain &amp; Sengketa
+                </h1>
+                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-rose-700 bg-rose-50 border border-rose-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+                    Mediasi
+                </span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Mediasi kendala pesanan, verifikasi bukti unboxing, dan tetapkan keputusan resmi pengembalian dana transaksi.</p>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-200/90 shadow-xs shrink-0 self-start sm:self-auto">
+            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            <span>Menunggu Mediasi: <strong class="text-slate-800 font-semibold">{{ $pendingCount }} Sengketa</strong></span>
         </div>
     </div>
 
-    <!-- 4 SUMMARY CARDS -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white rounded-xl p-4.5 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
-            <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-200/70 shrink-0">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
-                </svg>
+    <!-- 4 EXECUTIVE KPI CARDS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        
+        <!-- CARD 1: TOTAL KOMPLAIN -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
+            <div>
+                <div class="flex items-center justify-between">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-200/70 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                        </svg>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200/70">
+                        Semua Tiket
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Komplain</p>
+                    <h3 class="text-2xl font-bold text-slate-900 tracking-tight mt-1">
+                        {{ number_format($totalCount, 0, ',', '.') }} <span class="text-sm font-normal text-slate-400">Kasus</span>
+                    </h3>
+                </div>
             </div>
-            <div class="min-w-0">
-                <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Total Komplain</p>
-                <h4 class="text-xl font-bold text-slate-900 mt-0.5 truncate">{{ number_format($totalCount, 0, ',', '.') }}</h4>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl p-4.5 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
-            <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200/70 shrink-0">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                </svg>
-            </div>
-            <div class="min-w-0">
-                <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Menunggu Mediasi</p>
-                <h4 class="text-xl font-bold text-slate-900 mt-0.5 truncate">{{ number_format($pendingCount, 0, ',', '.') }}</h4>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl p-4.5 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
-            <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200/70 shrink-0">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>
-            </div>
-            <div class="min-w-0">
-                <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Disetujui (Refund)</p>
-                <h4 class="text-xl font-bold text-slate-900 mt-0.5 truncate">{{ number_format($approvedCount, 0, ',', '.') }}</h4>
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <span>Riwayat sengketa:</span>
+                <span class="font-medium text-slate-800">{{ number_format($totalCount, 0, ',', '.') }} Tiket</span>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl p-4.5 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
-            <div class="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-200/70 shrink-0">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
-                </svg>
+        <!-- CARD 2: MENUNGGU MEDIASI -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
+            <div>
+                <div class="flex items-center justify-between">
+                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 border border-amber-200/70 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/70">
+                        Perlu Respon
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Menunggu Mediasi</p>
+                    <h3 class="text-2xl font-bold text-slate-900 tracking-tight mt-1">
+                        {{ number_format($pendingCount, 0, ',', '.') }} <span class="text-sm font-normal text-slate-400">Kasus</span>
+                    </h3>
+                </div>
             </div>
-            <div class="min-w-0">
-                <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider truncate">Ditolak</p>
-                <h4 class="text-xl font-bold text-slate-900 mt-0.5 truncate">{{ number_format($rejectedCount, 0, ',', '.') }}</h4>
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <span>Status antrean:</span>
+                <span class="font-medium text-amber-700">{{ $pendingCount > 0 ? 'Menunggu keputusan admin' : 'Selesai dimediasi' }}</span>
+            </div>
+        </div>
+
+        <!-- CARD 3: DISETUJUI (REFUND) -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
+            <div>
+                <div class="flex items-center justify-between">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/70 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/70">
+                        Dana Kembali
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Disetujui (Refund)</p>
+                    <h3 class="text-2xl font-bold text-slate-900 tracking-tight mt-1">
+                        {{ number_format($approvedCount, 0, ',', '.') }} <span class="text-sm font-normal text-slate-400">Kasus</span>
+                    </h3>
+                </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <span>Pengembalian dana:</span>
+                <span class="font-medium text-emerald-700">{{ number_format($approvedCount, 0, ',', '.') }} Selesai</span>
+            </div>
+        </div>
+
+        <!-- CARD 4: DITOLAK -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
+            <div>
+                <div class="flex items-center justify-between">
+                    <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 border border-rose-200/70 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                            <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                        </svg>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200/70">
+                        Ditolak
+                    </span>
+                </div>
+                <div class="mt-4">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Komplain Ditolak</p>
+                    <h3 class="text-2xl font-bold text-slate-900 tracking-tight mt-1">
+                        {{ number_format($rejectedCount, 0, ',', '.') }} <span class="text-sm font-normal text-slate-400">Kasus</span>
+                    </h3>
+                </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <span>Dana diteruskan ke seller:</span>
+                <span class="font-medium text-rose-700">{{ number_format($rejectedCount, 0, ',', '.') }} Kasus</span>
             </div>
         </div>
     </div>
 
     <!-- MAIN CARD: FILTER & TABLE -->
-    <div class="bg-white rounded-xl border border-slate-200/90 shadow-xs overflow-hidden" x-data="{ selectedComplaint: null, showResolveModal: false, showPhotoModal: false, activePhoto: '' }">
+    <div class="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden" x-data="{ selectedComplaint: null, showResolveModal: false, showPhotoModal: false, activePhoto: '' }">
         
         <!-- Filter Tabs & Search -->
         <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-slate-50/50">
             <!-- Filter Status Pills -->
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
                 <a href="{{ route('admin.complaints.index', ['status' => 'all', 'search' => $search]) }}"
-                   class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ $status === 'all' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100' }}">
+                   class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors {{ $status === 'all' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100' }}">
                     Semua ({{ $totalCount }})
                 </a>
                 <a href="{{ route('admin.complaints.index', ['status' => 'pending', 'search' => $search]) }}"
-                   class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ $status === 'pending' ? 'bg-amber-500 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100' }}">
+                   class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors {{ $status === 'pending' ? 'bg-amber-500 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100' }}">
                     Menunggu ({{ $pendingCount }})
                 </a>
                 <a href="{{ route('admin.complaints.index', ['status' => 'approved', 'search' => $search]) }}"
-                   class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ $status === 'approved' ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100' }}">
+                   class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors {{ $status === 'approved' ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100' }}">
                     Disetujui ({{ $approvedCount }})
                 </a>
                 <a href="{{ route('admin.complaints.index', ['status' => 'rejected', 'search' => $search]) }}"
-                   class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ $status === 'rejected' ? 'bg-rose-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100' }}">
+                   class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors {{ $status === 'rejected' ? 'bg-rose-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100' }}">
                     Ditolak ({{ $rejectedCount }})
                 </a>
             </div>
@@ -95,7 +163,7 @@
             <!-- Search Form -->
             <form action="{{ route('admin.complaints.index') }}" method="GET" class="relative">
                 <input type="hidden" name="status" value="{{ $status }}">
-                <input type="text" name="search" value="{{ $search }}" class="w-full lg:w-72 h-9 pl-9 pr-3 text-xs rounded-lg border border-slate-200 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder:text-slate-400" placeholder="Cari invoice, pembeli, toko...">
+                <input type="text" name="search" value="{{ $search }}" class="w-full lg:w-72 h-9 pl-9 pr-3 text-xs rounded-xl border border-slate-200 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder:text-slate-400" placeholder="Cari invoice, pembeli, toko...">
                 <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                     <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
                 </svg>
@@ -105,7 +173,7 @@
         <!-- Table Complaints -->
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-                <thead class="bg-slate-50 text-slate-500 font-semibold uppercase text-[11px] tracking-wider border-b border-slate-100">
+                <thead class="bg-slate-50 text-slate-500 font-semibold uppercase text-[11px] tracking-wider border-b border-slate-200/80">
                     <tr>
                         <th class="px-5 py-3.5">Invoice &amp; Tanggal</th>
                         <th class="px-5 py-3.5">Pihak Sengketa</th>
@@ -175,7 +243,7 @@
                             @endif
 
                             @if($c->admin_notes)
-                            <div class="mt-2 p-2 rounded-lg bg-slate-50 border border-slate-200 text-[11px] text-slate-600">
+                            <div class="mt-2 p-2 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600">
                                 <span class="font-bold text-slate-700 block">Catatan Admin:</span>
                                 {{ $c->admin_notes }}
                             </div>
@@ -187,7 +255,7 @@
                             @if($c->status === 'pending')
                             <button type="button" 
                                     @click="selectedComplaint = {{ json_encode($c) }}; showResolveModal = true"
-                                    class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer inline-flex items-center gap-1.5">
+                                    class="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer inline-flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
                                 </svg>
@@ -200,14 +268,14 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="py-14 text-center text-slate-400">
-                            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto mb-3">
-                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                        <td colspan="5" class="py-16 text-center text-slate-400">
+                            <div class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
                                 </svg>
                             </div>
-                            <span class="text-sm font-semibold text-slate-700 block">Tidak Ada Komplain Ditemukan</span>
-                            <p class="text-xs text-slate-400 mt-1">Semua transaksi platform berjalan lancar tanpa sengketa.</p>
+                            <span class="text-sm font-bold text-slate-700 block">Tidak Ada Komplain Ditemukan</span>
+                            <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Semua transaksi platform berjalan lancar tanpa sengketa komplain aktif.</p>
                         </td>
                     </tr>
                     @endforelse
