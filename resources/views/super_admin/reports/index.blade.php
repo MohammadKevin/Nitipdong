@@ -322,24 +322,24 @@
     </div>
 
     <!-- HIDDEN CONTAINER FOR HIGH-RES CLIENT-SIDE PDF GENERATION -->
-    <div style="position: absolute; left: -9999px; top: 0; width: 1100px; background: white;" id="pdf-export-content">
-        <div style="padding: 24px; font-family: Arial, Helvetica, sans-serif; color: #0f172a; background: white;">
+    <div style="display: none;" id="pdf-export-content">
+        <div style="padding: 24px; font-family: Arial, Helvetica, sans-serif; color: #0f172a; background: #ffffff;">
             <!-- Header -->
             <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0f172a; padding-bottom: 14px; margin-bottom: 16px;">
                 <div>
-                    <h2 style="font-size: 20px; font-weight: 800; margin: 0; color: #0f172a;">NITIPDONG PLATFORM</h2>
-                    <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">Enterprise Marketplace &amp; Multi-Vendor E-Commerce</p>
+                    <h2 style="font-size: 22px; font-weight: 800; margin: 0; color: #0f172a; letter-spacing: -0.5px;">NITIPDONG PLATFORM</h2>
+                    <p style="font-size: 11px; color: #64748b; margin: 3px 0 0 0;">Enterprise Marketplace &amp; Multi-Vendor E-Commerce Platform</p>
                 </div>
                 <div style="text-align: right;">
-                    <span style="display: inline-block; padding: 2px 8px; background: #f1f5f9; font-size: 9px; font-weight: 700; text-transform: uppercase; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 4px;">DOKUMEN RESMI</span>
+                    <span style="display: inline-block; padding: 3px 10px; background: #f1f5f9; font-size: 9.5px; font-weight: 700; text-transform: uppercase; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 4px; color: #334155;">DOKUMEN RESMI</span>
                     <p style="font-size: 10px; color: #64748b; margin: 0;">Dicetak: {{ now()->translatedFormat('d F Y, H:i') }} WIB</p>
                 </div>
             </div>
 
             <!-- Title & Period -->
-            <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 16px; font-size: 11px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 16px; font-size: 11px;">
                 <div>
-                    <strong>Laporan: </strong><span>Rekapitulasi Penjualan &amp; Pembagian Komisi Platform (15%)</span>
+                    <strong>Laporan: </strong><span style="color: #0f172a;">Rekapitulasi Penjualan &amp; Pembagian Komisi Platform (15%)</span>
                 </div>
                 <div>
                     <strong>Periode: </strong><span style="color: #1d4ed8; font-weight: 700;">{{ $periodText ?? 'Semua Waktu Historis' }}</span>
@@ -366,19 +366,19 @@
                 </div>
             </div>
 
-            <!-- Table -->
+            <!-- Full Data Table with Structured Grid -->
             <table style="width: 100%; border-collapse: collapse; font-size: 10px; border: 1px solid #cbd5e1; margin-bottom: 16px;">
                 <thead>
-                    <tr style="background: #0f172a; color: white;">
-                        <th style="padding: 6px 8px; text-align: center; width: 30px; border: 1px solid #1e293b;">No</th>
-                        <th style="padding: 6px 8px; text-align: left; width: 130px; border: 1px solid #1e293b;">Invoice &amp; Waktu</th>
-                        <th style="padding: 6px 8px; text-align: left; width: 140px; border: 1px solid #1e293b;">Toko</th>
-                        <th style="padding: 6px 8px; text-align: left; width: 120px; border: 1px solid #1e293b;">Pembeli</th>
-                        <th style="padding: 6px 8px; text-align: left; border: 1px solid #1e293b;">Item Produk</th>
-                        <th style="padding: 6px 8px; text-align: right; width: 110px; border: 1px solid #1e293b;">GMV (Rp)</th>
-                        <th style="padding: 6px 8px; text-align: right; width: 100px; border: 1px solid #1e293b;">Komisi 15%</th>
-                        <th style="padding: 6px 8px; text-align: right; width: 100px; border: 1px solid #1e293b;">Hak Toko 85%</th>
-                        <th style="padding: 6px 8px; text-align: center; width: 70px; border: 1px solid #1e293b;">Status</th>
+                    <tr style="background: #0f172a; color: #ffffff;">
+                        <th style="padding: 7px 8px; text-align: center; width: 35px; border: 1px solid #1e293b; font-weight: 700;">No</th>
+                        <th style="padding: 7px 8px; text-align: left; width: 140px; border: 1px solid #1e293b; font-weight: 700;">No Invoice &amp; Waktu</th>
+                        <th style="padding: 7px 8px; text-align: left; width: 140px; border: 1px solid #1e293b; font-weight: 700;">Merchant / Toko</th>
+                        <th style="padding: 7px 8px; text-align: left; width: 130px; border: 1px solid #1e293b; font-weight: 700;">Pembeli</th>
+                        <th style="padding: 7px 8px; text-align: left; border: 1px solid #1e293b; font-weight: 700;">Item Produk Terjual</th>
+                        <th style="padding: 7px 8px; text-align: right; width: 115px; border: 1px solid #1e293b; font-weight: 700;">Nilai GMV (Rp)</th>
+                        <th style="padding: 7px 8px; text-align: right; width: 110px; border: 1px solid #1e293b; font-weight: 700;">Komisi 15% (Rp)</th>
+                        <th style="padding: 7px 8px; text-align: right; width: 110px; border: 1px solid #1e293b; font-weight: 700;">Hak Toko 85% (Rp)</th>
+                        <th style="padding: 7px 8px; text-align: center; width: 75px; border: 1px solid #1e293b; font-weight: 700;">Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -389,44 +389,52 @@
                         $itemsSummary = $order->orderItems ? $order->orderItems->map(fn($it) => ($it->product->name ?? 'Item') . " ({$it->quantity}x)")->join(', ') : '-';
                     @endphp
                     <tr style="{{ $idx % 2 == 1 ? 'background: #f8fafc;' : 'background: #ffffff;' }}">
-                        <td style="padding: 5px 6px; text-align: center; border: 1px solid #cbd5e1;">{{ $idx + 1 }}</td>
-                        <td style="padding: 5px 6px; border: 1px solid #cbd5e1; font-weight: 700;">
+                        <td style="padding: 6px 8px; text-align: center; border: 1px solid #cbd5e1;">{{ $idx + 1 }}</td>
+                        <td style="padding: 6px 8px; border: 1px solid #cbd5e1; font-weight: 700;">
                             {{ $order->invoice_number }}<br>
                             <span style="font-size: 9px; font-weight: 400; color: #64748b;">{{ $order->created_at ? $order->created_at->format('d/m/Y H:i') : '-' }}</span>
                         </td>
-                        <td style="padding: 5px 6px; border: 1px solid #cbd5e1;">{{ $order->store->name ?? '-' }}</td>
-                        <td style="padding: 5px 6px; border: 1px solid #cbd5e1;">{{ $order->user->name ?? '-' }}</td>
-                        <td style="padding: 5px 6px; border: 1px solid #cbd5e1; font-size: 9.5px; color: #475569;">{{ $itemsSummary }}</td>
-                        <td style="padding: 5px 6px; text-align: right; border: 1px solid #cbd5e1; font-weight: 700;">{{ number_format($order->total_amount, 0, ',', '.') }}</td>
-                        <td style="padding: 5px 6px; text-align: right; border: 1px solid #cbd5e1; font-weight: 700; color: #065f46; background: #ecfdf5;">{{ number_format($fee, 0, ',', '.') }}</td>
-                        <td style="padding: 5px 6px; text-align: right; border: 1px solid #cbd5e1;">{{ number_format($sellerNet, 0, ',', '.') }}</td>
-                        <td style="padding: 5px 6px; text-align: center; border: 1px solid #cbd5e1; font-weight: 700; font-size: 9px;">{{ strtoupper($order->status ?? '-') }}</td>
+                        <td style="padding: 6px 8px; border: 1px solid #cbd5e1;">{{ $order->store->name ?? '-' }}</td>
+                        <td style="padding: 6px 8px; border: 1px solid #cbd5e1;">{{ $order->user->name ?? '-' }}</td>
+                        <td style="padding: 6px 8px; border: 1px solid #cbd5e1; font-size: 9.5px; color: #475569;">{{ $itemsSummary }}</td>
+                        <td style="padding: 6px 8px; text-align: right; border: 1px solid #cbd5e1; font-weight: 700;">{{ number_format($order->total_amount, 0, ',', '.') }}</td>
+                        <td style="padding: 6px 8px; text-align: right; border: 1px solid #cbd5e1; font-weight: 700; color: #065f46; background: #ecfdf5;">{{ number_format($fee, 0, ',', '.') }}</td>
+                        <td style="padding: 6px 8px; text-align: right; border: 1px solid #cbd5e1;">{{ number_format($sellerNet, 0, ',', '.') }}</td>
+                        <td style="padding: 6px 8px; text-align: center; border: 1px solid #cbd5e1; font-weight: 700; font-size: 9px;">{{ strtoupper($order->status ?? '-') }}</td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="9" style="padding: 16px; text-align: center; color: #94a3b8; border: 1px solid #cbd5e1;">Tidak ada data transaksi pada periode ini.</td>
+                        <td style="padding: 16px 8px; text-align: center; border: 1px solid #cbd5e1; color: #94a3b8;">-</td>
+                        <td style="padding: 16px 8px; text-align: center; border: 1px solid #cbd5e1; color: #94a3b8;" colspan="4">
+                            <strong style="color: #475569; font-size: 11px;">Belum ada data transaksi pada periode ini</strong><br>
+                            <span style="font-size: 9px; color: #94a3b8;">Seluruh rekapitulasi data penjualan dan komisi akan tercatat otomatis di tabel ini.</span>
+                        </td>
+                        <td style="padding: 16px 8px; text-align: right; border: 1px solid #cbd5e1; font-weight: 700; color: #94a3b8;">Rp 0</td>
+                        <td style="padding: 16px 8px; text-align: right; border: 1px solid #cbd5e1; font-weight: 700; color: #065f46; background: #ecfdf5;">Rp 0</td>
+                        <td style="padding: 16px 8px; text-align: right; border: 1px solid #cbd5e1; color: #94a3b8;">Rp 0</td>
+                        <td style="padding: 16px 8px; text-align: center; border: 1px solid #cbd5e1; color: #94a3b8; font-weight: 700; font-size: 9px;">NIHIL</td>
                     </tr>
                     @endforelse
                 </tbody>
                 <tfoot>
                     <tr style="background: #f1f5f9; font-weight: 800;">
-                        <td colspan="5" style="padding: 8px; text-align: right; border: 1px solid #cbd5e1; text-transform: uppercase;">TOTAL KESELURUHAN:</td>
-                        <td style="padding: 8px; text-align: right; border: 1px solid #cbd5e1;">Rp {{ number_format($totalGrossRevenue, 0, ',', '.') }}</td>
-                        <td style="padding: 8px; text-align: right; border: 1px solid #cbd5e1; color: #065f46;">Rp {{ number_format($totalPlatformFee, 0, ',', '.') }}</td>
-                        <td style="padding: 8px; text-align: right; border: 1px solid #cbd5e1;">Rp {{ number_format($totalSellerEarnings, 0, ',', '.') }}</td>
+                        <td colspan="5" style="padding: 8px 10px; text-align: right; border: 1px solid #cbd5e1; text-transform: uppercase; letter-spacing: 0.5px;">TOTAL KESELURUHAN LAPORAN:</td>
+                        <td style="padding: 8px 10px; text-align: right; border: 1px solid #cbd5e1;">Rp {{ number_format($totalGrossRevenue, 0, ',', '.') }}</td>
+                        <td style="padding: 8px 10px; text-align: right; border: 1px solid #cbd5e1; color: #065f46;">Rp {{ number_format($totalPlatformFee, 0, ',', '.') }}</td>
+                        <td style="padding: 8px 10px; text-align: right; border: 1px solid #cbd5e1;">Rp {{ number_format($totalSellerEarnings, 0, ',', '.') }}</td>
                         <td style="border: 1px solid #cbd5e1;"></td>
                     </tr>
                 </tfoot>
             </table>
 
             <!-- Verification Footer -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #cbd5e1; padding-top: 10px; font-size: 9.5px; color: #64748b;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #cbd5e1; padding-top: 12px; font-size: 9.5px; color: #64748b;">
                 <div>
-                    <p style="margin: 0;">Laporan terverifikasi sistem NitipDong Engine v2.4</p>
-                    <p style="margin: 2px 0 0 0; font-family: monospace;">Kode Hash: {{ strtoupper(substr(md5(now() . $totalGrossRevenue), 0, 16)) }}</p>
+                    <p style="margin: 0;">Laporan keuangan resmi di-generate oleh sistem analitik NitipDong Platform v2.4</p>
+                    <p style="margin: 2px 0 0 0; font-family: monospace;">Kode Verifikasi: {{ strtoupper(substr(md5(now() . $totalGrossRevenue), 0, 16)) }}</p>
                 </div>
                 <div style="text-align: right;">
-                    <p style="margin: 0; font-weight: 700; color: #0f172a;">Otoritas Pusat Super Administrator NitipDong</p>
+                    <p style="margin: 0; font-weight: 700; color: #0f172a;">Otoritas Super Administrator NitipDong</p>
                     <p style="margin: 2px 0 0 0;">{{ auth()->user()->name ?? 'Super Admin' }}</p>
                 </div>
             </div>
@@ -436,7 +444,7 @@
     @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
-        function downloadReportPDF() {
+        async function downloadReportPDF() {
             const btn = document.getElementById('btn-download-pdf');
             const btnText = document.getElementById('pdf-btn-text');
             const icon = document.getElementById('pdf-icon');
@@ -451,28 +459,53 @@
             const todayStr = new Date().toISOString().slice(0, 10);
             const fileName = 'Laporan_Keuangan_NitipDong_' + periodName + '_' + todayStr + '.pdf';
 
+            // Clone element to visible screen area for html2canvas pixel capture
+            const clone = element.cloneNode(true);
+            clone.id = 'pdf-export-clone';
+            clone.style.display = 'block';
+            clone.style.position = 'fixed';
+            clone.style.top = '0px';
+            clone.style.left = '0px';
+            clone.style.width = '1080px';
+            clone.style.backgroundColor = '#ffffff';
+            clone.style.zIndex = '999999';
+            clone.style.opacity = '1';
+            clone.style.pointerEvents = 'none';
+            document.body.appendChild(clone);
+
             const opt = {
                 margin:       [6, 6, 6, 6],
                 filename:     fileName,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: 1200
+                },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
             };
 
-            html2pdf().set(opt).from(element).save().then(() => {
+            try {
+                await html2pdf().set(opt).from(clone).save();
                 btnText.innerText = 'Selesai!';
                 icon.className = 'fa-solid fa-circle-check text-emerald-600 text-sm';
+            } catch (err) {
+                console.error(err);
+                btnText.innerText = 'Gagal';
+                icon.className = 'fa-solid fa-triangle-exclamation text-rose-600 text-sm';
+            } finally {
+                if (document.body.contains(clone)) {
+                    document.body.removeChild(clone);
+                }
                 setTimeout(() => {
                     btnText.innerText = originalText;
                     icon.className = 'fa-solid fa-file-pdf text-rose-600 text-sm';
                     btn.disabled = false;
                 }, 2000);
-            }).catch(err => {
-                console.error(err);
-                btnText.innerText = originalText;
-                icon.className = 'fa-solid fa-file-pdf text-rose-600 text-sm';
-                btn.disabled = false;
-            });
+            }
         }
     </script>
     @endpush
