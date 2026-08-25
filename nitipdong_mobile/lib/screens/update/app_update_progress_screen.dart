@@ -266,8 +266,9 @@ class _AppUpdateProgressScreenState extends State<AppUpdateProgressScreen> with 
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildChangelogItem(String text) {
     return Padding(
