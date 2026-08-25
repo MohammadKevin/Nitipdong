@@ -87,8 +87,10 @@ class _ProductModerationScreenState extends State<ProductModerationScreen> {
           // Search box
           Container(
             padding: const EdgeInsets.all(12),
-            color: Colors.white,
-            border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+            ),
             child: TextField(
               controller: _searchController,
               style: const TextStyle(fontSize: 13),

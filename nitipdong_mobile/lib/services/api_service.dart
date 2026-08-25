@@ -1673,6 +1673,45 @@ class ApiService {
       return {'success': false, 'message': e.toString()};
     }
   }
+
+  /// Create new flash sale event
+  static Future<Map<String, dynamic>> storeFlashSale(String title, String start, String end) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/admin/flash-sales'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'title': title,
+          'start_time': start,
+          'end_time': end,
+        }),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200 || response.statusCode == 201,
+        'message': data['message'] ?? 'Flash sale berhasil dibuat.',
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  /// Delete flash sale event
+  static Future<Map<String, dynamic>> deleteFlashSale(int id) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/admin/flash-sales/$id'),
+        headers: await _getHeaders(),
+      );
+      final data = jsonDecode(response.body);
+      return {
+        'success': response.statusCode == 200,
+        'message': data['message'] ?? 'Flash sale berhasil dihapus.',
+      };
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
 }
 
 
