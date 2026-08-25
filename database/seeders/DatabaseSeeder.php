@@ -23,5 +23,8 @@ class DatabaseSeeder extends Seeder
                 'role'              => 'super_admin',
             ]
         );
+
+        // Kategori Marketplace
+        $this->call(CategorySeeder::class);
     }
 }
