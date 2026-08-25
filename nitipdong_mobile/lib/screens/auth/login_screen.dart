@@ -137,9 +137,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.white.withOpacity(0.18)),
                         ),
-                        child: const Text(
-                          'v5.0.0',
-                          style: TextStyle(color: Color(0xFF38BDF8), fontSize: 11, fontWeight: FontWeight.w700),
+                        child: Text(
+                          'v${ApiService.currentAppVersion}',
+                          style: const TextStyle(color: Color(0xFF38BDF8), fontSize: 11, fontWeight: FontWeight.w700),
                         ),
                       ),
                     ],

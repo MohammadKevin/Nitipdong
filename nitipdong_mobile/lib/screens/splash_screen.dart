@@ -246,9 +246,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: Colors.white.withOpacity(0.12)),
                       ),
-                      child: const Text(
-                        'v5.0.0 Official Release 🚀',
-                        style: TextStyle(
+                      child: Text(
+                        'v${ApiService.currentAppVersion} Official Release 🚀',
+                        style: const TextStyle(
                           color: Color(0xFF38BDF8),
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
