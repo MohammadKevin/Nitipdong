@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ComplaintController as AdminComplaintController;
 use App\Http\Controllers\Admin\FlashSaleController;
+use App\Http\Controllers\Admin\OrderMonitoringController as AdminOrderMonitoringController;
 use App\Http\Controllers\Admin\ProductModerationController;
 use App\Http\Controllers\Admin\StoreApprovalController;
 use App\Http\Controllers\AiAssistantController;
@@ -288,6 +290,14 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/products', [ProductModerationController::class, 'index'])->name('products.index');
         Route::post('/products/{product}/toggle-status', [ProductModerationController::class, 'toggleStatus'])->name('products.toggle_status');
+
+        // Dispute Resolution Center
+        Route::get('/complaints', [AdminComplaintController::class, 'index'])->name('complaints.index');
+        Route::post('/complaints/{complaint}/resolve', [AdminComplaintController::class, 'resolve'])->name('complaints.resolve');
+
+        // Real-Time Order Monitoring
+        Route::get('/orders', [AdminOrderMonitoringController::class, 'index'])->name('orders.index');
+        Route::post('/orders/{order}/cancel', [AdminOrderMonitoringController::class, 'cancel'])->name('orders.cancel');
 
         Route::resource('categories', CategoryController::class);
 
