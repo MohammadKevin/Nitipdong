@@ -158,7 +158,6 @@
                         @enderror
                     </div>
 
-                    {{-- Detail Produk --}}
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                         <div>
                             <label for="weight" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -197,7 +196,6 @@
                 </div>
             </div>
 
-            {{-- SECTION BARU: Spesifikasi & Varian --}}
             <div x-data="{
                 specs: {{ json_encode(old('specifications', [])) }},
                 variants: {{ json_encode(old('variants', [])) }},
@@ -220,7 +218,7 @@
                     this.variants[variantIndex].options.splice(optionIndex, 1);
                 }
             }">
-                {{-- Spesifikasi Detail --}}
+                
                 <div>
                     <div class="flex items-center justify-between gap-2 pb-2.5 mb-4 border-b border-slate-100">
                         <div class="flex items-center gap-2">
@@ -255,7 +253,6 @@
                     </div>
                 </div>
 
-                {{-- Varian Produk --}}
                 <div>
                     <div class="flex items-center justify-between gap-2 pb-2.5 mb-4 border-b border-slate-100">
                         <div class="flex items-center gap-2">
@@ -316,7 +313,6 @@
                 <div x-data="{ mainPreview: null }">
                     <p class="text-xs text-slate-400 mb-3">Format didukung: JPG, PNG, WEBP (Maks. 2MB). Pilih foto utama untuk listing produk toko.</p>
 
-                    {{-- Foto Utama --}}
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Foto Utama <span class="text-rose-500">*</span></label>
                         <div class="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">

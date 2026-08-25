@@ -24,7 +24,6 @@
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 min-h-screen py-8">
 
-    {{-- Top Action Bar --}}
     <div class="max-w-md mx-auto mb-4 px-2 flex items-center justify-between no-print">
         <a href="javascript:history.back()" class="text-xs font-semibold text-slate-600 hover:text-cyan-700 flex items-center gap-1.5">
             <i class="fa-solid fa-arrow-left"></i> Kembali
@@ -34,9 +33,8 @@
         </button>
     </div>
 
-    {{-- Thermal / A6 Shipping Label Card --}}
     <div class="max-w-md mx-auto bg-white rounded-xl shadow-card border-2 border-slate-900 p-5 label-card text-xs">
-        {{-- Header Strip --}}
+        
         <div class="flex items-center justify-between pb-3 border-b-2 border-slate-900">
             <div class="flex items-center gap-1.5">
                 <div class="w-6 h-6 rounded bg-slate-900 text-white flex items-center justify-center font-extrabold text-xs">N</div>
@@ -49,7 +47,6 @@
             </div>
         </div>
 
-        {{-- Barcode & Resi Box --}}
         <div class="py-3 text-center border-b-2 border-slate-900">
             @php
                 $barcodeText = $order->tracking_number ?: $order->invoice_number;
@@ -63,7 +60,6 @@
             </div>
         </div>
 
-        {{-- Destination / Receiver Box (Big & Clear) --}}
         <div class="py-3 border-b-2 border-slate-900">
             <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">PENERIMA:</span>
             <h3 class="font-bold text-sm text-slate-900 mt-0.5">{{ $order->user->name }}</h3>
@@ -73,7 +69,6 @@
             </p>
         </div>
 
-        {{-- Sender / Store Box --}}
         <div class="py-3 border-b-2 border-slate-900 grid grid-cols-2 gap-2 text-[11px]">
             <div>
                 <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">PENGIRIM:</span>
@@ -87,7 +82,6 @@
             </div>
         </div>
 
-        {{-- Item Contents & Note --}}
         <div class="py-3 border-b-2 border-slate-900 text-[11px]">
             <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block mb-1">ISI PAKET:</span>
             <div class="space-y-1 max-h-32 overflow-hidden">
@@ -105,7 +99,6 @@
             </div>
         </div>
 
-        {{-- Footer Warnings --}}
         <div class="pt-3 flex items-center justify-between text-[10px] text-slate-500 font-bold">
             <span class="flex items-center gap-1 text-rose-700">
                 <i class="fa-solid fa-wine-glass"></i> FRAGILE / JANGAN DIBANTING

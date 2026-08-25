@@ -34,7 +34,7 @@
                     @php $product = $wishlist->product; @endphp
                     @if($product)
                     <div class="bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-card hover:shadow-lg transition-all duration-200 flex flex-col group relative">
-                        {{-- Remove button top right --}}
+                        
                         <form action="{{ route('customer.wishlist.destroy', $wishlist) }}" method="POST" class="absolute top-2.5 right-2.5 z-10">
                             @csrf
                             @method('DELETE')
@@ -44,7 +44,6 @@
                             </button>
                         </form>
 
-                        {{-- Product Image --}}
                         <a href="{{ route('product.show', $product) }}" class="relative aspect-square bg-slate-50 overflow-hidden block">
                             @if($product->image_url)
                                 <img src="{{ $product->image_url }}" alt="{{ $product->name }}"
@@ -66,7 +65,6 @@
                             @endif
                         </a>
 
-                        {{-- Product Info --}}
                         <div class="p-3.5 flex-1 flex flex-col justify-between space-y-3">
                             <div>
                                 <span class="text-[10px] text-slate-400 uppercase font-semibold tracking-wider block truncate">
@@ -99,7 +97,6 @@
                                 </div>
                             </div>
 
-                            {{-- Actions --}}
                             <div class="pt-2 border-t border-slate-100 flex gap-2">
                                 <form action="{{ route('customer.cart.store', $product) }}" method="POST" class="flex-1">
                                     @csrf

@@ -226,7 +226,6 @@
 <body x-data="{ platform: 'android' }">
     <div class="bg-mesh"></div>
 
-    {{-- Navbar --}}
     <nav>
         <a href="{{ url('/') }}" class="logo">
             <img src="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}" alt="NitipDong">
@@ -237,7 +236,6 @@
         </a>
     </nav>
 
-    {{-- Hero --}}
     <div class="hero">
         <div class="badge-pill">
             <i class="fa-solid fa-mobile-screen"></i>
@@ -250,7 +248,6 @@
             Download aplikasi NitipDong sekarang dan nikmati pengalaman belanja yang lebih cepat, mudah, dan menyenangkan langsung dari smartphone Anda.
         </p>
 
-        {{-- Unified Hero Buttons --}}
         <div class="cta-group">
             <a href="{{ route('app.download.android') }}" class="btn-download-android" title="Download untuk Android">
                 <i class="fa-brands fa-android"></i>
@@ -277,7 +274,6 @@
         <p class="version-note">Gratis · Tanpa iklan · Server Cloud Terenkripsi</p>
     </div>
 
-    {{-- Stats --}}
     <div class="stats">
         <div class="stat">
             <strong>100%</strong>
@@ -297,7 +293,6 @@
         </div>
     </div>
 
-    {{-- Features --}}
     <div class="section">
         <h2 class="section-title">Kenapa Pilih <span>NitipDong</span>?</h2>
         <div class="features-grid">
@@ -334,7 +329,6 @@
         </div>
     </div>
 
-    {{-- How to Install with Tabs --}}
     <div class="section" style="padding-top: 0;">
         <h2 class="section-title">Panduan <span>Instalasi</span></h2>
 
@@ -347,7 +341,6 @@
             </button>
         </div>
 
-        {{-- Android Steps --}}
         <div class="steps" x-show="platform === 'android'" x-cloak>
             <div class="step">
                 <div class="step-num">1</div>
@@ -372,7 +365,6 @@
             </div>
         </div>
 
-        {{-- iOS Steps --}}
         <div class="steps" x-show="platform === 'ios'" x-cloak>
             <div class="step">
                 <div class="step-num">1</div>
@@ -398,7 +390,6 @@
         </div>
     </div>
 
-    {{-- Bottom CTA --}}
     <div class="bottom-cta">
         <h2>Siap Mulai Belanja?</h2>
         <p>Bergabung bersama ribuan pembeli yang sudah merasakan kemudahan belanja di NitipDong.</p>
@@ -418,7 +409,6 @@
         </div>
     </div>
 
-    {{-- Footer --}}
     <footer>
         <p>© {{ date('Y') }} NitipDong · <a href="{{ url('/') }}">budayakita.com</a> · Dibuat dengan ❤️ di Indonesia</p>
     </footer>

@@ -273,7 +273,7 @@
             }
         }
     }">
-        {{-- Breadcrumb --}}
+        
         <nav class="flex text-xs text-slate-400 mb-4 items-center gap-1.5 flex-wrap" aria-label="Breadcrumb">
             <a href="{{ auth()->check() ? url('/?is_from_login=true') : url('/') }}" class="hover:text-cyan-700 transition-colors flex items-center gap-1">
                 <i class="fa-solid fa-house text-[10px]"></i> Beranda
@@ -284,7 +284,6 @@
             <span class="text-slate-800 font-semibold">Dashboard & Riwayat Belanja</span>
         </nav>
 
-        {{-- Page Title Banner --}}
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs relative overflow-hidden">
             <div class="absolute -right-8 -top-8 w-32 h-32 bg-cyan-50 rounded-full blur-2xl pointer-events-none"></div>
             <div class="relative z-10">
@@ -307,11 +306,11 @@
         </div>
 
         <div class="flex flex-col lg:flex-row gap-6 items-start">
-            {{-- Left Sidebar Cards --}}
+            
             <aside class="w-full lg:w-72 shrink-0 space-y-4">
-                {{-- Card 1: User Profile & Loyalty Tier Card --}}
+                
                 <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden transition-all hover:shadow-card-hover">
-                    {{-- Decorative Header with Tier Gradient --}}
+                    
                     <div class="h-20 bg-gradient-to-r from-cyan-700 via-cyan-800 to-slate-900 relative">
                         <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:12px_12px]"></div>
                         <div class="absolute top-2.5 right-3">
@@ -323,7 +322,7 @@
                     </div>
 
                     <div class="px-5 pb-5 pt-0 text-center relative">
-                        {{-- Avatar --}}
+                        
                         <div class="relative w-20 h-20 mx-auto -mt-10 mb-3">
                             <img src="{{ auth()->user()->avatar_url }}"
                                  class="w-full h-full rounded-2xl border-4 border-white shadow-md object-cover bg-cyan-700" alt="{{ auth()->user()->name }}">
@@ -335,7 +334,6 @@
                         <h3 class="font-bold text-sm text-slate-900 leading-snug">{{ auth()->user()->name }}</h3>
                         <p class="text-xs text-slate-400 mt-0.5 truncate">{{ auth()->user()->email }}</p>
 
-                        {{-- Loyalty Tier Progress Bar --}}
                         <div class="mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-left">
                             <div class="flex items-center justify-between text-[10px] font-bold">
                                 <span class="text-slate-600 flex items-center gap-1">
@@ -353,7 +351,6 @@
                             </p>
                         </div>
 
-                        {{-- Mini Stats Grid inside Profile Card --}}
                         <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-100 text-center">
                             <a href="{{ route('customer.dashboard') }}" class="p-2 rounded-xl bg-slate-50 hover:bg-cyan-50 transition-colors group">
                                 <span class="block font-bold text-slate-900 text-sm group-hover:text-cyan-700">{{ $totalOrdersCount }}</span>
@@ -371,9 +368,8 @@
                     </div>
                 </div>
 
-                {{-- Card 2: Navigation Menu Card --}}
                 <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-card space-y-4">
-                    {{-- Section 1: Aktivitas Belanja --}}
+                    
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">Aktivitas Belanja</p>
                         <div class="space-y-1 text-xs">
@@ -418,7 +414,6 @@
                         </div>
                     </div>
 
-                    {{-- Section 2: Pengaturan Akun & Pesan --}}
                     <div class="pt-3 border-t border-slate-100">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-2">Pengaturan & Bantuan</p>
                         <div class="space-y-1 text-xs">
@@ -458,7 +453,6 @@
                         </div>
                     </div>
 
-                    {{-- Section 3: Merchant & Toko --}}
                     <div class="pt-3 border-t border-slate-100">
                         @if(!$userStore)
                             <a href="{{ route('store.register') }}"
@@ -498,9 +492,8 @@
                 </div>
             </aside>
 
-            {{-- Right Main Content --}}
             <div class="flex-1 min-w-0 w-full space-y-5">
-                {{-- FEATURE 1: ACTIVE ORDER HIGHLIGHT BANNER --}}
+                
                 @if($highlightOrder)
                     <div class="rounded-2xl p-5 bg-white border border-slate-200 shadow-xs relative overflow-hidden transition-all">
                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -571,9 +564,8 @@
                     </div>
                 @endif
 
-                {{-- 5 STATS CARDS: SEMUA, BELUM BAYAR, DIPROSES, DIKIRIM, SELESAI --}}
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                    {{-- Total Orders --}}
+                    
                     <button type="button" @click="activeTab = 'all'"
                             :class="activeTab === 'all' ? 'border-cyan-600 ring-2 ring-cyan-500/20 bg-cyan-50/40' : 'border-slate-200/80 bg-white hover:border-slate-300'"
                             class="p-3.5 rounded-2xl border text-left shadow-2xs transition-all flex flex-col justify-between cursor-pointer">
@@ -589,7 +581,6 @@
                         </div>
                     </button>
 
-                    {{-- Pending Payment --}}
                     <button type="button" @click="activeTab = 'pending'"
                             :class="activeTab === 'pending' ? 'border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/40' : 'border-slate-200/80 bg-white hover:border-slate-300'"
                             class="p-3.5 rounded-2xl border text-left shadow-2xs transition-all flex flex-col justify-between cursor-pointer">
@@ -608,7 +599,6 @@
                         </div>
                     </button>
 
-                    {{-- Processing / Dikemas --}}
                     <button type="button" @click="activeTab = 'processing'"
                             :class="activeTab === 'processing' ? 'border-cyan-600 ring-2 ring-cyan-500/20 bg-cyan-50/40' : 'border-slate-200/80 bg-white hover:border-slate-300'"
                             class="p-3.5 rounded-2xl border text-left shadow-2xs transition-all flex flex-col justify-between cursor-pointer">
@@ -624,7 +614,6 @@
                         </div>
                     </button>
 
-                    {{-- In Shipping --}}
                     <button type="button" @click="activeTab = 'shipped'"
                             :class="activeTab === 'shipped' ? 'border-purple-500 ring-2 ring-purple-500/20 bg-purple-50/40' : 'border-slate-200/80 bg-white hover:border-slate-300'"
                             class="p-3.5 rounded-2xl border text-left shadow-2xs transition-all flex flex-col justify-between cursor-pointer">
@@ -640,7 +629,6 @@
                         </div>
                     </button>
 
-                    {{-- Completed --}}
                     <button type="button" @click="activeTab = 'completed'"
                             :class="activeTab === 'completed' ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/40' : 'border-slate-200/80 bg-white hover:border-slate-300'"
                             class="p-3.5 rounded-2xl border text-left shadow-2xs transition-all flex flex-col justify-between cursor-pointer">
@@ -657,9 +645,8 @@
                     </button>
                 </div>
 
-                {{-- Main Card: Riwayat Pesanan Belanja --}}
                 <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden">
-                    {{-- Header with Search & Filter Tabs --}}
+                    
                     <div class="p-5 border-b border-slate-100 space-y-4">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div class="flex items-center gap-2.5">
@@ -672,7 +659,6 @@
                                 </div>
                             </div>
 
-                            {{-- Search bar within orders --}}
                             @if($totalOrdersCount > 0)
                             <div class="relative w-full sm:w-64">
                                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400"></i>
@@ -687,7 +673,6 @@
                             @endif
                         </div>
 
-                        {{-- Status Filter Tabs --}}
                         <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs no-scrollbar">
                             <button type="button" @click="activeTab = 'all'"
                                     :class="activeTab === 'all' ? 'bg-cyan-700 text-white font-semibold shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80 font-medium'"
@@ -767,7 +752,6 @@
                         </div>
                     </div>
 
-                    {{-- Orders Content Container --}}
                     <div class="p-5">
                         @if($orders->count() > 0)
                             <div class="space-y-4">
@@ -779,10 +763,10 @@
                                 @endphp
                                 <div x-show="(activeTab === 'all' || (activeTab === 'complaint' ? {{ $order->complaint ? 'true' : 'false' }} : activeTab === '{{ $order->status }}')) && (!searchQuery || '{{ addslashes($searchBlob) }}'.includes(searchQuery.toLowerCase()))"
                                      class="border border-slate-200/90 rounded-2xl overflow-hidden shadow-xs hover:shadow-card hover:border-cyan-200 transition-all bg-white">
-                                    {{-- Order Card Header --}}
+                                    
                                     <div class="px-4 sm:px-5 py-3.5 bg-slate-50/80 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
                                         <div class="flex items-center gap-2.5 flex-wrap">
-                                            {{-- Store badge --}}
+                                            
                                             @if($order->store && $order->store->slug)
                                                 <a href="{{ route('store.show', $order->store) }}" target="_blank"
                                                    class="flex items-center gap-1.5 font-bold text-slate-800 hover:text-cyan-700 hover:underline transition-colors" title="Kunjungi Toko">
@@ -798,7 +782,6 @@
                                             @endif
                                             <span class="text-slate-300">|</span>
 
-                                            {{-- Invoice badge with copy --}}
                                             <div class="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-slate-200">
                                                 <span class="font-mono font-semibold text-slate-700 text-[11px]">#{{ $order->invoice_number }}</span>
                                                 <button type="button" @click="copyToClipboard('{{ $order->invoice_number }}')"
@@ -844,7 +827,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- FEATURE 2: COUNTDOWN TIMER UNTUK PESANAN PENDING --}}
                                     @if($order->status === 'pending')
                                         <div class="px-4 sm:px-5 py-2 bg-amber-50/70 border-b border-amber-100 text-amber-900 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                                              x-data="{
@@ -876,11 +858,10 @@
                                         </div>
                                     @endif
 
-                                    {{-- Order Items List --}}
                                     <div class="p-4 sm:p-5 divide-y divide-slate-100 space-y-3.5">
                                         @foreach($order->orderItems as $item)
                                         <div class="flex items-start sm:items-center gap-3.5 {{ !$loop->first ? 'pt-3.5' : '' }}">
-                                            {{-- Product Image --}}
+                                            
                                             <div class="w-14 h-14 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
                                                 @if($item->product && $item->product->image_url)
                                                     <img src="{{ $item->product->image_url }}" class="w-full h-full object-cover" alt="{{ $item->product->name }}">
@@ -891,7 +872,6 @@
                                                 @endif
                                             </div>
 
-                                            {{-- Product Info --}}
                                             <div class="flex-1 min-w-0">
                                                 @if($item->product)
                                                     <a href="{{ route('product.show', $item->product) }}" class="text-xs sm:text-sm font-semibold text-slate-900 hover:text-cyan-700 transition-colors line-clamp-1">
@@ -910,13 +890,11 @@
                                                 </div>
                                             </div>
 
-                                            {{-- Subtotal & Review CTA --}}
                                             <div class="text-right flex flex-col items-end gap-1.5 shrink-0">
                                                 <span class="font-extrabold text-xs sm:text-sm text-slate-900">
                                                     Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}
                                                 </span>
 
-                                                {{-- Review Action or Status --}}
                                                 @if($order->status === 'completed')
                                                     @php $review = $item->review; @endphp
                                                     @if($review)
@@ -936,9 +914,8 @@
                                         @endforeach
                                     </div>
 
-                                    {{-- Order Card Footer --}}
                                     <div x-data="{ showCostDetail: false }" class="border-t border-slate-100 bg-slate-50/60">
-                                        {{-- Top Line: Total + Buttons --}}
+                                        
                                         <div class="px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
                                             <div class="flex items-center gap-3 flex-wrap">
                                                 <div class="flex items-baseline gap-1.5">
@@ -972,7 +949,7 @@
                                             </div>
 
                                             <div class="flex items-center gap-2 flex-wrap">
-                                                {{-- Chat Seller Trigger --}}
+                                                
                                                 @if($order->store)
                                                     <button type="button"
                                                             @click="$dispatch('open-chat', { receiver_id: {{ $order->store->user_id ?? 1 }}, receiver_name: '{{ addslashes($order->store->name) }}' })"
@@ -982,7 +959,6 @@
                                                     </button>
                                                 @endif
 
-                                                {{-- Live Maps Tracking Button: Only if shipped, or completed but NOT reviewed yet --}}
                                                 @if($order->status === 'shipped' || ($order->status === 'completed' && !$hasReviewed))
                                                     <a href="{{ route('orders.tracking', $order) }}"
                                                        class="h-8 px-3.5 rounded-xl border border-cyan-200 hover:border-cyan-300 bg-cyan-50 hover:bg-cyan-100 text-cyan-800 font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs" title="Lacak Posisi Paket di Peta Live">
@@ -991,14 +967,12 @@
                                                     </a>
                                                 @endif
 
-                                                {{-- Invoice Button --}}
                                                 <a href="{{ route('orders.invoice', $order) }}" target="_blank"
                                                    class="h-8 px-3 rounded-xl border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-xs flex items-center gap-1.5 transition-colors" title="Lihat Invoice Resmi">
                                                     <i class="fa-solid fa-file-invoice text-[10px] text-slate-400"></i>
                                                     <span>Invoice</span>
                                                 </a>
 
-                                                {{-- Complaint Trigger Button: Only if not complained, and status is processing/shipped or completed but NOT reviewed yet --}}
                                                 @if(!$order->complaint && (in_array($order->status, ['processing', 'shipped']) || ($order->status === 'completed' && !$hasReviewed)))
                                                     <button type="button"
                                                             @click="openComplaint({{ $order->toJson() }}, '{{ route('customer.complaints.store', $order) }}')"
@@ -1031,7 +1005,6 @@
                                                     </form>
                                                 @endif
 
-                                                {{-- Quick Re-Order "Beli Lagi" --}}
                                                 @if($order->orderItems->first() && $order->orderItems->first()->product)
                                                     @php $firstProduct = $order->orderItems->first()->product; @endphp
                                                     <button type="button"
@@ -1045,7 +1018,6 @@
                                             </div>
                                         </div>
 
-                                        {{-- Accordion Breakdown Content --}}
                                         <div x-show="showCostDetail" x-cloak
                                              x-transition:enter="transition ease-out duration-150"
                                              x-transition:enter-start="opacity-0 -translate-y-2"
@@ -1098,7 +1070,7 @@
                                 @endforeach
                             </div>
                         @else
-                            {{-- Enhanced Empty State Card --}}
+                            
                             <div class="py-16 px-4 text-center">
                                 <div class="relative w-24 h-24 mx-auto mb-4">
                                     <div class="absolute inset-0 bg-cyan-100/60 rounded-full blur-xl animate-pulse"></div>
@@ -1127,7 +1099,6 @@
                     </div>
                 </div>
 
-                {{-- FEATURE 3: FLASH SALE SECTION --}}
                 @if(isset($activeFlashSale) && $activeFlashSale && $activeFlashSale->items->count() > 0)
                     <div class="bg-gradient-to-r from-rose-900 via-rose-950 to-slate-900 rounded-2xl p-5 text-white border border-rose-800/80 shadow-card space-y-4"
                          x-data="{
@@ -1165,7 +1136,6 @@
                                     </span>
                                 </div>
 
-                                {{-- Countdown Timer --}}
                                 <div class="flex items-center gap-1 ml-2">
                                     <div class="flex items-center gap-1 font-mono font-bold text-xs">
                                         <span class="px-2 py-1 rounded-md bg-slate-950 text-white border border-rose-700/50" x-text="hours">00</span>
@@ -1224,7 +1194,6 @@
                                             </span>
                                         </div>
 
-                                        {{-- Progress Bar Terjual --}}
                                         <div class="mt-2">
                                             <div class="w-full bg-rose-100 rounded-full h-3.5 relative overflow-hidden flex items-center">
                                                 <div class="bg-gradient-to-r from-amber-400 to-rose-500 h-full rounded-full transition-all" style="width: {{ max($fsItem->sold_percentage, 15) }}%"></div>
@@ -1234,7 +1203,6 @@
                                             </div>
                                         </div>
 
-                                        {{-- Quick Add to Cart --}}
                                         <div class="mt-2.5">
                                             <button type="button"
                                                     @click="addFlashSaleProduct('{{ route('customer.cart.store', $product) }}', '{{ addslashes($product->name) }}', {{ $product->id }})"
@@ -1252,7 +1220,6 @@
                     </div>
                 @endif
 
-                {{-- FEATURE 4: SECTION "REKOMENDASI KHUSUS UNTUK ANDA" DI BAWAH DASHBOARD --}}
                 @if(isset($recommendedProducts) && $recommendedProducts->count() > 0)
                     <div class="bg-white rounded-2xl border border-slate-200/80 p-5 sm:p-6 shadow-card space-y-4">
                         <div class="flex items-center justify-between pb-2 border-b border-slate-100">
@@ -1275,7 +1242,7 @@
                             @foreach($recommendedProducts as $prod)
                             <div class="group bg-slate-50/50 hover:bg-white rounded-2xl border border-slate-200/80 hover:border-cyan-300 transition-all shadow-2xs hover:shadow-card flex flex-col justify-between overflow-hidden">
                                 <div>
-                                    {{-- Thumbnail with link --}}
+                                    
                                     <a href="{{ route('product.show', $prod) }}" class="block aspect-square relative overflow-hidden bg-slate-100">
                                         <img src="{{ $prod->image_url }}" alt="{{ $prod->name }}"
                                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -1287,7 +1254,6 @@
                                         @endif
                                     </a>
 
-                                    {{-- Content --}}
                                     <div class="p-3">
                                         <span class="text-[9px] font-bold text-cyan-700 uppercase tracking-wider block truncate">
                                             {{ $prod->category?->name ?? 'Produk' }}
@@ -1323,7 +1289,6 @@
                                     </div>
                                 </div>
 
-                                {{-- Quick Add to Cart Button --}}
                                 <div class="p-3 pt-0">
                                     <button type="button"
                                             @click="addRecommendedProduct('{{ route('customer.cart.store', $prod) }}', '{{ addslashes($prod->name) }}', {{ $prod->id }})"
@@ -1341,7 +1306,6 @@
             </div>
         </div>
 
-        {{-- Modal Ulasan Produk --}}
         <div x-show="showReviewModal" x-cloak
              class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.outside="showReviewModal = false"
@@ -1363,7 +1327,6 @@
                     <input type="hidden" name="order_item_id" :value="reviewData.orderItemId">
                     <input type="hidden" name="rating" :value="reviewData.rating">
 
-                    {{-- Product summary --}}
                     <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
                         <img :src="reviewData.productImage || '{{ asset('img/saksershop-logo.png') }}'"
                              class="w-11 h-11 rounded-lg object-cover border border-slate-200 bg-white" alt="Product">
@@ -1373,7 +1336,6 @@
                         </div>
                     </div>
 
-                    {{-- Star Rating Picker --}}
                     <div class="text-center py-2 bg-slate-50/60 rounded-xl border border-slate-100 p-3">
                         <label class="block font-semibold text-slate-700 mb-2">Penilaian Bintang</label>
                         <div class="flex items-center justify-center gap-2 text-2xl cursor-pointer">
@@ -1420,7 +1382,6 @@
             </div>
         </div>
 
-        {{-- Modal Ajukan Komplain Pesanan --}}
         <div x-show="showComplaintModal" x-cloak
              class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.outside="showComplaintModal = false"
@@ -1486,7 +1447,6 @@
             </div>
         </div>
 
-        {{-- Modal Batalkan Pesanan --}}
         <div x-show="showCancelModal" x-cloak
              class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.outside="showCancelModal = false"

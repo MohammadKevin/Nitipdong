@@ -43,7 +43,6 @@
             </div>
         </div>
 
-        {{-- Sticky Floating Bulk Action Bar --}}
         <div x-show="selected.length > 0" x-cloak
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 -translate-y-2"
@@ -58,7 +57,7 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
-                {{-- Form Aktifkan Masal --}}
+                
                 <form action="{{ route('seller.products.bulk_action') }}" method="POST" class="inline">
                     @csrf
                     <input type="hidden" name="action" value="activate">
@@ -71,7 +70,6 @@
                     </button>
                 </form>
 
-                {{-- Form Nonaktifkan Masal --}}
                 <form action="{{ route('seller.products.bulk_action') }}" method="POST" class="inline">
                     @csrf
                     <input type="hidden" name="action" value="deactivate">
@@ -84,13 +82,11 @@
                     </button>
                 </form>
 
-                {{-- Modal Trigger Ubah Diskon Masal --}}
                 <button type="button" @click="showDiscountModal = true" class="h-8 px-3 rounded-lg bg-amber-500/90 hover:bg-amber-500 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-colors">
                     <i class="fa-solid fa-percent text-[11px]"></i>
                     Set Diskon
                 </button>
 
-                {{-- Form Hapus Masal --}}
                 <form action="{{ route('seller.products.bulk_action') }}" method="POST" class="inline"
                       @submit="if(!confirm('Apakah Anda yakin ingin menghapus ' + selected.length + ' produk terpilih secara permanen?')) $event.preventDefault()">
                     @csrf
@@ -110,7 +106,6 @@
             </div>
         </div>
 
-        {{-- Modal Popup Set Diskon Masal --}}
         <div x-show="showDiscountModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 scale-95"

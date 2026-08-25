@@ -6,7 +6,6 @@
         Manajemen Toko & Merchant
     </x-slot>
 
-    <!-- HEADER / ACTION BAR -->
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-1">
         <div>
             <h1 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
@@ -16,7 +15,6 @@
         </div>
     </div>
 
-    <!-- 4 SUMMARY METRIC CARDS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         <div class="bg-white rounded-lg p-4 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
             <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center justify-center text-base shrink-0 font-mono-num">
@@ -59,13 +57,10 @@
         </div>
     </div>
 
-    <!-- STORES LEDGER TABLE CARD -->
     <div class="bg-white rounded-lg border border-slate-200/90 shadow-xs overflow-hidden">
-        
-        <!-- SEARCH & FILTER BAR -->
+
         <div class="p-4 border-b border-slate-100 flex flex-col lg:flex-row justify-between lg:items-center gap-3 bg-slate-50/50">
-            
-            <!-- Filter Tabs -->
+
             <div class="flex items-center gap-1 overflow-x-auto pb-1 lg:pb-0 font-mono-num">
                 <a href="{{ route('super_admin.stores.index', array_merge(request()->except(['status', 'page']))) }}" 
                    class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {{ empty($status) ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/60' }}">
@@ -85,7 +80,6 @@
                 </a>
             </div>
 
-            <!-- Search Form -->
             <form action="{{ route('super_admin.stores.index') }}" method="GET" class="flex items-center gap-2 w-full lg:w-auto">
                 @if(!empty($status))
                     <input type="hidden" name="status" value="{{ $status }}">
@@ -102,7 +96,6 @@
             </form>
         </div>
 
-        <!-- TABLE -->
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
                 <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-100 font-mono-num">

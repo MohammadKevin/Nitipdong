@@ -15,7 +15,6 @@
         </a>
     </div>
 
-    <!-- HERO / EVENT STATUS BANNER -->
     <div class="bg-[#0F172A] rounded-2xl p-5 text-white mb-6 relative overflow-hidden shadow-sm border border-slate-800">
         <div class="flex flex-col lg:flex-row justify-between lg:items-center gap-4 relative z-10">
             <div>
@@ -84,9 +83,8 @@
         </div>
     </div>
 
-    <!-- MAIN INTERFACE -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <!-- Add Product to Flash Sale -->
+        
         <div class="lg:col-span-1">
             <div class="bg-white rounded-xl p-5 shadow-xs border border-slate-200/90 sticky top-6"
                  x-data="{
@@ -215,7 +213,6 @@
             </div>
         </div>
 
-        <!-- Products in Flash Sale -->
         <div class="lg:col-span-2">
             <div class="bg-white rounded-xl shadow-xs border border-slate-200/90 overflow-hidden">
                 <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">

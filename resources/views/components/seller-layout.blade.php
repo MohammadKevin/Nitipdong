@@ -55,8 +55,7 @@
     @endphp
 
     <div class="flex h-screen overflow-hidden bg-[#F8FAFC]">
-        
-        <!-- Mobile Sidebar Backdrop -->
+
         <div x-show="sidebarOpen" 
              x-cloak
              @click="sidebarOpen = false"
@@ -69,13 +68,11 @@
              class="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-xs lg:hidden">
         </div>
 
-        <!-- ENTERPRISE SLATE SIDEBAR (#0F172A) -->
         <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
                class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0F172A] text-slate-300 flex flex-col justify-between transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 border-r border-slate-800 shrink-0">
             
             <div class="flex flex-col h-full">
-                
-                <!-- HEADER / BRANDING -->
+
                 <div class="h-16 px-4 border-b border-slate-800 flex items-center justify-between bg-[#0B1324]">
                     <a href="{{ route('seller.dashboard') }}" class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs shrink-0 p-1">
@@ -90,7 +87,6 @@
                         </div>
                     </a>
 
-                    <!-- Mobile Dismiss -->
                     <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-800 transition-colors">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                             <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
@@ -98,16 +94,14 @@
                     </button>
                 </div>
 
-                <!-- NAVIGATION ITEMS -->
                 <div class="flex-1 overflow-y-auto slate-scrollbar px-3 py-5 space-y-6">
-                    
-                    <!-- SECTION 1: OPERASIONAL TOKO -->
+
                     <div>
                         <p class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase px-3 mb-2">
                             Operasional Toko
                         </p>
                         <nav class="space-y-1">
-                            <!-- Dashboard Toko -->
+                            
                             @php $active = request()->routeIs('seller.dashboard'); @endphp
                             <a href="{{ route('seller.dashboard') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -120,7 +114,6 @@
                                 <span class="flex-1 truncate">Dashboard Toko</span>
                             </a>
 
-                            <!-- Pesanan Masuk -->
                             @php $active = request()->routeIs('seller.orders.*'); @endphp
                             <a href="{{ route('seller.orders.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -136,7 +129,6 @@
                                 @endif
                             </a>
 
-                            <!-- Katalog Produk -->
                             @php $active = request()->routeIs('seller.products.index') || request()->routeIs('seller.products.edit'); @endphp
                             <a href="{{ route('seller.products.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -149,7 +141,6 @@
                                 <span class="flex-1 truncate">Katalog Produk</span>
                             </a>
 
-                            <!-- Tambah Produk Baru -->
                             @php $active = request()->routeIs('seller.products.create'); @endphp
                             <a href="{{ route('seller.products.create') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -164,13 +155,12 @@
                         </nav>
                     </div>
 
-                    <!-- SECTION 2: KEUANGAN & PROMO -->
                     <div>
                         <p class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase px-3 mb-2">
                             Keuangan &amp; Promo
                         </p>
                         <nav class="space-y-1">
-                            <!-- Dompet & Saldo Toko -->
+                            
                             @php $active = request()->routeIs('seller.wallet.*'); @endphp
                             <a href="{{ route('seller.wallet.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -183,7 +173,6 @@
                                 <span class="flex-1 truncate">Dompet &amp; Saldo Toko</span>
                             </a>
 
-                            <!-- Voucher Promo -->
                             @php $active = request()->routeIs('seller.vouchers.*'); @endphp
                             <a href="{{ route('seller.vouchers.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -199,7 +188,6 @@
                                 @endif
                             </a>
 
-                            <!-- Pusat Komplain -->
                             @php $active = request()->routeIs('seller.complaints.*'); @endphp
                             <a href="{{ route('seller.complaints.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -217,13 +205,12 @@
                         </nav>
                     </div>
 
-                    <!-- SECTION 3: KOMUNIKASI & PENGATURAN -->
                     <div>
                         <p class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase px-3 mb-2">
                             Komunikasi &amp; Pengaturan
                         </p>
                         <nav class="space-y-1">
-                            <!-- Chat Pembeli -->
+                            
                             @php $active = request()->routeIs('seller.chat.cus*'); @endphp
                             <a href="{{ route('seller.chat.cus') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -236,7 +223,6 @@
                                 <span class="flex-1 truncate">Chat Pembeli</span>
                             </a>
 
-                            <!-- Chat Admin -->
                             @php $active = request()->routeIs('seller.chat.admin*'); @endphp
                             <a href="{{ route('seller.chat.admin') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -249,7 +235,6 @@
                                 <span class="flex-1 truncate">Bantuan Admin</span>
                             </a>
 
-                            <!-- Pengaturan Toko -->
                             @php $active = request()->routeIs('seller.settings.*'); @endphp
                             <a href="{{ route('seller.settings.edit') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -262,7 +247,6 @@
                                 <span class="flex-1 truncate">Pengaturan Toko</span>
                             </a>
 
-                            <!-- Profil Akun -->
                             @php $active = request()->routeIs('profile.*'); @endphp
                             <a href="{{ route('profile.edit') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -279,7 +263,6 @@
 
                 </div>
 
-                <!-- FOOTER / USER PROFILE CARD -->
                 <div class="p-3 border-t border-slate-800 bg-[#0B1324]/60">
                     <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 transition-colors flex items-center gap-3">
                         <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=2563eb&color=fff' }}" 
@@ -306,13 +289,10 @@
             </div>
         </aside>
 
-        <!-- MAIN LAYOUT WRAPPER -->
         <div class="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
-            
-            <!-- STICKY TOP APP HEADER -->
+
             <header class="h-16 shrink-0 bg-white border-b border-slate-200/90 px-4 sm:px-6 flex items-center justify-between z-30 shadow-xs">
-                
-                <!-- Left: Breadcrumb -->
+
                 <div class="flex items-center gap-3">
                     <button @click="sidebarOpen = true" class="lg:hidden p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
@@ -329,10 +309,8 @@
                     </div>
                 </div>
 
-                <!-- Right: STORE IDENTITY + WIB CLOCK + MARKETPLACE LINK -->
                 <div class="flex items-center gap-2.5 sm:gap-3">
-                    
-                    <!-- NAMA STORE DI ATAS KANAN -->
+
                     @if($sellerStore)
                     <a href="{{ route('seller.settings.edit') }}" 
                        class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors shadow-2xs group"
@@ -353,13 +331,11 @@
                     </a>
                     @endif
 
-                    <!-- LIVE WIB CLOCK -->
                     <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 font-mono-num">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span id="seller-clock" class="font-semibold text-slate-700">--:--:-- WIB</span>
                     </div>
 
-                    <!-- LIHAT MARKETPLACE -->
                     <a href="/" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-colors">
                         <svg class="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                             <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/>
@@ -369,7 +345,6 @@
                 </div>
             </header>
 
-            <!-- SCROLLABLE WORKSPACE -->
             <main class="flex-1 overflow-y-auto bg-[#F8FAFC] p-4 sm:p-6 lg:p-7 space-y-6 pb-24 scroll-smooth">
                 @if(session('success'))
                 <div x-data="{ show: true }" x-show="show" x-transition class="p-3.5 sm:p-4 rounded-xl bg-emerald-50/90 border border-emerald-200 text-emerald-800 flex items-start justify-between shadow-xs">
@@ -396,7 +371,6 @@
         </div>
     </div>
 
-    <!-- Live Clock Script -->
     <script>
         function updateClock() {
             const clockEl = document.getElementById('seller-clock');

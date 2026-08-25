@@ -6,7 +6,6 @@
         Monitoring Pesanan Platform
     </x-slot>
 
-    <!-- HEADER / ACTION BAR -->
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-1">
         <div>
             <div class="flex items-center gap-2.5">
@@ -27,10 +26,8 @@
         </div>
     </div>
 
-    <!-- 5 EXECUTIVE KPI CARDS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5">
-        
-        <!-- CARD 1: TOTAL PESANAN -->
+
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between">
@@ -56,7 +53,6 @@
             </div>
         </div>
 
-        <!-- CARD 2: DIPROSES -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between">
@@ -82,7 +78,6 @@
             </div>
         </div>
 
-        <!-- CARD 3: DIKIRIM -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between">
@@ -108,7 +103,6 @@
             </div>
         </div>
 
-        <!-- CARD 4: SELESAI -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between">
@@ -134,7 +128,6 @@
             </div>
         </div>
 
-        <!-- CARD 5: BATAL / KENDALA -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all flex flex-col justify-between sm:col-span-2 lg:col-span-1 xl:col-span-1">
             <div>
                 <div class="flex items-center justify-between">
@@ -161,12 +154,10 @@
         </div>
     </div>
 
-    <!-- MAIN CARD: FILTER & TABLE -->
     <div class="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden" x-data="{ selectedOrder: null, showCancelModal: false }">
-        
-        <!-- Filter Tabs & Search -->
+
         <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-slate-50/50">
-            <!-- Filter Status Pills -->
+            
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
                 <a href="{{ route('admin.orders.index', ['status' => 'all', 'search' => $search]) }}"
                    class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors {{ $status === 'all' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100' }}">
@@ -194,7 +185,6 @@
                 </a>
             </div>
 
-            <!-- Search Form -->
             <form action="{{ route('admin.orders.index') }}" method="GET" class="relative">
                 <input type="hidden" name="status" value="{{ $status }}">
                 <input type="text" name="search" value="{{ $search }}" class="w-full lg:w-80 h-9 pl-9 pr-3 text-xs rounded-xl border border-slate-200 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder:text-slate-400" placeholder="Cari invoice, resi, pembeli, toko...">
@@ -204,7 +194,6 @@
             </form>
         </div>
 
-        <!-- Table Orders -->
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
                 <thead class="bg-slate-50 text-slate-500 font-semibold uppercase text-[11px] tracking-wider border-b border-slate-200/80">
@@ -220,7 +209,7 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse($orders as $order)
                     <tr class="hover:bg-slate-50/70 transition-colors">
-                        <!-- Invoice & Date -->
+                        
                         <td class="px-5 py-4 align-top">
                             <span class="font-bold text-slate-900 block text-xs">#{{ $order->invoice_number }}</span>
                             <span class="text-[11px] text-slate-500 mt-0.5 block">{{ $order->created_at->translatedFormat('d M Y, H:i') }} WIB</span>
@@ -231,7 +220,6 @@
                             @endif
                         </td>
 
-                        <!-- Pembeli & Toko -->
                         <td class="px-5 py-4 align-top">
                             <div class="space-y-1.5">
                                 <div>
@@ -246,7 +234,6 @@
                             </div>
                         </td>
 
-                        <!-- Produk Dipesan -->
                         <td class="px-5 py-4 align-top max-w-xs">
                             <div class="space-y-2">
                                 @foreach($order->orderItems->take(2) as $item)
@@ -264,14 +251,12 @@
                             </div>
                         </td>
 
-                        <!-- Total & Pembayaran -->
                         <td class="px-5 py-4 align-top">
                             <span class="font-bold text-slate-900 block text-xs">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
                             <span class="text-[11px] text-slate-500 mt-0.5 block uppercase">{{ $order->payment_method ?? 'Midtrans Gateway' }}</span>
                             <span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md mt-1 inline-block border border-emerald-200/60">Lunas (Escrow)</span>
                         </td>
 
-                        <!-- Status & Logistik -->
                         <td class="px-5 py-4 align-top">
                             @if($order->status === 'pending')
                                 <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">Menunggu Pembayaran</span>
@@ -293,7 +278,6 @@
                             @endif
                         </td>
 
-                        <!-- Aksi -->
                         <td class="px-5 py-4 align-top text-center">
                             <div class="flex items-center justify-center gap-1.5">
                                 <a href="{{ route('orders.invoice', $order) }}" target="_blank" class="p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition-colors" title="Lihat Invoice">
@@ -338,7 +322,6 @@
         </div>
         @endif
 
-        <!-- MODAL INTERVENSI PEMBATALAN PESANAN -->
         <div x-show="showCancelModal" 
              x-cloak 
              class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">

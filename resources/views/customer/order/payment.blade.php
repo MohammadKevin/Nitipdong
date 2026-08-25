@@ -120,8 +120,7 @@
                 </a>
                 <h1 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Selesaikan Pembayaran</h1>
             </div>
-            
-            {{-- Tombol Ubah Metode Pembayaran --}}
+
             <button type="button" @click="isChangeModalOpen = true"
                     class="px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:border-cyan-600 text-slate-700 hover:text-cyan-700 font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 active:scale-95">
                 <i class="fa-solid fa-wallet text-cyan-600"></i> Ubah Metode
@@ -137,7 +136,6 @@
 
         <div class="max-w-2xl mx-auto space-y-4">
 
-            {{-- 1. COUNTDOWN & TOTAL BANNER --}}
             <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-cyan-950 text-white rounded-2xl p-5 shadow-lg border border-slate-700/50">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
@@ -165,9 +163,8 @@
                 </div>
             </div>
 
-            {{-- 2. DEDICATED PAYMENT METHOD CARD --}}
             @if($isQris)
-                {{-- QRIS DIRECT VIEW --}}
+                
                 <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm text-center">
                     <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 font-bold text-xs mb-4">
                         <i class="fa-solid fa-qrcode"></i> QRIS NASIONAL (GPN)
@@ -195,7 +192,7 @@
                     </div>
                 </div>
             @elseif(!$isManual)
-                {{-- VIRTUAL ACCOUNT DIRECT VIEW (BRI / BCA / BNI / MANDIRI) --}}
+                
                 <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
                     <div class="flex items-center justify-between pb-4 border-b border-slate-100">
                         <div>
@@ -221,7 +218,6 @@
                         </p>
                     </div>
 
-                    {{-- Panduan Transfer Step-by-Step --}}
                     <div class="mt-4 pt-4 border-t border-slate-100 space-y-3">
                         <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Panduan Pembayaran {{ $bankName }}:</h4>
                         
@@ -250,7 +246,7 @@
                     </div>
                 </div>
             @else
-                {{-- MANUAL TRANSFER --}}
+                
                 <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm">
                     <h3 class="text-base font-bold text-slate-900 mb-3">Transfer Bank Manual</h3>
                     <p class="text-xs text-slate-600 mb-4">Silakan transfer ke rekening resmi NitipDong, lalu unggah foto struk bukti transfer Anda di bawah ini:</p>
@@ -274,7 +270,6 @@
                 </div>
             @endif
 
-            {{-- 3. ACTION BUTTONS & SIMULATOR --}}
             <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
                 <button type="button" @click="checkStatusNow()" :disabled="isChecking"
                         class="w-full sm:w-auto flex-1 btn-primary h-11 text-xs bg-slate-900 hover:bg-slate-800 flex items-center justify-center gap-2">
@@ -290,7 +285,6 @@
                     </template>
                 </button>
 
-                {{-- Testing Sandbox Demo Button --}}
                 <button type="button" @click="simulatePaid()" :disabled="isSimulating"
                         class="w-full sm:w-auto px-4 h-11 text-xs font-bold rounded-xl border border-teal-300 bg-teal-50 text-teal-800 hover:bg-teal-100 transition-all flex items-center justify-center gap-1.5 active:scale-95">
                     <template x-if="!isSimulating">
@@ -306,7 +300,6 @@
                 </button>
             </div>
 
-            {{-- MODAL UBAH METODE PEMBAYARAN --}}
             <div x-show="isChangeModalOpen" class="fixed inset-0 z-50 overflow-y-auto" x-cloak>
                 <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
                     <div class="fixed inset-0 transition-opacity bg-slate-900/60 backdrop-blur-sm" @click="isChangeModalOpen = false"></div>
@@ -324,8 +317,7 @@
 
                         <form action="{{ route('customer.order.change_payment_method', $order) }}" method="POST" class="mt-4 space-y-2.5">
                             @csrf
-                            
-                            {{-- QRIS --}}
+
                             <label class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all"
                                    :class="newPaymentMethod === 'qris' ? 'border-cyan-600 bg-cyan-50/50' : 'border-slate-200 hover:border-slate-300'">
                                 <div class="flex items-center gap-3">
@@ -338,7 +330,6 @@
                                 <i class="fa-solid fa-qrcode text-red-500 text-lg"></i>
                             </label>
 
-                            {{-- BCA VA --}}
                             <label class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all"
                                    :class="newPaymentMethod === 'va_bca' ? 'border-cyan-600 bg-cyan-50/50' : 'border-slate-200 hover:border-slate-300'">
                                 <div class="flex items-center gap-3">
@@ -351,7 +342,6 @@
                                 <i class="fa-solid fa-building-columns text-blue-600 text-lg"></i>
                             </label>
 
-                            {{-- BRI VA --}}
                             <label class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all"
                                    :class="newPaymentMethod === 'va_bri' ? 'border-cyan-600 bg-cyan-50/50' : 'border-slate-200 hover:border-slate-300'">
                                 <div class="flex items-center gap-3">
@@ -364,7 +354,6 @@
                                 <i class="fa-solid fa-building-columns text-cyan-600 text-lg"></i>
                             </label>
 
-                            {{-- Mandiri VA --}}
                             <label class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all"
                                    :class="newPaymentMethod === 'va_mandiri' ? 'border-cyan-600 bg-cyan-50/50' : 'border-slate-200 hover:border-slate-300'">
                                 <div class="flex items-center gap-3">
@@ -377,7 +366,6 @@
                                 <i class="fa-solid fa-building-columns text-amber-600 text-lg"></i>
                             </label>
 
-                            {{-- BNI VA --}}
                             <label class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all"
                                    :class="newPaymentMethod === 'va_bni' ? 'border-cyan-600 bg-cyan-50/50' : 'border-slate-200 hover:border-slate-300'">
                                 <div class="flex items-center gap-3">
@@ -390,7 +378,6 @@
                                 <i class="fa-solid fa-building-columns text-orange-600 text-lg"></i>
                             </label>
 
-                            {{-- Manual --}}
                             <label class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all"
                                    :class="newPaymentMethod === 'manual_transfer' ? 'border-cyan-600 bg-cyan-50/50' : 'border-slate-200 hover:border-slate-300'">
                                 <div class="flex items-center gap-3">
@@ -413,7 +400,6 @@
                 </div>
             </div>
 
-            {{-- Floating Copy Notification Toast --}}
             <div x-show="copied" x-transition
                  class="fixed bottom-6 right-6 z-50 px-4 py-3 bg-slate-900 text-white text-xs font-bold rounded-xl shadow-2xl flex items-center gap-2"
                  x-cloak>

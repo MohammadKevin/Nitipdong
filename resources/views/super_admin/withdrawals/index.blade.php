@@ -22,7 +22,7 @@
             this.showRejectModal = true;
         }
     }">
-        {{-- Header Bar --}}
+        
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-1">
             <div>
                 <h1 class="text-xl font-bold text-slate-900 tracking-tight">Manajemen Payout & Penarikan Dana Toko</h1>
@@ -36,7 +36,6 @@
             </div>
         </div>
 
-        {{-- Flash Messages --}}
         @if(session('success'))
             <div class="flex items-center gap-2.5 px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-lg text-xs font-semibold shadow-xs">
                 <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
@@ -51,7 +50,6 @@
             </div>
         @endif
 
-        {{-- Metrics Summary Grid --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
             <div class="bg-white rounded-lg p-4 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
                 <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 border border-amber-200/70 flex items-center justify-center text-base shrink-0 font-mono-num">
@@ -96,7 +94,6 @@
             </div>
         </div>
 
-        {{-- Table Card --}}
         <div class="bg-white rounded-lg border border-slate-200/90 shadow-xs overflow-hidden">
             <div class="p-3.5 border-b border-slate-100 flex items-center justify-between gap-3 flex-wrap bg-slate-50/50">
                 <div class="flex items-center gap-1 overflow-x-auto text-xs font-mono-num">
@@ -208,7 +205,6 @@
             @endif
         </div>
 
-        {{-- Modal Approve Payout --}}
         <div x-show="showApproveModal" x-cloak
              class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.outside="showApproveModal = false"
@@ -253,7 +249,6 @@
             </div>
         </div>
 
-        {{-- Modal Reject Payout --}}
         <div x-show="showRejectModal" x-cloak
              class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.outside="showRejectModal = false"

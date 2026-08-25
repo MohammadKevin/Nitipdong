@@ -6,7 +6,6 @@
         Flash Sale Platform
     </x-slot>
 
-    <!-- HEADER / ACTION BAR -->
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-1">
         <div>
             <div class="flex items-center gap-2.5">
@@ -31,10 +30,8 @@
         </div>
     </div>
 
-    <!-- 3 EXECUTIVE KPI CARDS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-        
-        <!-- CARD 1: SEDANG BERLANGSUNG -->
+
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
             <div>
                 <div class="flex items-center justify-between">
@@ -60,7 +57,6 @@
             </div>
         </div>
 
-        <!-- CARD 2: AKAN DATANG -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
             <div>
                 <div class="flex items-center justify-between">
@@ -86,7 +82,6 @@
             </div>
         </div>
 
-        <!-- CARD 3: TOTAL EVENT -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all sm:col-span-2 lg:col-span-1">
             <div>
                 <div class="flex items-center justify-between">
@@ -113,7 +108,6 @@
         </div>
     </div>
 
-    <!-- FLASH SALES TABLE CARD -->
     <div class="bg-white rounded-2xl shadow-xs border border-slate-200/90 overflow-hidden">
         <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-slate-50/50">
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">

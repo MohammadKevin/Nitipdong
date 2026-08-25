@@ -17,7 +17,7 @@
             this.showRespondModal = true;
         }
     }">
-        {{-- Header Banner --}}
+        
         <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <div class="flex items-center gap-2">
@@ -30,7 +30,6 @@
             </div>
         </div>
 
-        {{-- Flash Messages --}}
         @if(session('success'))
             <div class="flex items-center gap-3 px-4 py-3.5 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl text-xs font-semibold shadow-xs">
                 <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
@@ -38,7 +37,6 @@
             </div>
         @endif
 
-        {{-- Complaints List Table Card --}}
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden">
             <div class="p-5 border-b border-slate-100 flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -135,7 +133,6 @@
             @endif
         </div>
 
-        {{-- Modal Tanggapi Komplain --}}
         <div x-show="showRespondModal" x-cloak
              class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.outside="showRespondModal = false"

@@ -19,7 +19,6 @@
 </head>
 <body class="bg-slate-100 font-sans text-slate-900 min-h-screen py-8">
 
-    {{-- Top Action Bar --}}
     <div class="max-w-3xl mx-auto mb-4 px-4 flex items-center justify-between no-print">
         <a href="javascript:void(0);" onclick="if (window.history.length > 1 && document.referrer) { window.history.back(); } else { window.close(); setTimeout(function() { window.location.href = '{{ url('/') }}'; }, 150); }" class="text-xs font-semibold text-slate-600 hover:text-cyan-700 flex items-center gap-1.5">
             <i class="fa-solid fa-arrow-left"></i> Kembali
@@ -31,9 +30,8 @@
         </div>
     </div>
 
-    {{-- Printable Invoice Paper --}}
     <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-card border border-slate-200 p-8 sm:p-10 print-container">
-        {{-- Invoice Header --}}
+        
         <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200 gap-4">
             <div>
                 <div class="flex items-center gap-2">
@@ -49,7 +47,6 @@
             </div>
         </div>
 
-        {{-- Meta & Parties Grid --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 py-6 border-b border-slate-100 text-xs">
             <div>
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Diterbitkan Atas Nama:</span>
@@ -77,7 +74,6 @@
             </div>
         </div>
 
-        {{-- Items Table --}}
         <div class="py-6">
             <table class="w-full text-left text-xs">
                 <thead>
@@ -109,7 +105,6 @@
             </table>
         </div>
 
-        {{-- Payment Summary --}}
         <div class="pt-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-start gap-6 text-xs">
             <div class="max-w-xs">
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Status Transaksi:</span>
@@ -159,7 +154,6 @@
             </div>
         </div>
 
-        {{-- Footer --}}
         <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
             <span>Terima kasih telah berbelanja di NitipDong</span>
             <span>www.nitipdong.com</span>

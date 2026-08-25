@@ -133,9 +133,9 @@ class DetailedProductSeeder extends Seeder
     private function getStoresAndProducts(): array
     {
         return [
-            // ══════════════════════════════════════════════════
+
             // 1. EIGER ADVENTURE OFFICIAL STORE (OUTDOOR)
-            // ══════════════════════════════════════════════════
+
             [
                 'name'         => 'Eiger Adventure Official',
                 'slug'         => 'eiger-adventure-official',
@@ -230,9 +230,8 @@ class DetailedProductSeeder extends Seeder
                 ],
             ],
 
-            // ══════════════════════════════════════════════════
             // 2. APPLE IBOX OFFICIAL STORE (ELEKTRONIK)
-            // ══════════════════════════════════════════════════
+
             [
                 'name'         => 'iBox Apple Official Store',
                 'slug'         => 'ibox-apple-official-store',
@@ -326,9 +325,8 @@ class DetailedProductSeeder extends Seeder
                 ],
             ],
 
-            // ══════════════════════════════════════════════════
             // 3. NIKE OFFICIAL STORE INDONESIA (FASHION & SPORT)
-            // ══════════════════════════════════════════════════
+
             [
                 'name'         => 'Nike Official Store Indonesia',
                 'slug'         => 'nike-official-store-indonesia',
@@ -423,9 +421,8 @@ class DetailedProductSeeder extends Seeder
                 ],
             ],
 
-            // ══════════════════════════════════════════════════
             // 4. KOPI NUSANTARA & MAKANAN SEHAT (KULINER)
-            // ══════════════════════════════════════════════════
+
             [
                 'name'         => 'Kopi Nusantara & Makanan Sehat',
                 'slug'         => 'kopi-nusantara-makanan-sehat',
@@ -515,9 +512,8 @@ class DetailedProductSeeder extends Seeder
                 ],
             ],
 
-            // ══════════════════════════════════════════════════
             // 5. AUTOSPEED RACING & GARAGE (OTOMOTIF)
-            // ══════════════════════════════════════════════════
+
             [
                 'name'         => 'Autospeed Racing & Garage',
                 'slug'         => 'autospeed-racing-garage',

@@ -1,5 +1,5 @@
 <x-guest-layout>
-    {{-- Brand Logo (Desktop only) --}}
+    
     <div class="hidden lg:flex items-center justify-center gap-2.5 mb-8">
         <img src="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}" alt="NitipDong" class="w-8 h-8 rounded-lg object-contain">
         <span class="font-extrabold text-xl tracking-tight text-slate-900">

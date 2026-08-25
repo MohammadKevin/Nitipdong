@@ -6,9 +6,8 @@
      @keydown.escape.window="if(isOpen) isOpen = false"
      class="relative">
 
-    {{-- Unified Floating Dock (Bottom Right): AI Button + Chat Button Side-by-Side --}}
     <div class="fixed bottom-20 md:bottom-5 right-4 sm:right-5 z-40 flex items-center gap-2 select-none">
-        {{-- Button 1: Asisten AI --}}
+        
         <button type="button"
                 @click="$dispatch('toggle-ai-chat')"
                 :class="isAiOpen ? 'bg-cyan-700 text-white shadow-lg ring-2 ring-cyan-400' : 'bg-slate-900 hover:bg-slate-800 text-white shadow-md'"
@@ -19,7 +18,6 @@
             <span x-show="isAiOpen" class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
         </button>
 
-        {{-- Button 2: Chat Penjual --}}
         <button type="button"
                 @click="togglePopup()"
                 :class="isOpen ? 'bg-cyan-800 text-white shadow-lg ring-2 ring-cyan-400' : 'bg-cyan-700 hover:bg-cyan-800 text-white shadow-md hover:shadow-lg'"
@@ -37,7 +35,6 @@
         </button>
     </div>
 
-    {{-- Floating Chat Popup Window (Directly above the dock) --}}
     <div x-show="isOpen"
          x-cloak
          x-transition:enter="transition ease-out duration-200 transform"
@@ -48,9 +45,8 @@
          x-transition:leave-end="opacity-0 translate-y-4 scale-95"
          class="fixed bottom-36 md:bottom-20 right-4 md:right-5 z-50 w-[calc(100vw-2rem)] sm:w-96 h-[500px] max-h-[calc(100vh-10.5rem)] md:max-h-[calc(100vh-6.5rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col text-xs font-sans">
 
-        {{-- 1. HEADER --}}
         <div class="bg-cyan-700 text-white px-4 py-3 flex items-center justify-between shadow-xs shrink-0 select-none">
-            {{-- Header Left: If in Active Chat vs List --}}
+            
             <div class="flex items-center gap-2.5 min-w-0">
                 <template x-if="activeConversation">
                     <button type="button" @click="backToList()" class="w-7 h-7 -ml-1 rounded-lg hover:bg-white/15 flex items-center justify-center transition-colors cursor-pointer" title="Kembali ke daftar pesan">
@@ -85,28 +81,24 @@
                 </template>
             </div>
 
-            {{-- Header Actions --}}
             <div class="flex items-center gap-1 shrink-0">
-                {{-- Expand / Go to Full Page CTA --}}
+                
                 <a :href="activeConversation ? activeConversation.full_url : '{{ route('chat.index') }}'"
                    title="Buka Halaman Penuh"
                    class="w-7 h-7 rounded-lg hover:bg-white/15 text-cyan-100 hover:text-white flex items-center justify-center transition-colors cursor-pointer">
                     <i class="fa-solid fa-up-right-and-down-left-from-center text-[11px]"></i>
                 </a>
 
-                {{-- Minimize / Close Button --}}
                 <button type="button" @click="isOpen = false" title="Tutup" class="w-7 h-7 rounded-lg hover:bg-white/15 text-cyan-100 hover:text-white flex items-center justify-center transition-colors cursor-pointer">
                     <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
         </div>
 
-        {{-- 2. BODY CONTENT --}}
         <div class="flex-1 flex flex-col min-h-0 bg-slate-50 relative">
 
-            {{-- VIEW A: CONVERSATIONS LIST --}}
             <div x-show="!activeConversation" class="flex-1 flex flex-col min-h-0">
-                {{-- Search Filter --}}
+                
                 <div class="p-2.5 bg-white border-b border-slate-100">
                     <div class="relative">
                         <input type="text" x-model="searchQuery" placeholder="Cari nama toko / pesan..."
@@ -115,7 +107,6 @@
                     </div>
                 </div>
 
-                {{-- Conversations Scroll List --}}
                 <div class="flex-1 overflow-y-auto divide-y divide-slate-100 p-1.5 scrollbar-thin">
                     <template x-if="filteredConversations.length > 0">
                         <div>
@@ -160,9 +151,8 @@
                 </div>
             </div>
 
-            {{-- VIEW B: ACTIVE CHAT MESSAGES --}}
             <div x-show="activeConversation" class="flex-1 flex flex-col min-h-0 bg-slate-50" x-cloak>
-                {{-- Message Bubbles Scroll Area --}}
+                
                 <div id="popup-chat-messages" class="flex-1 overflow-y-auto p-3 space-y-2.5 scrollbar-thin">
                     <template x-if="isLoadingMessages">
                         <div class="py-12 text-center text-slate-400">
@@ -192,7 +182,6 @@
                     </template>
                 </div>
 
-                {{-- Input Bar --}}
                 <div class="p-2.5 bg-white border-t border-slate-200/90 shrink-0">
                     <form @submit.prevent="sendMessage()" class="flex items-center gap-1.5">
                         <input type="text"

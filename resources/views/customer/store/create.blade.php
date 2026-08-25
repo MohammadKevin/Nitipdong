@@ -223,7 +223,6 @@
                         @enderror
                     </div>
 
-                    {{-- Cascading Regions --}}
                     <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3.5">
                         <span class="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
                             <i class="fa-solid fa-location-dot text-cyan-600"></i>
@@ -292,7 +291,6 @@
                             @enderror
                         </div>
 
-                        {{-- Leaflet Map Pinpoint --}}
                         <div class="space-y-2 pt-2 border-t border-slate-200/80">
                             <div class="flex items-center justify-between flex-wrap gap-2">
                                 <label class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">

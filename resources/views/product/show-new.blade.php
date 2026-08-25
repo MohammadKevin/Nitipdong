@@ -13,7 +13,7 @@
         </nav>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
-            {{-- Left: Product Image Gallery --}}
+            
             <div class="lg:col-span-5">
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 sticky top-20">
                     <div class="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-50 border border-slate-200 mb-3">
@@ -40,20 +40,17 @@
                             </div>
                         @endif
 
-                        {{-- Discount Badge --}}
                         @if($product->has_discount)
                             <div class="absolute top-0 left-0 bg-rose-600 text-white px-2 py-1.5 text-sm font-black leading-none rounded-br-lg">
                                 {{ $product->discount_percentage_effective }}%
                             </div>
                         @endif
 
-                        {{-- Official Badge --}}
                         <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-500 text-white border border-emerald-300 shadow-sm">
                             Resmi
                         </div>
                     </div>
 
-                    {{-- Thumbnail Gallery --}}
                     @if(count($allImages) > 1)
                     <div class="flex gap-2 overflow-x-auto pb-1">
                         @foreach($allImages as $i => $imgPath)
@@ -73,7 +70,6 @@
                 </div>
             </div>
 
-            {{-- Right: Product Info --}}
             <div class="lg:col-span-7 space-y-5">
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
                     <div>
@@ -95,7 +91,6 @@
                         </div>
                     </div>
 
-                    {{-- Price --}}
                     <div class="pt-3 border-t border-slate-100">
                         <div class="flex items-baseline gap-2">
                             <span class="text-2xl font-bold text-rose-600">
@@ -117,7 +112,6 @@
                         @endif
                     </div>
 
-                    {{-- Variants Section --}}
                     @if($product->variants && count($product->variants) > 0)
                     <div class="space-y-4" x-data="{
                         @foreach($product->variants as $variant)
@@ -144,7 +138,6 @@
                     </div>
                     @endif
 
-                    {{-- Quantity & Actions --}}
                     <div class="pt-4 border-t border-slate-100" x-data="{
                         qty: 1,
                         stock: {{ $product->stock }},
@@ -186,7 +179,6 @@
                     </div>
                 </div>
 
-                {{-- Store Profile --}}
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
                     <div class="flex items-center gap-4">
                         <img src="https://ui-avatars.com/api/?name={{ urlencode($product->store->name ?? 'Official Store') }}&background=0891b2&color=fff"
@@ -215,7 +207,6 @@
                     </div>
                 </div>
 
-                {{-- Detail Produk --}}
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
                     <h3 class="text-base font-bold text-emerald-600 mb-4 pb-3 border-b-2 border-emerald-600">Detail Produk</h3>
 

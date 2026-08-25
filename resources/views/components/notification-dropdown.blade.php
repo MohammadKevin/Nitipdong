@@ -5,7 +5,7 @@
 @endphp
 
 <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-    {{-- Bell Trigger Button --}}
+    
     <button @click="open = !open" type="button"
             class="relative p-2 text-slate-400 hover:text-cyan-700 hover:bg-slate-100 rounded-xl transition-all cursor-pointer" title="Notifikasi">
         <i class="fa-regular fa-bell text-base"></i>
@@ -16,7 +16,6 @@
         @endif
     </button>
 
-    {{-- Dropdown Card --}}
     <div x-show="open" x-cloak
          x-transition:enter="transition ease-out duration-150"
          x-transition:enter-start="opacity-0 scale-95"
@@ -44,7 +43,6 @@
             @endif
         </div>
 
-        {{-- Notifications List --}}
         <div class="max-h-80 overflow-y-auto divide-y divide-slate-100">
             @forelse($notifications as $notif)
             @php

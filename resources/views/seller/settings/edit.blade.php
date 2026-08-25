@@ -3,7 +3,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <div class="p-6 max-w-5xl mx-auto space-y-6">
-        {{-- Header Bar --}}
+        
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div>
                 <h1 class="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
@@ -21,7 +21,6 @@
             </a>
         </div>
 
-        {{-- Flash Messages --}}
         @if(session('success'))
             <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs flex items-center gap-2 shadow-2xs">
                 <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
@@ -222,7 +221,6 @@
             @csrf
             @method('PUT')
 
-            {{-- 1. LOKASI ASAL PENGIRIMAN TOKO (Paling Utama) --}}
             <div class="bg-white rounded-2xl border border-slate-200 shadow-card p-6 space-y-5">
                 <div class="flex items-center justify-between pb-3 border-b border-slate-100 flex-wrap gap-2">
                     <div class="flex items-center gap-2">
@@ -239,7 +237,6 @@
                     </span>
                 </div>
 
-                {{-- Alert Info Gratis Ongkir 1 Kota --}}
                 <div class="p-3.5 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 border border-emerald-200 rounded-xl text-xs text-emerald-950 flex items-start gap-3">
                     <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs shrink-0 mt-0.5 shadow-xs">
                         <i class="fa-solid fa-gift"></i>
@@ -252,7 +249,6 @@
                     </div>
                 </div>
 
-                {{-- Cascading Regions (Provinsi -> Kota -> Kecamatan -> Kode Pos) --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="province" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -312,7 +308,6 @@
                               class="input text-xs rounded-xl leading-relaxed"></textarea>
                 </div>
 
-                {{-- Interactive Map Pinpoint --}}
                 <div class="space-y-2 pt-2 border-t border-slate-100">
                     <div class="flex items-center justify-between flex-wrap gap-2">
                         <div>
@@ -343,7 +338,6 @@
                 </div>
             </div>
 
-            {{-- 2. PROFIL & IDENTITAS TOKO --}}
             <div class="bg-white rounded-2xl border border-slate-200 shadow-card p-6 space-y-5">
                 <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
                     <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center text-sm">
@@ -382,7 +376,6 @@
                               class="input text-xs rounded-xl leading-relaxed">{{ old('description', $store->description) }}</textarea>
                 </div>
 
-                {{-- Logo & Banner Upload --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2 border-t border-slate-100">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
@@ -418,7 +411,6 @@
                 </div>
             </div>
 
-            {{-- 3. REKENING BANK PENCAIRAN SALDO --}}
             <div class="bg-white rounded-2xl border border-slate-200 shadow-card p-6 space-y-4">
                 <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
                     <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center text-sm">
@@ -460,7 +452,6 @@
                 </div>
             </div>
 
-            {{-- Submit Action Bar --}}
             <div class="flex items-center justify-between pt-2">
                 <a href="{{ route('seller.dashboard') }}" class="btn-secondary text-xs h-10 px-5 rounded-xl">
                     Batal

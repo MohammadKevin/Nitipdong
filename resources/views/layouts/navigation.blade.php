@@ -63,7 +63,6 @@
                 </div>
             </a>
 
-            {{-- Center Search Bar with Live Suggestions --}}
             <div class="flex-1 max-w-3xl hidden md:flex flex-col justify-center relative" @click.outside="showSuggestions = false">
                 <form action="{{ url('/products') }}" method="GET" class="w-full flex items-center relative">
                     <div class="relative w-full flex items-center">
@@ -82,14 +81,12 @@
                     </div>
                 </form>
 
-                {{-- Live Search Autocomplete PopUp --}}
                 <div x-show="showSuggestions" x-cloak
                      x-transition:enter="transition ease-out duration-150"
                      x-transition:enter-start="opacity-0 translate-y-1"
                      x-transition:enter-end="opacity-100 translate-y-0"
                      class="absolute top-11 left-0 right-0 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden text-xs max-h-96 overflow-y-auto">
-                    
-                    {{-- Categories --}}
+
                     <template x-if="searchSuggestions.categories && searchSuggestions.categories.length > 0">
                         <div class="p-2 border-b border-slate-100 bg-slate-50/50">
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">Kategori</span>
@@ -104,7 +101,6 @@
                         </div>
                     </template>
 
-                    {{-- Stores --}}
                     <template x-if="searchSuggestions.stores && searchSuggestions.stores.length > 0">
                         <div class="p-2 border-b border-slate-100">
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">Toko Resmi</span>
@@ -125,7 +121,6 @@
                         </div>
                     </template>
 
-                    {{-- Products --}}
                     <template x-if="searchSuggestions.products && searchSuggestions.products.length > 0">
                         <div class="p-2">
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2">Produk Terkait</span>
@@ -169,13 +164,11 @@
 
             <div class="flex items-center gap-1.5 sm:gap-2">
 
-                {{-- Download App button for Desktop --}}
                 <a href="{{ route('app.download') }}" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cyan-200 bg-cyan-50/70 hover:bg-cyan-100 text-cyan-800 text-xs font-bold transition-all shadow-2xs group" title="Download Aplikasi NitipDong">
                     <i class="fa-solid fa-download text-sm text-cyan-600 group-hover:scale-110 transition-transform"></i>
                     <span>Download App</span>
                 </a>
 
-                {{-- Download App button for Mobile --}}
                 <a href="{{ route('app.download') }}" class="md:hidden inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-cyan-200 bg-cyan-50 text-cyan-800 text-[11px] font-bold shadow-2xs active:scale-95 transition-all shrink-0" title="Download Aplikasi NitipDong">
                     <i class="fa-solid fa-download text-[11px] text-cyan-600"></i>
                     <span>App</span>
@@ -192,7 +185,7 @@
                     @endphp
 
                     @if(auth()->user()->role === 'customer')
-                    {{-- PopUp Mini-Wishlist Dropdown --}}
+                    
                     <div class="relative" @click.outside="wishlistOpen = false">
                         <button type="button" id="nav-wishlist-btn" @click="wishlistOpen = !wishlistOpen" aria-label="Wishlist Saya"
                                 class="btn-icon relative cursor-pointer transition-transform duration-300"
@@ -206,7 +199,6 @@
                             </span>
                         </button>
 
-                        {{-- Dropdown Container --}}
                         <div x-show="wishlistOpen" x-cloak
                              x-transition:enter="transition ease-out duration-150"
                              x-transition:enter-start="opacity-0 translate-y-2 scale-95"
@@ -215,8 +207,7 @@
                              x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                              x-transition:leave-end="opacity-0 translate-y-2 scale-95"
                              class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200/90 z-50 overflow-hidden text-xs">
-                            
-                            {{-- Header --}}
+
                             <div class="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
                                 <div class="flex items-center gap-1.5 font-bold text-slate-900">
                                     <i class="fa-solid fa-heart text-rose-500"></i>
@@ -227,7 +218,6 @@
                                 </a>
                             </div>
 
-                            {{-- Body List (With Scrollbar if > 1 / multiple items) --}}
                             <template x-if="wishlistItems.length > 0">
                                 <div class="divide-y divide-slate-100 max-h-80 overflow-y-auto p-1.5 scrollbar-thin">
                                     <template x-for="item in wishlistItems" :key="item.id">
@@ -268,7 +258,6 @@
                                 </div>
                             </template>
 
-                            {{-- Footer --}}
                             <template x-if="wishlistItems.length > 0">
                                 <div class="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
                                     <span class="text-[11px] text-slate-500"><span x-text="wishlistCount"></span> Produk disimpan</span>
@@ -281,7 +270,6 @@
                     </div>
                     @endif
 
-                    {{-- PopUp Mini-Cart Dropdown --}}
                     <div class="relative" @click.outside="cartOpen = false">
                         <button type="button" id="nav-cart-btn" @click="cartOpen = !cartOpen" aria-label="Keranjang Belanja"
                                 class="btn-icon relative cursor-pointer transition-transform duration-300"
@@ -295,7 +283,6 @@
                             </span>
                         </button>
 
-                        {{-- Dropdown Container --}}
                         <div x-show="cartOpen" x-cloak
                              x-transition:enter="transition ease-out duration-150"
                              x-transition:enter-start="opacity-0 translate-y-2 scale-95"
@@ -304,8 +291,7 @@
                              x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                              x-transition:leave-end="opacity-0 translate-y-2 scale-95"
                              class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200/90 z-50 overflow-hidden text-xs">
-                            
-                            {{-- Header --}}
+
                             <div class="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
                                 <div class="flex items-center gap-1.5 font-bold text-slate-900">
                                     <i class="fa-solid fa-cart-shopping text-cyan-600"></i>
@@ -316,7 +302,6 @@
                                 </a>
                             </div>
 
-                            {{-- Body List --}}
                             <template x-if="cartItems.length > 0">
                                 <div class="divide-y divide-slate-100 max-h-80 overflow-y-auto p-1">
                                     <template x-for="item in cartItems" :key="item.id">
@@ -337,7 +322,7 @@
                                                     <span class="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded inline-block mt-0.5" x-text="item.variant"></span>
                                                 </template>
                                                 <div class="flex items-center justify-between mt-1.5">
-                                                    {{-- Quantity Stepper --}}
+                                                    
                                                     <div class="flex items-center rounded-lg border border-slate-200 bg-white overflow-hidden shadow-2xs">
                                                         <button type="button" @click="updateCartQty(item, item.quantity - 1)"
                                                                 :disabled="isUpdatingCart"
@@ -374,7 +359,6 @@
                                 </div>
                             </template>
 
-                            {{-- Footer Checkout Buttons --}}
                             <template x-if="cartItems.length > 0">
                                 <div class="p-3.5 border-t border-slate-100 bg-slate-50/50 space-y-2.5">
                                     <div class="flex items-center justify-between">
@@ -492,7 +476,7 @@
                         </div>
                     </div>
                 @else
-                    {{-- Guest Cart Icon with PopUp --}}
+                    
                     <div class="relative" @click.outside="cartOpen = false">
                         <button type="button" @click="cartOpen = !cartOpen" aria-label="Keranjang Belanja" class="btn-icon relative cursor-pointer" title="Keranjang Belanja">
                             <i class="fa-solid fa-cart-shopping text-sm text-slate-600"></i>

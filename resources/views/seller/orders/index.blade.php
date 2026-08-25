@@ -30,7 +30,6 @@
             </a>
         </div>
 
-        {{-- Modal Input No Resi --}}
         <div x-show="showResiModal" x-cloak
              class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.outside="showResiModal = false"

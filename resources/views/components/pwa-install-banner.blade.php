@@ -66,7 +66,6 @@
     }
 }" x-cloak>
 
-    {{-- Bottom Floating Install Banner --}}
     <div x-show="showBanner"
          x-transition:enter="transition ease-out duration-400"
          x-transition:enter-start="opacity-0 translate-y-12 scale-95"
@@ -77,12 +76,11 @@
          class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-sm z-[9990] bg-slate-900/95 backdrop-blur-md text-white border border-cyan-500/30 rounded-2xl shadow-2xl p-4">
         
         <div class="flex items-start gap-3.5">
-            {{-- App Icon --}}
+            
             <div class="w-12 h-12 rounded-xl bg-white p-1.5 border border-cyan-300 shadow-md shrink-0 overflow-hidden">
                 <img src="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}" alt="NitipDong Icon" class="w-full h-full object-contain">
             </div>
 
-            {{-- Info & Text --}}
             <div class="flex-1 min-w-0">
                 <div class="flex items-center justify-between">
                     <h4 class="text-xs font-black tracking-tight text-white flex items-center gap-1.5">
@@ -97,7 +95,6 @@
                     Pasang di Layar Utama HP untuk belanja lebih cepat, hemat kuota &amp; notifikasi pesanan.
                 </p>
 
-                {{-- Action Buttons --}}
                 <div class="flex items-center gap-2 mt-3">
                     <button type="button" 
                             @click="installPWA()" 
@@ -114,7 +111,6 @@
             </div>
         </div>
 
-        {{-- iOS Safari Helper Modal/Tooltip --}}
         <div x-show="showIOSGuide" x-cloak class="mt-3 pt-3 border-t border-white/15 text-[11px] text-sky-200">
             <p class="font-bold text-white mb-1">Cara Pasang di iPhone/iPad:</p>
             <ol class="list-decimal list-inside space-y-1 text-slate-300">

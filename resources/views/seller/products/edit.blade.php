@@ -180,7 +180,6 @@
                 <div x-data="{ mainPreview: null }">
                     <p class="text-xs text-slate-400 mb-3">Format didukung: JPG, PNG, WEBP (Maks. 2MB). Pilih foto baru untuk mengganti foto produk utama.</p>
 
-                    {{-- Foto Utama --}}
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Foto Utama Produk</label>
                         <div class="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">

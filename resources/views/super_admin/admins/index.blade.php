@@ -24,7 +24,6 @@
         }
     }" class="space-y-5">
 
-        {{-- Top Header & Action --}}
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
             <div>
                 <h1 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
@@ -40,7 +39,6 @@
             </button>
         </div>
 
-        {{-- Notification Alerts --}}
         @if(session('success'))
             <div class="flex items-center gap-2.5 px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-lg text-xs font-semibold shadow-xs">
                 <i class="fa-solid fa-circle-check text-emerald-600 text-sm shrink-0"></i>
@@ -61,7 +59,6 @@
             </div>
         @endif
 
-        {{-- Statistics & Search Toolbar --}}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
             <div class="bg-white p-4 rounded-lg border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
                 <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center justify-center text-base shrink-0 font-mono-num">
@@ -93,7 +90,6 @@
             </div>
         </div>
 
-        {{-- Table List Admin --}}
         <div class="bg-white rounded-lg border border-slate-200/90 shadow-xs overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
@@ -131,7 +127,7 @@
                                 </td>
                                 <td class="py-3.5 px-5 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
-                                        {{-- Edit Button --}}
+                                        
                                         <button type="button"
                                                 @click="openEdit({{ $admin->toJson() }}, '{{ route('super_admin.admins.update', $admin) }}')"
                                                 class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer border border-slate-200 shadow-2xs"
@@ -139,7 +135,6 @@
                                             <i class="fa-solid fa-pen-to-square text-[10px]"></i> Edit
                                         </button>
 
-                                        {{-- Delete Button --}}
                                         <form action="{{ route('super_admin.admins.destroy', $admin) }}" method="POST"
                                               onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun admin {{ addslashes($admin->name) }}?');">
                                             @csrf
@@ -173,7 +168,6 @@
             @endif
         </div>
 
-        {{-- MODAL TAMBAH ADMIN BARU --}}
         <div x-show="showCreateModal" x-cloak
              class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.outside="showCreateModal = false"
@@ -226,7 +220,6 @@
             </div>
         </div>
 
-        {{-- MODAL EDIT ADMIN --}}
         <div x-show="showEditModal" x-cloak
              class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.outside="showEditModal = false"

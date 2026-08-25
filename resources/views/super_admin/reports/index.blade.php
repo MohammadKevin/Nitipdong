@@ -6,7 +6,6 @@
         Laporan Keuangan & Ekspor Platform
     </x-slot>
 
-    <!-- HEADER / ACTION BAR -->
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-1">
         <div>
             <h1 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
@@ -16,14 +15,13 @@
         </div>
 
         <div class="flex items-center gap-2.5 flex-wrap">
-            <!-- Direct PDF Download Button (No new tab) -->
+            
             <button type="button" id="btn-download-pdf" onclick="downloadReportPDF()"
                class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200 shadow-xs hover:border-slate-300 transition-all cursor-pointer" title="Langsung unduh dokumen laporan sebagai file PDF">
                 <i class="fa-solid fa-file-pdf text-rose-600 text-sm" id="pdf-icon"></i>
                 <span id="pdf-btn-text">Unduh PDF</span>
             </button>
 
-            <!-- Download Formatted Excel .xls Button -->
             <a href="{{ route('super_admin.reports.revenue.export', array_merge(request()->query(), ['format' => 'excel'])) }}" 
                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-xs hover:shadow transition-all cursor-pointer" title="Format tabel Microsoft Excel berkolom rapi">
                 <i class="fa-solid fa-file-excel text-white text-sm"></i>
@@ -32,10 +30,8 @@
         </div>
     </div>
 
-    <!-- FILTER & CONTROL PANEL -->
     <div class="bg-white rounded-lg border border-slate-200/90 shadow-xs p-4 sm:p-5 space-y-4" x-data="{ customDate: {{ $period === 'custom' || ($startDate && $endDate && !in_array($period, ['today', '7days', 'this_month', 'last_month', 'this_year', 'all'])) ? 'true' : 'false' }} }">
-        
-        <!-- Preset Period Tabs -->
+
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
             <span class="text-xs font-bold text-slate-700 uppercase tracking-wider font-mono-num flex items-center gap-1.5">
                 <i class="fa-regular fa-calendar-days text-blue-600"></i> Pilih Periode Cepat:
@@ -69,11 +65,9 @@
             </div>
         </div>
 
-        <!-- Detailed Filter Form -->
         <form action="{{ route('super_admin.reports.index') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
             <input type="hidden" name="period" value="custom">
 
-            <!-- Start Date -->
             <div>
                 <label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider font-mono-num">
                     Dari Tanggal
@@ -82,7 +76,6 @@
                        class="w-full h-8.5 px-2.5 rounded-lg border border-slate-200 bg-white text-xs font-mono-num focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
             </div>
 
-            <!-- End Date -->
             <div>
                 <label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider font-mono-num">
                     Sampai Tanggal
@@ -91,7 +84,6 @@
                        class="w-full h-8.5 px-2.5 rounded-lg border border-slate-200 bg-white text-xs font-mono-num focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
             </div>
 
-            <!-- Store Filter -->
             <div>
                 <label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider font-mono-num">
                     Filter Toko
@@ -106,7 +98,6 @@
                 </select>
             </div>
 
-            <!-- Status Filter -->
             <div>
                 <label class="block font-semibold text-slate-700 mb-1 uppercase text-[10px] tracking-wider font-mono-num">
                     Status Transaksi
@@ -119,7 +110,6 @@
                 </select>
             </div>
 
-            <!-- Search & Actions -->
             <div class="flex items-end gap-2">
                 <button type="submit" class="flex-1 h-8.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer">
                     <i class="fa-solid fa-filter text-[10px]"></i>
@@ -132,10 +122,8 @@
         </form>
     </div>
 
-    <!-- 4 SUMMARY CARDS FOR FILTERED DATA -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
-        
-        <!-- Total GMV -->
+
         <div class="bg-white rounded-lg p-4 sm:p-4.5 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
             <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center justify-center text-base shrink-0 font-mono-num">
                 <i class="fa-solid fa-chart-line"></i>
@@ -148,7 +136,6 @@
             </div>
         </div>
 
-        <!-- Komisi Platform 15% -->
         <div class="bg-white rounded-lg p-4 sm:p-4.5 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
             <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center text-base shrink-0 font-mono-num">
                 <i class="fa-solid fa-coins"></i>
@@ -161,7 +148,6 @@
             </div>
         </div>
 
-        <!-- Hak Penjual 85% -->
         <div class="bg-white rounded-lg p-4 sm:p-4.5 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
             <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-700 border border-purple-200/60 flex items-center justify-center text-base shrink-0 font-mono-num">
                 <i class="fa-solid fa-hand-holding-dollar"></i>
@@ -174,7 +160,6 @@
             </div>
         </div>
 
-        <!-- Total Orders -->
         <div class="bg-white rounded-lg p-4 sm:p-4.5 border border-slate-200/90 shadow-xs flex items-center gap-3.5 hover:border-slate-300 transition-colors">
             <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-700 border border-amber-200/60 flex items-center justify-center text-base shrink-0 font-mono-num">
                 <i class="fa-solid fa-file-invoice"></i>
@@ -189,7 +174,6 @@
 
     </div>
 
-    <!-- PREVIEW DATA TABLE -->
     <div class="bg-white rounded-lg border border-slate-200/90 shadow-xs overflow-hidden">
         <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-slate-50/50">
             <div>
@@ -321,10 +305,9 @@
         @endif
     </div>
 
-    <!-- HIDDEN CONTAINER FOR HIGH-RES CLIENT-SIDE PDF GENERATION -->
     <div style="display: none;" id="pdf-export-content">
         <div style="padding: 24px; font-family: Arial, Helvetica, sans-serif; color: #0f172a; background: #ffffff;">
-            <!-- Header -->
+            
             <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0f172a; padding-bottom: 14px; margin-bottom: 16px;">
                 <div>
                     <h2 style="font-size: 22px; font-weight: 800; margin: 0; color: #0f172a; letter-spacing: -0.5px;">NITIPDONG PLATFORM</h2>
@@ -336,7 +319,6 @@
                 </div>
             </div>
 
-            <!-- Title & Period -->
             <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 16px; font-size: 11px;">
                 <div>
                     <strong>Laporan: </strong><span style="color: #0f172a;">Rekapitulasi Penjualan &amp; Pembagian Komisi Platform (15%)</span>
@@ -346,7 +328,6 @@
                 </div>
             </div>
 
-            <!-- 4 KPI Boxes -->
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
                 <div style="padding: 10px 12px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px;">
                     <span style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block;">Gross Volume (GMV)</span>
@@ -366,7 +347,6 @@
                 </div>
             </div>
 
-            <!-- Full Data Table with Structured Grid -->
             <table style="width: 100%; border-collapse: collapse; font-size: 10px; border: 1px solid #cbd5e1; margin-bottom: 16px;">
                 <thead>
                     <tr style="background: #0f172a; color: #ffffff;">
@@ -427,7 +407,6 @@
                 </tfoot>
             </table>
 
-            <!-- Verification Footer -->
             <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #cbd5e1; padding-top: 12px; font-size: 9.5px; color: #64748b;">
                 <div>
                     <p style="margin: 0;">Laporan keuangan resmi di-generate oleh sistem analitik NitipDong Platform v2.4</p>

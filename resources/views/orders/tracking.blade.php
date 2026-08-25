@@ -3,7 +3,6 @@
         Lacak Pengiriman Pesanan #{{ $order->invoice_number }} — NitipDong
     </x-slot>
 
-    {{-- Leaflet Maps CSS & JS --}}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
@@ -36,7 +35,7 @@
             setTimeout(() => this.copiedResi = false, 2000);
         }
     }">
-        {{-- Breadcrumb --}}
+        
         <nav class="flex text-xs text-slate-400 mb-4 items-center gap-1.5 flex-wrap" aria-label="Breadcrumb">
             <a href="{{ auth()->check() ? url('/?is_from_login=true') : url('/') }}" class="hover:text-cyan-700 transition-colors flex items-center gap-1">
                 <i class="fa-solid fa-house text-[10px]"></i> Beranda
@@ -47,13 +46,10 @@
             <span class="text-slate-800 font-semibold">Lacak Pengiriman Paket</span>
         </nav>
 
-        {{-- Main Layout Grid --}}
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-            {{-- Left Column: Live Maps & Courier Card (7 cols) --}}
             <div class="lg:col-span-7 space-y-4">
-                
-                {{-- Live Delivery Status Card --}}
+
                 <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-card relative overflow-hidden">
                     <div class="flex items-center justify-between flex-wrap gap-3 pb-3.5 border-b border-slate-100">
                         <div class="flex items-center gap-2">
@@ -78,7 +74,6 @@
                         </span>
                     </div>
 
-                    {{-- Progress Bar Strip --}}
                     <div class="mt-4">
                         <div class="flex items-center justify-between text-xs mb-1.5 font-semibold">
                             <span class="text-slate-500">Proses Pengiriman</span>
@@ -91,10 +86,10 @@
                             <i class="fa-solid fa-clock text-cyan-600 text-xs"></i>
                             <strong>Estimasi Tiba:</strong> {{ $estimated_time }}
                         </p>
-                    </div>                    {{-- Courier / Store Profile Card Overlay (Adaptive to Order Status) --}}
+                    </div>                    
                     <div class="mt-4 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-4 flex-wrap">
                         @if($order->status === 'shipped')
-                            {{-- Shipped: Courier is on the road --}}
+                            
                             <div class="flex items-center gap-3">
                                 <div class="relative">
                                     <img src="https://ui-avatars.com/api/?name={{ urlencode($courier['name']) }}&background=0891b2&color=fff&size=80&bold=true"
@@ -122,7 +117,7 @@
                                 </button>
                             </div>
                         @elseif($order->status === 'completed')
-                            {{-- Completed: Package delivered --}}
+                            
                             <div class="flex items-center gap-3">
                                 <div class="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center text-lg shadow-xs">
                                     <i class="fa-solid fa-circle-check"></i>
@@ -141,7 +136,7 @@
                                 </a>
                             </div>
                         @else
-                            {{-- Processing / Pending: Package still being prepared at store --}}
+                            
                             <div class="flex items-center gap-3">
                                 <div class="w-11 h-11 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-700 flex items-center justify-center text-lg shadow-xs">
                                     <i class="fa-solid fa-boxes-packing"></i>
@@ -171,7 +166,6 @@
                     </div>
                 </div>
 
-                {{-- Interactive Leaflet Map Container --}}
                 <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden relative">
                     <div class="p-3.5 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between text-xs">
                         <div class="flex items-center gap-2 font-bold text-slate-800">
@@ -185,10 +179,8 @@
                         </div>
                     </div>
 
-                    {{-- Map Div --}}
                     <div id="liveTrackingMap" class="w-full h-80 sm:h-96 z-10 bg-slate-100"></div>
 
-                    {{-- Map Legend Bar --}}
                     <div class="p-3 bg-white border-t border-slate-100 flex items-center justify-around text-[10px] text-slate-500 font-semibold flex-wrap gap-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-3 h-3 rounded-full bg-purple-600 border-2 border-white shadow-xs"></span>
@@ -213,10 +205,8 @@
 
             </div>
 
-            {{-- Right Column: Timeline & Order Summary (5 cols) --}}
             <div class="lg:col-span-5 space-y-4">
-                
-                {{-- Order Item Summary Mini Card --}}
+
                 <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-card">
                     <div class="flex items-center justify-between pb-3 border-b border-slate-100 text-xs">
                         <div class="flex items-center gap-1.5 font-bold text-slate-900">
@@ -247,7 +237,6 @@
                     </div>
                 </div>
 
-                {{-- Proof of Delivery Card (If available) --}}
                 @if($order->delivery_proof_image)
                 <div class="bg-emerald-50/80 rounded-2xl border border-emerald-200/90 p-4.5 shadow-card text-xs">
                     <div class="flex items-center justify-between mb-2.5">
@@ -275,7 +264,6 @@
                 </div>
                 @endif
 
-                {{-- Delivery Timeline Logs Card (Shopee / Tokopedia Style) --}}
                 <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-card">
                     <h3 class="text-xs font-extrabold text-slate-900 mb-4 flex items-center gap-2">
                         <i class="fa-solid fa-timeline text-cyan-700"></i>
@@ -285,13 +273,12 @@
                     <div class="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 text-xs">
                         @foreach($checkpoints as $index => $cp)
                         <div class="relative">
-                            {{-- Dot / Icon Indicator --}}
+                            
                             <div class="absolute -left-6 top-0.5 w-4.5 h-4.5 rounded-full flex items-center justify-center text-[9px] border-2 border-white shadow-xs
                                         {{ $loop->first ? 'bg-cyan-600 text-white ring-4 ring-cyan-100' : 'bg-slate-300 text-white' }}">
                                 <i class="fa-solid {{ $cp['icon'] }}"></i>
                             </div>
 
-                            {{-- Content --}}
                             <div>
                                 <h4 class="font-bold {{ $loop->first ? 'text-cyan-900 text-xs' : 'text-slate-700 text-[11px]' }}">
                                     {{ $cp['title'] }}
@@ -308,7 +295,6 @@
                     </div>
                 </div>
 
-                {{-- Delivery Destination Address Card --}}
                 <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-card text-xs">
                     <div class="flex items-center gap-2 text-slate-900 font-bold mb-2">
                         <i class="fa-solid fa-location-dot text-rose-500"></i>
@@ -325,7 +311,6 @@
         </div>
     </div>
 
-    {{-- Leaflet Map Initialization Script --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const orderStatus = '{{ $order->status }}';

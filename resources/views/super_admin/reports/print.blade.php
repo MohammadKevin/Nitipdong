@@ -38,7 +38,6 @@
 </head>
 <body class="p-6 sm:p-10 max-w-6xl mx-auto text-slate-900 bg-white">
 
-    <!-- ACTION BUTTONS (NO PRINT) -->
     <div class="no-print mb-6 p-4 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between">
         <div class="flex items-center gap-2">
             <a href="{{ route('super_admin.reports.index', request()->query()) }}" class="px-3 py-1.5 rounded-md border border-slate-300 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50">
@@ -51,7 +50,6 @@
         </button>
     </div>
 
-    <!-- OFFICIAL COMPANY HEADER -->
     <div class="border-b-2 border-slate-900 pb-5 mb-6">
         <div class="flex justify-between items-start">
             <div class="flex items-center gap-3">
@@ -88,7 +86,6 @@
         </div>
     </div>
 
-    <!-- 4 SUMMARY METRIC BOXES -->
     <div class="grid grid-cols-4 gap-3 mb-6 font-mono-num">
         <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
             <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Gross Volume (GMV)</span>
@@ -108,7 +105,6 @@
         </div>
     </div>
 
-    <!-- DATA TABLE -->
     <table class="w-full text-left text-xs border border-slate-300 mb-6">
         <thead class="bg-slate-100 text-slate-800 font-bold uppercase text-[10px] tracking-wider border-b border-slate-300 font-mono-num">
             <tr>
@@ -177,7 +173,6 @@
         </tfoot>
     </table>
 
-    <!-- SIGNATURE / VERIFICATION BLOCK -->
     <div class="mt-10 pt-6 border-t border-slate-200 flex justify-between items-end text-xs">
         <div>
             <p class="text-[10px] text-slate-400 font-mono-num uppercase tracking-wider">Keaslian Dokumen</p>

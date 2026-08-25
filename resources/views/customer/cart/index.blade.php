@@ -94,7 +94,7 @@
             </div>
 
             <div class="lg:col-span-4 space-y-4">
-                {{-- Ringkasan Tagihan --}}
+                
                 <div class="bg-white rounded-xl border border-slate-200/80 p-5 shadow-card space-y-4 sticky top-20">
                     <h3 class="font-bold text-xs text-slate-900 pb-3 border-b border-slate-100 uppercase tracking-wider">Ringkasan Tagihan</h3>
 
@@ -155,16 +155,14 @@
             </div>
         </div>
         @else
-        {{-- Empty Cart Premium Showcase --}}
+        
         <div class="space-y-10 py-4">
 
-            {{-- Main Empty State Hero Card --}}
             <div class="bg-gradient-to-b from-white via-white to-cyan-50/40 rounded-3xl border border-slate-200/90 p-8 sm:p-12 text-center max-w-2xl mx-auto shadow-xl relative overflow-hidden">
-                {{-- Decorative Soft Blobs --}}
+                
                 <div class="absolute -top-16 -left-16 w-40 h-40 bg-cyan-200/30 rounded-full blur-2xl pointer-events-none"></div>
                 <div class="absolute -bottom-16 -right-16 w-40 h-40 bg-amber-200/30 rounded-full blur-2xl pointer-events-none"></div>
 
-                {{-- Animated Cart Graphic --}}
                 <div class="relative w-24 h-24 sm:w-28 sm:h-28 mx-auto mb-5">
                     <div class="w-full h-full rounded-3xl bg-gradient-to-tr from-cyan-600 to-cyan-400 text-white flex items-center justify-center text-4xl shadow-lg shadow-cyan-600/30 transform -rotate-3 hover:rotate-0 transition-transform duration-300">
                         <i class="fa-solid fa-cart-shopping"></i>
@@ -181,7 +179,6 @@
                     Yuk, temukan jutaan produk original impianmu dengan harga termurah, promo flash sale harian, dan voucher gratis ongkir Rp0 ke seluruh Indonesia.
                 </p>
 
-                {{-- CTA Actions --}}
                 <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
                     <a href="{{ url('/products') }}"
                        class="h-11 px-6 bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-cyan-700/25 flex items-center gap-2 hover:scale-105 active:scale-95 transition-all">
@@ -196,7 +193,6 @@
                     </a>
                 </div>
 
-                {{-- Trust Value Highlights --}}
                 <div class="mt-8 pt-6 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
                     <div class="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-slate-100 shadow-2xs">
                         <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs shrink-0">
@@ -228,7 +224,6 @@
                 </div>
             </div>
 
-            {{-- Recommended Products Carousel / Grid --}}
             @if(isset($recommendedProducts) && $recommendedProducts->count() > 0)
             <div class="space-y-4">
                 <div class="flex items-center justify-between">
@@ -298,7 +293,6 @@
     </div>
 </x-app-layout>
 
-{{-- Stock Validation Script --}}
 @if($carts->count() > 0)
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -330,5 +324,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endif
-
-{{-- Cache bust: 20260820113027 --}}

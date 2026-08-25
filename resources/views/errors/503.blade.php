@@ -144,7 +144,6 @@
             : ('System sedang dalam pemeliharaan terjadwal' . ($windowStart && $windowEnd ? " pada pukul {$windowStart} – {$windowEnd} WIB." : '.') . ' Silakan coba kembali setelah jam tersebut.');
     @endphp
 
-    <!-- Header -->
     <header class="relative z-10 w-full px-5 sm:px-8 py-5">
         <div class="max-w-md mx-auto flex items-center justify-between">
             <div class="flex items-center gap-2.5">
@@ -161,12 +160,10 @@
         </div>
     </header>
 
-    <!-- Main -->
     <main class="relative z-10 flex items-start sm:items-center justify-center px-5 py-6 sm:py-14 min-h-[calc(100vh-140px)]">
         <div class="w-full max-w-md">
             <div class="bg-white rounded-[28px] shadow-card p-6 sm:p-8 text-center">
 
-                <!-- Icon badge -->
                 <div class="relative w-20 h-20 mx-auto mb-6">
                     <div class="absolute inset-0 rounded-3xl bg-teal-100 drift"></div>
                     <div class="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-teal-500 to-teal-600 pulse-ring flex items-center justify-center">
@@ -176,25 +173,21 @@
                     </div>
                 </div>
 
-                <!-- Status pill -->
                 <div class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-500/25 text-amber-600 text-[11px] font-extrabold tracking-wide uppercase mb-4">
                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500 dot-blink"></span>
                     Pemeliharaan Sistem
                 </div>
 
-                <!-- Title -->
                 <h1 class="text-[22px] sm:text-2xl font-extrabold text-ink leading-snug mb-3">
                     {{ $title }} 🛠️
                 </h1>
 
-                <!-- Message card -->
                 <div class="bg-teal-50/70 rounded-2xl px-5 py-4 mb-6">
                     <p class="text-[13.5px] leading-relaxed text-ink/70 font-medium">
                         {{ $message }}
                     </p>
                 </div>
 
-                <!-- Checklist -->
                 <div class="rounded-2xl border border-ink/[0.06] divide-y divide-ink/[0.06] mb-6 text-left overflow-hidden">
                     <div class="flex items-center gap-3 px-4 py-3.5">
                         <div class="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
@@ -219,7 +212,6 @@
                     </div>
                 </div>
 
-                <!-- Progress -->
                 <div class="mb-6">
                     <div class="flex justify-between items-center text-[11px] font-semibold text-ink/40 mb-1.5">
                         <span>Sedang berjalan</span>
@@ -230,7 +222,6 @@
                     </div>
                 </div>
 
-                <!-- Actions -->
                 <button id="btnCheckStatus" onclick="checkServerStatus(true)" class="w-full py-3.5 rounded-2xl bg-teal-600 hover:bg-teal-700 active:scale-[0.98] text-white font-bold text-[14px] transition-all duration-150 shadow-soft flex items-center justify-center gap-2 mb-3">
                     <svg id="refreshIcon" class="w-4 h-4 transition-transform duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 12a9 9 0 0 1 15.3-6.4L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.3 6.4L3 16"/><path d="M3 21v-5h5"/>

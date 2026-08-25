@@ -17,8 +17,7 @@
      aria-label="Mobile Navigation">
 
     <div class="grid grid-cols-5 h-14 items-center justify-around px-1 text-[10px] font-medium text-slate-500">
-        
-        {{-- 1. Beranda --}}
+
         <a href="{{ auth()->check() ? url('/?is_from_login=true') : url('/') }}"
            class="flex flex-col items-center justify-center py-1 transition-all group {{ request()->is('/') ? 'text-cyan-600 font-bold' : 'hover:text-slate-900' }}">
             <div class="relative">
@@ -27,7 +26,6 @@
             <span class="mt-1 leading-none tracking-tight">Beranda</span>
         </a>
 
-        {{-- 2. Flash Sale / Promo --}}
         <a href="{{ url('/products?flash_sale=1') }}"
            class="flex flex-col items-center justify-center py-1 transition-all group {{ request()->has('flash_sale') ? 'text-orange-500 font-bold' : 'hover:text-slate-900' }}">
             <div class="relative">
@@ -37,7 +35,6 @@
             <span class="mt-1 leading-none tracking-tight">Flash Sale</span>
         </a>
 
-        {{-- 3. Live Chat --}}
         <button type="button"
                 @click="$dispatch('open-chat')"
                 class="flex flex-col items-center justify-center py-1 transition-all group hover:text-slate-900 cursor-pointer">
@@ -47,7 +44,6 @@
             <span class="mt-1 leading-none tracking-tight">Chat</span>
         </button>
 
-        {{-- 4. Keranjang Belanja --}}
         <a href="{{ route('customer.cart.index') }}"
            class="flex flex-col items-center justify-center py-1 transition-all group {{ request()->routeIs('customer.cart.*') ? 'text-cyan-600 font-bold' : 'hover:text-slate-900' }}">
             <div class="relative">
@@ -60,7 +56,6 @@
             <span class="mt-1 leading-none tracking-tight">Keranjang</span>
         </a>
 
-        {{-- 5. Akun Saya --}}
         @auth
             <a href="{{ auth()->user()->role === 'seller' ? route('seller.dashboard') : (auth()->user()->role === 'admin' ? route('admin.dashboard') : (auth()->user()->role === 'super_admin' ? route('super_admin.dashboard') : route('customer.dashboard'))) }}"
                class="flex flex-col items-center justify-center py-1 transition-all group {{ request()->routeIs('customer.dashboard') || request()->routeIs('seller.*') || request()->routeIs('admin.*') ? 'text-cyan-600 font-bold' : 'hover:text-slate-900' }}">

@@ -18,7 +18,7 @@
     </x-slot>
 
     <div class="{{ $isSidebarLayout ? 'space-y-6' : 'page-container py-6 min-h-[75vh] space-y-6' }}">
-        {{-- Profile Header Banner Card --}}
+        
         <div class="bg-white rounded-2xl p-6 shadow-card border border-slate-200/80 relative overflow-hidden">
             <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5">
                 <div class="relative shrink-0">
@@ -71,16 +71,14 @@
             </div>
         </div>
 
-        {{-- Form Cards Grid --}}
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {{-- Left Column: Profile Information & Avatar Upload --}}
+            
             <div class="lg:col-span-7 space-y-6">
                 <div class="p-6 bg-white border border-slate-200/80 shadow-card rounded-2xl">
                     @include('profile.partials.update-profile-information-form')
                 </div>
             </div>
 
-            {{-- Right Column: Security & Password Update + Account Deletion --}}
             <div class="lg:col-span-5 space-y-6">
                 <div class="p-6 bg-white border border-slate-200/80 shadow-card rounded-2xl">
                     @include('profile.partials.update-password-form')

@@ -9,7 +9,7 @@
         </nav>
 
         <div class="flex flex-col lg:flex-row gap-6 items-start">
-            {{-- Seller Sidebar --}}
+            
             @include('seller.sidebar')
 
             <div class="flex-1 min-w-0 space-y-5">
@@ -38,7 +38,7 @@
                         @foreach($reviews as $rev)
                             <div class="bg-white rounded-xl border border-slate-200/80 p-5 shadow-card space-y-4"
                                  x-data="{ showReplyForm: false }">
-                                {{-- Top: Product Info --}}
+                                
                                 <div class="flex items-center justify-between gap-3 pb-3 border-b border-slate-100 flex-wrap">
                                     <div class="flex items-center gap-3 min-w-0">
                                         <div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
@@ -69,7 +69,6 @@
                                     </div>
                                 </div>
 
-                                {{-- Middle: Customer Review --}}
                                 <div class="space-y-2">
                                     <div class="flex items-center gap-2 text-xs">
                                         <span class="font-bold text-slate-800">
@@ -100,7 +99,6 @@
                                     @endif
                                 </div>
 
-                                {{-- Bottom: Seller Reply Section --}}
                                 @if($rev->seller_reply)
                                     <div class="p-3.5 rounded-xl bg-cyan-50/50 border border-cyan-200/70 text-xs space-y-1.5">
                                         <div class="flex items-center justify-between">
@@ -117,7 +115,6 @@
                                     </div>
                                 @endif
 
-                                {{-- Reply Form (Toggled or if no reply exists) --}}
                                 <div x-show="showReplyForm || {{ $rev->seller_reply ? 'false' : 'true' }}" x-cloak
                                      class="pt-2 border-t border-slate-100">
                                     <form action="{{ route('seller.reviews.reply', $rev) }}" method="POST" class="space-y-2 text-xs">

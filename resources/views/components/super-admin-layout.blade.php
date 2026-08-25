@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" type="image/svg+xml" href="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}">
 
-    <!-- Chart.js CDN for Analytical Charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <style>
@@ -51,8 +50,7 @@
 </head>
 <body class="h-full bg-[#F8FAFC] text-slate-800 antialiased" x-data="{ sidebarOpen: false }">
     <div class="flex h-screen overflow-hidden bg-[#F8FAFC]">
-        
-        <!-- Mobile Sidebar Backdrop -->
+
         <div x-show="sidebarOpen" 
              x-cloak
              @click="sidebarOpen = false"
@@ -65,13 +63,11 @@
              class="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-xs lg:hidden">
         </div>
 
-        <!-- ENTERPRISE SLATE SIDEBAR (#0F172A) -->
         <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
                class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0F172A] text-slate-300 flex flex-col justify-between transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 border-r border-slate-800 shrink-0">
             
             <div class="flex flex-col h-full">
-                
-                <!-- HEADER / BRANDING -->
+
                 <div class="h-16 px-4 border-b border-slate-800 flex items-center justify-between bg-[#0B1324]">
                     <a href="{{ route('super_admin.dashboard') }}" class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs shrink-0 p-1">
@@ -86,7 +82,6 @@
                         </div>
                     </a>
 
-                    <!-- Mobile Dismiss -->
                     <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-800 transition-colors">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
@@ -94,10 +89,8 @@
                     </button>
                 </div>
 
-                <!-- NAVIGATION ITEMS -->
                 <div class="flex-1 overflow-y-auto slate-scrollbar px-3 py-5 space-y-6">
-                    
-                    <!-- SECTION 1: ANALITIK & UTAMA -->
+
                     <div>
                         <p class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase px-3 mb-2">
                             Analitik &amp; Utama
@@ -117,13 +110,12 @@
                         </nav>
                     </div>
 
-                    <!-- SECTION 2: OPERASIONAL PLATFORM -->
                     <div>
                         <p class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase px-3 mb-2">
                             Operasional Platform
                         </p>
                         <nav class="space-y-1">
-                            <!-- Manajemen Toko -->
+                            
                             @php $active = request()->routeIs('super_admin.stores.*'); @endphp
                             <a href="{{ route('super_admin.stores.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -136,7 +128,6 @@
                                 <span class="flex-1 truncate">Manajemen Toko</span>
                             </a>
 
-                            <!-- Persetujuan Toko -->
                             @php $active = request()->routeIs('super_admin.approvals.*') || request()->routeIs('admin.dashboard'); @endphp
                             <a href="{{ route('super_admin.approvals.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -149,7 +140,6 @@
                                 <span class="flex-1 truncate">Persetujuan Toko</span>
                             </a>
 
-                            <!-- Moderasi Produk -->
                             @php $active = request()->routeIs('super_admin.products.*') || request()->routeIs('admin.products.*'); @endphp
                             <a href="{{ route('super_admin.products.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -162,7 +152,6 @@
                                 <span class="flex-1 truncate">Moderasi Produk</span>
                             </a>
 
-                            <!-- Kategori Produk -->
                             @php $active = request()->routeIs('super_admin.categories.*') || request()->routeIs('admin.categories.*'); @endphp
                             <a href="{{ route('super_admin.categories.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -175,7 +164,6 @@
                                 <span class="flex-1 truncate">Kategori Produk</span>
                             </a>
 
-                            <!-- Flash Sale Platform -->
                             @php $active = request()->routeIs('super_admin.flash_sales.*') || request()->routeIs('admin.flash_sales.*'); @endphp
                             <a href="{{ route('super_admin.flash_sales.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -191,13 +179,12 @@
                         </nav>
                     </div>
 
-                    <!-- SECTION 3: KEUANGAN & PAYOUT -->
                     <div>
                         <p class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase px-3 mb-2">
                             Keuangan &amp; Payout
                         </p>
                         <nav class="space-y-1">
-                            <!-- Payout Toko -->
+                            
                             @php $active = request()->routeIs('super_admin.withdrawals.*'); @endphp
                             <a href="{{ route('super_admin.withdrawals.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -210,7 +197,6 @@
                                 <span class="flex-1 truncate">Payout Toko</span>
                             </a>
 
-                            <!-- Laporan & Ekspor -->
                             @php $active = request()->routeIs('super_admin.reports.*'); @endphp
                             <a href="{{ route('super_admin.reports.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -225,13 +211,12 @@
                         </nav>
                     </div>
 
-                    <!-- SECTION 4: PENGGUNA & KEAMANAN -->
                     <div>
                         <p class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase px-3 mb-2">
                             Pengguna &amp; Keamanan
                         </p>
                         <nav class="space-y-1">
-                            <!-- Daftar Pengguna -->
+                            
                             @php $active = request()->routeIs('super_admin.users.*'); @endphp
                             <a href="{{ route('super_admin.users.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -244,7 +229,6 @@
                                 <span class="flex-1 truncate">Daftar Pengguna</span>
                             </a>
 
-                            <!-- Admin Operasional -->
                             @php $active = request()->routeIs('super_admin.admins.*'); @endphp
                             <a href="{{ route('super_admin.admins.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -257,7 +241,6 @@
                                 <span class="flex-1 truncate">Admin Operasional</span>
                             </a>
 
-                            <!-- Pusat Pesan / Chat -->
                             @php $active = request()->routeIs('chat.*'); @endphp
                             <a href="{{ route('chat.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -270,7 +253,6 @@
                                 <span class="flex-1 truncate">Pusat Pesan / Chat</span>
                             </a>
 
-                            <!-- Pengaturan Profil -->
                             @php $active = request()->routeIs('profile.edit'); @endphp
                             <a href="{{ route('profile.edit') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -287,7 +269,6 @@
 
                 </div>
 
-                <!-- FOOTER / USER PROFILE CARD -->
                 <div class="p-3 border-t border-slate-800 bg-[#0B1324]/60">
                     <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 transition-colors flex items-center gap-3">
                         <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=2563eb&color=fff' }}" 
@@ -314,13 +295,10 @@
             </div>
         </aside>
 
-        <!-- MAIN LAYOUT WRAPPER -->
         <div class="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
-            
-            <!-- STICKY TOP APP HEADER -->
+
             <header class="h-14 shrink-0 bg-white border-b border-slate-200/90 px-4 sm:px-6 flex items-center justify-between z-30 shadow-xs">
-                
-                <!-- Left: Breadcrumb -->
+
                 <div class="flex items-center gap-3">
                     <button @click="sidebarOpen = true" class="lg:hidden p-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
                         <i class="fa-solid fa-bars-staggered text-sm"></i>
@@ -335,16 +313,13 @@
                     </div>
                 </div>
 
-                <!-- Right: Timestamp & Action Buttons -->
                 <div class="flex items-center gap-2 sm:gap-3">
-                    
-                    <!-- Live Server Clock WIB -->
+
                     <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-xs text-slate-600 font-mono-num">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span id="super-admin-clock" class="font-semibold text-slate-700">--:--:-- WIB</span>
                     </div>
 
-                    <!-- Secondary Outline Button: Tinjau Payout -->
                     <a href="{{ route('super_admin.withdrawals.index') }}" 
                        class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 shadow-xs transition-colors shrink-0">
                         <i class="fa-solid fa-money-bill-transfer text-emerald-600 text-[11px]"></i>
@@ -352,7 +327,6 @@
                         <span class="md:hidden">Payout</span>
                     </a>
 
-                    <!-- Primary Solid Button: Ekspor Laporan Keuangan -->
                     <a href="{{ route('super_admin.reports.index') }}"
                        class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-xs transition-colors shrink-0">
                         <i class="fa-solid fa-file-invoice-dollar text-[11px]"></i>
@@ -362,7 +336,6 @@
                 </div>
             </header>
 
-            <!-- SCROLLABLE WORKSPACE -->
             <main class="flex-1 overflow-y-auto bg-[#F8FAFC] p-4 sm:p-6 lg:p-7 space-y-6 pb-24 scroll-smooth">
                 @if(session('success'))
                     <div class="bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-lg p-3 flex gap-2.5 shadow-xs text-xs font-semibold" role="alert">
@@ -375,7 +348,6 @@
         </div>
     </div>
 
-    <!-- Live Clock Script -->
     <script>
         function updateClock() {
             const clockEl = document.getElementById('super-admin-clock');

@@ -3,8 +3,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <div class="page-container py-6" x-data="addressManagerComponent()">
-        
-        {{-- Breadcrumbs & Header --}}
+
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
                 <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
@@ -26,7 +25,6 @@
             </button>
         </div>
 
-        {{-- Alerts --}}
         @if(session('success'))
             <div class="mb-6 flex items-center gap-2.5 px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl text-xs font-semibold animate-fade-up">
                 <i class="fa-solid fa-circle-check text-emerald-600 text-sm shrink-0"></i>
@@ -47,12 +45,11 @@
             </div>
         @endif
 
-        {{-- Address List Cards --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             @forelse($addresses as $addr)
                 <div class="bg-white rounded-2xl border transition-all p-5 flex flex-col justify-between {{ $addr->is_default ? 'border-cyan-500 ring-2 ring-cyan-100 shadow-sm' : 'border-slate-200 hover:border-slate-300 shadow-2xs' }}">
                     <div>
-                        {{-- Header Badges --}}
+                        
                         <div class="flex items-center justify-between gap-2 mb-3">
                             <div class="flex items-center gap-2">
                                 <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider {{ $addr->label === 'Kantor' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-cyan-50 text-cyan-800 border border-cyan-200' }}">
@@ -73,13 +70,11 @@
                             @endif
                         </div>
 
-                        {{-- Recipient & Phone --}}
                         <div class="mb-2">
                             <h3 class="font-extrabold text-sm text-slate-900 leading-snug">{{ $addr->recipient_name }}</h3>
                             <p class="font-mono text-xs text-slate-500 mt-0.5">{{ $addr->phone }}</p>
                         </div>
 
-                        {{-- Address Text --}}
                         <p class="text-xs text-slate-700 leading-relaxed mt-2">
                             {{ $addr->full_address }}
                         </p>
@@ -96,7 +91,6 @@
                             {{ implode(', ', $regionParts) }}
                         </p>
 
-                        {{-- Courier Notes / Patokan --}}
                         @if($addr->notes)
                             <div class="mt-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 text-[11px] text-slate-600 flex items-start gap-2">
                                 <i class="fa-solid fa-map-pin text-cyan-600 text-xs mt-0.5 shrink-0"></i>
@@ -105,7 +99,6 @@
                         @endif
                     </div>
 
-                    {{-- Actions Footer --}}
                     <div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap text-xs">
                         <div>
                             @if(!$addr->is_default)
@@ -153,7 +146,6 @@
             @endforelse
         </div>
 
-        {{-- MODAL COMPREHENSIVE ADDRESS PICKER (ADD & EDIT) --}}
         <div x-show="showModal" x-cloak
              class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.outside="showModal = false"
@@ -161,8 +153,7 @@
                  x-transition:enter-start="opacity-0 scale-95"
                  x-transition:enter-end="opacity-100 scale-100"
                  class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border border-slate-200 text-xs max-h-[92vh] flex flex-col">
-                
-                {{-- Modal Header --}}
+
                 <div class="flex items-center justify-between pb-3.5 border-b border-slate-100 shrink-0">
                     <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
                         <i class="fa-solid fa-map-location-dot text-cyan-600"></i>
@@ -173,14 +164,12 @@
                     </button>
                 </div>
 
-                {{-- Modal Body Form (Scrollable) --}}
                 <form :action="formData.actionUrl" method="POST" class="mt-4 space-y-4 overflow-y-auto pr-1 flex-1 scrollbar-thin">
                     @csrf
                     <template x-if="isEdit">
                         <input type="hidden" name="_method" value="PUT">
                     </template>
 
-                    {{-- 1. Leaflet Interactive Map Pinpoint Section --}}
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
                             <label class="font-bold text-slate-800 text-xs flex items-center gap-1.5">
@@ -194,14 +183,12 @@
                             </button>
                         </div>
 
-                        {{-- Search on Map Input --}}
                         <div class="relative">
                             <input type="text" x-model="searchMapQuery" @input.debounce.400ms="searchMapLocation()"
                                    placeholder="Ketik nama jalan, gedung, atau perumahan untuk mencari di peta..."
                                    class="w-full h-8 pl-8 pr-3 rounded-xl border border-slate-300 text-[11px] bg-slate-50 focus:bg-white focus:border-cyan-600">
                             <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-2.5 top-2.5 text-[10px]"></i>
 
-                            {{-- Autocomplete Dropdown Search Results --}}
                             <div x-show="searchResults.length > 0" x-cloak
                                  class="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden divide-y divide-slate-100 max-h-48 overflow-y-auto text-[11px]">
                                 <template x-for="res in searchResults" :key="res.place_id">
@@ -214,7 +201,6 @@
                             </div>
                         </div>
 
-                        {{-- Leaflet Map Container --}}
                         <div class="relative rounded-2xl overflow-hidden border border-slate-300 shadow-2xs">
                             <div id="address-map-container" class="w-full h-44 sm:h-52 bg-slate-100 z-10"></div>
                             <div class="absolute bottom-2 left-2 right-2 z-20 bg-slate-900/80 backdrop-blur-xs text-white p-2 rounded-xl text-[10px] flex items-center justify-between">
@@ -224,11 +210,9 @@
                         </div>
                     </div>
 
-                    {{-- Hidden Lat & Lng --}}
                     <input type="hidden" name="latitude" x-model="formData.latitude">
                     <input type="hidden" name="longitude" x-model="formData.longitude">
 
-                    {{-- 2. Label, Recipient & Phone --}}
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Label Alamat <span class="text-rose-500">*</span></label>
@@ -250,7 +234,6 @@
                         </div>
                     </div>
 
-                    {{-- 3. Cascading Regions (Provinsi -> Kota -> Kecamatan -> Kelurahan -> Kode Pos) --}}
                     <div class="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-200 space-y-3">
                         <div class="flex items-center justify-between">
                             <span class="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
@@ -263,7 +246,7 @@
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {{-- Provinsi --}}
+                            
                             <div>
                                 <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Provinsi <span class="text-rose-500">*</span></label>
                                 <select name="province" x-model="formData.province" @change="onProvinceSelect()" required class="input text-xs bg-white">
@@ -274,7 +257,6 @@
                                 </select>
                             </div>
 
-                            {{-- Kota / Kabupaten --}}
                             <div>
                                 <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Kota / Kabupaten <span class="text-rose-500">*</span></label>
                                 <select name="city" x-model="formData.city" @change="onCitySelect()" required class="input text-xs bg-white" :disabled="regenciesList.length === 0">
@@ -285,7 +267,6 @@
                                 </select>
                             </div>
 
-                            {{-- Kecamatan --}}
                             <div>
                                 <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Kecamatan</label>
                                 <select name="district" x-model="formData.district" @change="onDistrictSelect()" class="input text-xs bg-white" :disabled="districtsList.length === 0">
@@ -296,7 +277,6 @@
                                 </select>
                             </div>
 
-                            {{-- Kelurahan / Desa & Kode Pos --}}
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
                                     <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Kelurahan / Desa</label>
@@ -315,7 +295,6 @@
                         </div>
                     </div>
 
-                    {{-- 4. Alamat Lengkap & Patokan --}}
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1 text-[11px]">Alamat Jalan Lengkap (Nama Jalan, No. Rumah, RT/RW, Blok) <span class="text-rose-500">*</span></label>
                         <textarea name="full_address" x-model="formData.full_address" required rows="2"
@@ -330,7 +309,6 @@
                                class="input text-xs">
                     </div>
 
-                    {{-- 5. Set Default Toggle --}}
                     <div class="pt-2 flex items-center gap-2">
                         <input type="checkbox" id="is_default_chk" name="is_default" value="1" x-model="formData.is_default"
                                class="w-4 h-4 text-cyan-600 rounded border-slate-300 focus:ring-cyan-500 cursor-pointer">
@@ -339,7 +317,6 @@
                         </label>
                     </div>
 
-                    {{-- Modal Footer Actions --}}
                     <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5 shrink-0">
                         <button type="button" @click="showModal = false" class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium text-xs cursor-pointer transition-colors">
                             Batal

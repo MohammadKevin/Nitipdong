@@ -40,7 +40,6 @@
     <div class="{{ $isSidebarLayout ? 'space-y-4' : 'page-container py-4 sm:py-6 min-h-[80vh]' }}"
          x-data="fullChatPage({{ json_encode($conversationsData) }}, {{ request('conv') ? (int)request('conv') : 'null' }})">
 
-        {{-- Page Header --}}
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
             <div>
                 <h1 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
@@ -79,7 +78,7 @@
         </div>
 
         @if(auth()->user()->role === 'seller')
-            {{-- Seller Chat Navigation Tabs --}}
+            
             <div class="flex items-center gap-2 border-b border-slate-200/80 pb-1">
                 <a href="{{ route('seller.chat.cus') }}"
                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 {{ ($activeTab ?? 'cus') === 'cus' ? 'bg-cyan-700 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' }}">
@@ -94,14 +93,11 @@
             </div>
         @endif
 
-        {{-- Main Two-Pane Chat Container --}}
         <div class="bg-white rounded-2xl shadow-card border border-slate-200/90 overflow-hidden flex flex-col md:flex-row h-[calc(100vh-230px)] min-h-[560px]">
-            
-            {{-- LEFT PANE: Conversation List --}}
+
             <div class="w-full md:w-80 lg:w-96 border-r border-slate-200/90 flex flex-col bg-white shrink-0"
                  :class="activeConv ? 'hidden md:flex' : 'flex'">
-                
-                {{-- Search & Counter Header --}}
+
                 <div class="p-3.5 border-b border-slate-100 bg-slate-50/70 space-y-2.5">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
@@ -121,7 +117,6 @@
                     </div>
                 </div>
 
-                {{-- Conversations Scroll List --}}
                 <div class="flex-1 overflow-y-auto divide-y divide-slate-100">
                     <template x-for="conv in filteredConversations" :key="conv.id">
                         <div @click="selectConversation(conv)"
@@ -164,18 +159,15 @@
                 </div>
             </div>
 
-            {{-- RIGHT PANE: Active Chat Room --}}
             <div class="flex-1 flex flex-col min-w-0 bg-slate-50/70"
                  :class="activeConv ? 'flex' : 'hidden md:flex'">
-                
-                {{-- State 1: A conversation is active --}}
+
                 <template x-if="activeConv">
                     <div class="flex-1 flex flex-col min-h-0 bg-white">
-                        
-                        {{-- Chat Header --}}
+
                         <div class="px-4 sm:px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-white shrink-0 shadow-2xs">
                             <div class="flex items-center gap-3 min-w-0">
-                                {{-- Back button for mobile --}}
+                                
                                 <button type="button" @click="activeConv = null"
                                         class="md:hidden w-8 h-8 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-xs hover:bg-slate-200">
                                     <i class="fa-solid fa-arrow-left"></i>
@@ -198,7 +190,6 @@
                             </div>
                         </div>
 
-                        {{-- Chat Messages Area --}}
                         <div id="fullchat-messages-container" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/70">
                             <template x-if="isLoadingMessages">
                                 <div class="py-16 text-center text-slate-400">
@@ -242,7 +233,6 @@
                             </template>
                         </div>
 
-                        {{-- Chat Input Bar --}}
                         <div class="p-3 bg-white border-t border-slate-100 shrink-0">
                             <form @submit.prevent="sendMessage()" class="flex items-center gap-2">
                                 <input type="text"
@@ -265,7 +255,6 @@
                     </div>
                 </template>
 
-                {{-- State 2: No conversation selected (Desktop Empty State) --}}
                 <template x-if="!activeConv">
                     <div class="flex-1 flex flex-col items-center justify-center p-8 text-center my-auto">
                         <div class="w-16 h-16 bg-cyan-50 text-cyan-700 rounded-2xl flex items-center justify-center text-2xl mb-3.5 border border-cyan-200 shadow-2xs">

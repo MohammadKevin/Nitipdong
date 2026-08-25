@@ -15,8 +15,7 @@
 
     <div class="{{ $isSidebarLayout ? 'max-w-4xl mx-auto w-full' : 'page-container py-4 sm:py-6 max-w-4xl mx-auto min-h-[80vh]' }}">
         <div class="bg-white rounded-2xl shadow-card border border-slate-200/90 flex flex-col h-[calc(100vh-180px)] min-h-[560px] overflow-hidden">
-            
-            {{-- Chat Header --}}
+
             <div class="px-4 sm:px-6 py-3.5 border-b border-slate-100 flex items-center justify-between bg-white shrink-0 shadow-2xs">
                 <div class="flex items-center gap-3">
                     <a href="{{ route('chat.index') }}" class="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 hover:bg-cyan-50 hover:text-cyan-800 transition-colors border border-slate-200 shadow-2xs" title="Kembali ke Kotak Masuk">
@@ -62,7 +61,6 @@
                 </div>
             </div>
 
-            {{-- Messages Body --}}
             <div class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-3 bg-slate-50/70" id="chat-messages">
                 <div class="text-center my-2">
                     <span class="text-[10px] font-medium text-slate-400 bg-white/90 border border-slate-200/80 px-3.5 py-1 rounded-full shadow-2xs">
@@ -87,7 +85,6 @@
                 @endforeach
             </div>
 
-            {{-- Message Input Form --}}
             <form action="{{ route('chat.send', $conversation) }}" method="POST" class="p-3 sm:p-4 bg-white border-t border-slate-100 shrink-0">
                 @csrf
                 <div class="flex items-center gap-2 relative">

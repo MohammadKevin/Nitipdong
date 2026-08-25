@@ -24,4 +24,3 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Pagination\Paginator::useTailwind();
     }
 }
-

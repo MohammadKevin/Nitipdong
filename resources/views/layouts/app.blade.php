@@ -28,7 +28,6 @@
     </head>
     <body class="antialiased bg-slate-50 text-slate-900 min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-white overflow-x-hidden w-full max-w-full">
 
-        {{-- Shopee-Style Top Utility Bar --}}
         <div class="bg-slate-950 text-slate-300 text-[11px] py-1.5 border-b border-slate-800 hidden sm:block">
             <div class="page-container flex items-center justify-between">
                 <div class="flex items-center gap-3 text-slate-400">
@@ -60,20 +59,16 @@
             </div>
         </div>
 
-        {{-- Main Navigation Bar --}}
         @include('layouts.navigation')
 
-        {{-- Main Body --}}
         <main class="flex-1 pb-20 md:pb-0">
             {{ $slot }}
         </main>
 
-        {{-- Shopee-Style Complete Marketplace Footer --}}
         <footer class="bg-white border-t border-slate-200/80 mt-12 text-slate-600 text-xs">
             <div class="page-container py-12">
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-8 pb-10 border-b border-slate-100">
-                    
-                    {{-- Col 1 & 2: About NitipDong --}}
+
                     <div class="md:col-span-2 space-y-4">
                         <div class="flex items-center gap-2.5">
                             <div class="w-9 h-9 rounded-xl overflow-hidden bg-cyan-50 border border-cyan-200 flex items-center justify-center shadow-xs p-1">
@@ -109,7 +104,6 @@
                         </div>
                     </div>
 
-                    {{-- Col 3: Layanan Pelanggan --}}
                     <div>
                         <h4 class="font-bold text-slate-900 mb-3.5 text-xs uppercase tracking-wider">Layanan Pelanggan</h4>
                         <ul class="space-y-2 text-xs">
@@ -122,7 +116,6 @@
                         </ul>
                     </div>
 
-                    {{-- Col 4: Solusi Penjual & Bisnis --}}
                     <div>
                         <h4 class="font-bold text-slate-900 mb-3.5 text-xs uppercase tracking-wider">Solusi Penjual</h4>
                         <ul class="space-y-2 text-xs">
@@ -135,7 +128,6 @@
                         </ul>
                     </div>
 
-                    {{-- Col 5: Pembayaran & Pengiriman --}}
                     <div>
                         <h4 class="font-bold text-slate-900 mb-2.5 text-xs uppercase tracking-wider">Pembayaran Resmi</h4>
                         <div class="grid grid-cols-3 gap-1.5 mb-4 text-center font-bold text-[10px] text-slate-700">
@@ -159,7 +151,6 @@
                     </div>
                 </div>
 
-                {{-- Bottom Copyright & Security --}}
                 <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-400">
                     <p>&copy; {{ date('Y') }} PT NitipDong Niaga Nusantara. Hak Cipta Dilindungi.</p>
                     <div class="flex items-center gap-4">

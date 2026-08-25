@@ -1,4 +1,3 @@
-{{-- Standard Clean Notification Toast Card (Top Right Positioned) --}}
 <div x-data="toastNotificationComponent()"
      x-init="initToast()"
      @notify.window="addToast($event.detail.title || defaultTitle($event.detail.type), $event.detail.message || $event.detail, $event.detail.type || 'success', $event.detail.duration || 4500, $event.detail.action || null)"
@@ -18,9 +17,8 @@
              @mouseleave="resumeToast(t.id)"
              class="pointer-events-auto bg-white rounded-xl border border-slate-200 shadow-xl p-3.5 flex flex-col gap-2 transition-all relative overflow-hidden group select-none text-xs">
 
-            {{-- Main Toast Body --}}
             <div class="flex items-start gap-3 relative z-10">
-                {{-- Clean Type Icon Badge --}}
+                
                 <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border"
                      :class="{
                         'bg-emerald-50 border-emerald-200 text-emerald-600': t.type === 'success',
@@ -42,7 +40,6 @@
                     </template>
                 </div>
 
-                {{-- Text Content --}}
                 <div class="flex-1 min-w-0 pr-1 pt-0.5">
                     <div class="flex items-center justify-between gap-2">
                         <h4 class="font-bold text-xs text-slate-900 leading-none" x-text="t.title"></h4>
@@ -50,7 +47,6 @@
                     </div>
                     <p class="text-[11px] text-slate-600 mt-1 leading-relaxed break-words" x-html="t.message"></p>
 
-                    {{-- Action Button (Optional) --}}
                     <template x-if="t.action">
                         <div class="mt-2 flex items-center gap-2">
                             <a :href="t.action.url || '#'"
@@ -69,7 +65,6 @@
                     </template>
                 </div>
 
-                {{-- Close Button --}}
                 <button type="button"
                         @click="removeToast(t.id)"
                         class="w-6 h-6 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer shrink-0"
@@ -78,7 +73,6 @@
                 </button>
             </div>
 
-            {{-- Clean Timer Progress Bar --}}
             <div class="w-full bg-slate-100 h-1 rounded-full overflow-hidden mt-0.5">
                 <div class="h-full transition-all duration-100 ease-linear rounded-full"
                      :style="`width: ${t.progress}%;`"

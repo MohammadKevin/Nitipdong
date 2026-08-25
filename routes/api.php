@@ -30,9 +30,7 @@ Route::prefix('v1')->group(function () {
     Route::match(['get', 'post'], '/midtrans/notification', [\App\Http\Controllers\MidtransPaymentController::class, 'handleNotification']);
     Route::match(['get', 'post'], '/payment/notification', [\App\Http\Controllers\MidtransPaymentController::class, 'handleNotification']);
 
-    // ══════════════════════════════════════════════════
     // PUBLIC API ENDPOINTS
-    // ══════════════════════════════════════════════════
 
     // 0. App System Status & Maintenance Mode
     Route::get('/system/status', [SystemConfigController::class, 'status']);
@@ -63,10 +61,8 @@ Route::prefix('v1')->group(function () {
     Route::get('/products/flash-sale', [ProductController::class, 'flashSale']);
     Route::get('/products/{id}', [ProductController::class, 'show']);
 
-
-    // ══════════════════════════════════════════════════
     // AUTHENTICATED USER ENDPOINTS (SANCTUM PROTECTED)
-    // ══════════════════════════════════════════════════
+
     Route::middleware('auth:sanctum')->group(function () {
 
         // User Profile & Logout

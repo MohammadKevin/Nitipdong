@@ -10,7 +10,7 @@
         accountNumber: '{{ addslashes($store->bank_account_number ?? '') }}',
         accountHolder: '{{ addslashes($store->bank_account_holder ?? Auth::user()->name) }}'
     }">
-        {{-- Header Banner --}}
+        
         <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <div class="flex items-center gap-2">
@@ -31,7 +31,6 @@
             </div>
         </div>
 
-        {{-- Flash Messages --}}
         @if(session('success'))
             <div class="flex items-center gap-3 px-4 py-3.5 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl text-xs font-semibold shadow-xs">
                 <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
@@ -46,9 +45,8 @@
             </div>
         @endif
 
-        {{-- Metrics Grid --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {{-- Available Balance Card --}}
+            
             <div class="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-5 text-white shadow-card flex flex-col justify-between relative overflow-hidden">
                 <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
                 <div>
@@ -66,7 +64,6 @@
                 </div>
             </div>
 
-            {{-- Total Gross Sales --}}
             <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-card flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-medium text-slate-500">Omset Penjualan (GMV)</span>
@@ -83,7 +80,6 @@
                 </div>
             </div>
 
-            {{-- Total Withdrawn --}}
             <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-card flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-medium text-slate-500">Total Telah Dicairkan</span>
@@ -100,7 +96,6 @@
                 </div>
             </div>
 
-            {{-- Pending Withdrawal --}}
             <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-card flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                     <span class="text-xs font-medium text-slate-500">Sedang Diproses</span>
@@ -120,7 +115,6 @@
             </div>
         </div>
 
-        {{-- Withdrawal History Table Card --}}
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden">
             <div class="p-5 border-b border-slate-100 flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -205,7 +199,6 @@
             @endif
         </div>
 
-        {{-- Modal Tarik Dana --}}
         <div x-show="showWithdrawModal" x-cloak
              class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
             <div @click.outside="showWithdrawModal = false"

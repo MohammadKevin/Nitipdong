@@ -17,7 +17,6 @@
         @csrf
         @method('patch')
 
-        {{-- Foto Profil Upload Box --}}
         <div>
             <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">Foto Profil</label>
             <div class="flex items-center gap-4">
@@ -40,7 +39,6 @@
             <x-input-error class="mt-1.5 text-xs text-rose-500" :messages="$errors->get('avatar')" />
         </div>
 
-        {{-- Nama Lengkap --}}
         <div>
             <label for="name" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
             <div class="relative">
@@ -52,7 +50,6 @@
             <x-input-error class="mt-1.5 text-xs text-rose-500" :messages="$errors->get('name')" />
         </div>
 
-        {{-- Alamat Email --}}
         <div>
             <label for="email" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Alamat Email</label>
             <div class="relative">
@@ -85,7 +82,6 @@
             @endif
         </div>
 
-        {{-- Nomor Telepon --}}
         <div>
             <label for="phone" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Nomor Telepon / WhatsApp</label>
             <div class="relative">
@@ -97,7 +93,6 @@
             <x-input-error class="mt-1.5 text-xs text-rose-500" :messages="$errors->get('phone')" />
         </div>
 
-        {{-- Submit Action --}}
         <div class="flex items-center gap-3 pt-3 border-t border-slate-100">
             <button type="submit" class="btn-primary text-xs h-10 px-5 rounded-xl bg-cyan-700 hover:bg-cyan-800 font-semibold shadow-xs flex items-center gap-2">
                 <i class="fa-solid fa-floppy-disk text-xs"></i>

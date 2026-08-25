@@ -6,7 +6,6 @@
         Daftar Pengguna Platform
     </x-slot>
 
-    <!-- HEADER / ACTION BAR -->
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-1">
         <div>
             <h1 class="text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
@@ -16,7 +15,6 @@
         </div>
     </div>
 
-    <!-- 4 SUMMARY CARDS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white rounded-lg p-4 border border-slate-200/90 shadow-xs flex items-center gap-3.5">
             <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center justify-center text-base shrink-0 font-mono-num">
@@ -59,13 +57,10 @@
         </div>
     </div>
 
-    <!-- USERS LEDGER TABLE CARD -->
     <div class="bg-white rounded-lg border border-slate-200/90 shadow-xs overflow-hidden">
-        
-        <!-- SEARCH & FILTER TABS -->
+
         <div class="p-4 border-b border-slate-100 flex flex-col lg:flex-row justify-between lg:items-center gap-3 bg-slate-50/50">
-            
-            <!-- Filter Tabs -->
+
             <div class="flex items-center gap-1 overflow-x-auto pb-1 lg:pb-0 font-mono-num">
                 <a href="{{ route('super_admin.users.index', array_merge(request()->except(['status', 'page']))) }}" 
                    class="px-3 py-1 rounded-md text-xs font-semibold transition-colors {{ empty($status) ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-200/60' }}">
@@ -81,7 +76,6 @@
                 </a>
             </div>
 
-            <!-- Role Filter & Search Bar -->
             <form action="{{ route('super_admin.users.index') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-2">
                 @if(!empty($status))
                     <input type="hidden" name="status" value="{{ $status }}">
@@ -108,7 +102,6 @@
             </form>
         </div>
 
-        <!-- TABLE -->
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
                 <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-100 font-mono-num">
@@ -189,8 +182,7 @@
                         <td class="py-3.5 px-5 text-center">
                             @if($user->role !== 'super_admin' && $user->id !== auth()->id())
                                 <div class="flex items-center justify-center gap-1.5">
-                                    
-                                    <!-- Toggle Ban Button -->
+
                                     <form action="{{ route('super_admin.users.toggle_ban', $user) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin {{ $user->is_banned ? 'mengaktifkan kembali' : 'memblokir / mensuspend' }} akun pengguna \'{{ $user->name }}\'?')">
                                         @csrf
                                         <button type="submit" 
@@ -201,7 +193,6 @@
                                         </button>
                                     </form>
 
-                                    <!-- Delete Button -->
                                     <form action="{{ route('super_admin.users.destroy', $user) }}" method="POST" onsubmit="return confirm('PERINGATAN: Apakah Anda yakin ingin MENGHAPUS PERMANEN akun pengguna \'{{ $user->name }}\' ({{ $user->email }})?')">
                                         @csrf
                                         @method('DELETE')

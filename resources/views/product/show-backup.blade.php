@@ -49,7 +49,6 @@
                     @endif
                 </div>
 
-                {{-- Thumbnail strip --}}
                 @if(count($allImages) > 1)
                 <div class="flex gap-2 overflow-x-auto pb-1">
                     @foreach($allImages as $i => $imgPath)
@@ -245,7 +244,6 @@
             </div>
         </div>
 
-        {{-- Deskripsi Produk --}}
         <div class="bg-white rounded-xl border border-slate-200/80 p-6 sm:p-7 shadow-card mb-6">
             <h3 class="text-sm font-bold text-slate-900 mb-4 pb-3 border-b border-slate-100">Deskripsi & Spesifikasi Produk</h3>
             <div class="text-slate-700 text-xs sm:text-sm leading-relaxed whitespace-pre-line">
@@ -253,7 +251,6 @@
             </div>
         </div>
 
-        {{-- Ulasan & Penilaian Pembeli --}}
         <div class="bg-white rounded-xl border border-slate-200/80 p-6 sm:p-7 shadow-card mb-6">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
                 <div>
@@ -277,7 +274,7 @@
             @endphp
 
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6 pb-6 border-b border-slate-100">
-                {{-- Score Box --}}
+                
                 <div class="md:col-span-4 bg-slate-50/80 rounded-xl p-5 border border-slate-200/80 text-center flex flex-col items-center justify-center">
                     <span class="text-4xl sm:text-5xl font-black text-slate-900 leading-none">
                         {{ number_format($product->rating ?? 5.0, 1) }}
@@ -290,7 +287,6 @@
                     <span class="text-xs text-slate-500 mt-1 font-medium">Berdasarkan {{ $totalReviews }} ulasan pembeli</span>
                 </div>
 
-                {{-- Rating Bars --}}
                 <div class="md:col-span-8 space-y-2 flex flex-col justify-center">
                     @foreach([5, 4, 3, 2, 1] as $star)
                         @php
@@ -310,7 +306,6 @@
                 </div>
             </div>
 
-            {{-- Reviews List --}}
             @if($totalReviews > 0)
                 <div class="divide-y divide-slate-100 mt-4">
                     @foreach($product->reviews as $review)
@@ -348,7 +343,6 @@
                                 </p>
                             @endif
 
-                            {{-- Review Photos Gallery --}}
                             @if(!empty($review->images) && is_array($review->images))
                                 <div class="flex gap-2 pt-1 overflow-x-auto">
                                     @foreach($review->images as $revImg)
@@ -360,7 +354,6 @@
                                 </div>
                             @endif
 
-                            {{-- Seller Reply Box --}}
                             @if($review->seller_reply)
                                 <div class="mt-3 p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs space-y-1">
                                     <div class="flex items-center gap-1.5 font-bold text-cyan-800 text-[11px]">

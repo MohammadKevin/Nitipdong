@@ -10,7 +10,7 @@
             }, 2000);
         }
     }">
-        {{-- Breadcrumb --}}
+        
         <nav class="flex text-xs text-slate-400 mb-4 items-center gap-1.5 flex-wrap" aria-label="Breadcrumb">
             <a href="{{ auth()->check() ? url('/?is_from_login=true') : url('/') }}" class="hover:text-cyan-700 transition-colors flex items-center gap-1">
                 <i class="fa-solid fa-house text-[10px]"></i> Beranda
@@ -21,9 +21,8 @@
             <span class="text-slate-800 font-semibold">{{ $store->name }}</span>
         </nav>
 
-        {{-- Store Profile Header Card --}}
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden mb-6">
-            {{-- Banner Backdrop --}}
+            
             <div class="h-36 sm:h-48 bg-gradient-to-r from-cyan-800 via-cyan-900 to-slate-950 relative">
                 @if($store->banner_url)
                     <img src="{{ $store->banner_url }}" alt="{{ $store->name }}" class="w-full h-full object-cover opacity-60">
@@ -32,7 +31,6 @@
                 @endif
             </div>
 
-            {{-- Store Info Bar --}}
             <div class="p-5 sm:p-6 pt-0 relative">
                 <div class="flex flex-col md:flex-row md:items-end justify-between gap-5 -mt-12 sm:-mt-16">
                     <div class="flex items-end gap-4">
@@ -59,7 +57,6 @@
                         </div>
                     </div>
 
-                    {{-- Store Quick CTA --}}
                     <div class="flex items-center gap-3 shrink-0">
                         @auth
                             @if(Auth::id() !== $store->user_id)
@@ -79,7 +76,6 @@
                     </div>
                 </div>
 
-                {{-- Store Stats Strip --}}
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-slate-100 text-center sm:text-left">
                     <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-3">
                         <div class="w-10 h-10 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center text-sm shrink-0 border border-cyan-200">
@@ -126,7 +122,6 @@
             </div>
         </div>
 
-        {{-- Store Vouchers Section (if any) --}}
         @if($activeVouchers->count() > 0)
             <div class="mb-6 bg-gradient-to-br from-cyan-900 to-slate-900 rounded-2xl p-5 text-white shadow-card">
                 <div class="flex items-center justify-between mb-3.5">
@@ -160,7 +155,6 @@
             </div>
         @endif
 
-        {{-- Tabs Navigation --}}
         <div class="flex items-center gap-3 border-b border-slate-200 mb-6 text-sm font-semibold">
             <button type="button" @click="activeTab = 'products'"
                     :class="activeTab === 'products' ? 'border-cyan-700 text-cyan-700 border-b-2 font-bold' : 'text-slate-500 hover:text-slate-800'"
@@ -176,9 +170,8 @@
             </button>
         </div>
 
-        {{-- Tab 1: Products Catalog --}}
         <div x-show="activeTab === 'products'">
-            {{-- Filter & Search Bar --}}
+            
             <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <form action="{{ route('store.show', $store) }}" method="GET" class="flex-1 flex items-center gap-2 flex-wrap">
                     <div class="relative flex-1 min-w-[200px]">
@@ -213,7 +206,6 @@
                 </form>
             </div>
 
-            {{-- Products Grid --}}
             @if($products->count() > 0)
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-5">
                     @foreach($products as $product)
@@ -286,7 +278,6 @@
             @endif
         </div>
 
-        {{-- Tab 2: Store Reviews --}}
         <div x-show="activeTab === 'reviews'" class="space-y-4">
             @if($storeReviews->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

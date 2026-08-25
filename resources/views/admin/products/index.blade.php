@@ -6,7 +6,6 @@
         Moderasi &amp; Kontrol Produk
     </x-slot>
 
-    <!-- HEADER / ACTION BAR -->
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-1">
         <div>
             <div class="flex items-center gap-2.5">
@@ -27,10 +26,8 @@
         </div>
     </div>
 
-    <!-- 3 EXECUTIVE KPI CARDS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-        
-        <!-- CARD 1: TOTAL PRODUK -->
+
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
             <div>
                 <div class="flex items-center justify-between">
@@ -56,7 +53,6 @@
             </div>
         </div>
 
-        <!-- CARD 2: PRODUK AKTIF -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
             <div>
                 <div class="flex items-center justify-between">
@@ -82,7 +78,6 @@
             </div>
         </div>
 
-        <!-- CARD 3: PRODUK TAKEDOWN -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all sm:col-span-2 lg:col-span-1">
             <div>
                 <div class="flex items-center justify-between">
@@ -109,13 +104,10 @@
         </div>
     </div>
 
-    <!-- PRODUCTS TABLE CARD -->
     <div class="bg-white rounded-2xl shadow-xs border border-slate-200/90 overflow-hidden">
-        
-        <!-- SEARCH & FILTER BAR -->
+
         <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col lg:flex-row justify-between lg:items-center gap-4 bg-slate-50/50">
-            
-            <!-- Filter Tabs -->
+
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
                 @php
                     $routeIndex = auth()->user()->role === 'super_admin' ? 'super_admin.products.index' : 'admin.products.index';
@@ -134,7 +126,6 @@
                 </a>
             </div>
 
-            <!-- Search Form -->
             <form action="{{ route($routeIndex) }}" method="GET" class="flex items-center gap-2 w-full lg:w-auto">
                 @if(!empty($status))
                     <input type="hidden" name="status" value="{{ $status }}">

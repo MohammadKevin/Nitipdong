@@ -81,7 +81,7 @@
 </head>
 <body>
     <table border="1" cellpadding="6" cellspacing="0">
-        <!-- Meta info -->
+        
         <tr>
             <td colspan="10" class="header-title" style="border: none;">LAPORAN KEUANGAN &amp; KOMISI PLATFORM NITIPDONG</td>
         </tr>
@@ -101,7 +101,6 @@
             <td colspan="10" style="height: 15px; border: none;"></td>
         </tr>
 
-        <!-- Table Columns Header -->
         <thead>
             <tr>
                 <th class="th-header" style="width: 45px;">No</th>
@@ -117,7 +116,6 @@
             </tr>
         </thead>
 
-        <!-- Data Rows -->
         <tbody>
             @foreach($orders as $idx => $order)
             @php
@@ -142,7 +140,6 @@
             @endforeach
         </tbody>
 
-        <!-- Summary Row -->
         <tfoot>
             <tr>
                 <td colspan="10" style="height: 10px; border: none;"></td>

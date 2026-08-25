@@ -9,7 +9,6 @@
         $totalIncome = isset($orders) ? $orders->where('status', 'completed')->sum('total_amount') : 0;
     @endphp
 
-    {{-- Header Banner Toko (Professional E-Commerce Seller Center Style) --}}
     <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-slate-200/80 relative overflow-hidden">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
             <div class="flex items-center gap-4">
@@ -96,7 +95,6 @@
         </div>
     </div>
 
-    {{-- Store Location & Shipping Origin Overview Card --}}
     <div class="bg-gradient-to-r from-cyan-950 via-slate-900 to-slate-950 text-white rounded-2xl p-5 sm:p-6 shadow-card border border-cyan-500/20 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="flex items-start sm:items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 flex items-center justify-center text-xl shrink-0 shadow-inner">

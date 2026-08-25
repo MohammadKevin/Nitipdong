@@ -6,7 +6,6 @@
         Pusat Resolusi Komplain
     </x-slot>
 
-    <!-- HEADER / ACTION BAR -->
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-1">
         <div>
             <div class="flex items-center gap-2.5">
@@ -27,10 +26,8 @@
         </div>
     </div>
 
-    <!-- 4 EXECUTIVE KPI CARDS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        
-        <!-- CARD 1: TOTAL KOMPLAIN -->
+
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
             <div>
                 <div class="flex items-center justify-between">
@@ -56,7 +53,6 @@
             </div>
         </div>
 
-        <!-- CARD 2: MENUNGGU MEDIASI -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
             <div>
                 <div class="flex items-center justify-between">
@@ -82,7 +78,6 @@
             </div>
         </div>
 
-        <!-- CARD 3: DISETUJUI (REFUND) -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
             <div>
                 <div class="flex items-center justify-between">
@@ -108,7 +103,6 @@
             </div>
         </div>
 
-        <!-- CARD 4: DITOLAK -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
             <div>
                 <div class="flex items-center justify-between">
@@ -135,12 +129,10 @@
         </div>
     </div>
 
-    <!-- MAIN CARD: FILTER & TABLE -->
     <div class="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden" x-data="{ selectedComplaint: null, showResolveModal: false, showPhotoModal: false, activePhoto: '' }">
-        
-        <!-- Filter Tabs & Search -->
+
         <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-slate-50/50">
-            <!-- Filter Status Pills -->
+            
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
                 <a href="{{ route('admin.complaints.index', ['status' => 'all', 'search' => $search]) }}"
                    class="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors {{ $status === 'all' ? 'bg-slate-900 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100' }}">
@@ -160,7 +152,6 @@
                 </a>
             </div>
 
-            <!-- Search Form -->
             <form action="{{ route('admin.complaints.index') }}" method="GET" class="relative">
                 <input type="hidden" name="status" value="{{ $status }}">
                 <input type="text" name="search" value="{{ $search }}" class="w-full lg:w-72 h-9 pl-9 pr-3 text-xs rounded-xl border border-slate-200 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder:text-slate-400" placeholder="Cari invoice, pembeli, toko...">
@@ -170,7 +161,6 @@
             </form>
         </div>
 
-        <!-- Table Complaints -->
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
                 <thead class="bg-slate-50 text-slate-500 font-semibold uppercase text-[11px] tracking-wider border-b border-slate-200/80">
@@ -185,14 +175,13 @@
                 <tbody class="divide-y divide-slate-100">
                     @forelse($complaints as $c)
                     <tr class="hover:bg-slate-50/70 transition-colors">
-                        <!-- Invoice & Date -->
+                        
                         <td class="px-5 py-4 align-top">
                             <span class="font-bold text-slate-900 block text-xs">#{{ $c->order->invoice_number ?? '-' }}</span>
                             <span class="text-[11px] text-slate-500 mt-0.5 block">{{ $c->created_at->translatedFormat('d M Y, H:i') }} WIB</span>
                             <span class="text-[11px] font-semibold text-blue-600 mt-1 block">Rp {{ number_format($c->order->total_amount ?? 0, 0, ',', '.') }}</span>
                         </td>
 
-                        <!-- Pihak Sengketa -->
                         <td class="px-5 py-4 align-top">
                             <div class="space-y-1.5">
                                 <div class="flex items-center gap-1.5">
@@ -206,7 +195,6 @@
                             </div>
                         </td>
 
-                        <!-- Alasan & Bukti -->
                         <td class="px-5 py-4 align-top max-w-xs">
                             <p class="font-semibold text-slate-800 text-xs">{{ $c->reason }}</p>
                             <p class="text-[11px] text-slate-500 mt-1 line-clamp-2">{{ $c->description }}</p>
@@ -223,7 +211,6 @@
                             @endif
                         </td>
 
-                        <!-- Status Mediasi -->
                         <td class="px-5 py-4 align-top">
                             @if($c->status === 'pending')
                                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
@@ -250,7 +237,6 @@
                             @endif
                         </td>
 
-                        <!-- Aksi Keputusan -->
                         <td class="px-5 py-4 align-top text-center">
                             @if($c->status === 'pending')
                             <button type="button" 
@@ -289,7 +275,6 @@
         </div>
         @endif
 
-        <!-- MODAL PUTUSAN MEDIASI -->
         <div x-show="showResolveModal" 
              x-cloak 
              class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
@@ -339,7 +324,6 @@
             </div>
         </div>
 
-        <!-- MODAL PHOTO LIGHTBOX -->
         <div x-show="showPhotoModal" 
              x-cloak 
              class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">

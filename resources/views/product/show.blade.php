@@ -13,7 +13,7 @@
         </nav>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
-            {{-- Left: Product Image Gallery --}}
+            
             <div class="lg:col-span-5">
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 sticky top-20">
                     <div class="relative w-full aspect-square rounded-lg overflow-hidden bg-slate-50 border border-slate-200 mb-3">
@@ -43,20 +43,17 @@
                             </div>
                         @endif
 
-                        {{-- Discount Badge --}}
                         @if($product->has_discount)
                             <div class="absolute top-0 left-0 bg-rose-600 text-white px-2 py-1.5 text-sm font-black leading-none rounded-br-lg">
                                 {{ $product->discount_percentage_effective }}%
                             </div>
                         @endif
 
-                        {{-- Official Badge --}}
                         <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-500 text-white border border-emerald-300 shadow-sm">
                             Resmi
                         </div>
                     </div>
 
-                    {{-- Thumbnail Gallery --}}
                     @if(count($allImages) > 1)
                     <div class="flex gap-2 overflow-x-auto pb-1">
                         @foreach($allImages as $i => $imgPath)
@@ -81,7 +78,6 @@
                 </div>
             </div>
 
-            {{-- Right: Product Info --}}
             <div class="lg:col-span-7 space-y-5">
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
                     <div>
@@ -107,7 +103,6 @@
                         </div>
                     </div>
 
-                    {{-- Price --}}
                     <div class="pt-3 border-t border-slate-100">
                         <div class="flex items-baseline gap-2">
                             <span class="text-2xl font-bold text-rose-600">
@@ -129,7 +124,6 @@
                         @endif
                     </div>
 
-                    {{-- Interactive Variants & Purchase Panel --}}
                     <div x-data="{
                         qty: 1,
                         stock: {{ $product->stock }},
@@ -285,7 +279,6 @@
                         </div>
                         @endif
 
-                        {{-- Quantity & Actions --}}
                         <div class="pt-3 border-t border-slate-100">
                             <label class="block text-xs font-semibold text-slate-700 mb-2 uppercase tracking-wider">Jumlah Pembelian</label>
                             <div class="flex items-center gap-3">
@@ -304,7 +297,7 @@
                             </div>
 
                             <div class="flex items-center gap-2.5 mt-4">
-                                {{-- Wishlist Toggle Button --}}
+                                
                                 @auth
                                     @if(auth()->user()->role === 'customer')
                                         @php $isWish = $product->isWishlistedBy(auth()->user()); @endphp
@@ -375,7 +368,6 @@
                     </div>
                 </div>
 
-                {{-- Store Profile --}}
                 <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
                     <div class="flex items-center justify-between gap-4 flex-wrap">
                         <div class="flex items-center gap-3.5 min-w-0">
@@ -426,7 +418,6 @@
                     </div>
                 </div>
 
-                {{-- Tabbed Section: Detail, Ulasan & Diskusi --}}
                 <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden"
                      x-data="{
                         activeTab: 'detail',
@@ -434,7 +425,7 @@
                         showPhotoModal: false,
                         activePhoto: ''
                      }">
-                    {{-- Tab Navigation Bar --}}
+                    
                     <div class="flex border-b border-slate-200 px-5 gap-6 text-xs bg-slate-50/50">
                         <button type="button" @click="activeTab = 'detail'"
                                 :class="activeTab === 'detail' ? 'border-cyan-700 text-cyan-800 font-extrabold border-b-2' : 'text-slate-500 hover:text-slate-800 font-semibold'"
@@ -457,7 +448,7 @@
                     </div>
 
                     <div class="p-5 sm:p-6">
-                        {{-- 1. TAB DETAIL PRODUK --}}
+                        
                         <div x-show="activeTab === 'detail'" class="space-y-4">
                             @if($product->specifications)
                                 <div class="space-y-2.5 text-xs">
@@ -511,9 +502,8 @@
                             @endif
                         </div>
 
-                        {{-- 2. TAB ULASAN PEMBELI & FOTO --}}
                         <div x-show="activeTab === 'reviews'" x-cloak class="space-y-5">
-                            {{-- Rating Overview Header --}}
+                            
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-gradient-to-r from-amber-50/50 to-orange-50/30 rounded-2xl border border-amber-200/60">
                                 <div class="flex items-center gap-4">
                                     <div class="text-center bg-white px-5 py-3 rounded-xl border border-amber-200 shadow-xs">
@@ -535,7 +525,6 @@
                                 </span>
                             </div>
 
-                            {{-- Review Items List --}}
                             @if($product->reviews->count() > 0)
                                 <div class="space-y-4 divide-y divide-slate-100">
                                     @foreach($product->reviews as $rev)
@@ -563,7 +552,6 @@
                                                 <p class="text-slate-700 leading-relaxed">{{ $rev->comment }}</p>
                                             @endif
 
-                                            {{-- Attached Photos Gallery --}}
                                             @if($rev->images && is_array($rev->images) && count($rev->images) > 0)
                                                 <div class="flex items-center gap-2 pt-1">
                                                     @foreach($rev->images as $img)
@@ -577,7 +565,6 @@
                                                 </div>
                                             @endif
 
-                                            {{-- Seller Reply if any --}}
                                             @if($rev->seller_reply)
                                                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 ml-4 mt-2 space-y-1">
                                                     <div class="flex items-center gap-1.5 text-cyan-800 font-bold text-[11px]">
@@ -598,9 +585,8 @@
                             @endif
                         </div>
 
-                        {{-- 3. TAB FORUM DISKUSI PRODUK (Q&A) --}}
                         <div x-show="activeTab === 'discussions'" x-cloak class="space-y-5">
-                            {{-- Form Tanya Pertanyaan Baru --}}
+                            
                             @auth
                                 <form action="{{ route('products.discussions.store', $product) }}" method="POST" class="p-4 bg-cyan-50/40 rounded-2xl border border-cyan-200/80 space-y-3">
                                     @csrf
@@ -623,7 +609,6 @@
                                 </div>
                             @endauth
 
-                            {{-- Discussion Threads List --}}
                             @if($product->discussions->count() > 0)
                                 <div class="space-y-4 divide-y divide-slate-100">
                                     @foreach($product->discussions as $disc)
@@ -645,7 +630,6 @@
 
                                             <p class="text-slate-800 leading-relaxed pl-9 font-medium">{{ $disc->body }}</p>
 
-                                            {{-- Replies List --}}
                                             @if($disc->replies->count() > 0)
                                                 <div class="ml-9 mt-2 space-y-2 border-l-2 border-cyan-200 pl-3">
                                                     @foreach($disc->replies as $rep)
@@ -665,7 +649,6 @@
                                                 </div>
                                             @endif
 
-                                            {{-- Reply Button / Form Trigger --}}
                                             @auth
                                                 <div class="pl-9 pt-1">
                                                     <button type="button" @click="replyToId = replyToId === {{ $disc->id }} ? null : {{ $disc->id }}"
@@ -700,7 +683,6 @@
                         </div>
                     </div>
 
-                    {{-- Image Lightbox Modal --}}
                     <div x-show="showPhotoModal" x-cloak
                          class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
                          @click="showPhotoModal = false">

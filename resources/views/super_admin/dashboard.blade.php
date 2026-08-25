@@ -6,7 +6,6 @@
         Executive Overview & Platform Analytics
     </x-slot>
 
-    <!-- HERO / STATUS BAR (Compact Enterprise Style) -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
         <div>
             <div class="flex items-center gap-2">
@@ -29,10 +28,8 @@
         </div>
     </div>
 
-    <!-- 4 KEY METRIC CARDS (Enterprise Flat Grid with 6px-8px Radius & Tabular Numbers) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3.5 sm:gap-4">
-        
-        <!-- CARD 1: KOMISI PLATFORM 15% -->
+
         <div class="bg-white p-4 sm:p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div>
                 <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
@@ -54,7 +51,6 @@
             </div>
         </div>
 
-        <!-- CARD 2: GROSS MERCHANDISE VOLUME (GMV) -->
         <div class="bg-white p-4 sm:p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div>
                 <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
@@ -76,7 +72,6 @@
             </div>
         </div>
 
-        <!-- CARD 3: VOLUME PESANAN -->
         <div class="bg-white p-4 sm:p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div>
                 <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
@@ -98,7 +93,6 @@
             </div>
         </div>
 
-        <!-- CARD 4: EKOSISTEM PLATFORM -->
         <div class="bg-white p-4 sm:p-4.5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
             <div>
                 <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
@@ -129,10 +123,8 @@
 
     </div>
 
-    <!-- ANALYTICS CHART & TRANSACTION STATUS WIDGET -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        
-        <!-- ANALYTICS CHART: TREN PENDAPATAN & VOLUME TRANSAKSI -->
+
         <div class="lg:col-span-8 bg-white p-5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100">
                 <div>
@@ -140,7 +132,6 @@
                     <p class="text-xs text-slate-400 mt-0.5">Analisis pendapatan komisi 15% dan gross merchandise volume (GMV)</p>
                 </div>
 
-                <!-- Timeframe Segmented Controls -->
                 <div class="inline-flex p-0.5 bg-slate-100 rounded-md text-xs font-medium font-mono-num max-w-full overflow-x-auto shrink-0" id="chart-period-tabs">
                     <button type="button" onclick="loadChartData('day')" class="period-btn px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 transition-colors" data-period="day">7 Hari</button>
                     <button type="button" onclick="loadChartData('week')" class="period-btn px-2.5 py-1 rounded text-slate-600 hover:text-slate-900 transition-colors active bg-white text-blue-700 font-bold shadow-xs" data-period="week">Mingguan</button>
@@ -149,7 +140,6 @@
                 </div>
             </div>
 
-            <!-- Canvas Area with Precision Gridlines -->
             <div class="relative w-full h-64 sm:h-72 pt-3">
                 <canvas id="revenueChart"></canvas>
                 <div id="chart-loader" class="absolute inset-0 bg-white/80 flex items-center justify-center hidden">
@@ -160,7 +150,6 @@
                 </div>
             </div>
 
-            <!-- Legend & Subtext -->
             <div class="mt-3 pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500">
                 <div class="flex items-center gap-4 flex-wrap">
                     <div class="flex items-center gap-1.5">
@@ -176,7 +165,6 @@
             </div>
         </div>
 
-        <!-- TRANSACTION STATUS BREAKDOWN WIDGET -->
         <div class="lg:col-span-4 bg-white p-5 rounded-lg border border-slate-200/90 shadow-xs flex flex-col justify-between">
             <div class="pb-3 border-b border-slate-100 flex items-center justify-between">
                 <div>
@@ -198,7 +186,6 @@
                     $cancPct = round(($cancelledOrders / $safeTotal) * 100);
                 @endphp
 
-                <!-- Selesai -->
                 <div>
                     <div class="flex justify-between text-xs font-medium text-slate-700 mb-1">
                         <span class="flex items-center gap-1.5">
@@ -211,7 +198,6 @@
                     </div>
                 </div>
 
-                <!-- Sedang Dikirim -->
                 <div>
                     <div class="flex justify-between text-xs font-medium text-slate-700 mb-1">
                         <span class="flex items-center gap-1.5">
@@ -224,7 +210,6 @@
                     </div>
                 </div>
 
-                <!-- Diproses Toko -->
                 <div>
                     <div class="flex justify-between text-xs font-medium text-slate-700 mb-1">
                         <span class="flex items-center gap-1.5">
@@ -237,7 +222,6 @@
                     </div>
                 </div>
 
-                <!-- Menunggu Konfirmasi -->
                 <div>
                     <div class="flex justify-between text-xs font-medium text-slate-700 mb-1">
                         <span class="flex items-center gap-1.5">
@@ -250,7 +234,6 @@
                     </div>
                 </div>
 
-                <!-- Dibatalkan / Gagal -->
                 <div>
                     <div class="flex justify-between text-xs font-medium text-slate-700 mb-1">
                         <span class="flex items-center gap-1.5">
@@ -264,7 +247,6 @@
                 </div>
             </div>
 
-            <!-- Operational Notice -->
             <div class="p-3 bg-slate-50 rounded-lg border border-slate-200/80 text-xs text-slate-600">
                 <p class="leading-relaxed">
                     Setiap transaksi sukses secara otomatis dipotong komisi <strong class="text-slate-900 font-semibold">15%</strong> untuk kas operasional platform.
@@ -274,10 +256,8 @@
 
     </div>
 
-    <!-- RECENT TRANSACTIONS ENTERPRISE LEDGER TABLE -->
     <div class="bg-white rounded-lg border border-slate-200/90 shadow-xs overflow-hidden" x-data="{ tableSearch: '' }">
-        
-        <!-- Table Header & Fast Search -->
+
         <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
             <div>
                 <h3 class="font-bold text-sm text-slate-900 tracking-tight">Aktivitas Transaksi Terbaru</h3>
@@ -300,7 +280,6 @@
             </div>
         </div>
 
-        <!-- Table View -->
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
                 <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-100 font-mono-num">
@@ -318,13 +297,11 @@
                     @forelse($recentOrders as $order)
                     <tr class="hover:bg-slate-50/70 transition-colors" 
                         x-show="!tableSearch || '{{ strtolower($order->invoice_number) }}'.includes(tableSearch.toLowerCase()) || '{{ strtolower($order->store->name ?? '') }}'.includes(tableSearch.toLowerCase()) || '{{ strtolower($order->user->name ?? '') }}'.includes(tableSearch.toLowerCase())">
-                        
-                        <!-- Invoice Code -->
+
                         <td class="px-5 py-3.5 font-mono-num font-semibold text-slate-900">
                             #{{ $order->invoice_number }}
                         </td>
 
-                        <!-- Store Name -->
                         <td class="px-5 py-3.5 font-medium text-slate-800">
                             <div class="flex items-center gap-2">
                                 <i class="fa-solid fa-store text-slate-400 text-xs"></i>
@@ -332,7 +309,6 @@
                             </div>
                         </td>
 
-                        <!-- Buyer Name -->
                         <td class="px-5 py-3.5">
                             <div class="flex items-center gap-2">
                                 <img src="https://ui-avatars.com/api/?name={{ urlencode($order->user->name ?? 'Customer') }}&background=0f172a&color=fff&size=50" 
@@ -342,19 +318,16 @@
                             </div>
                         </td>
 
-                        <!-- Total Belanja -->
                         <td class="px-5 py-3.5 font-bold text-slate-900 font-mono-num">
                             Rp {{ number_format($order->total_amount, 0, ',', '.') }}
                         </td>
 
-                        <!-- Komisi 15% -->
                         <td class="px-5 py-3.5">
                             <span class="inline-flex items-center gap-1 font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200/60 font-mono-num">
                                 Rp {{ number_format(round($order->total_amount * 0.15), 0, ',', '.') }}
                             </span>
                         </td>
 
-                        <!-- Status Badge -->
                         <td class="px-5 py-3.5">
                             @if($order->status === 'pending')
                                 <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 font-bold text-[10px] border border-amber-200 inline-flex items-center gap-1.5">
@@ -379,7 +352,6 @@
                             @endif
                         </td>
 
-                        <!-- Timestamp -->
                         <td class="px-5 py-3.5 text-slate-400 font-mono-num text-[11px]">
                             {{ $order->created_at->translatedFormat('d M Y, H:i') }}
                         </td>

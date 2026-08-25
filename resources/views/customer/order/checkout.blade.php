@@ -278,7 +278,6 @@
               class="max-w-4xl mx-auto space-y-4">
             @csrf
 
-            {{-- 1. ALAMAT PENGIRIMAN (REALTIME INTERACTIVE CARD) --}}
             <div class="bg-white rounded-xl border border-slate-200/80 p-5 sm:p-6 shadow-card space-y-4">
                 <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                     <div class="flex items-center gap-2">
@@ -300,7 +299,6 @@
                     </div>
                 </div>
 
-                {{-- Active Address Card Display --}}
                 <div x-show="useSaved && activeAddress" class="space-y-3">
                     <input type="hidden" name="address_id" :value="selectedAddressId">
 
@@ -344,7 +342,6 @@
                     </div>
                 </div>
 
-                {{-- Manual Address Fallback --}}
                 <div x-show="!useSaved" x-cloak class="space-y-3">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <div class="font-medium text-slate-800">
@@ -370,7 +367,6 @@
                 </div>
             </div>
 
-            {{-- 2. RINCIAN BARANG & PILIHAN KURIR PENGIRIMAN PER TOKO --}}
             <div class="space-y-4">
                 <div class="flex items-center justify-between px-1">
                     <h2 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
@@ -388,7 +384,7 @@
                         $storeOriginCity = $shippingInfo['origin_city'] ?? ($storeObj?->effective_city ?? 'Jakarta Pusat');
                     @endphp
                     <div class="bg-white rounded-xl border border-slate-200/80 overflow-hidden shadow-card">
-                        {{-- Store Header with Origin Location --}}
+                        
                         <div class="px-4 py-3 bg-slate-50/70 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <i class="fa-solid fa-store text-cyan-700 text-xs"></i>
@@ -405,7 +401,6 @@
                             </div>
                         </div>
 
-                        {{-- Same City Free Shipping Notice Banner --}}
                         <template x-if="storeShippingOptions['{{ $storeId }}'] && storeShippingOptions['{{ $storeId }}'][0] && storeShippingOptions['{{ $storeId }}'][0].is_same_city">
                             <div class="mx-4 mt-3 p-3 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 border border-emerald-300 text-emerald-900 rounded-xl text-xs flex items-center justify-between gap-3 shadow-2xs">
                                 <div class="flex items-center gap-2.5">
@@ -423,7 +418,6 @@
                             </div>
                         </template>
 
-                        {{-- Product Items in Store --}}
                         <div class="divide-y divide-slate-100">
                             @foreach($items as $item)
                                 <div class="p-4 flex items-center gap-3 sm:gap-4">
@@ -456,7 +450,6 @@
                             @endforeach
                         </div>
 
-                        {{-- Courier Shipping Selection Row --}}
                         <div class="p-3.5 sm:p-4 bg-cyan-50/20 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                             <div class="flex items-center gap-2">
                                 <div class="w-7 h-7 rounded-lg bg-cyan-100 text-cyan-800 flex items-center justify-center text-xs shrink-0">
@@ -494,7 +487,6 @@
                 @endforeach
             </div>
 
-            {{-- 3. METODE PEMBAYARAN OTOMATIS & MANUAL --}}
             <div class="bg-white rounded-xl border border-slate-200/80 p-5 sm:p-6 shadow-card space-y-4">
                 <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                     <div class="flex items-center gap-2">
@@ -528,7 +520,6 @@
                 </div>
             </div>
 
-            {{-- 4. VOUCHER & PROMO --}}
             <div class="bg-white rounded-xl border border-slate-200/80 p-5 sm:p-6 shadow-card">
                 <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
                     <div class="flex items-center gap-2">
@@ -565,7 +556,6 @@
                 @endif
             </div>
 
-            {{-- 5. RINCIAN PEMBAYARAN FINAL --}}
             <div class="bg-white rounded-xl border border-slate-200/80 p-5 sm:p-6 shadow-card space-y-4">
                 <h3 class="font-bold text-xs text-slate-900 pb-3 border-b border-slate-100 uppercase tracking-wider">5. Rincian Pembayaran</h3>
 
@@ -631,7 +621,6 @@
             </div>
         </form>
 
-        {{-- MODAL PILIH ALAMAT LAIN (QUICK SWITCHER) --}}
         <div x-show="showAddressModal" x-cloak
              class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
             <div @click.outside="showAddressModal = false"
@@ -691,7 +680,6 @@
             </div>
         </div>
 
-        {{-- MODAL TAMBAH ALAMAT BARU DENGAN LEAFLET GPS & PINPOINT --}}
         <div x-show="showAddAddressModal" x-cloak
              class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
             <div @click.outside="showAddAddressModal = false"
@@ -709,7 +697,6 @@
                     </button>
                 </div>
 
-                {{-- Interactive Map Pinpoint Section --}}
                 <div class="mt-4 space-y-3">
                     <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center justify-between">
                         <div class="relative flex-1">
@@ -722,7 +709,6 @@
                                 <i class="fa-solid fa-circle-notch fa-spin"></i>
                             </div>
 
-                            {{-- Autocomplete Dropdown --}}
                             <div x-show="searchResults.length > 0" x-cloak
                                  class="absolute z-20 top-10 left-0 right-0 bg-white rounded-xl shadow-xl border border-slate-200 divide-y divide-slate-100 max-h-48 overflow-y-auto text-xs">
                                 <template x-for="res in searchResults" :key="res.place_id">
@@ -743,7 +729,6 @@
                         </button>
                     </div>
 
-                    {{-- Map Container --}}
                     <div id="checkout-map" class="w-full h-40 rounded-xl border border-slate-200 overflow-hidden shadow-inner"></div>
                 </div>
 
@@ -828,5 +813,3 @@
         </div>
     </div>
 </x-app-layout>
-
-{{-- Cache bust: 20260820113044 --}}

@@ -31,7 +31,6 @@
             </div>
         </div>
 
-        <!-- HORIZONTAL CATEGORY PILL STRIP -->
         <div class="mb-5 overflow-x-auto scrollbar-none pb-1">
             <div class="flex items-center gap-2 text-xs">
                 <a href="{{ url('/products' . (request('q') ? '?q='.request('q') : '')) }}"

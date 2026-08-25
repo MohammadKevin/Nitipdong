@@ -37,17 +37,14 @@
 
 <div class="min-h-screen flex flex-col {{ $reverse ? 'lg:flex-row-reverse' : 'lg:flex-row' }} relative" id="auth-wrapper">
 
-    {{-- BRAND SHOWCASE PANEL — Dark navy (desktop only lg:flex) --}}
     <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col justify-between p-12 text-white"
          style="background: linear-gradient(160deg, #0c1a35 0%, #0f2a4a 45%, #083a52 100%);">
 
-        {{-- Decorative glow blobs --}}
         <div class="absolute -top-20 -right-20 w-96 h-96 rounded-full pointer-events-none"
              style="background: radial-gradient(circle, rgba(8,145,178,0.15), transparent 70%);"></div>
         <div class="absolute -bottom-20 -left-10 w-96 h-96 rounded-full pointer-events-none"
              style="background: radial-gradient(circle, rgba(14,116,144,0.12), transparent 70%);"></div>
 
-        {{-- Logo --}}
         <div class="relative z-10 flex items-center gap-3 mt-24 {{ $reverse ? 'mr-20 justify-start' : 'ml-20 justify-start' }}">
             <div class="w-12 h-12 rounded-2xl overflow-hidden bg-cyan-50 border border-cyan-200 flex items-center justify-center shadow-md p-1.5">
                 <img src="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}" alt="NitipDong" class="w-full h-full object-contain">
@@ -57,7 +54,6 @@
             </span>
         </div>
 
-        {{-- Main copy --}}
         <div class="relative z-10 max-w-md {{ $reverse ? 'self-start pl-8' : '' }}">
             <p class="text-xs font-bold uppercase tracking-widest mb-5 flex items-center gap-2 text-cyan-400">
                 <span class="w-1.5 h-1.5 rounded-full inline-block bg-cyan-400 animate-pulse"></span>
@@ -91,13 +87,11 @@
             </div>
         </div>
 
-        {{-- Footer --}}
         <div class="relative z-10 {{ $reverse ? 'pl-8' : '' }}">
             <p class="text-xs text-slate-400">&copy; {{ date('Y') }} NitipDong Platform. Hak Cipta Dilindungi.</p>
         </div>
     </div>
 
-    {{-- CURVE DIVIDER (Adapts cleanly based on $reverse) --}}
     <div class="auth-curve-divider" @if($reverse) style="transform: scaleX(-1);" @endif>
         <svg viewBox="0 0 120 1000" preserveAspectRatio="none"
              xmlns="http://www.w3.org/2000/svg"
@@ -118,14 +112,11 @@
         </svg>
     </div>
 
-    {{-- FORM PANEL (desktop white) / FULL PAGE (mobile dark+white) --}}
     <div class="w-full lg:w-1/2 flex flex-col min-h-screen bg-white relative">
 
-        {{-- MOBILE: dark header + dome curve (hidden on desktop) --}}
         <div class="lg:hidden relative flex flex-col items-center px-6 pt-12 pb-16"
              style="background: linear-gradient(160deg, #0c1a35 0%, #0f2a4a 45%, #0a3d5c 100%);">
 
-            {{-- Close / back button --}}
             <a href="/"
                class="absolute top-5 right-5 w-9 h-9 rounded-full flex items-center justify-center
                       text-white/70 hover:text-white border border-white/20 bg-white/10
@@ -140,7 +131,6 @@
                 <span class="text-2xl font-extrabold text-white tracking-tight">Nitip<span class="text-cyan-400">Dong</span></span>
             </div>
 
-            {{-- Dome curve anchored to bottom of dark header --}}
             <svg style="position:absolute;bottom:-1px;left:0;width:100%;height:68px;display:block;"
                  viewBox="0 0 1000 80" preserveAspectRatio="none"
                  xmlns="http://www.w3.org/2000/svg">
@@ -158,13 +148,11 @@
             </svg>
         </div>
 
-        {{-- FORM AREA --}}
         <div class="flex-1 bg-white
                     lg:flex lg:items-center lg:justify-center
                     px-6 pt-8 pb-10 sm:px-10 lg:px-16 lg:py-0
                     relative">
 
-            {{-- Desktop close button --}}
             <a href="/"
                class="hidden lg:flex absolute top-5 {{ $reverse ? 'left-5' : 'right-5' }} z-50 w-9 h-9 rounded-full
                       bg-white shadow-md hover:shadow-lg items-center justify-center
@@ -173,7 +161,6 @@
                 ✕
             </a>
 
-            {{-- Form slot --}}
             <div class="w-full max-w-sm mx-auto lg:mx-0 relative z-10">
                 {{ $slot }}
             </div>
@@ -184,7 +171,6 @@
 
 <x-toast-notifier />
 
-{{-- Premium Full-Screen Loading Overlay --}}
 <div x-data="{ submitting: false }"
      x-on:auth-submitting.window="submitting = true"
      x-show="submitting"

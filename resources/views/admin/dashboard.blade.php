@@ -6,7 +6,6 @@
         Persetujuan Toko &amp; Merchant
     </x-slot>
 
-    <!-- HEADER / ACTION BAR -->
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 pb-1">
         <div>
             <div class="flex items-center gap-2.5">
@@ -27,10 +26,8 @@
         </div>
     </div>
 
-    <!-- 3 EXECUTIVE KPI CARDS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-        
-        <!-- CARD 1: MENUNGGU REVIEW -->
+
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
             <div>
                 <div class="flex items-center justify-between">
@@ -56,7 +53,6 @@
             </div>
         </div>
 
-        <!-- CARD 2: TOKO DISETUJUI -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
             <div>
                 <div class="flex items-center justify-between">
@@ -82,7 +78,6 @@
             </div>
         </div>
 
-        <!-- CARD 3: PENGAJUAN DITOLAK -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all sm:col-span-2 lg:col-span-1">
             <div>
                 <div class="flex items-center justify-between">
@@ -109,10 +104,8 @@
         </div>
     </div>
 
-    <!-- TABLE PENDING STORES CARD -->
     <div class="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
-        
-        <!-- CARD HEADER -->
+
         <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
             <div>
                 <h3 class="font-bold text-sm text-slate-900 uppercase tracking-wider">Daftar Pengajuan Toko (Pending)</h3>
@@ -126,8 +119,7 @@
                 </svg>
             </form>
         </div>
-        
-        <!-- TABLE -->
+
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
                 <thead class="bg-slate-50 text-slate-500 font-semibold uppercase text-[11px] tracking-wider border-b border-slate-200/80">

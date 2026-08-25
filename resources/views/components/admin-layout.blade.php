@@ -18,7 +18,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" type="image/svg+xml" href="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}">
 
-    <!-- Chart.js CDN for Analytical Charts if needed -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
     <style>
@@ -54,8 +53,7 @@
 </head>
 <body class="h-full bg-[#F8FAFC] text-slate-800 antialiased" x-data="{ sidebarOpen: false }">
     <div class="flex h-screen overflow-hidden bg-[#F8FAFC]">
-        
-        <!-- Mobile Sidebar Backdrop -->
+
         <div x-show="sidebarOpen" 
              x-cloak
              @click="sidebarOpen = false"
@@ -68,13 +66,11 @@
              class="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-xs lg:hidden">
         </div>
 
-        <!-- ENTERPRISE SLATE SIDEBAR (#0F172A) -->
         <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
                class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0F172A] text-slate-300 flex flex-col justify-between transition-transform duration-200 ease-in-out lg:static lg:translate-x-0 border-r border-slate-800 shrink-0">
             
             <div class="flex flex-col h-full">
-                
-                <!-- HEADER / BRANDING -->
+
                 <div class="h-16 px-4 border-b border-slate-800 flex items-center justify-between bg-[#0B1324]">
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs shrink-0 p-1">
@@ -89,7 +85,6 @@
                         </div>
                     </a>
 
-                    <!-- Mobile Dismiss -->
                     <button @click="sidebarOpen = false" class="lg:hidden text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-800 transition-colors">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
@@ -97,16 +92,14 @@
                     </button>
                 </div>
 
-                <!-- NAVIGATION ITEMS -->
                 <div class="flex-1 overflow-y-auto slate-scrollbar px-3 py-5 space-y-6">
-                    
-                    <!-- SECTION 1: MODERASI & KONTROL -->
+
                     <div>
                         <p class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase px-3 mb-2">
                             Moderasi &amp; Kontrol
                         </p>
                         <nav class="space-y-1">
-                            <!-- Persetujuan Toko -->
+                            
                             @php $active = request()->routeIs('admin.dashboard') || request()->routeIs('admin.stores.*'); @endphp
                             <a href="{{ route('admin.dashboard') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -119,7 +112,6 @@
                                 <span class="flex-1 truncate">Persetujuan Toko</span>
                             </a>
 
-                            <!-- Moderasi Produk -->
                             @php $active = request()->routeIs('admin.products.*'); @endphp
                             <a href="{{ route('admin.products.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -132,7 +124,6 @@
                                 <span class="flex-1 truncate">Moderasi Produk</span>
                             </a>
 
-                            <!-- Resolusi Komplain (Dispute Center) -->
                             @php $active = request()->routeIs('admin.complaints.*'); @endphp
                             <a href="{{ route('admin.complaints.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -145,7 +136,6 @@
                                 <span class="flex-1 truncate">Resolusi Komplain</span>
                             </a>
 
-                            <!-- Monitoring Pesanan -->
                             @php $active = request()->routeIs('admin.orders.*'); @endphp
                             <a href="{{ route('admin.orders.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -160,13 +150,12 @@
                         </nav>
                     </div>
 
-                    <!-- SECTION 2: KATALOG & PROMOSI -->
                     <div>
                         <p class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase px-3 mb-2">
                             Katalog &amp; Promosi
                         </p>
                         <nav class="space-y-1">
-                            <!-- Kategori Produk -->
+                            
                             @php $active = request()->routeIs('admin.categories.*'); @endphp
                             <a href="{{ route('admin.categories.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -179,7 +168,6 @@
                                 <span class="flex-1 truncate">Kategori Produk</span>
                             </a>
 
-                            <!-- Flash Sale Platform -->
                             @php $active = request()->routeIs('admin.flash_sales.*'); @endphp
                             <a href="{{ route('admin.flash_sales.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -195,13 +183,12 @@
                         </nav>
                     </div>
 
-                    <!-- SECTION 3: KOMUNIKASI & AKUN -->
                     <div>
                         <p class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase px-3 mb-2">
                             Komunikasi &amp; Akun
                         </p>
                         <nav class="space-y-1">
-                            <!-- Pesan Chat -->
+                            
                             @php $active = request()->routeIs('chat.*'); @endphp
                             <a href="{{ route('chat.index') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -214,7 +201,6 @@
                                 <span class="flex-1 truncate">Pesan Chat</span>
                             </a>
 
-                            <!-- Pengaturan Profil -->
                             @php $active = request()->routeIs('profile.edit'); @endphp
                             <a href="{{ route('profile.edit') }}"
                                class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
@@ -231,7 +217,6 @@
 
                 </div>
 
-                <!-- FOOTER / USER PROFILE CARD -->
                 <div class="p-3 border-t border-slate-800 bg-[#0B1324]/60">
                     <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 transition-colors flex items-center gap-3">
                         <img src="{{ auth()->user()->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=2563eb&color=fff' }}" 
@@ -258,13 +243,10 @@
             </div>
         </aside>
 
-        <!-- MAIN LAYOUT WRAPPER -->
         <div class="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
-            
-            <!-- STICKY TOP APP HEADER -->
+
             <header class="h-14 shrink-0 bg-white border-b border-slate-200/90 px-4 sm:px-6 flex items-center justify-between z-30 shadow-xs">
-                
-                <!-- Left: Breadcrumb -->
+
                 <div class="flex items-center gap-3">
                     <button @click="sidebarOpen = true" class="lg:hidden p-1.5 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
@@ -281,7 +263,6 @@
                     </div>
                 </div>
 
-                <!-- Right: Timestamp & Info -->
                 <div class="flex items-center gap-2 sm:gap-3">
                     <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-xs text-slate-600 font-mono-num">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -295,7 +276,6 @@
                 </div>
             </header>
 
-            <!-- SCROLLABLE WORKSPACE -->
             <main class="flex-1 overflow-y-auto bg-[#F8FAFC] p-4 sm:p-6 lg:p-7 space-y-6 pb-24 scroll-smooth">
                 @if(session('success'))
                 <div x-data="{ show: true }" x-show="show" x-transition class="p-3.5 sm:p-4 rounded-xl bg-emerald-50/90 border border-emerald-200 text-emerald-800 flex items-start justify-between shadow-xs">
@@ -322,7 +302,6 @@
         </div>
     </div>
 
-    <!-- Clock Script -->
     <script>
         function updateAdminClock() {
             const clockEl = document.getElementById('admin-clock');
