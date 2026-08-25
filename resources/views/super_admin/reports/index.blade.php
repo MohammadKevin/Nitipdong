@@ -246,7 +246,7 @@
                         <td class="px-4 py-3.5">
                             <div class="text-[11px] text-slate-600 max-w-[180px]">
                                 @foreach($order->orderItems->take(2) as $item)
-                                    <p class="truncate">&bull; {{ $item->product->name ?? 'Item' }} <span class="text-slate-400 font-mono-num">({{ $item->quantity}x)</span></p>
+                                    <p class="truncate">&bull; {{ $item->product->name ?? 'Item' }} <span class="text-slate-400 font-mono-num">({{ $item->quantity }}x)</span></p>
                                 @endforeach
                                 @if($order->orderItems->count() > 2)
                                     <span class="text-[10px] text-blue-600 font-semibold font-mono-num">+{{ $order->orderItems->count() - 2 }} produk lainnya</span>
