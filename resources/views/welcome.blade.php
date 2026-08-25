@@ -237,7 +237,7 @@
             </div>
         </div>
 
-        {{-- Horizontal Quick-Access Category Chips with 2-Row Desktop & 1-Row Mobile Scroll --}}
+        {{-- Horizontal Quick-Access Category Chips (1 Baris / 1 Row on Mobile & Desktop) --}}
         <div class="mt-3.5 bg-white rounded-2xl border border-sky-100/90 p-4 shadow-xs" x-data="{
             scrollLeft() {
                 this.$refs.categorySlider.scrollBy({ left: -320, behavior: 'smooth' });
@@ -282,9 +282,9 @@
                 </div>
             </div>
 
-            <!-- 2-SHAF DESKTOP/TABLET, 1-SHAF MOBILE HORIZONTAL SCROLL -->
+            <!-- 1 BARIS / 1 ROW HORIZONTAL SCROLL (DESKTOP & MOBILE) -->
             <div x-ref="categorySlider" 
-                 class="grid grid-rows-1 sm:grid-rows-2 grid-flow-col auto-cols-[100px] sm:auto-cols-[125px] gap-2.5 sm:gap-3 overflow-x-auto scrollbar-none scroll-smooth pb-1 text-center select-none">
+                 class="grid grid-rows-1 grid-flow-col auto-cols-[95px] sm:auto-cols-[115px] gap-2.5 sm:gap-3 overflow-x-auto scrollbar-none scroll-smooth pb-1 text-center select-none">
                 @if(isset($categories) && $categories->count() > 0)
                     @foreach($categories as $cat)
                     <a href="{{ route('products.index', ['category' => $cat->slug]) }}" 
