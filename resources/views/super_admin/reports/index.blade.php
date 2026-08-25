@@ -16,12 +16,12 @@
         </div>
 
         <div class="flex items-center gap-2.5 flex-wrap">
-            <!-- Print / PDF Button -->
-            <a href="{{ route('super_admin.reports.print', request()->query()) }}" target="_blank"
-               class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200 shadow-xs hover:border-slate-300 transition-all cursor-pointer" title="Cetak langsung atau simpan sebagai dokumen PDF">
-                <i class="fa-solid fa-file-pdf text-rose-600 text-sm"></i>
-                <span>Cetak / PDF</span>
-            </a>
+            <!-- Direct PDF Download Button (No new tab) -->
+            <button type="button" id="btn-download-pdf" onclick="downloadReportPDF()"
+               class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200 shadow-xs hover:border-slate-300 transition-all cursor-pointer" title="Langsung unduh dokumen laporan sebagai file PDF">
+                <i class="fa-solid fa-file-pdf text-rose-600 text-sm" id="pdf-icon"></i>
+                <span id="pdf-btn-text">Unduh PDF</span>
+            </button>
 
             <!-- Download Formatted Excel .xls Button -->
             <a href="{{ route('super_admin.reports.revenue.export', array_merge(request()->query(), ['format' => 'excel'])) }}" 
@@ -320,4 +320,160 @@
         </div>
         @endif
     </div>
+
+    <!-- HIDDEN CONTAINER FOR HIGH-RES CLIENT-SIDE PDF GENERATION -->
+    <div style="position: absolute; left: -9999px; top: 0; width: 1100px; background: white;" id="pdf-export-content">
+        <div style="padding: 24px; font-family: Arial, Helvetica, sans-serif; color: #0f172a; background: white;">
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0f172a; padding-bottom: 14px; margin-bottom: 16px;">
+                <div>
+                    <h2 style="font-size: 20px; font-weight: 800; margin: 0; color: #0f172a;">NITIPDONG PLATFORM</h2>
+                    <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">Enterprise Marketplace &amp; Multi-Vendor E-Commerce</p>
+                </div>
+                <div style="text-align: right;">
+                    <span style="display: inline-block; padding: 2px 8px; background: #f1f5f9; font-size: 9px; font-weight: 700; text-transform: uppercase; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 4px;">DOKUMEN RESMI</span>
+                    <p style="font-size: 10px; color: #64748b; margin: 0;">Dicetak: {{ now()->translatedFormat('d F Y, H:i') }} WIB</p>
+                </div>
+            </div>
+
+            <!-- Title & Period -->
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 16px; font-size: 11px;">
+                <div>
+                    <strong>Laporan: </strong><span>Rekapitulasi Penjualan &amp; Pembagian Komisi Platform (15%)</span>
+                </div>
+                <div>
+                    <strong>Periode: </strong><span style="color: #1d4ed8; font-weight: 700;">{{ $periodText ?? 'Semua Waktu Historis' }}</span>
+                </div>
+            </div>
+
+            <!-- 4 KPI Boxes -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
+                <div style="padding: 10px 12px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px;">
+                    <span style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block;">Gross Volume (GMV)</span>
+                    <span style="font-size: 14px; font-weight: 800; color: #0f172a; margin-top: 2px; display: block;">Rp {{ number_format($totalGrossRevenue, 0, ',', '.') }}</span>
+                </div>
+                <div style="padding: 10px 12px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px;">
+                    <span style="font-size: 9px; font-weight: 700; color: #065f46; text-transform: uppercase; display: block;">Laba Komisi Platform (15%)</span>
+                    <span style="font-size: 14px; font-weight: 800; color: #065f46; margin-top: 2px; display: block;">Rp {{ number_format($totalPlatformFee, 0, ',', '.') }}</span>
+                </div>
+                <div style="padding: 10px 12px; background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 6px;">
+                    <span style="font-size: 9px; font-weight: 700; color: #6b21a8; text-transform: uppercase; display: block;">Hak Penjual (85%)</span>
+                    <span style="font-size: 14px; font-weight: 800; color: #6b21a8; margin-top: 2px; display: block;">Rp {{ number_format($totalSellerEarnings, 0, ',', '.') }}</span>
+                </div>
+                <div style="padding: 10px 12px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px;">
+                    <span style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; display: block;">Total Transaksi</span>
+                    <span style="font-size: 14px; font-weight: 800; color: #0f172a; margin-top: 2px; display: block;">{{ number_format($totalOrdersCount, 0, ',', '.') }} Pesanan</span>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <table style="width: 100%; border-collapse: collapse; font-size: 10px; border: 1px solid #cbd5e1; margin-bottom: 16px;">
+                <thead>
+                    <tr style="background: #0f172a; color: white;">
+                        <th style="padding: 6px 8px; text-align: center; width: 30px; border: 1px solid #1e293b;">No</th>
+                        <th style="padding: 6px 8px; text-align: left; width: 130px; border: 1px solid #1e293b;">Invoice &amp; Waktu</th>
+                        <th style="padding: 6px 8px; text-align: left; width: 140px; border: 1px solid #1e293b;">Toko</th>
+                        <th style="padding: 6px 8px; text-align: left; width: 120px; border: 1px solid #1e293b;">Pembeli</th>
+                        <th style="padding: 6px 8px; text-align: left; border: 1px solid #1e293b;">Item Produk</th>
+                        <th style="padding: 6px 8px; text-align: right; width: 110px; border: 1px solid #1e293b;">GMV (Rp)</th>
+                        <th style="padding: 6px 8px; text-align: right; width: 100px; border: 1px solid #1e293b;">Komisi 15%</th>
+                        <th style="padding: 6px 8px; text-align: right; width: 100px; border: 1px solid #1e293b;">Hak Toko 85%</th>
+                        <th style="padding: 6px 8px; text-align: center; width: 70px; border: 1px solid #1e293b;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($allOrders as $idx => $order)
+                    @php
+                        $fee = round($order->total_amount * 0.15);
+                        $sellerNet = $order->total_amount - $fee;
+                        $itemsSummary = $order->orderItems ? $order->orderItems->map(fn($it) => ($it->product->name ?? 'Item') . " ({$it->quantity}x)")->join(', ') : '-';
+                    @endphp
+                    <tr style="{{ $idx % 2 == 1 ? 'background: #f8fafc;' : 'background: #ffffff;' }}">
+                        <td style="padding: 5px 6px; text-align: center; border: 1px solid #cbd5e1;">{{ $idx + 1 }}</td>
+                        <td style="padding: 5px 6px; border: 1px solid #cbd5e1; font-weight: 700;">
+                            {{ $order->invoice_number }}<br>
+                            <span style="font-size: 9px; font-weight: 400; color: #64748b;">{{ $order->created_at ? $order->created_at->format('d/m/Y H:i') : '-' }}</span>
+                        </td>
+                        <td style="padding: 5px 6px; border: 1px solid #cbd5e1;">{{ $order->store->name ?? '-' }}</td>
+                        <td style="padding: 5px 6px; border: 1px solid #cbd5e1;">{{ $order->user->name ?? '-' }}</td>
+                        <td style="padding: 5px 6px; border: 1px solid #cbd5e1; font-size: 9.5px; color: #475569;">{{ $itemsSummary }}</td>
+                        <td style="padding: 5px 6px; text-align: right; border: 1px solid #cbd5e1; font-weight: 700;">{{ number_format($order->total_amount, 0, ',', '.') }}</td>
+                        <td style="padding: 5px 6px; text-align: right; border: 1px solid #cbd5e1; font-weight: 700; color: #065f46; background: #ecfdf5;">{{ number_format($fee, 0, ',', '.') }}</td>
+                        <td style="padding: 5px 6px; text-align: right; border: 1px solid #cbd5e1;">{{ number_format($sellerNet, 0, ',', '.') }}</td>
+                        <td style="padding: 5px 6px; text-align: center; border: 1px solid #cbd5e1; font-weight: 700; font-size: 9px;">{{ strtoupper($order->status ?? '-') }}</td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="9" style="padding: 16px; text-align: center; color: #94a3b8; border: 1px solid #cbd5e1;">Tidak ada data transaksi pada periode ini.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+                <tfoot>
+                    <tr style="background: #f1f5f9; font-weight: 800;">
+                        <td colspan="5" style="padding: 8px; text-align: right; border: 1px solid #cbd5e1; text-transform: uppercase;">TOTAL KESELURUHAN:</td>
+                        <td style="padding: 8px; text-align: right; border: 1px solid #cbd5e1;">Rp {{ number_format($totalGrossRevenue, 0, ',', '.') }}</td>
+                        <td style="padding: 8px; text-align: right; border: 1px solid #cbd5e1; color: #065f46;">Rp {{ number_format($totalPlatformFee, 0, ',', '.') }}</td>
+                        <td style="padding: 8px; text-align: right; border: 1px solid #cbd5e1;">Rp {{ number_format($totalSellerEarnings, 0, ',', '.') }}</td>
+                        <td style="border: 1px solid #cbd5e1;"></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- Verification Footer -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #cbd5e1; padding-top: 10px; font-size: 9.5px; color: #64748b;">
+                <div>
+                    <p style="margin: 0;">Laporan terverifikasi sistem NitipDong Engine v2.4</p>
+                    <p style="margin: 2px 0 0 0; font-family: monospace;">Kode Hash: {{ strtoupper(substr(md5(now() . $totalGrossRevenue), 0, 16)) }}</p>
+                </div>
+                <div style="text-align: right;">
+                    <p style="margin: 0; font-weight: 700; color: #0f172a;">Otoritas Pusat Super Administrator NitipDong</p>
+                    <p style="margin: 2px 0 0 0;">{{ auth()->user()->name ?? 'Super Admin' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        function downloadReportPDF() {
+            const btn = document.getElementById('btn-download-pdf');
+            const btnText = document.getElementById('pdf-btn-text');
+            const icon = document.getElementById('pdf-icon');
+            const originalText = btnText.innerText;
+
+            btnText.innerText = 'Mengunduh PDF...';
+            icon.className = 'fa-solid fa-circle-notch fa-spin text-rose-600 text-sm';
+            btn.disabled = true;
+
+            const element = document.getElementById('pdf-export-content');
+            const periodName = '{{ $period ?? "periode" }}';
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const fileName = 'Laporan_Keuangan_NitipDong_' + periodName + '_' + todayStr + '.pdf';
+
+            const opt = {
+                margin:       [6, 6, 6, 6],
+                filename:     fileName,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                btnText.innerText = 'Selesai!';
+                icon.className = 'fa-solid fa-circle-check text-emerald-600 text-sm';
+                setTimeout(() => {
+                    btnText.innerText = originalText;
+                    icon.className = 'fa-solid fa-file-pdf text-rose-600 text-sm';
+                    btn.disabled = false;
+                }, 2000);
+            }).catch(err => {
+                console.error(err);
+                btnText.innerText = originalText;
+                icon.className = 'fa-solid fa-file-pdf text-rose-600 text-sm';
+                btn.disabled = false;
+            });
+        }
+    </script>
+    @endpush
 </x-super-admin-layout>

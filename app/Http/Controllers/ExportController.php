@@ -103,19 +103,30 @@ class ExportController extends Controller
         $totalSellerEarnings = $totalGrossRevenue - $totalPlatformFee;
 
         // Paginated records for table view
-        $orders = $query->with(['store', 'user', 'orderItems.product'])
+        $orders = (clone $query)->with(['store', 'user', 'orderItems.product'])
             ->latest()
             ->paginate(15)
             ->withQueryString();
+
+        // Complete dataset for PDF generation & accurate export
+        $allOrders = (clone $query)->with(['store', 'user', 'orderItems.product'])
+            ->latest()
+            ->get();
+
+        $periodText = ($startDate && $endDate)
+            ? Carbon::parse($startDate)->translatedFormat('d F Y') . ' s/d ' . Carbon::parse($endDate)->translatedFormat('d F Y')
+            : 'Semua Waktu Historis';
 
         $stores = Store::where('status', 'approved')->orderBy('name')->get();
 
         return view('super_admin.reports.index', compact(
             'orders',
+            'allOrders',
             'stores',
             'period',
             'startDate',
             'endDate',
+            'periodText',
             'status',
             'storeId',
             'search',
