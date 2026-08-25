@@ -313,6 +313,9 @@
         setInterval(updateAdminClock, 1000);
         updateAdminClock();
     </script>
+    <x-chat-popup />
+    <x-toast-notifier />
+
     @stack('scripts')
 </body>
 </html>

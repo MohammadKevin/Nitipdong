@@ -229,11 +229,10 @@
                     this.isAiOpen = !!e.detail?.isOpen;
                 });
                 this.fetchConversations();
+                // Check for new messages periodically for real-time notifications
                 setInterval(() => {
-                    if (!this.activeConversation) {
-                        this.fetchConversations(false);
-                    }
-                }, 10000);
+                    this.fetchConversations(false);
+                }, 4000);
             },
 
             togglePopup() {
@@ -261,13 +260,101 @@
                 );
             },
 
+            playNotificationSound() {
+                try {
+                    const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioCtxClass) return;
+                    const audioCtx = new AudioCtxClass();
+                    
+                    const playChime = (freq, startTime, duration) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, startTime);
+                        gain.gain.setValueAtTime(0.12, startTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(startTime);
+                        osc.stop(startTime + duration);
+                    };
+                    
+                    const now = audioCtx.currentTime;
+                    // Double-ding (Slack style): C5 then E5
+                    playChime(523.25, now, 0.15);
+                    playChime(659.25, now + 0.12, 0.25);
+                } catch (e) {
+                    console.warn('Failed to play synthesized sound', e);
+                }
+            },
+
+            playChatSound() {
+                try {
+                    const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioCtxClass) return;
+                    const audioCtx = new AudioCtxClass();
+                    
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5 note
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.15);
+                } catch (e) {
+                    console.warn('Failed to play chat sound', e);
+                }
+            },
+
             async fetchConversations(showLoading = true) {
                 if (showLoading) this.isLoadingList = true;
                 try {
                     const res = await fetch('{{ route('chat.api.conversations') }}');
                     if (res.ok) {
                         const data = await res.json();
-                        this.conversations = data.conversations || [];
+                        
+                        const oldConversations = this.conversations || [];
+                        const newConversations = data.conversations || [];
+                        
+                        let hasNewMsg = false;
+                        newConversations.forEach(newConv => {
+                            const oldConv = oldConversations.find(o => o.id === newConv.id);
+                            const oldUnread = oldConv ? oldConv.unread_count : 0;
+                            
+                            // If unread count has increased
+                            if (newConv.unread_count > oldUnread) {
+                                const isCurrentActive = this.activeConversation && this.activeConversation.id === newConv.id;
+                                if (!this.isOpen || !isCurrentActive) {
+                                    hasNewMsg = true;
+                                    
+                                    if (window.toast) {
+                                        window.toast.info(
+                                            newConv.last_message,
+                                            'Pesan baru dari ' + newConv.partner.name,
+                                            {
+                                                duration: 6000,
+                                                action: {
+                                                    label: 'Balas',
+                                                    onClick: () => {
+                                                        this.openPopup();
+                                                        this.openConversation(newConv);
+                                                    }
+                                                }
+                                            }
+                                        );
+                                    }
+                                }
+                            }
+                        });
+                        
+                        if (hasNewMsg) {
+                            this.playNotificationSound();
+                        }
+                        
+                        this.conversations = newConversations;
                         this.totalUnread = data.total_unread || 0;
                     }
                 } catch (e) {
@@ -290,7 +377,19 @@
                     const res = await fetch(`/chat/api/${convId}/messages`);
                     if (res.ok) {
                         const data = await res.json();
-                        this.messages = data.messages || [];
+                        const newMessages = data.messages || [];
+                        
+                        // Check if a new message has arrived in the active chat (from the partner)
+                        if (this.messages.length > 0 && newMessages.length > this.messages.length) {
+                            const lastNewMsg = newMessages[newMessages.length - 1];
+                            const lastOldMsg = this.messages[this.messages.length - 1];
+                            
+                            if (lastNewMsg.id !== lastOldMsg.id && !lastNewMsg.is_me) {
+                                this.playChatSound();
+                            }
+                        }
+                        
+                        this.messages = newMessages;
                         if (this.activeConversation) {
                             this.activeConversation.full_url = data.conversation.full_url;
                         }

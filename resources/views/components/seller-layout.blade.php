@@ -383,6 +383,9 @@
         updateClock();
     </script>
 
+    <x-chat-popup />
+    <x-toast-notifier />
+
     @stack('scripts')
 </body>
 </html>
