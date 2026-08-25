@@ -35,6 +35,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->append(CheckWebMaintenanceMode::class);
 
+        $middleware->trustProxies(at: '*');
+
         $middleware->redirectUsersTo(function (Request $request) {
             $user = $request->user();
             return match ($user?->role) {
