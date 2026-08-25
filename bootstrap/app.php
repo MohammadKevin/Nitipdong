@@ -29,6 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
             '/api/payment/notification',
             '/api/midtrans/notification',
             '/api/midtrans/callback',
+            'logout',
+            '/logout',
         ]);
 
         $middleware->append(CheckWebMaintenanceMode::class);
@@ -47,4 +49,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, Request $request) {
+            if ($request->is('logout') || $request->routeIs('logout')) {
+                \Illuminate\Support\Facades\Auth::guard('web')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return redirect('/');
+            }
+        });
     })->create();
