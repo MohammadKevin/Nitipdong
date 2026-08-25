@@ -17,6 +17,10 @@ import '../courier/courier_registration_screen.dart';
 import '../seller/seller_dashboard_screen.dart';
 import '../seller/seller_registration_screen.dart';
 import '../admin/admin_dashboard_screen.dart';
+import '../admin/store_approval_screen.dart';
+import '../admin/product_moderation_screen.dart';
+import '../admin/flash_sale_management_screen.dart';
+import '../admin/category_management_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -270,74 +274,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   _buildMenuDivider(),
 
-                  // 5. Buka Toko / Seller Center
-                  if (user?.role?.toLowerCase() == 'seller')
-                    _buildMenuItem(
-                      icon: Icons.storefront_rounded,
-                      title: 'Seller Center (Toko Saya)',
-                      badge: 'Toko Aktif 🛍️',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SellerDashboardScreen()),
-                        );
-                      },
-                    )
-                  else
-                    _buildMenuItem(
-                      icon: Icons.storefront_outlined,
-                      title: 'Buka Toko Jualan (Seller Center)',
-                      badge: 'Gratis 🛍️',
-                      onTap: () {
-                        if (!authProvider.isAuthenticated) {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
-                          return;
-                        }
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SellerRegistrationScreen()),
-                        );
-                      },
-                    ),
-                  _buildMenuDivider(),
-
-                  // 6. Mitra Kurir NitipDong (Mode Driver / Pendaftaran)
-                  if (user?.role?.toLowerCase() == 'courier' || user?.role?.toLowerCase() == 'kurir')
-                    _buildMenuItem(
-                      icon: Icons.delivery_dining_rounded,
-                      title: 'Dashboard Mitra Kurir (Mode Driver)',
-                      badge: 'Aktif 🛵',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const CourierHomeScreen()),
-                        );
-                      },
-                    )
-                  else
-                    _buildMenuItem(
-                      icon: Icons.two_wheeler_rounded,
-                      title: 'Gabung Jadi Mitra Kurir',
-                      badge: 'Daftar 🛵',
-                      onTap: () {
-                        if (!authProvider.isAuthenticated) {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
-                          return;
-                        }
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const CourierRegistrationScreen()),
-                        );
-                      },
-                    ),
-
-                  // 7. Super Admin / Admin Platform Control Panel
-                  if (authProvider.isAuthenticated && user != null && (user.role?.toLowerCase() == 'admin' || user.role?.toLowerCase() == 'super_admin')) ...[
+                  // 5. SUPER ADMIN SECTION (Khusus Role super_admin)
+                  if (authProvider.isAuthenticated && user != null && user.role.toLowerCase() == 'super_admin') ...[
                     _buildMenuDivider(),
                     _buildMenuItem(
                       icon: Icons.admin_panel_settings_rounded,
-                      title: 'Panel Kontrol Admin Platform',
-                      badge: 'Admin 👑',
+                      title: 'Panel Kontrol Super Admin',
+                      badge: 'Super Admin 👑',
                       onTap: () {
                         Navigator.push(
                           context,
@@ -345,6 +288,205 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                     ),
+                    _buildMenuDivider(),
+                    _buildMenuItem(
+                      icon: Icons.verified_user_rounded,
+                      title: 'Persetujuan Toko Mitra',
+                      badge: 'Verifikasi 🏪',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const StoreApprovalScreen()),
+                        );
+                      },
+                    ),
+                    _buildMenuDivider(),
+                    _buildMenuItem(
+                      icon: Icons.inventory_2_rounded,
+                      title: 'Moderasi & Validasi Produk',
+                      badge: 'Katalog 📦',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ProductModerationScreen()),
+                        );
+                      },
+                    ),
+                    _buildMenuDivider(),
+                    _buildMenuItem(
+                      icon: Icons.bolt_rounded,
+                      title: 'Manajemen Flash Sale & Promo',
+                      badge: 'Flash Sale ⚡',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const FlashSaleManagementScreen()),
+                        );
+                      },
+                    ),
+                    _buildMenuDivider(),
+                    _buildMenuItem(
+                      icon: Icons.category_rounded,
+                      title: 'Kelola Kategori Marketplace',
+                      badge: 'Kategori 🏷️',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const CategoryManagementScreen()),
+                        );
+                      },
+                    ),
+                    _buildMenuDivider(),
+                    _buildMenuItem(
+                      icon: Icons.storefront_rounded,
+                      title: 'Seller Center (Toko Jualan)',
+                      badge: 'Akses Penuh 🛍️',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const SellerDashboardScreen()),
+                        );
+                      },
+                    ),
+                    _buildMenuDivider(),
+                    _buildMenuItem(
+                      icon: Icons.delivery_dining_rounded,
+                      title: 'Dashboard Mitra Kurir (Mode Driver)',
+                      badge: 'Akses Penuh 🛵',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const CourierHomeScreen()),
+                        );
+                      },
+                    ),
+                  ]
+                  // 6. ADMIN SECTION (Khusus Role admin biasa)
+                  else if (authProvider.isAuthenticated && user != null && user.role.toLowerCase() == 'admin') ...[
+                    _buildMenuDivider(),
+                    _buildMenuItem(
+                      icon: Icons.admin_panel_settings_rounded,
+                      title: 'Panel Kontrol Admin Platform',
+                      badge: 'Admin 🛡️',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
+                        );
+                      },
+                    ),
+                    _buildMenuDivider(),
+                    _buildMenuItem(
+                      icon: Icons.verified_user_rounded,
+                      title: 'Persetujuan Toko Mitra',
+                      badge: 'Verifikasi 🏪',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const StoreApprovalScreen()),
+                        );
+                      },
+                    ),
+                    _buildMenuDivider(),
+                    _buildMenuItem(
+                      icon: Icons.inventory_2_rounded,
+                      title: 'Moderasi & Validasi Produk',
+                      badge: 'Katalog 📦',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ProductModerationScreen()),
+                        );
+                      },
+                    ),
+                    _buildMenuDivider(),
+                    _buildMenuItem(
+                      icon: Icons.bolt_rounded,
+                      title: 'Manajemen Flash Sale & Promo',
+                      badge: 'Flash Sale ⚡',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const FlashSaleManagementScreen()),
+                        );
+                      },
+                    ),
+                    _buildMenuDivider(),
+                    _buildMenuItem(
+                      icon: Icons.category_rounded,
+                      title: 'Kelola Kategori Marketplace',
+                      badge: 'Kategori 🏷️',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const CategoryManagementScreen()),
+                        );
+                      },
+                    ),
+                  ]
+                  // 7. SELLER & COURIER & BUYER
+                  else ...[
+                    _buildMenuDivider(),
+                    // Buka Toko / Seller Center
+                    if (user?.role.toLowerCase() == 'seller')
+                      _buildMenuItem(
+                        icon: Icons.storefront_rounded,
+                        title: 'Seller Center (Toko Saya)',
+                        badge: 'Toko Aktif 🛍️',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const SellerDashboardScreen()),
+                          );
+                        },
+                      )
+                    else
+                      _buildMenuItem(
+                        icon: Icons.storefront_outlined,
+                        title: 'Buka Toko Jualan (Seller Center)',
+                        badge: 'Gratis 🛍️',
+                        onTap: () {
+                          if (!authProvider.isAuthenticated) {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+                            return;
+                          }
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const SellerRegistrationScreen()),
+                          );
+                        },
+                      ),
+                    _buildMenuDivider(),
+
+                    // Mitra Kurir NitipDong (Mode Driver / Pendaftaran)
+                    if (user?.role.toLowerCase() == 'courier' || user?.role.toLowerCase() == 'kurir')
+                      _buildMenuItem(
+                        icon: Icons.delivery_dining_rounded,
+                        title: 'Dashboard Mitra Kurir (Mode Driver)',
+                        badge: 'Aktif 🛵',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const CourierHomeScreen()),
+                          );
+                        },
+                      )
+                    else
+                      _buildMenuItem(
+                        icon: Icons.two_wheeler_rounded,
+                        title: 'Gabung Jadi Mitra Kurir',
+                        badge: 'Daftar 🛵',
+                        onTap: () {
+                          if (!authProvider.isAuthenticated) {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+                            return;
+                          }
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const CourierRegistrationScreen()),
+                          );
+                        },
+                      ),
                   ],
 
                 ],

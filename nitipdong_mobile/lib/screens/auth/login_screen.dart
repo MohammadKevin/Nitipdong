@@ -49,14 +49,12 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      if (widget.isFromSplash) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MainNavScreen()),
-        );
-      } else {
-        Navigator.pop(context);
-      }
+      // Selalu arahkan ke dashboard utama belanja (MainNavScreen) untuk semua role
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const MainNavScreen()),
+        (route) => false,
+      );
     }
   }
 

@@ -3,6 +3,12 @@ import 'package:intl/intl.dart';
 import '../../theme/app_theme.dart';
 import '../../services/api_service.dart';
 import '../main_nav_screen.dart';
+import 'store_approval_screen.dart';
+import 'product_moderation_screen.dart';
+import 'flash_sale_management_screen.dart';
+import 'category_management_screen.dart';
+import '../seller/seller_dashboard_screen.dart';
+import '../courier/courier_home_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({Key? key}) : super(key: key);
@@ -272,6 +278,95 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
           ),
           const SizedBox(height: 20),
 
+          // Quick Action Management Modules
+          const Text('Modul Manajemen & Operasional ⚡', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 10),
+
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppTheme.border),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildQuickActionBtn(
+                        icon: Icons.verified_user_rounded,
+                        label: 'Persetujuan Toko',
+                        color: Colors.amber.shade700,
+                        bgColor: Colors.amber.shade50,
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StoreApprovalScreen())),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildQuickActionBtn(
+                        icon: Icons.inventory_2_rounded,
+                        label: 'Moderasi Produk',
+                        color: Colors.blue.shade700,
+                        bgColor: Colors.blue.shade50,
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProductModerationScreen())),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildQuickActionBtn(
+                        icon: Icons.bolt_rounded,
+                        label: 'Flash Sale',
+                        color: Colors.red.shade700,
+                        bgColor: Colors.red.shade50,
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FlashSaleManagementScreen())),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildQuickActionBtn(
+                        icon: Icons.category_rounded,
+                        label: 'Kelola Kategori',
+                        color: Colors.teal.shade700,
+                        bgColor: Colors.teal.shade50,
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoryManagementScreen())),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildQuickActionBtn(
+                        icon: Icons.storefront_rounded,
+                        label: 'Seller Center',
+                        color: Colors.purple.shade700,
+                        bgColor: Colors.purple.shade50,
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SellerDashboardScreen())),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildQuickActionBtn(
+                        icon: Icons.delivery_dining_rounded,
+                        label: 'Mode Driver Kurir',
+                        color: Colors.green.shade700,
+                        bgColor: Colors.green.shade50,
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CourierHomeScreen())),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+
           // Recent Orders Header
           const Text('Transaksi Terbaru Platform ⏱️', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
           const SizedBox(height: 10),
@@ -345,6 +440,42 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> with Single
           ),
           Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppTheme.textPrimary)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActionBtn({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required Color bgColor,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.2)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: color),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: color.withOpacity(0.6), size: 16),
+          ],
+        ),
       ),
     );
   }
