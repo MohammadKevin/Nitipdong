@@ -13,150 +13,150 @@
                 <h1 class="text-xl font-bold text-slate-900 tracking-tight">
                     Monitoring Pesanan &amp; Logistik
                 </h1>
-                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200">
-                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
-                    Logistik &amp; Escrow
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
+                    Live Escrow
                 </span>
             </div>
-            <p class="text-xs text-slate-500 mt-1">Pantau seluruh alur transaksi, status resi pengiriman kurir, dan intervensi operasional pesanan.</p>
+            <p class="text-xs text-slate-500 mt-1">Pantau seluruh alur transaksi marketplace, pelacakan resi kurir, dan intervensi operasional pesanan.</p>
         </div>
 
-        <div class="flex items-center gap-2 text-xs text-slate-500 bg-white px-3 py-1.5 rounded-xl border border-slate-200/90 shadow-xs shrink-0 self-start sm:self-auto">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>Total Transaksi: <strong class="text-slate-800 font-semibold">{{ number_format($totalOrders, 0, ',', '.') }} Order</strong></span>
+        <div class="flex items-center gap-2 text-xs text-slate-600 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-xs shrink-0 self-start sm:self-auto">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Total Transaksi: <strong class="text-slate-900 font-bold font-mono-num">{{ number_format($totalOrders, 0, ',', '.') }} Pesanan</strong></span>
         </div>
     </div>
 
     <!-- 5 EXECUTIVE KPI CARDS -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5">
         
-        <!-- CARD 1: TOTAL ORDER -->
-        <div class="bg-white p-4.5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
+        <!-- CARD 1: TOTAL PESANAN -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between">
-                    <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 border border-blue-200/70 flex items-center justify-center shrink-0">
-                        <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                    <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 border border-blue-200/70 flex items-center justify-center shadow-2xs shrink-0">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                             <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>
                         </svg>
                     </div>
-                    <span class="inline-flex items-center text-[10px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200/70">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200/70">
                         Semua
                     </span>
                 </div>
-                <div class="mt-3">
-                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Pesanan</p>
-                    <h3 class="text-xl font-bold text-slate-900 tracking-tight mt-0.5">
-                        {{ number_format($totalOrders, 0, ',', '.') }} <span class="text-xs font-normal text-slate-400">Order</span>
+                <div class="mt-4">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Pesanan</p>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1 font-mono-num">
+                        {{ number_format($totalOrders, 0, ',', '.') }} <span class="text-xs font-medium text-slate-400">Order</span>
                     </h3>
                 </div>
             </div>
-            <div class="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-500 flex justify-between">
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                 <span>Platform:</span>
-                <span class="font-medium text-slate-700">100% Tercatat</span>
+                <span class="font-semibold text-slate-700">100% Tercatat</span>
             </div>
         </div>
 
         <!-- CARD 2: DIPROSES -->
-        <div class="bg-white p-4.5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between">
-                    <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 border border-amber-200/70 flex items-center justify-center shrink-0">
-                        <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                    <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 border border-amber-200/70 flex items-center justify-center shadow-2xs shrink-0">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                             <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                         </svg>
                     </div>
-                    <span class="inline-flex items-center text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/70">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200/70">
                         Di Toko
                     </span>
                 </div>
-                <div class="mt-3">
-                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Sedang Diproses</p>
-                    <h3 class="text-xl font-bold text-slate-900 tracking-tight mt-0.5">
-                        {{ number_format($processingOrders, 0, ',', '.') }} <span class="text-xs font-normal text-slate-400">Order</span>
+                <div class="mt-4">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Sedang Diproses</p>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1 font-mono-num">
+                        {{ number_format($processingOrders, 0, ',', '.') }} <span class="text-xs font-medium text-slate-400">Order</span>
                     </h3>
                 </div>
             </div>
-            <div class="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-500 flex justify-between">
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                 <span>Packing:</span>
-                <span class="font-medium text-amber-700">{{ $processingOrders }} Siap kirim</span>
+                <span class="font-semibold text-amber-700">{{ $processingOrders }} Siap kirim</span>
             </div>
         </div>
 
         <!-- CARD 3: DIKIRIM -->
-        <div class="bg-white p-4.5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between">
-                    <div class="w-9 h-9 rounded-xl bg-cyan-50 text-cyan-600 border border-cyan-200/70 flex items-center justify-center shrink-0">
-                        <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                    <div class="w-11 h-11 rounded-xl bg-cyan-50 text-cyan-600 border border-cyan-200/70 flex items-center justify-center shadow-2xs shrink-0">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                             <rect width="16" height="13" x="1" y="3" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
                         </svg>
                     </div>
-                    <span class="inline-flex items-center text-[10px] font-semibold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-200/70">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-cyan-700 bg-cyan-50 border border-cyan-200/70">
                         Kurir
                     </span>
                 </div>
-                <div class="mt-3">
-                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Dalam Pengiriman</p>
-                    <h3 class="text-xl font-bold text-slate-900 tracking-tight mt-0.5">
-                        {{ number_format($shippedOrders, 0, ',', '.') }} <span class="text-xs font-normal text-slate-400">Order</span>
+                <div class="mt-4">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Dalam Pengiriman</p>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1 font-mono-num">
+                        {{ number_format($shippedOrders, 0, ',', '.') }} <span class="text-xs font-medium text-slate-400">Order</span>
                     </h3>
                 </div>
             </div>
-            <div class="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-500 flex justify-between">
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                 <span>Perjalanan:</span>
-                <span class="font-medium text-cyan-700">{{ $shippedOrders }} Dalam rute</span>
+                <span class="font-semibold text-cyan-700">{{ $shippedOrders }} Dalam rute</span>
             </div>
         </div>
 
         <!-- CARD 4: SELESAI -->
-        <div class="bg-white p-4.5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between">
-                    <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/70 flex items-center justify-center shrink-0">
-                        <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200/70 flex items-center justify-center shadow-2xs shrink-0">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
                         </svg>
                     </div>
-                    <span class="inline-flex items-center text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/70">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/70">
                         Sukses
                     </span>
                 </div>
-                <div class="mt-3">
-                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Pesanan Selesai</p>
-                    <h3 class="text-xl font-bold text-slate-900 tracking-tight mt-0.5">
-                        {{ number_format($completedOrders, 0, ',', '.') }} <span class="text-xs font-normal text-slate-400">Order</span>
+                <div class="mt-4">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pesanan Selesai</p>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1 font-mono-num">
+                        {{ number_format($completedOrders, 0, ',', '.') }} <span class="text-xs font-medium text-slate-400">Order</span>
                     </h3>
                 </div>
             </div>
-            <div class="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-500 flex justify-between">
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                 <span>Diterima buyer:</span>
-                <span class="font-medium text-emerald-700">{{ number_format($completedOrders, 0, ',', '.') }} Sukses</span>
+                <span class="font-semibold text-emerald-700">{{ number_format($completedOrders, 0, ',', '.') }} Sukses</span>
             </div>
         </div>
 
         <!-- CARD 5: BATAL / KENDALA -->
-        <div class="bg-white p-4.5 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col justify-between hover:border-slate-300 hover:shadow-sm transition-all sm:col-span-2 lg:col-span-1 xl:col-span-1">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all flex flex-col justify-between sm:col-span-2 lg:col-span-1 xl:col-span-1">
             <div>
                 <div class="flex items-center justify-between">
-                    <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 border border-rose-200/70 flex items-center justify-center shrink-0">
-                        <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+                    <div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 border border-rose-200/70 flex items-center justify-center shadow-2xs shrink-0">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                             <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
                         </svg>
                     </div>
-                    <span class="inline-flex items-center text-[10px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200/70">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold text-rose-700 bg-rose-50 border border-rose-200/70">
                         Batal
                     </span>
                 </div>
-                <div class="mt-3">
-                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Batal / Kendala</p>
-                    <h3 class="text-xl font-bold text-slate-900 tracking-tight mt-0.5">
-                        {{ number_format($cancelledOrders, 0, ',', '.') }} <span class="text-xs font-normal text-slate-400">Order</span>
+                <div class="mt-4">
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Batal / Kendala</p>
+                    <h3 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1 font-mono-num">
+                        {{ number_format($cancelledOrders, 0, ',', '.') }} <span class="text-xs font-medium text-slate-400">Order</span>
                     </h3>
                 </div>
             </div>
-            <div class="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-500 flex justify-between">
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                 <span>Pembatalan:</span>
-                <span class="font-medium text-rose-700">{{ number_format($cancelledOrders, 0, ',', '.') }} Kasus</span>
+                <span class="font-semibold text-rose-700">{{ number_format($cancelledOrders, 0, ',', '.') }} Kasus</span>
             </div>
         </div>
     </div>
@@ -197,7 +197,7 @@
             <!-- Search Form -->
             <form action="{{ route('admin.orders.index') }}" method="GET" class="relative">
                 <input type="hidden" name="status" value="{{ $status }}">
-                <input type="text" name="search" value="{{ $search }}" class="w-full lg:w-72 h-9 pl-9 pr-3 text-xs rounded-xl border border-slate-200 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder:text-slate-400" placeholder="Cari invoice, resi, pembeli, toko...">
+                <input type="text" name="search" value="{{ $search }}" class="w-full lg:w-80 h-9 pl-9 pr-3 text-xs rounded-xl border border-slate-200 bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors placeholder:text-slate-400" placeholder="Cari invoice, resi, pembeli, toko...">
                 <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
                     <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
                 </svg>
@@ -298,7 +298,7 @@
                             <div class="flex items-center justify-center gap-1.5">
                                 <a href="{{ route('orders.invoice', $order) }}" target="_blank" class="p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition-colors" title="Lihat Invoice">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/>
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
                                     </svg>
                                 </a>
 
