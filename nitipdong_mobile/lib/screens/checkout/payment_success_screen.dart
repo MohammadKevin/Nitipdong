@@ -25,14 +25,15 @@ class PaymentSuccessScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const MainNavScreen(initialIndex: 0)),
           (route) => false,
         );
-        return false;
       },
       child: Scaffold(
         backgroundColor: Colors.white,

@@ -68,8 +68,8 @@ class _AppUpdateProgressScreenState extends State<AppUpdateProgressScreen> with 
   Widget build(BuildContext context) {
     final currentVer = ApiService.currentAppVersion;
 
-    return WillPopScope(
-      onWillPop: () async => !widget.isForceUpdate,
+    return PopScope(
+      canPop: !widget.isForceUpdate,
       child: Scaffold(
         backgroundColor: const Color(0xFF0B1528),
         appBar: AppBar(
