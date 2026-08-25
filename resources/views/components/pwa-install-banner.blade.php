@@ -78,8 +78,8 @@
         
         <div class="flex items-start gap-3.5">
             {{-- App Icon --}}
-            <div class="w-12 h-12 rounded-xl bg-white p-1 border border-cyan-300 shadow-md shrink-0 overflow-hidden">
-                <img src="{{ asset('img/saksershop-logo.png') }}" alt="NitipDong Icon" class="w-full h-full object-cover">
+            <div class="w-12 h-12 rounded-xl bg-white p-1.5 border border-cyan-300 shadow-md shrink-0 overflow-hidden">
+                <img src="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}" alt="NitipDong Icon" class="w-full h-full object-contain">
             </div>
 
             {{-- Info & Text --}}

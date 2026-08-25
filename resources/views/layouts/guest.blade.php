@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="icon" type="image/png" href="{{ asset('img/saksershop-logo.png') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}">
     <style>
         /* Mobile: dark navy full-page gradient */
         .auth-page-bg {
@@ -49,8 +49,8 @@
 
         {{-- Logo --}}
         <div class="relative z-10 flex items-center gap-3 mt-24 {{ $reverse ? 'mr-20 justify-start' : 'ml-20 justify-start' }}">
-            <div class="w-12 h-12 rounded-2xl overflow-hidden bg-cyan-50 border border-cyan-200 flex items-center justify-center shadow-md">
-                <img src="{{ asset('img/saksershop-logo.png') }}" alt="NitipDong" class="w-full h-full object-cover">
+            <div class="w-12 h-12 rounded-2xl overflow-hidden bg-cyan-50 border border-cyan-200 flex items-center justify-center shadow-md p-1.5">
+                <img src="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}" alt="NitipDong" class="w-full h-full object-contain">
             </div>
             <span class="font-extrabold text-3xl tracking-tight text-white">
                 Nitip<span class="text-cyan-400">Dong</span>
@@ -134,8 +134,8 @@
             </a>
 
             <div class="flex items-center gap-2.5 mb-3">
-                <div class="w-10 h-10 rounded-xl overflow-hidden border border-cyan-200 bg-cyan-50 flex items-center justify-center shadow-xs">
-                    <img src="{{ asset('img/saksershop-logo.png') }}" alt="NitipDong Logo" class="w-full h-full object-cover">
+                <div class="w-10 h-10 rounded-xl overflow-hidden border border-cyan-200 bg-cyan-50 flex items-center justify-center shadow-xs p-1">
+                    <img src="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}" alt="NitipDong Logo" class="w-full h-full object-contain">
                 </div>
                 <span class="text-2xl font-extrabold text-white tracking-tight">Nitip<span class="text-cyan-400">Dong</span></span>
             </div>
@@ -196,7 +196,7 @@
     <div class="relative flex items-center justify-center mb-6">
         <div class="w-16 h-16 rounded-full border-4 border-cyan-500/20 border-t-cyan-400 animate-spin shadow-[0_0_15px_rgba(6,182,212,0.25)]"></div>
         <div class="w-8 h-8 rounded-lg overflow-hidden absolute animate-pulse">
-            <img src="{{ asset('img/saksershop-logo.png') }}" alt="Logo" class="w-full h-full object-cover">
+            <img src="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}" alt="Logo" class="w-full h-full object-contain">
         </div>
     </div>
     <h3 class="text-base font-extrabold text-white tracking-tight animate-pulse">Menghubungkan ke Akun Anda</h3>

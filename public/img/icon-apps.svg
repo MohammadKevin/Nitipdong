@@ -1,45 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Background Gradient -->
-    <linearGradient id="squircleBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#f1f5f9"/>
+    <linearGradient id="ribbon" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#0B6E86"/>
     </linearGradient>
-    
-    <!-- Subtle Drop Shadow -->
-    <filter id="iconShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.08"/>
-    </filter>
-
-    <!-- Text Path Arc -->
-    <path id="textArcTop" d="M 120 256 A 136 136 0 0 1 392 256" fill="none" />
-    <path id="textArcBottom" d="M 392 256 A 136 136 0 0 1 120 256" fill="none" />
   </defs>
 
-  <!-- Squircle / Rounded-Square App Container -->
-  <rect x="16" y="16" width="480" height="480" rx="108" ry="108" fill="url(#squircleBg)" filter="url(#iconShadow)" stroke="#e2e8f0" stroke-width="4"/>
+  <!-- the N, drawn as one continuous folded ribbon -->
+  <path d="M17,52 L17,19 L47,52 L47,19"
+        fill="none" stroke="url(#ribbon)" stroke-width="9"
+        stroke-linecap="round" stroke-linejoin="round"/>
 
-  <!-- Outer Ring Band -->
-  <circle cx="256" cy="256" r="190" fill="#e5e5e5" />
-  <circle cx="256" cy="256" r="140" fill="#ffffff" stroke="#d4d4d4" stroke-width="3"/>
-
-  <!-- Arc Typography: NITIPDONG -->
-  <text font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="44" fill="#262626" letter-spacing="4">
-    <textPath href="#textArcTop" startOffset="50%" text-anchor="middle">NITIPDONG</textPath>
-  </text>
-
-  <!-- Arc Typography: FRESH TREATS EVERY DAY -->
-  <text font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="22" fill="#404040" letter-spacing="3">
-    <textPath href="#textArcBottom" startOffset="50%" text-anchor="middle">&#8226; FRESH TREATS EVERY DAY &#8226;</textPath>
-  </text>
-
-  <!-- Triple Concentric Nested Rings (NitipDong Motif) -->
-  <g fill="none" stroke="#262626" stroke-linecap="round" stroke-linejoin="round">
-    <!-- Outer Arc Ring -->
-    <circle cx="256" cy="256" r="76" stroke-width="16"/>
-    <!-- Middle Arc Ring -->
-    <circle cx="256" cy="268" r="52" stroke-width="14"/>
-    <!-- Inner Small Ring -->
-    <circle cx="256" cy="280" r="30" stroke-width="12"/>
-  </g>
+  <!-- tag-knot ring: the ribbon's end loops into a punched tag hole -->
+  <circle cx="17" cy="12" r="6.4" fill="none" stroke="#0C1E2B" stroke-width="3.2"/>
 </svg>

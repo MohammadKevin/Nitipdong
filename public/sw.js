@@ -1,7 +1,9 @@
-const CACHE_NAME = 'nitipdong-pwa-v1';
+const CACHE_NAME = 'nitipdong-pwa-v2';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
+  '/icon-app-web-terbaru/nitipdong-icon-mark.svg',
+  '/icon-app-web-terbaru/nitipdong-logo-primary.png',
   '/img/saksershop-logo.png',
   '/img/icons/icon-192x192.png',
   '/img/icons/icon-512x512.png',

@@ -52,8 +52,8 @@
         <div class="flex items-center justify-between h-16 gap-4">
 
             <a href="{{ auth()->check() ? url('/?is_from_login=true') : url('/') }}" class="flex items-center gap-2.5 shrink-0 group" aria-label="NitipDong Home">
-                <div class="w-9 h-9 rounded-xl overflow-hidden border border-cyan-200 bg-cyan-50 flex items-center justify-center shadow-xs">
-                    <img src="{{ asset('img/saksershop-logo.png') }}" alt="NitipDong Logo" class="w-full h-full object-cover">
+                <div class="w-9 h-9 rounded-xl overflow-hidden border border-cyan-200 bg-cyan-50 flex items-center justify-center shadow-xs p-1">
+                    <img src="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}" alt="NitipDong Logo" class="w-full h-full object-contain">
                 </div>
                 <div>
                     <span class="font-bold text-base tracking-tight text-slate-900 leading-none block">

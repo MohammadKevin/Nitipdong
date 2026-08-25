@@ -18,7 +18,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="icon" type="image/png" href="{{ asset('img/saksershop-logo.png') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}">
 
     <style>
         body {
@@ -75,8 +75,8 @@
         <!-- HEADER / BRANDING -->
         <div class="h-16 px-4 border-b border-[#1B1F26] flex items-center justify-between bg-[#0E1116]">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-sm border border-[#262B33] bg-[#12151A] flex items-center justify-center shrink-0 relative">
-                    <img src="{{ asset('img/saksershop-logo.png') }}" alt="Logo" class="w-5 h-5 object-contain opacity-90">
+                <div class="w-9 h-9 rounded-sm border border-[#262B33] bg-[#12151A] flex items-center justify-center shrink-0 relative p-1">
+                    <img src="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}" alt="Logo" class="w-full h-full object-contain">
                     <span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#B8441A] ring-2 ring-[#0E1116]"></span>
                 </div>
                 <div class="flex flex-col min-w-0">

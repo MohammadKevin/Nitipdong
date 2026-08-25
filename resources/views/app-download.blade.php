@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Download Aplikasi NitipDong — Android & iOS</title>
     <meta name="description" content="Download aplikasi NitipDong untuk Android (APK) dan iOS iPhone (IPA). Belanja online lebih mudah, cepat, dan aman langsung dari genggaman Anda.">
-    <link rel="icon" href="{{ asset('img/icon-apps.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}" type="image/svg+xml">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -229,7 +229,7 @@
     {{-- Navbar --}}
     <nav>
         <a href="{{ url('/') }}" class="logo">
-            <img src="{{ asset('img/saksershop-logo.png') }}" alt="NitipDong">
+            <img src="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}" alt="NitipDong">
             <span>Nitip<em>Dong</em></span>
         </a>
         <a href="{{ url('/') }}" class="btn-nav">

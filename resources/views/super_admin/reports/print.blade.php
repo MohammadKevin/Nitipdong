@@ -55,7 +55,7 @@
     <div class="border-b-2 border-slate-900 pb-5 mb-6">
         <div class="flex justify-between items-start">
             <div class="flex items-center gap-3">
-                <img src="{{ asset('img/saksershop-logo.png') }}" alt="Logo" class="w-10 h-10 object-contain">
+                <img src="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}" alt="Logo" class="w-10 h-10 object-contain">
                 <div>
                     <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">NITIPDONG PLATFORM</h1>
                     <p class="text-xs text-slate-500 font-mono-num">Enterprise Marketplace & Multi-Vendor E-Commerce</p>
