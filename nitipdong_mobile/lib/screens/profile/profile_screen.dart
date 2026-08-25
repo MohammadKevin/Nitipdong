@@ -275,7 +275,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildMenuDivider(),
 
                   // 5. SUPER ADMIN SECTION (Khusus Role super_admin)
-                  if (authProvider.isAuthenticated && user != null && user.role.toLowerCase() == 'super_admin') ...[
+                  if (authProvider.isAuthenticated && user != null && user.role?.toLowerCase() == 'super_admin') ...[
                     _buildMenuDivider(),
                     _buildMenuItem(
                       icon: Icons.admin_panel_settings_rounded,
@@ -362,7 +362,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ]
                   // 6. ADMIN SECTION (Khusus Role admin biasa)
-                  else if (authProvider.isAuthenticated && user != null && user.role.toLowerCase() == 'admin') ...[
+                  else if (authProvider.isAuthenticated && user != null && user.role?.toLowerCase() == 'admin') ...[
                     _buildMenuDivider(),
                     _buildMenuItem(
                       icon: Icons.admin_panel_settings_rounded,
@@ -428,7 +428,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   else ...[
                     _buildMenuDivider(),
                     // Buka Toko / Seller Center
-                    if (user?.role.toLowerCase() == 'seller')
+                    if (user?.role?.toLowerCase() == 'seller')
                       _buildMenuItem(
                         icon: Icons.storefront_rounded,
                         title: 'Seller Center (Toko Saya)',
@@ -459,7 +459,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _buildMenuDivider(),
 
                     // Mitra Kurir NitipDong (Mode Driver / Pendaftaran)
-                    if (user?.role.toLowerCase() == 'courier' || user?.role.toLowerCase() == 'kurir')
+                    if (user?.role?.toLowerCase() == 'courier' || user?.role?.toLowerCase() == 'kurir')
                       _buildMenuItem(
                         icon: Icons.delivery_dining_rounded,
                         title: 'Dashboard Mitra Kurir (Mode Driver)',
