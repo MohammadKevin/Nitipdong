@@ -78,7 +78,7 @@ Route::get('/system/reset-transactions', function (\Illuminate\Http\Request $req
 Route::get('/download/app', function (\Illuminate\Http\Request $request) {
     $userAgent = strtolower($request->header('User-Agent', ''));
     $isIos = str_contains($userAgent, 'iphone') || str_contains($userAgent, 'ipad') || str_contains($userAgent, 'ipod');
-    $version = env('APP_MOBILE_LATEST_VERSION', '2.5.1');
+    $version = env('APP_MOBILE_LATEST_VERSION', '2.5.2');
 
     if ($isIos) {
         $paths = [
