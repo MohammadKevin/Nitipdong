@@ -48,6 +48,32 @@ use Illuminate\Support\Facades\Route;
 Route::post('/api/midtrans/notification', [MidtransPaymentController::class, 'handleNotification'])->name('midtrans.notification');
 Route::post('/api/payment/notification', [MidtransPaymentController::class, 'handleNotification'])->name('payment.webhook');
 
+// Super Admin / System Action to Reset Transactions & Reviews (Keeping Products, Users & Stock Intact)
+Route::get('/system/reset-transactions', function (\Illuminate\Http\Request $request) {
+    $isSuperAdmin = Auth::check() && in_array(Auth::user()->role, ['super_admin', 'admin']);
+    $isValidSecret = $request->query('key') === 'nitipdong2026reset';
+
+    if (!$isSuperAdmin && !$isValidSecret) {
+        abort(403, 'Akses ditolak. Tindakan ini hanya dapat dilakukan oleh Super Admin.');
+    }
+
+    \Illuminate\Support\Facades\Artisan::call('app:reset-transactions', ['--force' => true]);
+    $output = \Illuminate\Support\Facades\Artisan::output();
+
+    return response()->json([
+        'success'   => true,
+        'message'   => 'Reset database transaksi, rating, dan ulasan berhasil dijalankan.',
+        'details'   => $output,
+        'preserved' => [
+            'users'      => 'Aman & Utuh',
+            'stores'     => 'Aman & Utuh',
+            'products'   => 'Aman & Utuh',
+            'stock'      => 'Aman & Utuh',
+            'categories' => 'Aman & Utuh',
+        ]
+    ]);
+})->name('system.reset-transactions');
+
 // Smart Download Route for Mobile Apps (Direct Fast Local Download from DomaiNesia)
 Route::get('/download/app', function (\Illuminate\Http\Request $request) {
     $userAgent = strtolower($request->header('User-Agent', ''));

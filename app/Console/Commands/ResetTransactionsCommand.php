@@ -36,14 +36,16 @@ class ResetTransactionsCommand extends Command
 
         Schema::disableForeignKeyConstraints();
 
-        // 1. Truncate tabel riwayat transaksi
+        // 1. Truncate tabel riwayat transaksi, ulasan, dan notifikasi
+        if (Schema::hasTable('reviews')) DB::table('reviews')->truncate();
+        if (Schema::hasTable('product_discussions')) DB::table('product_discussions')->truncate();
+        if (Schema::hasTable('order_complaints')) DB::table('order_complaints')->truncate();
+        if (Schema::hasTable('complaints')) DB::table('complaints')->truncate();
         if (Schema::hasTable('order_items')) DB::table('order_items')->truncate();
         if (Schema::hasTable('orders')) DB::table('orders')->truncate();
-        if (Schema::hasTable('reviews')) DB::table('reviews')->truncate();
-        if (Schema::hasTable('complaints')) DB::table('complaints')->truncate();
-        if (Schema::hasTable('withdrawals')) DB::table('withdrawals')->truncate();
         if (Schema::hasTable('carts')) DB::table('carts')->truncate();
         if (Schema::hasTable('wishlists')) DB::table('wishlists')->truncate();
+        if (Schema::hasTable('withdrawals')) DB::table('withdrawals')->truncate();
         if (Schema::hasTable('app_notifications')) DB::table('app_notifications')->truncate();
 
         // 2. Reset Saldo Toko ke Rp 0
@@ -53,12 +55,18 @@ class ResetTransactionsCommand extends Command
             ]);
         }
 
-        // 3. Reset Penjualan Produk & Pulihkan Stok ke 50 Unit
+        // 3. Reset Voucher used_count
+        if (Schema::hasTable('vouchers')) {
+            DB::table('vouchers')->update([
+                'used_count' => 0,
+            ]);
+        }
+
+        // 4. Reset Jumlah Terjual (sold_count) dan Rating Produk (STOK & DATA PRODUK TETAP AMAN)
         if (Schema::hasTable('products')) {
             DB::table('products')->update([
                 'sold_count' => 0,
                 'rating'     => 0.0,
-                'stock'      => 50,
             ]);
         }
 
@@ -66,14 +74,12 @@ class ResetTransactionsCommand extends Command
 
         $this->newLine();
         $this->info('===========================================================');
-        $this->info('🎉 DATABASE TRANSAKSI BERHASIL DI-RESET BERSIH!');
+        $this->info('🎉 DATABASE TRANSAKSI, ULASAN & RATING BERHASIL DI-RESET!');
         $this->info('===========================================================');
-        $this->line('  • Seluruh pesanan (#INV-...) & rincian item telah dihapus.');
-        $this->line('  • Seluruh ulasan bintang & komplain telah dibersihkan.');
-        $this->line('  • Keranjang & wishlist pelanggan telah dikosongkan.');
-        $this->line('  • Stok produk dipulihkan kembali ke 50 unit (0 terjual).');
-        $this->line('  • Saldo dompet semua toko resmi kembali ke Rp 0.');
-        $this->line('  • Akun User, Seller, Toko, dan Produk tetap AMAN terjaga.');
+        $this->line('  • Seluruh ulasan pembeli (reviews) & rating produk telah di-reset ke 0.');
+        $this->line('  • Jumlah terjual / pembeli (sold_count) telah di-reset ke 0.');
+        $this->line('  • Seluruh pesanan, rincian item, keranjang & komplain telah dibersihkan.');
+        $this->line('  • ✅ PRODUK, USER, KATEGORI, DAN STOK BARANG TETAP AMAN TERJAGA.');
         $this->newLine();
 
         return 0;
