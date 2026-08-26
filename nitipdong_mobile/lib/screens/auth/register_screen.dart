@@ -6,7 +6,6 @@ import '../../services/api_service.dart';
 import '../../services/google_auth_service.dart';
 import 'login_screen.dart';
 import 'otp_verification_screen.dart';
-import '../../widgets/flip_page_route.dart';
 
 class RegisterScreen extends StatefulWidget {
   final bool isFromSplash;
@@ -582,9 +581,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onPressed: () {
                           Navigator.pushReplacement(
                             context,
-                            Flip3DPageRoute(
-                              widget: LoginScreen(isFromSplash: widget.isFromSplash),
-                              isReverse: true,
+                            MaterialPageRoute(
+                              builder: (context) => LoginScreen(isFromSplash: widget.isFromSplash),
                             ),
                           );
                         },
