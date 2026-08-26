@@ -359,6 +359,52 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> loginWithGoogle({
+    required String email,
+    required String name,
+    required String googleId,
+    String? avatar,
+  }) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/auth/google'),
+            headers: await _getHeaders(withAuth: false),
+            body: jsonEncode({
+              'email': email.trim(),
+              'name': name.trim(),
+              'google_id': googleId.trim(),
+              if (avatar != null && avatar.isNotEmpty) 'avatar': avatar,
+            }),
+          )
+          .timeout(const Duration(seconds: 8));
+
+      checkResponseForMaintenance(response);
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200 && data['success'] == true) {
+        if (data['token'] != null) {
+          await setToken(data['token']);
+        }
+        return {
+          'success': true,
+          'token': data['token'],
+          'user': UserModel.fromJson(data['user']),
+          'message': data['message'] ?? 'Berhasil masuk dengan Google!',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Gagal masuk dengan Google. Silakan coba lagi.',
+        };
+      }
+    } catch (_) {
+      return {
+        'success': false,
+        'message': 'Gagal terhubung ke server. Periksa koneksi internet Anda.',
+      };
+    }
+  }
+
   static Future<Map<String, dynamic>> register(
       String name, String email, String password, String passwordConfirmation,
       {String? phone}) async {

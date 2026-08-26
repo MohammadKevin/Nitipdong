@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
+import '../../services/google_auth_service.dart';
 import '../main_nav_screen.dart';
 import 'register_screen.dart';
 
@@ -20,6 +21,21 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isPhoneMode = false;
+  bool _isGoogleLoading = false;
+
+  void _handleGoogleSignIn() async {
+    if (_isGoogleLoading) return;
+    setState(() => _isGoogleLoading = true);
+
+    try {
+      await GoogleAuthService.signInWithGoogle(context);
+    } catch (_) {
+    } finally {
+      if (mounted) {
+        setState(() => _isGoogleLoading = false);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -461,29 +477,31 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: Colors.white,
                         ),
                         child: OutlinedButton(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Google Sign-In Mobile sedang terhubung. Untuk pengujian, Anda juga dapat login via Web.'),
-                                backgroundColor: Color(0xFF0284C7),
-                              ),
-                            );
-                          },
+                          onPressed: _isGoogleLoading ? null : _handleGoogleSignIn,
                           style: OutlinedButton.styleFrom(
                             side: BorderSide.none,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.g_mobiledata_rounded, color: Colors.red, size: 28),
-                              SizedBox(width: 4),
-                              Text(
-                                'Masuk dengan Google',
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF334155)),
-                              ),
-                            ],
-                          ),
+                          child: _isGoogleLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Color(0xFF0891B2),
+                                  ),
+                                )
+                              : const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.g_mobiledata_rounded, color: Colors.red, size: 28),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      'Masuk dengan Google',
+                                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF334155)),
+                                    ),
+                                  ],
+                                ),
                         ),
                       ),
                     ],

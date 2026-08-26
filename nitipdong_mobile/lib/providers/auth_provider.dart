@@ -53,6 +53,39 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  Future<bool> loginWithGoogle({
+    required String email,
+    required String name,
+    required String googleId,
+    String? avatar,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    final result = await ApiService.loginWithGoogle(
+      email: email,
+      name: name,
+      googleId: googleId,
+      avatar: avatar,
+    );
+    _isLoading = false;
+
+    if (result['success'] == true) {
+      _user = result['user'];
+      if (_user != null) {
+        await ApiService.setBiometricEnabledLocally(_user!.biometricEnabled);
+        await ApiService.setBiometricTypeLocally(_user!.biometricType);
+      }
+      notifyListeners();
+      return true;
+    } else {
+      _errorMessage = result['message'];
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<Map<String, dynamic>> register(
       String name, String email, String password, String passwordConfirmation,
       {String? phone}) async {
