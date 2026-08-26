@@ -816,69 +816,75 @@
 
     </section>
 
-    <section class="page-container mt-10 mb-8">
-        <div class="bg-gradient-to-r from-slate-900 via-[#0B1528] to-slate-900 rounded-3xl p-6 sm:p-8 lg:p-10 text-white shadow-xl relative overflow-hidden border border-slate-800/80">
+    <section class="page-container mt-8 sm:mt-12 mb-8 sm:mb-12">
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#070E1E] via-[#0F172A] to-[#0A192F] text-white p-6 sm:p-8 lg:p-10 border border-slate-800 shadow-2xl">
+            <!-- Decorative Ambient Glow Circles -->
+            <div class="absolute -top-24 -right-24 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-72 h-72 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
             <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                
-                <div class="lg:col-span-7 space-y-4">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-400 text-xs font-semibold">
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-                        Aplikasi NitipDong
+                <!-- Left Content Area -->
+                <div class="lg:col-span-7 xl:col-span-8 space-y-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-bold tracking-wide">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                        <span>Aplikasi NitipDong Mobile • v{{ env('APP_MOBILE_LATEST_VERSION', '2.5.1') }}</span>
                     </div>
 
-                    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">
-                        Belanja &amp; Titip Beli Lebih Praktis Lewat Aplikasi
+                    <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
+                        Belanja &amp; Titip Beli Lebih Cepat Lewat Aplikasi
                     </h2>
 
-                    <p class="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-lg">
-                        Dapatkan promo gratis ongkir eksklusif, notifikasi pesanan secara langsung, dan kemudahan transaksi belanja dari ribuan toko terpercaya.
+                    <p class="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-xl">
+                        Nikmati kemudahan berbelanja online dan titip jastip langsung dari genggaman. Dapatkan promo gratis ongkir eksklusif, notifikasi pesanan real-time, dan transaksi aman.
                     </p>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs text-slate-300">
-                        <div class="flex items-center gap-2 bg-slate-800/50 px-3 py-2 rounded-xl border border-slate-700/50">
-                            <i class="fa-solid fa-truck-fast text-emerald-400 text-xs"></i>
-                            <span class="font-medium text-[11px]">Gratis Ongkir Rp0</span>
+                    <!-- Feature Badges -->
+                    <div class="flex flex-wrap gap-2 pt-1 text-xs">
+                        <div class="inline-flex items-center gap-2 bg-slate-800/70 backdrop-blur-xs px-3 py-2 rounded-xl border border-slate-700/60 text-slate-200">
+                            <i class="fa-solid fa-truck-fast text-cyan-400 text-xs"></i>
+                            <span class="font-semibold text-[11px]">Gratis Ongkir Rp0</span>
                         </div>
-                        <div class="flex items-center gap-2 bg-slate-800/50 px-3 py-2 rounded-xl border border-slate-700/50">
-                            <i class="fa-solid fa-shield-check text-blue-400 text-xs"></i>
-                            <span class="font-medium text-[11px]">Garansi Aman 100%</span>
+                        <div class="inline-flex items-center gap-2 bg-slate-800/70 backdrop-blur-xs px-3 py-2 rounded-xl border border-slate-700/60 text-slate-200">
+                            <i class="fa-solid fa-shield-check text-emerald-400 text-xs"></i>
+                            <span class="font-semibold text-[11px]">Garansi 100% Original</span>
                         </div>
-                        <div class="flex items-center gap-2 bg-slate-800/50 px-3 py-2 rounded-xl border border-slate-700/50">
-                            <i class="fa-solid fa-bell text-amber-400 text-xs"></i>
-                            <span class="font-medium text-[11px]">Update Status Real-Time</span>
+                        <div class="inline-flex items-center gap-2 bg-slate-800/70 backdrop-blur-xs px-3 py-2 rounded-xl border border-slate-700/60 text-slate-200">
+                            <i class="fa-solid fa-bolt text-amber-400 text-xs"></i>
+                            <span class="font-semibold text-[11px]">Update Resi Real-Time</span>
                         </div>
                     </div>
 
-                    <div class="flex flex-wrap items-center gap-3 pt-2">
-                        <a href="{{ route('app.download') }}" class="px-4.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center gap-2 shadow-xs transition-colors">
-                            <i class="fa-brands fa-android text-sm"></i>
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap items-center gap-3 pt-3">
+                        <a href="{{ route('app.download') }}" class="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-lg shadow-cyan-900/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                            <i class="fa-brands fa-android text-base"></i>
                             <span>Unduh APK Android</span>
                         </a>
-                        <a href="{{ route('app.landing') }}" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs flex items-center gap-2 transition-colors">
+                        <a href="{{ route('app.landing') }}" class="px-4.5 py-3 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-200 hover:text-white font-semibold text-xs sm:text-sm flex items-center gap-2 transition-all">
                             <i class="fa-solid fa-mobile-screen text-xs"></i>
-                            <span>Info Aplikasi</span>
+                            <span>Pusat Aplikasi (Apps Hub)</span>
                         </a>
                     </div>
                 </div>
 
-                <div class="lg:col-span-5 flex justify-center lg:justify-end">
-                    <div class="bg-white p-5 rounded-2xl shadow-xl text-slate-900 text-center max-w-[240px] w-full border border-slate-200/80">
-                        <div class="p-2 bg-slate-50 rounded-xl border border-slate-100 mb-2.5 inline-block">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https%3A%2F%2Fbudayakita.com%2Fdownload%2Fapp&bgcolor=ffffff&color=0b1528&margin=2"
+                <!-- Right QR Code & Showcase Card -->
+                <div class="lg:col-span-5 xl:col-span-4 flex justify-center lg:justify-end">
+                    <div class="bg-white/95 backdrop-blur-md p-5 sm:p-6 rounded-2xl shadow-2xl text-slate-900 text-center max-w-[260px] w-full border border-white/20">
+                        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 mb-3 inline-block shadow-inner">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https%3A%2F%2Fbudayakita.com%2Fdownload%2Fapp&bgcolor=ffffff&color=0b1528&margin=2"
                                  alt="QR Code NitipDong APK"
-                                 class="w-32 h-32 mx-auto object-contain rounded-lg">
+                                 class="w-36 h-36 mx-auto object-contain rounded-lg">
                         </div>
 
-                        <h4 class="font-bold text-xs text-slate-900">Scan untuk Download</h4>
-                        <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Arahkan kamera HP Anda untuk mengunduh aplikasi.</p>
+                        <h4 class="font-extrabold text-xs sm:text-sm text-slate-900">Scan untuk Download</h4>
+                        <p class="text-[11px] text-slate-500 mt-1 leading-snug">Arahkan kamera HP Anda untuk mengunduh versi terbaru.</p>
 
-                        <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-center gap-1.5 text-[10px] text-slate-500 font-medium">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            <span>Android APK • Aman &amp; Gratis</span>
+                        <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-center gap-1.5 text-[10.5px] text-slate-600 font-semibold">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span>APK v{{ env('APP_MOBILE_LATEST_VERSION', '2.5.1') }} • Cepat &amp; Aman</span>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </section>
