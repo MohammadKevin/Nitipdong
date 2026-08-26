@@ -118,10 +118,13 @@
                         </div>
 
                         <div>
-                            <label for="stock" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                                Jumlah Stok <span class="text-rose-500">*</span>
-                            </label>
-                            <input type="number" id="stock" name="stock" value="{{ old('stock', $product->stock) }}" required min="0"
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="stock" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                                    Jumlah Stok <span class="text-rose-500">*</span>
+                                </label>
+                                <span class="text-[10px] text-slate-400 font-medium">Maks. 10.000 unit</span>
+                            </div>
+                            <input type="number" id="stock" name="stock" value="{{ old('stock', $product->stock) }}" required min="0" max="10000"
                                 placeholder="10"
                                 class="input text-xs rounded-md">
                             @error('stock')

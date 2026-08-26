@@ -131,7 +131,7 @@ class SellerApiController extends Controller
         $request->validate([
             'name'        => 'required|string|max:150',
             'price'       => 'required|numeric|min:1000',
-            'stock'       => 'required|integer|min:1',
+            'stock'       => 'required|integer|min:0|max:10000',
             'description' => 'required|string',
             'category_id' => 'nullable|integer',
             'image_url'   => 'nullable|string',

@@ -62,11 +62,14 @@ class ProductController extends Controller
             'description'         => ['required', 'string'],
             'price'               => ['required', 'numeric', 'min:0'],
             'discount_percentage' => ['nullable', 'integer', 'min:0', 'max:99'],
-            'stock'               => ['required', 'integer', 'min:0'],
+            'stock'               => ['required', 'integer', 'min:0', 'max:10000'],
             'weight'              => ['nullable', 'numeric', 'min:0'],
             'condition'           => ['nullable', 'in:new,used'],
             'image'               => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'images.*'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+        ], [
+            'stock.max' => 'Jumlah stok tidak boleh melebihi batas maksimal 10.000 unit.',
+            'stock.min' => 'Jumlah stok tidak boleh bernilai negatif.',
         ]);
 
         $store = Auth::user()->store;
@@ -170,11 +173,14 @@ class ProductController extends Controller
             'description'         => ['required', 'string'],
             'price'               => ['required', 'numeric', 'min:0'],
             'discount_percentage' => ['nullable', 'integer', 'min:0', 'max:99'],
-            'stock'               => ['required', 'integer', 'min:0'],
+            'stock'               => ['required', 'integer', 'min:0', 'max:10000'],
             'image'               => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'images.*'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'delete_images'       => ['nullable', 'array'],
             'delete_images.*'     => ['nullable', 'string'],
+        ], [
+            'stock.max' => 'Jumlah stok tidak boleh melebihi batas maksimal 10.000 unit.',
+            'stock.min' => 'Jumlah stok tidak boleh bernilai negatif.',
         ]);
 
         $imagePath = $product->image;
