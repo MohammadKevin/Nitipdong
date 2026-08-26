@@ -121,16 +121,22 @@ class ProductController extends Controller
             }
         }
 
+        $rawPrice = $request->input('price');
+        $price = is_numeric($rawPrice) ? (float) $rawPrice : (float) preg_replace('/[^0-9.]/', '', (string) $rawPrice);
+
+        $rawWeight = $request->input('weight');
+        $weight = ($rawWeight !== null && $rawWeight !== '') ? (float) $rawWeight : null;
+
         Product::create([
             'store_id'            => $store->id,
             'category_id'         => $request->category_id,
             'name'                => $request->name,
             'slug'                => Str::slug($request->name) . '-' . Str::random(5),
             'description'         => $request->description,
-            'price'               => $request->price,
+            'price'               => $price,
             'discount_percentage' => (int) $request->input('discount_percentage', 0),
-            'stock'               => $request->stock,
-            'weight'              => $request->weight,
+            'stock'               => (int) $request->stock,
+            'weight'              => $weight,
             'condition'           => $request->input('condition', 'new'),
             'specifications'      => count($specifications) > 0 ? $specifications : null,
             'variants'            => count($variants) > 0 ? $variants : null,
@@ -195,13 +201,16 @@ class ProductController extends Controller
             }
         }
 
+        $rawPrice = $request->input('price');
+        $price = is_numeric($rawPrice) ? (float) $rawPrice : (float) preg_replace('/[^0-9.]/', '', (string) $rawPrice);
+
         $product->update([
             'category_id'         => $request->category_id,
             'name'                => $request->name,
             'description'         => $request->description,
-            'price'               => $request->price,
+            'price'               => $price,
             'discount_percentage' => (int) $request->input('discount_percentage', 0),
-            'stock'               => $request->stock,
+            'stock'               => (int) $request->stock,
             'image'               => $imagePath,
             'images'              => count($existingImages) ? array_values($existingImages) : null,
             'is_active'           => $request->boolean('is_active', true),
