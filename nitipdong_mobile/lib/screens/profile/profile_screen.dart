@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../theme/app_theme.dart';
@@ -494,6 +495,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 12),
 
+            // 3.1 KEAMANAN & KUNCI SIDIK JARI (BIOMETRIC LOCK)
+            if (authProvider.isAuthenticated && user != null) ...[
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppTheme.border),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF06B6D4).withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.fingerprint_rounded,
+                          color: Color(0xFF0891B2),
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Kunci Sidik Jari (Biometrik)',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0F172A),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              user.biometricEnabled
+                                  ? 'Aktif • Meminta sidik jari saat membuka aplikasi'
+                                  : 'Nonaktif • Aktifkan untuk keamanan ekstra',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                color: user.biometricEnabled ? const Color(0xFF059669) : const Color(0xFF64748B),
+                                fontWeight: user.biometricEnabled ? FontWeight.w600 : FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Switch.adaptive(
+                        value: user.biometricEnabled,
+                        activeColor: const Color(0xFF06B6D4),
+                        onChanged: (bool newVal) async {
+                          await _handleToggleBiometric(context, authProvider, newVal);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+
             // 4. APP VERSION DISPLAY & CHECK
             Container(
               padding: const EdgeInsets.all(12),
@@ -946,5 +1013,85 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _handleToggleBiometric(BuildContext context, AuthProvider authProvider, bool newVal) async {
+    final localAuth = LocalAuthentication();
+
+    if (newVal) {
+      // 1. Verifikasi ketersediaan hardware biometrik pada perangkat
+      try {
+        final bool canCheck = await localAuth.canCheckBiometrics;
+        final bool isSupported = await localAuth.isDeviceSupported();
+
+        if (!canCheck && !isSupported) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Perangkat Anda belum mendukung sensor sidik jari atau Face ID.'),
+              backgroundColor: Colors.orange,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          return;
+        }
+
+        // 2. Minta verifikasi sidik jari terlebih dahulu sebelum mengaktifkan
+        final bool authenticated = await localAuth.authenticate(
+          localizedReason: 'Pindai sidik jari Anda untuk mengonfirmasi pengaktifan kunci aplikasi',
+          options: const AuthenticationOptions(
+            biometricOnly: false,
+            stickyAuth: true,
+          ),
+        );
+
+        if (!authenticated) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Verifikasi sidik jari dibatalkan. Kunci biometrik belum diaktifkan.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          return;
+        }
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Kendala sensor biometrik: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+    }
+
+    // 3. Simpan perubahan ke database akun dan cache lokal
+    final success = await authProvider.updateBiometric(newVal);
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            newVal
+                ? 'Kunci Sidik Jari Berhasil Diaktifkan! 🔐'
+                : 'Kunci Sidik Jari Dinonaktifkan.',
+          ),
+          backgroundColor: newVal ? const Color(0xFF059669) : const Color(0xFF475569),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gagal memperbarui pengaturan sidik jari ke server. Silakan coba lagi.'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }

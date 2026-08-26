@@ -69,6 +69,38 @@ class ApiService {
   }
 
   // ══════════════════════════════════════════════════
+  // BIOMETRIC / FINGERPRINT SETTINGS & SYNC
+  // ══════════════════════════════════════════════════
+  static Future<bool> isBiometricEnabledLocally() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('biometric_enabled') ?? false;
+  }
+
+  static Future<void> setBiometricEnabledLocally(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('biometric_enabled', enabled);
+  }
+
+  static Future<bool> toggleBiometric(bool enabled) async {
+    await setBiometricEnabledLocally(enabled);
+    try {
+      final token = await getToken();
+      if (token != null && token.isNotEmpty) {
+        final response = await http.post(
+          Uri.parse('$baseUrl/user/biometric/toggle'),
+          headers: await _getHeaders(withAuth: true),
+          body: jsonEncode({'enabled': enabled}),
+        ).timeout(const Duration(seconds: 4));
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          return data['success'] == true;
+        }
+      }
+    } catch (_) {}
+    return true;
+  }
+
+  // ══════════════════════════════════════════════════
   // ADDRESS & LOCATION PERSISTENCE (ANTI-HILANG)
   // ══════════════════════════════════════════════════
   static Future<Map<String, String>> getSavedAddress() async {

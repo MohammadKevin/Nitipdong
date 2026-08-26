@@ -37,6 +37,7 @@ class User extends Authenticatable
         'address',
         'avatar',
         'google_id',
+        'biometric_enabled',
         'otp_code',
         'otp_expires_at',
         'pending_email',
@@ -53,6 +54,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_banned' => 'boolean',
+            'biometric_enabled' => 'boolean',
         ];
     }
 

@@ -99,15 +99,45 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     if (!mounted) return;
 
-    // Alihkan ke Layar Kunci Sidik Jari (Fingerprint / Biometric Lock)
-    Navigator.pushReplacement(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (_, __, ___) => const BiometricLockScreen(),
-        transitionsBuilder: (_, a, __, c) => FadeTransition(opacity: a, child: c),
-        transitionDuration: const Duration(milliseconds: 350),
-      ),
-    );
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    if (authProvider.isAuthenticated) {
+      final bool isBiometricActive = (authProvider.user?.biometricEnabled == true)
+          || await ApiService.isBiometricEnabledLocally();
+
+      if (isBiometricActive) {
+        // Jika pengguna telah mengaktifkan kunci sidik jari di akunnya
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => const BiometricLockScreen(),
+            transitionsBuilder: (_, a, __, c) => FadeTransition(opacity: a, child: c),
+            transitionDuration: const Duration(milliseconds: 350),
+          ),
+        );
+      } else {
+        // Jika belum mengaktifkan sidik jari, langsung buka beranda belanja utama
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => const MainNavScreen(),
+            transitionsBuilder: (_, a, __, c) => FadeTransition(opacity: a, child: c),
+            transitionDuration: const Duration(milliseconds: 350),
+          ),
+        );
+      }
+    } else {
+      Navigator.pushReplacement(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const LoginScreen(isFromSplash: true),
+          transitionsBuilder: (_, a, __, c) => FadeTransition(opacity: a, child: c),
+          transitionDuration: const Duration(milliseconds: 350),
+        ),
+      );
+    }
   }
 
   @override

@@ -66,9 +66,10 @@ Route::prefix('v1')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
 
-        // User Profile & Logout
+        // User Profile & Logout & Biometric Lock
         Route::get('/auth/profile', [AuthController::class, 'profile']);
         Route::post('/auth/logout', [AuthController::class, 'logout']);
+        Route::post('/user/biometric/toggle', [AuthController::class, 'toggleBiometric']);
 
         // User Wallet (NitipPay)
         Route::get('/wallet', [\App\Http\Controllers\Api\WalletApiController::class, 'index']);

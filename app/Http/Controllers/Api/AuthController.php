@@ -68,13 +68,14 @@ class AuthController extends Controller
             'message' => 'Login berhasil! Selamat datang kembali, ' . $user->name,
             'token'   => $token,
             'user'    => [
-                'id'         => $user->id,
-                'name'       => $user->name,
-                'email'      => $user->email,
-                'phone'      => $user->phone ?? '',
-                'role'       => $user->role,
-                'avatar_url' => $user->avatar_url,
-                'is_verified'=> $user->email_verified_at !== null,
+                'id'                => $user->id,
+                'name'              => $user->name,
+                'email'             => $user->email,
+                'phone'             => $user->phone ?? '',
+                'role'              => $user->role,
+                'avatar_url'        => $user->avatar_url,
+                'biometric_enabled' => (bool) $user->biometric_enabled,
+                'is_verified'       => $user->email_verified_at !== null,
             ],
         ]);
     }
@@ -285,21 +286,43 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'user'    => [
-                'id'             => $user->id,
-                'name'           => $user->name,
-                'email'          => $user->email,
-                'phone'          => $user->phone ?? '',
-                'role'           => $user->role,
-                'avatar_url'     => $user->avatar_url,
-                'cart_count'     => $user->carts()->count(),
-                'wishlist_count' => $user->wishlists()->count(),
-                'orders_count'   => $user->orders()->count(),
-                'store'          => $user->store ? [
+                'id'                => $user->id,
+                'name'              => $user->name,
+                'email'             => $user->email,
+                'phone'             => $user->phone ?? '',
+                'role'              => $user->role,
+                'avatar_url'        => $user->avatar_url,
+                'biometric_enabled' => (bool) $user->biometric_enabled,
+                'cart_count'        => $user->carts()->count(),
+                'wishlist_count'    => $user->wishlists()->count(),
+                'orders_count'      => $user->orders()->count(),
+                'store'             => $user->store ? [
                     'id'   => $user->store->id,
                     'name' => $user->store->name,
                     'city' => $user->store->city ?? 'Jakarta',
                 ] : null,
             ],
+        ]);
+    }
+
+    /**
+     * Toggle user biometric fingerprint lock preference.
+     */
+    public function toggleBiometric(Request $request): JsonResponse
+    {
+        $request->validate([
+            'enabled' => 'required|boolean',
+        ]);
+
+        $user = $request->user();
+        $user->update([
+            'biometric_enabled' => (bool) $request->enabled,
+        ]);
+
+        return response()->json([
+            'success'           => true,
+            'message'           => $request->enabled ? 'Kunci sidik jari berhasil diaktifkan!' : 'Kunci sidik jari telah dinonaktifkan.',
+            'biometric_enabled' => (bool) $user->biometric_enabled,
         ]);
     }
 

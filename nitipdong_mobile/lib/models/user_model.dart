@@ -5,6 +5,7 @@ class UserModel {
   final String phone;
   final String role;
   final String? avatarUrl;
+  final bool biometricEnabled;
   final int cartCount;
   final int wishlistCount;
   final int ordersCount;
@@ -16,6 +17,7 @@ class UserModel {
     required this.phone,
     required this.role,
     this.avatarUrl,
+    this.biometricEnabled = false,
     this.cartCount = 0,
     this.wishlistCount = 0,
     this.ordersCount = 0,
@@ -29,6 +31,7 @@ class UserModel {
       phone: json['phone'] ?? '',
       role: json['role'] ?? 'customer',
       avatarUrl: json['avatar_url'],
+      biometricEnabled: json['biometric_enabled'] == true || json['biometric_enabled'] == 1,
       cartCount: json['cart_count'] ?? 0,
       wishlistCount: json['wishlist_count'] ?? 0,
       ordersCount: json['orders_count'] ?? 0,
@@ -43,6 +46,7 @@ class UserModel {
       'phone': phone,
       'role': role,
       'avatar_url': avatarUrl,
+      'biometric_enabled': biometricEnabled,
     };
   }
 }

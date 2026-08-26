@@ -24,6 +24,9 @@ class AuthProvider with ChangeNotifier {
     final token = await ApiService.getToken();
     if (token != null && token.isNotEmpty) {
       _user = await ApiService.getProfile();
+      if (_user != null) {
+        await ApiService.setBiometricEnabledLocally(_user!.biometricEnabled);
+      }
     }
 
     _isLoading = false;
@@ -106,7 +109,28 @@ class AuthProvider with ChangeNotifier {
     return result;
   }
 
+  Future<bool> updateBiometric(bool enabled) async {
+    final success = await ApiService.toggleBiometric(enabled);
+    if (success && _user != null) {
+      _user = UserModel(
+        id: _user!.id,
+        name: _user!.name,
+        email: _user!.email,
+        phone: _user!.phone,
+        role: _user!.role,
+        avatarUrl: _user!.avatarUrl,
+        biometricEnabled: enabled,
+        cartCount: _user!.cartCount,
+        wishlistCount: _user!.wishlistCount,
+        ordersCount: _user!.ordersCount,
+      );
+      notifyListeners();
+    }
+    return success;
+  }
+
   Future<void> logout() async {
+    await ApiService.setBiometricEnabledLocally(false);
     await ApiService.logout();
     _user = null;
     notifyListeners();
