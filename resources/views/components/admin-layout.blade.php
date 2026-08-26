@@ -1,4 +1,19 @@
-@if(isset($pureContent) && $pureContent)
+@php
+    $isSuperAdmin = request()->is('super-admin*') 
+        || request()->routeIs('super_admin.*') 
+        || (auth()->check() && auth()->user()->role === 'super_admin' && !request()->is('admin*'));
+@endphp
+
+@if($isSuperAdmin)
+    <x-super-admin-layout :title="$title ?? null" :pageTitle="$pageTitle ?? null">
+        @if(isset($headerActions))
+            <x-slot name="headerActions">
+                {{ $headerActions }}
+            </x-slot>
+        @endif
+        {{ $slot }}
+    </x-super-admin-layout>
+@elseif(isset($pureContent) && $pureContent)
     {{ $slot }}
 @else
 <!DOCTYPE html>
