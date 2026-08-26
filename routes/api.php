@@ -45,6 +45,7 @@ Route::prefix('v1')->group(function () {
     // 1. Authentication & OTP Verification
     Route::post('/auth/login', [AuthController::class, 'login']);
     Route::post('/auth/register', [AuthController::class, 'register']);
+    Route::post('/auth/google', [\App\Http\Controllers\Auth\GoogleAuthController::class, 'handleApiGoogleLogin']);
     Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp']);
     Route::post('/auth/resend-otp', [AuthController::class, 'resendOtp']);
 

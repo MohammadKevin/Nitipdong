@@ -36,6 +36,7 @@ class User extends Authenticatable
         'phone',
         'address',
         'avatar',
+        'google_id',
         'otp_code',
         'otp_expires_at',
         'pending_email',

@@ -489,6 +489,60 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ),
                         ),
                       ),
+
+                      // Google Divider
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        child: Row(
+                          children: [
+                            Expanded(child: Divider(color: Colors.grey.shade200, thickness: 1)),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              child: Text(
+                                'atau daftar dengan',
+                                style: TextStyle(fontSize: 11, color: Colors.grey.shade400, fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                            Expanded(child: Divider(color: Colors.grey.shade200, thickness: 1)),
+                          ],
+                        ),
+                      ),
+
+                      // Google Sign In Button
+                      Container(
+                        width: double.infinity,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          color: Colors.white,
+                        ),
+                        child: OutlinedButton(
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Google Sign-In Mobile sedang terhubung. Untuk pengujian, Anda juga dapat login via Web.'),
+                                backgroundColor: Color(0xFF0284C7),
+                              ),
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide.none,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.g_mobiledata_rounded, color: Colors.red, size: 28),
+                              SizedBox(width: 4),
+                              Text(
+                                'Daftar dengan Google',
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF334155)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
