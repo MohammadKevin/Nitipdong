@@ -64,7 +64,7 @@ class ProductController extends Controller
             'discount_percentage' => ['nullable', 'integer', 'min:0', 'max:99'],
             'stock'               => ['required', 'integer', 'min:0', 'max:10000'],
             'weight'              => ['nullable', 'numeric', 'min:0'],
-            'condition'           => ['nullable', 'in:new,used'],
+            'condition'           => ['nullable', 'in:new,used,baru,bekas,second'],
             'image'               => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'images.*'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ], [
@@ -130,6 +130,9 @@ class ProductController extends Controller
         $rawWeight = $request->input('weight');
         $weight = ($rawWeight !== null && $rawWeight !== '') ? (float) $rawWeight : null;
 
+        $rawCondition = strtolower((string) $request->input('condition', 'new'));
+        $condition = in_array($rawCondition, ['used', 'bekas', 'second']) ? 'used' : 'new';
+
         Product::create([
             'store_id'            => $store->id,
             'category_id'         => $request->category_id,
@@ -140,7 +143,7 @@ class ProductController extends Controller
             'discount_percentage' => (int) $request->input('discount_percentage', 0),
             'stock'               => (int) $request->stock,
             'weight'              => $weight,
-            'condition'           => $request->input('condition', 'new'),
+            'condition'           => $condition,
             'specifications'      => count($specifications) > 0 ? $specifications : null,
             'variants'            => count($variants) > 0 ? $variants : null,
             'image'               => $imagePath,
@@ -174,6 +177,8 @@ class ProductController extends Controller
             'price'               => ['required', 'numeric', 'min:0'],
             'discount_percentage' => ['nullable', 'integer', 'min:0', 'max:99'],
             'stock'               => ['required', 'integer', 'min:0', 'max:10000'],
+            'weight'              => ['nullable', 'numeric', 'min:0'],
+            'condition'           => ['nullable', 'in:new,used,baru,bekas,second'],
             'image'               => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'images.*'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'delete_images'       => ['nullable', 'array'],
@@ -210,6 +215,12 @@ class ProductController extends Controller
         $rawPrice = $request->input('price');
         $price = is_numeric($rawPrice) ? (float) $rawPrice : (float) preg_replace('/[^0-9.]/', '', (string) $rawPrice);
 
+        $rawWeight = $request->input('weight');
+        $weight = ($rawWeight !== null && $rawWeight !== '') ? (float) $rawWeight : $product->weight;
+
+        $rawCondition = strtolower((string) $request->input('condition', $product->condition ?? 'new'));
+        $condition = in_array($rawCondition, ['used', 'bekas', 'second']) ? 'used' : 'new';
+
         $product->update([
             'category_id'         => $request->category_id,
             'name'                => $request->name,
@@ -217,6 +228,8 @@ class ProductController extends Controller
             'price'               => $price,
             'discount_percentage' => (int) $request->input('discount_percentage', 0),
             'stock'               => (int) $request->stock,
+            'weight'              => $weight,
+            'condition'           => $condition,
             'image'               => $imagePath,
             'images'              => count($existingImages) ? array_values($existingImages) : null,
             'is_active'           => $request->boolean('is_active', true),

@@ -49,8 +49,19 @@
                             </div>
                         @endif
 
-                        <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-500 text-white border border-emerald-300 shadow-sm">
-                            Resmi
+                        <div class="absolute top-2 right-2 flex items-center gap-1.5">
+                            @if(in_array($product->condition, ['used', 'bekas', 'second']))
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500 text-white border border-amber-300 shadow-sm flex items-center gap-1">
+                                    <i class="fa-solid fa-recycle text-[8px]"></i> Bekas
+                                </span>
+                            @else
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-cyan-600 text-white border border-cyan-400 shadow-sm flex items-center gap-1">
+                                    <i class="fa-solid fa-sparkles text-[8px]"></i> Baru
+                                </span>
+                            @endif
+                            <span class="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-500 text-white border border-emerald-300 shadow-sm">
+                                Resmi
+                            </span>
                         </div>
                     </div>
 
@@ -450,8 +461,30 @@
                     <div class="p-5 sm:p-6">
                         
                         <div x-show="activeTab === 'detail'" class="space-y-4">
-                            @if($product->specifications)
-                                <div class="space-y-2.5 text-xs">
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100 mb-2">
+                                <div>
+                                    <span class="text-slate-400 block text-[10px] uppercase font-bold">Kondisi</span>
+                                    <span class="font-bold {{ in_array($product->condition, ['used', 'bekas', 'second']) ? 'text-amber-700' : 'text-slate-800' }}">
+                                        {{ in_array($product->condition, ['used', 'bekas', 'second']) ? 'Bekas (Second)' : 'Baru (Original)' }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[10px] uppercase font-bold">Berat Produk</span>
+                                    <span class="font-bold text-slate-800">{{ $product->weight ? $product->weight . ' kg' : '1.0 kg' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[10px] uppercase font-bold">Kategori</span>
+                                    <span class="font-bold text-cyan-800">{{ $product->category->name ?? '-' }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block text-[10px] uppercase font-bold">Garansi Toko</span>
+                                    <span class="font-bold text-emerald-700">7 Hari Retur</span>
+                                </div>
+                            </div>
+
+                            @if($product->specifications && count($product->specifications) > 0)
+                                <div class="space-y-2.5 text-xs pt-1">
+                                    <h4 class="text-xs font-bold text-slate-900 mb-2 uppercase tracking-wider">Spesifikasi Tambahan</h4>
                                     @foreach($product->specifications as $key => $value)
                                         @if(is_array($value))
                                             <div>
@@ -472,25 +505,6 @@
                                             </div>
                                         @endif
                                     @endforeach
-                                </div>
-                            @else
-                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                    <div>
-                                        <span class="text-slate-400 block text-[10px] uppercase font-bold">Kondisi</span>
-                                        <span class="font-bold text-slate-800">Baru (Original)</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-slate-400 block text-[10px] uppercase font-bold">Min. Beli</span>
-                                        <span class="font-bold text-slate-800">1 Unit</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-slate-400 block text-[10px] uppercase font-bold">Kategori</span>
-                                        <span class="font-bold text-cyan-800">{{ $product->category->name ?? '-' }}</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-slate-400 block text-[10px] uppercase font-bold">Garansi Toko</span>
-                                        <span class="font-bold text-emerald-700">7 Hari Retur</span>
-                                    </div>
                                 </div>
                             @endif
 

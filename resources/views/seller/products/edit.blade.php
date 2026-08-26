@@ -132,6 +132,31 @@
                             @enderror
                         </div>
 
+                        <div>
+                            <label for="weight" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Berat (KG)
+                            </label>
+                            <input type="number" step="0.01" id="weight" name="weight" value="{{ old('weight', $product->weight ?? 1.0) }}" min="0.01"
+                                placeholder="1.0"
+                                class="input text-xs rounded-md">
+                            @error('weight')
+                                <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="condition" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Kondisi Barang
+                            </label>
+                            <select id="condition" name="condition" class="input text-xs rounded-md">
+                                <option value="new" {{ old('condition', $product->condition ?? 'new') == 'new' ? 'selected' : '' }}>Baru</option>
+                                <option value="used" {{ old('condition', $product->condition ?? 'new') == 'used' ? 'selected' : '' }}>Bekas</option>
+                            </select>
+                            @error('condition')
+                                <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
                         <div class="sm:col-span-2 lg:col-span-4" x-show="price > 0">
                             <div class="p-3 bg-cyan-50/70 rounded-md border border-cyan-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
                                 <div>
