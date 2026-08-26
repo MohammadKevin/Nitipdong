@@ -69,7 +69,7 @@ class ApiService {
   }
 
   // ══════════════════════════════════════════════════
-  // BIOMETRIC / FINGERPRINT SETTINGS & SYNC
+  // BIOMETRIC / FINGERPRINT & FACE SCAN SETTINGS & SYNC
   // ══════════════════════════════════════════════════
   static Future<bool> isBiometricEnabledLocally() async {
     final prefs = await SharedPreferences.getInstance();
@@ -81,15 +81,31 @@ class ApiService {
     await prefs.setBool('biometric_enabled', enabled);
   }
 
-  static Future<bool> toggleBiometric(bool enabled) async {
+  static Future<String> getBiometricTypeLocally() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('biometric_type') ?? 'fingerprint';
+  }
+
+  static Future<void> setBiometricTypeLocally(String type) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('biometric_type', type);
+  }
+
+  static Future<bool> toggleBiometric(bool enabled, {String? type}) async {
     await setBiometricEnabledLocally(enabled);
+    if (type != null) {
+      await setBiometricTypeLocally(type);
+    }
     try {
       final token = await getToken();
       if (token != null && token.isNotEmpty) {
         final response = await http.post(
           Uri.parse('$baseUrl/user/biometric/toggle'),
           headers: await _getHeaders(withAuth: true),
-          body: jsonEncode({'enabled': enabled}),
+          body: jsonEncode({
+            'enabled': enabled,
+            if (type != null) 'type': type,
+          }),
         ).timeout(const Duration(seconds: 4));
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);

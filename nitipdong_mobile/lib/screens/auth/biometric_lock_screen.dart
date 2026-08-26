@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/api_service.dart';
 import '../../screens/main_nav_screen.dart';
 import '../../screens/auth/login_screen.dart';
 
@@ -19,8 +20,9 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> with SingleTi
   late Animation<double> _scaleAnimation;
   late Animation<double> _glowAnimation;
 
+  String _currentMode = 'fingerprint'; // 'fingerprint' or 'face'
   bool _isAuthenticating = false;
-  String _statusMessage = 'Sentuh sensor sidik jari untuk membuka aplikasi';
+  String _statusMessage = 'Menyiapkan sensor keamanan...';
   bool _hasError = false;
 
   @override
@@ -40,7 +42,28 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> with SingleTi
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
-    // Otomatis minta sidik jari sesaat setelah layar dimuat
+    _initSecurityMode();
+  }
+
+  Future<void> _initSecurityMode() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    String preferredType = authProvider.user?.biometricType ?? await ApiService.getBiometricTypeLocally();
+    
+    if (preferredType == 'face') {
+      _currentMode = 'face';
+    } else {
+      _currentMode = 'fingerprint';
+    }
+
+    if (mounted) {
+      setState(() {
+        _statusMessage = _currentMode == 'face'
+            ? 'Arahkan kamera ke wajah Anda untuk membuka aplikasi'
+            : 'Sentuh sensor sidik jari untuk membuka aplikasi';
+      });
+    }
+
+    // Auto-trigger authentication
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _authenticate();
     });
@@ -58,7 +81,7 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> with SingleTi
     setState(() {
       _isAuthenticating = true;
       _hasError = false;
-      _statusMessage = 'Memindai sidik jari...';
+      _statusMessage = _currentMode == 'face' ? 'Memindai wajah...' : 'Memindai sidik jari...';
     });
 
     try {
@@ -66,13 +89,17 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> with SingleTi
       final bool isDeviceSupported = await _localAuth.isDeviceSupported();
 
       if (!canCheck && !isDeviceSupported) {
-        // Jika perangkat tidak mendukung biometrik, langsung lanjutkan ke aplikasi
+        // Jika perangkat tidak mendukung biometrik, langsung buka aplikasi
         _proceedToApp();
         return;
       }
 
+      final String localizedReason = _currentMode == 'face'
+          ? 'Pindai wajah Anda untuk membuka aplikasi NitipDong'
+          : 'Pindai sidik jari Anda untuk membuka aplikasi NitipDong';
+
       final bool didAuthenticate = await _localAuth.authenticate(
-        localizedReason: 'Pindai sidik jari atau Face ID Anda untuk membuka NitipDong',
+        localizedReason: localizedReason,
         options: const AuthenticationOptions(
           biometricOnly: false,
           stickyAuth: true,
@@ -95,7 +122,7 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> with SingleTi
     } on PlatformException catch (e) {
       setState(() {
         _hasError = true;
-        _statusMessage = 'Kendala biometrik: ${e.message ?? 'Gagal memverifikasi sidik jari'}';
+        _statusMessage = 'Kendala biometrik: ${e.message ?? 'Gagal memverifikasi'}';
       });
     } catch (e) {
       setState(() {
@@ -109,6 +136,18 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> with SingleTi
         });
       }
     }
+  }
+
+  void _switchMode(String newMode) {
+    if (_currentMode == newMode) return;
+    setState(() {
+      _currentMode = newMode;
+      _hasError = false;
+      _statusMessage = newMode == 'face'
+          ? 'Mode Pindai Wajah aktif. Ketuk untuk memindai.'
+          : 'Mode Sidik Jari aktif. Ketuk sensor untuk memindai.';
+    });
+    _authenticate();
   }
 
   void _proceedToApp() {
@@ -138,6 +177,8 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> with SingleTi
 
   @override
   Widget build(BuildContext context) {
+    final bool isFace = _currentMode == 'face';
+
     return Scaffold(
       backgroundColor: const Color(0xFF070E1E),
       body: Stack(
@@ -151,7 +192,7 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> with SingleTi
               height: 280,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF06B6D4).withOpacity(0.12),
+                color: (isFace ? const Color(0xFF8B5CF6) : const Color(0xFF06B6D4)).withOpacity(0.12),
               ),
             ),
           ),
@@ -175,7 +216,7 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> with SingleTi
                 children: [
                   const Spacer(),
 
-                  // App Logo with subtle white background badge
+                  // App Logo Badge
                   Container(
                     width: 72,
                     height: 72,
@@ -185,7 +226,7 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> with SingleTi
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF06B6D4).withOpacity(0.3),
+                          color: (isFace ? const Color(0xFF8B5CF6) : const Color(0xFF06B6D4)).withOpacity(0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 8),
                         ),
@@ -194,9 +235,9 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> with SingleTi
                     child: Image.asset(
                       'assets/icon/app_icon.png',
                       fit: BoxFit.contain,
-                      errorBuilder: (_, __, ___) => const Icon(
-                        Icons.shopping_bag_outlined,
-                        color: Color(0xFF0891B2),
+                      errorBuilder: (_, __, ___) => Icon(
+                        isFace ? Icons.face_retouching_natural_rounded : Icons.fingerprint_rounded,
+                        color: const Color(0xFF0891B2),
                         size: 32,
                       ),
                     ),
@@ -204,9 +245,9 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> with SingleTi
 
                   const SizedBox(height: 24),
 
-                  const Text(
-                    'Kunci Aplikasi NitipDong',
-                    style: TextStyle(
+                  Text(
+                    isFace ? 'Kunci Pindai Wajah' : 'Kunci Sidik Jari',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
@@ -227,9 +268,9 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> with SingleTi
                     ),
                   ),
 
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 36),
 
-                  // Animated Fingerprint Button & Sensor
+                  // Animated Sensor Button (Fingerprint or Face)
                   GestureDetector(
                     onTap: _authenticate,
                     child: AnimatedBuilder(
@@ -238,18 +279,20 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> with SingleTi
                         return Transform.scale(
                           scale: _scaleAnimation.value,
                           child: Container(
-                            width: 104,
-                            height: 104,
+                            width: 108,
+                            height: 108,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF06B6D4), Color(0xFF2563EB)],
+                              gradient: LinearGradient(
+                                colors: isFace
+                                    ? [const Color(0xFF8B5CF6), const Color(0xFF3B82F6)]
+                                    : [const Color(0xFF06B6D4), const Color(0xFF2563EB)],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF06B6D4).withOpacity(0.4),
+                                  color: (isFace ? const Color(0xFF8B5CF6) : const Color(0xFF06B6D4)).withOpacity(0.4),
                                   blurRadius: _glowAnimation.value,
                                   spreadRadius: 2,
                                 ),
@@ -265,8 +308,8 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> with SingleTi
                                         strokeWidth: 3,
                                       ),
                                     )
-                                  : const Icon(
-                                      Icons.fingerprint_rounded,
+                                  : Icon(
+                                      isFace ? Icons.face_unlock_rounded : Icons.fingerprint_rounded,
                                       color: Colors.white,
                                       size: 56,
                                     ),
@@ -288,9 +331,84 @@ class _BiometricLockScreenState extends State<BiometricLockScreen> with SingleTi
                     ),
                   ),
 
+                  const SizedBox(height: 28),
+
+                  // Mode Switcher Pills (Pilihan: Sidik Jari vs Scan Wajah)
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F172A),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: const Color(0xFF1E293B)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        InkWell(
+                          onTap: () => _switchMode('fingerprint'),
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: !isFace ? const Color(0xFF06B6D4) : Colors.transparent,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.fingerprint_rounded,
+                                  size: 16,
+                                  color: !isFace ? const Color(0xFF070E1E) : const Color(0xFF94A3B8),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Sidik Jari',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: !isFace ? FontWeight.w800 : FontWeight.w600,
+                                    color: !isFace ? const Color(0xFF070E1E) : const Color(0xFF94A3B8),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () => _switchMode('face'),
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isFace ? const Color(0xFF8B5CF6) : Colors.transparent,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.face_unlock_rounded,
+                                  size: 16,
+                                  color: isFace ? Colors.white : const Color(0xFF94A3B8),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Scan Wajah',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: isFace ? FontWeight.w800 : FontWeight.w600,
+                                    color: isFace ? Colors.white : const Color(0xFF94A3B8),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                   const Spacer(),
 
-                  // Fallback Action
+                  // Fallback to Password/PIN
                   SizedBox(
                     width: double.infinity,
                     height: 48,

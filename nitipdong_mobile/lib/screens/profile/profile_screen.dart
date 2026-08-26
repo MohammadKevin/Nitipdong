@@ -495,7 +495,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 12),
 
-            // 3.1 KEAMANAN & KUNCI SIDIK JARI (BIOMETRIC LOCK)
+            // 3.1 KEAMANAN: PILIHAN SIDIK JARI & SCAN WAJAH (BIOMETRIC LOCK)
             if (authProvider.isAuthenticated && user != null) ...[
               Container(
                 decoration: BoxDecoration(
@@ -503,58 +503,92 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: AppTheme.border),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF06B6D4).withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(
-                          Icons.fingerprint_rounded,
-                          color: Color(0xFF0891B2),
-                          size: 22,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Kunci Sidik Jari (Biometrik)',
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF0F172A),
-                              ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () => _showBiometricSecuritySheet(context, authProvider, user),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: user.biometricEnabled
+                                  ? (user.biometricType == 'face'
+                                      ? const Color(0xFF8B5CF6).withOpacity(0.12)
+                                      : const Color(0xFF06B6D4).withOpacity(0.12))
+                                  : const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              user.biometricEnabled
-                                  ? 'Aktif • Meminta sidik jari saat membuka aplikasi'
-                                  : 'Nonaktif • Aktifkan untuk keamanan ekstra',
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                color: user.biometricEnabled ? const Color(0xFF059669) : const Color(0xFF64748B),
-                                fontWeight: user.biometricEnabled ? FontWeight.w600 : FontWeight.w400,
-                              ),
+                            child: Icon(
+                              user.biometricType == 'face'
+                                  ? Icons.face_unlock_rounded
+                                  : Icons.fingerprint_rounded,
+                              color: user.biometricEnabled
+                                  ? (user.biometricType == 'face' ? const Color(0xFF7C3AED) : const Color(0xFF0891B2))
+                                  : const Color(0xFF64748B),
+                              size: 22,
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Text(
+                                      'Kunci Aplikasi (Biometrik)',
+                                      style: TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF0F172A),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    if (user.biometricEnabled)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                        decoration: BoxDecoration(
+                                          color: user.biometricType == 'face'
+                                              ? const Color(0xFF8B5CF6).withOpacity(0.15)
+                                              : const Color(0xFF06B6D4).withOpacity(0.15),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          user.biometricType == 'face' ? 'Face Unlock' : 'Fingerprint',
+                                          style: TextStyle(
+                                            fontSize: 9.5,
+                                            fontWeight: FontWeight.w800,
+                                            color: user.biometricType == 'face' ? const Color(0xFF7C3AED) : const Color(0xFF0891B2),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  user.biometricEnabled
+                                      ? (user.biometricType == 'face'
+                                          ? 'Aktif • Pindai Wajah sebelum masuk'
+                                          : 'Aktif • Sidik jari sebelum masuk')
+                                      : 'Nonaktif • Ketuk untuk memilih Sidik Jari / Scan Wajah',
+                                  style: TextStyle(
+                                    fontSize: 10.5,
+                                    color: user.biometricEnabled ? const Color(0xFF059669) : const Color(0xFF64748B),
+                                    fontWeight: user.biometricEnabled ? FontWeight.w600 : FontWeight.w400,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right_rounded, size: 20, color: Color(0xFF94A3B8)),
+                        ],
                       ),
-                      Switch.adaptive(
-                        value: user.biometricEnabled,
-                        activeColor: const Color(0xFF06B6D4),
-                        onChanged: (bool newVal) async {
-                          await _handleToggleBiometric(context, authProvider, newVal);
-                        },
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -1015,7 +1049,176 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<void> _handleToggleBiometric(BuildContext context, AuthProvider authProvider, bool newVal) async {
+  void _showBiometricSecuritySheet(BuildContext context, AuthProvider authProvider, dynamic user) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (sheetCtx) => StatefulBuilder(
+        builder: (ctx, setModalState) => Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF06B6D4).withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.security_rounded, color: Color(0xFF0891B2), size: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Pilih Metode Kunci Aplikasi',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Verifikasi identitas sebelum membuka NitipDong',
+                          style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Option 1: Sidik Jari (Fingerprint)
+              _buildBiometricOption(
+                title: 'Sidik Jari (Fingerprint)',
+                subtitle: 'Sentuh sensor sidik jari HP untuk membuka',
+                icon: Icons.fingerprint_rounded,
+                iconColor: const Color(0xFF0891B2),
+                isSelected: user.biometricEnabled && user.biometricType == 'fingerprint',
+                onTap: () async {
+                  Navigator.pop(sheetCtx);
+                  await _handleToggleBiometric(context, authProvider, true, type: 'fingerprint');
+                },
+              ),
+
+              const SizedBox(height: 10),
+
+              // Option 2: Scan Wajah (Face Unlock)
+              _buildBiometricOption(
+                title: 'Pindai Wajah (Face Unlock)',
+                subtitle: 'Gunakan kamera depan untuk pengenalan wajah',
+                icon: Icons.face_unlock_rounded,
+                iconColor: const Color(0xFF7C3AED),
+                isSelected: user.biometricEnabled && user.biometricType == 'face',
+                onTap: () async {
+                  Navigator.pop(sheetCtx);
+                  await _handleToggleBiometric(context, authProvider, true, type: 'face');
+                },
+              ),
+
+              const SizedBox(height: 10),
+
+              // Option 3: Nonaktifkan Kunci
+              _buildBiometricOption(
+                title: 'Nonaktifkan Kunci Biometrik',
+                subtitle: 'Aplikasi langsung terbuka tanpa meminta sidik jari / wajah',
+                icon: Icons.lock_open_rounded,
+                iconColor: const Color(0xFF64748B),
+                isSelected: !user.biometricEnabled,
+                onTap: () async {
+                  Navigator.pop(sheetCtx);
+                  await _handleToggleBiometric(context, authProvider, false);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBiometricOption({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color iconColor,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? iconColor.withOpacity(0.06) : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? iconColor : const Color(0xFFE2E8F0),
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: iconColor, size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
+                      color: const Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(Icons.check_circle_rounded, color: iconColor, size: 22)
+            else
+              const Icon(Icons.radio_button_unchecked_rounded, color: Color(0xFFCBD5E1), size: 22),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleToggleBiometric(
+    BuildContext context,
+    AuthProvider authProvider,
+    bool newVal, {
+    String type = 'fingerprint',
+  }) async {
     final localAuth = LocalAuthentication();
 
     if (newVal) {
@@ -1036,9 +1239,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           return;
         }
 
-        // 2. Minta verifikasi sidik jari terlebih dahulu sebelum mengaktifkan
+        final String reason = type == 'face'
+            ? 'Pindai wajah Anda untuk mengonfirmasi pengaktifan Face Unlock'
+            : 'Pindai sidik jari Anda untuk mengonfirmasi pengaktifan Fingerprint';
+
+        // 2. Minta verifikasi biometrik terlebih dahulu sebelum mengaktifkan
         final bool authenticated = await localAuth.authenticate(
-          localizedReason: 'Pindai sidik jari Anda untuk mengonfirmasi pengaktifan kunci aplikasi',
+          localizedReason: reason,
           options: const AuthenticationOptions(
             biometricOnly: false,
             stickyAuth: true,
@@ -1049,7 +1256,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Verifikasi sidik jari dibatalkan. Kunci biometrik belum diaktifkan.'),
+              content: Text('Verifikasi biometrik dibatalkan. Kunci belum diaktifkan.'),
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -1069,16 +1276,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     // 3. Simpan perubahan ke database akun dan cache lokal
-    final success = await authProvider.updateBiometric(newVal);
+    final success = await authProvider.updateBiometric(newVal, type: type);
     if (!mounted) return;
 
     if (success) {
+      final label = type == 'face' ? 'Pindai Wajah (Face Unlock)' : 'Sidik Jari (Fingerprint)';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            newVal
-                ? 'Kunci Sidik Jari Berhasil Diaktifkan! 🔐'
-                : 'Kunci Sidik Jari Dinonaktifkan.',
+            newVal ? 'Kunci $label Berhasil Diaktifkan! 🔐' : 'Kunci Biometrik Telah Dinonaktifkan.',
           ),
           backgroundColor: newVal ? const Color(0xFF059669) : const Color(0xFF475569),
           behavior: SnackBarBehavior.floating,
@@ -1087,7 +1293,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Gagal memperbarui pengaturan sidik jari ke server. Silakan coba lagi.'),
+          content: Text('Gagal memperbarui pengaturan biometrik ke server. Silakan coba lagi.'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),

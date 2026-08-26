@@ -26,6 +26,7 @@ class AuthProvider with ChangeNotifier {
       _user = await ApiService.getProfile();
       if (_user != null) {
         await ApiService.setBiometricEnabledLocally(_user!.biometricEnabled);
+        await ApiService.setBiometricTypeLocally(_user!.biometricType);
       }
     }
 
@@ -109,8 +110,8 @@ class AuthProvider with ChangeNotifier {
     return result;
   }
 
-  Future<bool> updateBiometric(bool enabled) async {
-    final success = await ApiService.toggleBiometric(enabled);
+  Future<bool> updateBiometric(bool enabled, {String? type}) async {
+    final success = await ApiService.toggleBiometric(enabled, type: type);
     if (success && _user != null) {
       _user = UserModel(
         id: _user!.id,
@@ -120,6 +121,7 @@ class AuthProvider with ChangeNotifier {
         role: _user!.role,
         avatarUrl: _user!.avatarUrl,
         biometricEnabled: enabled,
+        biometricType: type ?? _user!.biometricType,
         cartCount: _user!.cartCount,
         wishlistCount: _user!.wishlistCount,
         ordersCount: _user!.ordersCount,

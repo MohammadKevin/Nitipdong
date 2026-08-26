@@ -6,6 +6,7 @@ class UserModel {
   final String role;
   final String? avatarUrl;
   final bool biometricEnabled;
+  final String biometricType; // 'fingerprint', 'face', 'any'
   final int cartCount;
   final int wishlistCount;
   final int ordersCount;
@@ -18,6 +19,7 @@ class UserModel {
     required this.role,
     this.avatarUrl,
     this.biometricEnabled = false,
+    this.biometricType = 'fingerprint',
     this.cartCount = 0,
     this.wishlistCount = 0,
     this.ordersCount = 0,
@@ -32,6 +34,7 @@ class UserModel {
       role: json['role'] ?? 'customer',
       avatarUrl: json['avatar_url'],
       biometricEnabled: json['biometric_enabled'] == true || json['biometric_enabled'] == 1,
+      biometricType: json['biometric_type']?.toString() ?? 'fingerprint',
       cartCount: json['cart_count'] ?? 0,
       wishlistCount: json['wishlist_count'] ?? 0,
       ordersCount: json['orders_count'] ?? 0,
@@ -47,6 +50,7 @@ class UserModel {
       'role': role,
       'avatar_url': avatarUrl,
       'biometric_enabled': biometricEnabled,
+      'biometric_type': biometricType,
     };
   }
 }

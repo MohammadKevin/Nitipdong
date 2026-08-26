@@ -293,6 +293,7 @@ class AuthController extends Controller
                 'role'              => $user->role,
                 'avatar_url'        => $user->avatar_url,
                 'biometric_enabled' => (bool) $user->biometric_enabled,
+                'biometric_type'    => $user->biometric_type ?? 'fingerprint',
                 'cart_count'        => $user->carts()->count(),
                 'wishlist_count'    => $user->wishlists()->count(),
                 'orders_count'      => $user->orders()->count(),
@@ -306,23 +307,36 @@ class AuthController extends Controller
     }
 
     /**
-     * Toggle user biometric fingerprint lock preference.
+     * Toggle user biometric lock preference (Fingerprint / Face Unlock / Any).
      */
     public function toggleBiometric(Request $request): JsonResponse
     {
         $request->validate([
             'enabled' => 'required|boolean',
+            'type'    => 'nullable|string|in:fingerprint,face,any',
         ]);
 
         $user = $request->user();
-        $user->update([
+        $updates = [
             'biometric_enabled' => (bool) $request->enabled,
-        ]);
+        ];
+        if ($request->filled('type')) {
+            $updates['biometric_type'] = $request->type;
+        }
+
+        $user->update($updates);
+
+        $typeLabel = match($user->biometric_type) {
+            'face'        => 'Pindai Wajah (Face Unlock)',
+            'fingerprint' => 'Sidik Jari (Fingerprint)',
+            default       => 'Biometrik Fleksibel',
+        };
 
         return response()->json([
             'success'           => true,
-            'message'           => $request->enabled ? 'Kunci sidik jari berhasil diaktifkan!' : 'Kunci sidik jari telah dinonaktifkan.',
+            'message'           => $request->enabled ? "Kunci $typeLabel berhasil diaktifkan! 🔐" : 'Kunci biometrik telah dinonaktifkan.',
             'biometric_enabled' => (bool) $user->biometric_enabled,
+            'biometric_type'    => $user->biometric_type ?? 'fingerprint',
         ]);
     }
 

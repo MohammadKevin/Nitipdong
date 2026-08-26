@@ -38,6 +38,7 @@ class User extends Authenticatable
         'avatar',
         'google_id',
         'biometric_enabled',
+        'biometric_type',
         'otp_code',
         'otp_expires_at',
         'pending_email',
