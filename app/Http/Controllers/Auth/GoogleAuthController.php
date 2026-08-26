@@ -26,7 +26,12 @@ class GoogleAuthController extends Controller
     public function handleGoogleCallback()
     {
         try {
-            $googleUser = Socialite::driver('google')->user();
+            // Coba ambil data user Google secara stateful, jika sesi terputus fallback ke stateless
+            try {
+                $googleUser = Socialite::driver('google')->user();
+            } catch (\Exception $e) {
+                $googleUser = Socialite::driver('google')->stateless()->user();
+            }
 
             if (empty($googleUser->getEmail())) {
                 return redirect()->route('login')->with('error', 'Gagal mendapatkan data email dari akun Google Anda.');
