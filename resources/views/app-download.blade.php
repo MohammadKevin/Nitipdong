@@ -1,416 +1,358 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download Aplikasi NitipDong — Android & iOS</title>
-    <meta name="description" content="Download aplikasi NitipDong untuk Android (APK) dan iOS iPhone (IPA). Belanja online lebih mudah, cepat, dan aman langsung dari genggaman Anda.">
+    <title>Download Aplikasi NitipDong Mobile — Android (APK) & iOS (IPA)</title>
+    <meta name="description" content="Download aplikasi NitipDong resmi untuk Android (APK) dan iOS (IPA). Nikmati pengalaman belanja dan titip beli lebih cepat, aman, dan hemat langsung dari smartphone Anda.">
     <link rel="icon" href="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}" type="image/svg+xml">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-            --cyan: #06b6d4;
-            --cyan-dark: #0891b2;
-            --navy: #0b1528;
-            --navy-mid: #0f2044;
-            --navy-card: #132448;
-        }
-
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--navy);
-            color: #fff;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* ── Background mesh ── */
-        .bg-mesh {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            background:
-                radial-gradient(ellipse 80% 60% at 10% 0%, rgba(6,182,212,.18) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 50% at 90% 100%, rgba(6,182,212,.12) 0%, transparent 60%);
-        }
-
-        /* ── Navbar ── */
-        nav {
-            position: relative; z-index: 10;
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 1.2rem 2rem;
-            border-bottom: 1px solid rgba(255,255,255,.07);
-            backdrop-filter: blur(12px);
-        }
-        .logo { display: flex; align-items: center; gap: .6rem; text-decoration: none; }
-        .logo img { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; }
-        .logo span { font-size: 1.1rem; font-weight: 800; color: #fff; }
-        .logo span em { color: var(--cyan); font-style: normal; }
-        nav a.btn-nav {
-            padding: .45rem 1.2rem; border-radius: 8px;
-            background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
-            color: #fff; font-size: .8rem; font-weight: 600; text-decoration: none;
-            transition: background .2s;
-        }
-        nav a.btn-nav:hover { background: rgba(255,255,255,.15); }
-
-        /* ── Hero ── */
-        .hero {
-            position: relative; z-index: 1;
-            display: flex; flex-direction: column; align-items: center;
-            text-align: center;
-            padding: 4.5rem 1.5rem 2.5rem;
-            gap: 1.5rem;
-        }
-
-        .badge-pill {
-            display: inline-flex; align-items: center; gap: .5rem;
-            padding: .35rem 1rem; border-radius: 999px;
-            background: rgba(6,182,212,.15); border: 1px solid rgba(6,182,212,.3);
-            font-size: .75rem; font-weight: 700; color: var(--cyan); letter-spacing: .05em; text-transform: uppercase;
-        }
-
-        h1 {
-            font-size: clamp(2rem, 6vw, 3.6rem);
-            font-weight: 900; line-height: 1.1;
-            background: linear-gradient(135deg, #fff 40%, var(--cyan) 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-        }
-
-        .subtitle {
-            font-size: 1.05rem; color: rgba(255,255,255,.6); max-width: 520px; line-height: 1.7;
-        }
-
-        /* ── Download buttons ── */
-        .cta-group {
-            display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; align-items: center;
-            margin-top: .5rem;
-        }
-
-        .btn-download-android {
-            display: inline-flex; align-items: center; gap: .85rem;
-            padding: .9rem 1.75rem; border-radius: 14px;
-            background: linear-gradient(135deg, #0891b2, #06b6d4);
-            color: #fff; font-size: .95rem; font-weight: 800; text-decoration: none;
-            box-shadow: 0 8px 32px rgba(6,182,212,.35);
-            transition: transform .2s, box-shadow .2s;
-            text-align: left;
-        }
-        .btn-download-android:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(6,182,212,.5); }
-        .btn-download-android i { font-size: 1.6rem; color: #a5f3fc; }
-        .btn-download-android small { display: block; font-size: .7rem; font-weight: 500; opacity: .85; margin-top: .15rem; }
-
-        .btn-download-ios {
-            display: inline-flex; align-items: center; gap: .85rem;
-            padding: .9rem 1.75rem; border-radius: 14px;
-            background: linear-gradient(135deg, #1e293b, #334155);
-            border: 1px solid rgba(255,255,255,.2);
-            color: #fff; font-size: .95rem; font-weight: 800; text-decoration: none;
-            box-shadow: 0 8px 32px rgba(0,0,0,.4);
-            transition: transform .2s, border-color .2s;
-            text-align: left;
-        }
-        .btn-download-ios:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.5); }
-        .btn-download-ios i { font-size: 1.6rem; color: #fff; }
-        .btn-download-ios small { display: block; font-size: .7rem; font-weight: 500; opacity: .75; margin-top: .15rem; }
-
-        .btn-secondary {
-            display: inline-flex; align-items: center; gap: .5rem;
-            padding: .85rem 1.4rem; border-radius: 12px;
-            border: 1px solid rgba(255,255,255,.15);
-            color: rgba(255,255,255,.75); font-size: .85rem; font-weight: 600; text-decoration: none;
-            transition: border-color .2s, color .2s;
-        }
-        .btn-secondary:hover { border-color: var(--cyan); color: var(--cyan); }
-
-        .version-note {
-            font-size: .72rem; color: rgba(255,255,255,.4); margin-top: -.25rem;
-        }
-
-        /* ── Stats strip ── */
-        .stats {
-            position: relative; z-index: 1;
-            display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem;
-            padding: 2rem 1.5rem;
-            border-top: 1px solid rgba(255,255,255,.06);
-            border-bottom: 1px solid rgba(255,255,255,.06);
-        }
-        .stat { text-align: center; }
-        .stat strong { display: block; font-size: 1.6rem; font-weight: 900; color: var(--cyan); }
-        .stat span { font-size: .75rem; color: rgba(255,255,255,.45); font-weight: 500; }
-
-        /* ── Features ── */
-        .section {
-            position: relative; z-index: 1;
-            max-width: 900px; margin: 0 auto; padding: 4rem 1.5rem;
-        }
-        .section-title {
-            text-align: center; font-size: 1.6rem; font-weight: 800; margin-bottom: 2.5rem;
-        }
-        .section-title span { color: var(--cyan); }
-
-        .features-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;
-        }
-        .feature-card {
-            background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
-            border-radius: 16px; padding: 1.5rem;
-            transition: border-color .2s, background .2s;
-        }
-        .feature-card:hover { border-color: rgba(6,182,212,.4); background: rgba(6,182,212,.06); }
-        .feature-icon {
-            width: 44px; height: 44px; border-radius: 12px;
-            background: rgba(6,182,212,.15); display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem; color: var(--cyan); margin-bottom: 1rem;
-        }
-        .feature-card h3 { font-size: .9rem; font-weight: 700; margin-bottom: .4rem; }
-        .feature-card p { font-size: .8rem; color: rgba(255,255,255,.5); line-height: 1.6; }
-
-        /* ── How to install (Tabs) ── */
-        .install-tab-nav {
-            display: flex; justify-content: center; gap: .75rem; margin-bottom: 1.5rem;
-        }
-        .tab-btn {
-            padding: .6rem 1.4rem; border-radius: 12px; border: 1px solid rgba(255,255,255,.15);
-            background: rgba(255,255,255,.05); color: #fff; font-size: .85rem; font-weight: 700;
-            cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: .5rem;
-        }
-        .tab-btn.active {
-            background: var(--cyan); color: #0b1528; border-color: var(--cyan); box-shadow: 0 4px 20px rgba(6,182,212,.4);
-        }
-
-        .steps { display: flex; flex-direction: column; gap: 1rem; }
-        .step {
-            display: flex; align-items: flex-start; gap: 1rem;
-            background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07);
-            border-radius: 14px; padding: 1.2rem 1.4rem;
-        }
-        .step-num {
-            width: 32px; height: 32px; border-radius: 8px; shrink: 0;
-            background: linear-gradient(135deg, var(--cyan-dark), var(--cyan));
-            display: flex; align-items: center; justify-content: center;
-            font-size: .85rem; font-weight: 900; color: #fff; flex-shrink: 0;
-        }
-        .step h4 { font-size: .9rem; font-weight: 700; margin-bottom: .25rem; }
-        .step p { font-size: .78rem; color: rgba(255,255,255,.5); line-height: 1.5; }
-        .step a { color: var(--cyan); text-decoration: underline; font-weight: 600; }
-
-        /* ── Bottom CTA ── */
-        .bottom-cta {
-            position: relative; z-index: 1;
-            text-align: center; padding: 4rem 1.5rem;
-            border-top: 1px solid rgba(255,255,255,.06);
-        }
-        .bottom-cta h2 { font-size: 1.8rem; font-weight: 900; margin-bottom: .75rem; }
-        .bottom-cta p { color: rgba(255,255,255,.5); margin-bottom: 2rem; font-size: .9rem; }
-
-        /* ── Footer ── */
-        footer {
-            position: relative; z-index: 1;
-            text-align: center; padding: 1.5rem;
-            font-size: .72rem; color: rgba(255,255,255,.25);
-            border-top: 1px solid rgba(255,255,255,.05);
-        }
-        footer a { color: var(--cyan); text-decoration: none; }
-
-        @media (max-width: 600px) {
-            nav { padding: 1rem; }
-            .hero { padding: 3.5rem 1rem 2rem; }
-            .cta-group { flex-direction: column; width: 100%; }
-            .btn-download-android, .btn-download-ios, .btn-secondary { width: 100%; justify-content: center; }
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
     </style>
 </head>
-<body x-data="{ platform: 'android' }">
-    <div class="bg-mesh"></div>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-white" x-data="{ platform: 'android' }">
 
-    <nav>
-        <a href="{{ url('/') }}" class="logo">
-            <img src="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}" alt="NitipDong">
-            <span>Nitip<em>Dong</em></span>
-        </a>
-        <a href="{{ url('/') }}" class="btn-nav">
-            <i class="fa-solid fa-globe"></i> Buka Website
-        </a>
-    </nav>
+    <!-- Sticky Navigation Bar -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
+        <div class="page-container">
+            <div class="flex items-center justify-between h-16">
+                <a href="{{ url('/') }}" class="flex items-center gap-2.5 group">
+                    <div class="w-9 h-9 rounded-xl overflow-hidden border border-cyan-200 bg-cyan-50 flex items-center justify-center p-1 shadow-2xs group-hover:scale-105 transition-transform">
+                        <img src="{{ asset('icon-app-web-terbaru/nitipdong-icon-mark.svg') }}" alt="NitipDong Logo" class="w-full h-full object-contain">
+                    </div>
+                    <div>
+                        <span class="font-extrabold text-base tracking-tight text-slate-900 block leading-none">
+                            Nitip<span class="text-cyan-600">Dong</span>
+                        </span>
+                        <span class="text-[9px] font-bold text-cyan-700 uppercase tracking-widest">Apps Hub</span>
+                    </div>
+                </a>
 
-    <div class="hero">
-        <div class="badge-pill">
-            <i class="fa-solid fa-mobile-screen"></i>
-            Tersedia untuk Android &amp; iOS (iPhone)
-        </div>
-
-        <h1>Belanja Online<br>Ada di Genggamanmu</h1>
-
-        <p class="subtitle">
-            Download aplikasi NitipDong sekarang dan nikmati pengalaman belanja yang lebih cepat, mudah, dan menyenangkan langsung dari smartphone Anda.
-        </p>
-
-        <div class="cta-group">
-            <a href="{{ route('app.download.android') }}" class="btn-download-android" title="Download untuk Android">
-                <i class="fa-brands fa-android"></i>
-                <div>
-                    Download APK
-                    <small>Android 5.0+ · v1.0.0 (Latest)</small>
-                </div>
-            </a>
-
-            <a href="{{ route('app.download.ios') }}" class="btn-download-ios" title="Download untuk iOS iPhone">
-                <i class="fa-brands fa-apple"></i>
-                <div>
-                    Download IPA
-                    <small>iOS 13.0+ · Sideload Ready</small>
-                </div>
-            </a>
-
-            <a href="{{ url('/') }}" class="btn-secondary">
-                <i class="fa-solid fa-globe"></i>
-                Website
-            </a>
-        </div>
-
-        <p class="version-note">Gratis · Tanpa iklan · Server Cloud Terenkripsi</p>
-    </div>
-
-    <div class="stats">
-        <div class="stat">
-            <strong>100%</strong>
-            <span>Produk Original</span>
-        </div>
-        <div class="stat">
-            <strong>Rp0</strong>
-            <span>Ongkos Kirim</span>
-        </div>
-        <div class="stat">
-            <strong>30 Hari</strong>
-            <span>Sesi Login Awet</span>
-        </div>
-        <div class="stat">
-            <strong>24/7</strong>
-            <span>Customer Service</span>
-        </div>
-    </div>
-
-    <div class="section">
-        <h2 class="section-title">Kenapa Pilih <span>NitipDong</span>?</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
-                <h3>Super Cepat</h3>
-                <p>Loading super kilat di bawah 1 detik. Temukan produk dan checkout dalam hitungan detik.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fa-solid fa-shield-check"></i></div>
-                <h3>100% Aman</h3>
-                <p>Transaksi dienkripsi SSL. Garansi uang kembali jika produk tidak sesuai deskripsi.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fa-solid fa-tags"></i></div>
-                <h3>Harga Terbaik</h3>
-                <p>Flash sale kilat, kupon diskon, dan voucher gratis ongkir setiap hari untuk semua pengguna.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fa-solid fa-heart"></i></div>
-                <h3>Wishlist & Keranjang</h3>
-                <p>Simpan produk favorit, kelola keranjang, dan pantau status pesanan real-time.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fa-solid fa-store"></i></div>
-                <h3>Official Store</h3>
-                <p>Belanja dari toko-toko terverifikasi resmi dengan jaminan produk asli bergaransi.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="fa-solid fa-bell"></i></div>
-                <h3>Notifikasi Pintar</h3>
-                <p>Update status pesanan dan info promo terbaru langsung ke smartphone Anda.</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="section" style="padding-top: 0;">
-        <h2 class="section-title">Panduan <span>Instalasi</span></h2>
-
-        <div class="install-tab-nav">
-            <button class="tab-btn" :class="{ 'active': platform === 'android' }" @click="platform = 'android'">
-                <i class="fa-brands fa-android"></i> Panduan Android (APK)
-            </button>
-            <button class="tab-btn" :class="{ 'active': platform === 'ios' }" @click="platform = 'ios'">
-                <i class="fa-brands fa-apple"></i> Panduan iOS iPhone (IPA)
-            </button>
-        </div>
-
-        <div class="steps" x-show="platform === 'android'" x-cloak>
-            <div class="step">
-                <div class="step-num">1</div>
-                <div>
-                    <h4>Download File APK Android</h4>
-                    <p>Tap tombol "Download APK" di atas atau unduh dari <a href="{{ route('app.download.android') }}">link langsung APK</a>.</p>
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-num">2</div>
-                <div>
-                    <h4>Izinkan Sumber Tidak Dikenal</h4>
-                    <p>Buka Pengaturan HP → Keamanan → aktifkan "Install Unknown Apps" untuk browser Anda.</p>
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-num">3</div>
-                <div>
-                    <h4>Buka &amp; Pasang Aplikasi</h4>
-                    <p>Buka file APK dari notifikasi atau folder Downloads, lalu tap "Install" → Selesai! 🎉</p>
+                <div class="flex items-center gap-3">
+                    <a href="{{ url('/products') }}" class="hidden sm:inline-flex text-xs font-semibold text-slate-600 hover:text-cyan-600 transition-colors">
+                        Jelajahi Produk
+                    </a>
+                    <a href="{{ url('/') }}" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-cyan-700 hover:border-cyan-200 text-xs font-bold shadow-2xs transition-all">
+                        <i class="fa-solid fa-arrow-left text-[10px]"></i>
+                        <span>Ke Website</span>
+                    </a>
                 </div>
             </div>
         </div>
+    </header>
 
-        <div class="steps" x-show="platform === 'ios'" x-cloak>
-            <div class="step">
-                <div class="step-num">1</div>
-                <div>
-                    <h4>Download File IPA iOS</h4>
-                    <p>Unduh file <a href="{{ route('app.download.ios') }}">NitipDong-latest.ipa</a> ke PC atau Mac Anda.</p>
+    <!-- Main Content Area -->
+    <main class="flex-1">
+
+        <!-- Hero Section -->
+        <section class="relative overflow-hidden pt-8 pb-12 sm:pt-12 sm:pb-16 bg-gradient-to-b from-white via-cyan-50/40 to-slate-50 border-b border-slate-200/60">
+            <div class="page-container">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+                    
+                    <!-- Left Hero Text & CTA -->
+                    <div class="lg:col-span-7 xl:col-span-8 space-y-5 text-center lg:text-left">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100/80 border border-cyan-200 text-cyan-800 text-xs font-extrabold shadow-2xs">
+                            <span class="w-2 h-2 rounded-full bg-cyan-600 animate-pulse"></span>
+                            <span>Aplikasi Resmi • Versi v{{ env('APP_MOBILE_LATEST_VERSION', '2.5.1') }}</span>
+                        </div>
+
+                        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                            Belanja Online &amp; Titip Jastip <br class="hidden sm:inline">
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-600">Lebih Cepat di Aplikasi</span>
+                        </h1>
+
+                        <p class="text-xs sm:text-sm lg:text-base text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                            Download aplikasi NitipDong untuk Android dan iOS. Nikmati promo gratis ongkir Rp0, notifikasi resi pengiriman real-time, dan transaksi aman dengan proteksi rekening bersama.
+                        </p>
+
+                        <!-- CTA Download Buttons -->
+                        <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-2">
+                            <a href="{{ route('app.download.android') }}" class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 active:scale-98 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-3 shadow-md shadow-cyan-600/20 transition-all">
+                                <i class="fa-brands fa-android text-xl"></i>
+                                <div class="text-left">
+                                    <span class="block leading-none text-[10px] text-cyan-100 font-medium">Download Langsung</span>
+                                    <span class="block text-sm font-black mt-0.5">Android APK (v{{ env('APP_MOBILE_LATEST_VERSION', '2.5.1') }})</span>
+                                </div>
+                            </a>
+
+                            <a href="{{ route('app.download.ios') }}" class="w-full sm:w-auto px-5 py-3.5 rounded-xl bg-white hover:bg-slate-50 active:scale-98 border border-slate-300 hover:border-slate-400 text-slate-800 font-bold text-xs sm:text-sm flex items-center justify-center gap-3 shadow-2xs transition-all">
+                                <i class="fa-brands fa-apple text-xl text-slate-900"></i>
+                                <div class="text-left">
+                                    <span class="block leading-none text-[10px] text-slate-500 font-medium">Sideload / IPA</span>
+                                    <span class="block text-sm font-bold mt-0.5 text-slate-900">iOS iPhone (IPA)</span>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Trust Checkmarks -->
+                        <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-3 text-[11px] font-semibold text-slate-500">
+                            <span class="inline-flex items-center gap-1.5">
+                                <i class="fa-solid fa-check text-emerald-500"></i> Bebas Iklan &amp; Malware
+                            </span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <i class="fa-solid fa-check text-emerald-500"></i> Server Cloud Cepat
+                            </span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <i class="fa-solid fa-check text-emerald-500"></i> Ukuran Ringan (~28 MB)
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Right QR Code Download Card -->
+                    <div class="lg:col-span-5 xl:col-span-4 flex justify-center lg:justify-end">
+                        <div class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-xl max-w-[280px] w-full text-center relative overflow-hidden">
+                            <div class="absolute -top-12 -right-12 w-28 h-28 bg-cyan-100 rounded-full blur-2xl pointer-events-none"></div>
+
+                            <span class="text-[11px] font-extrabold uppercase tracking-wider text-cyan-700 block mb-1">Scan Pakai Kamera HP</span>
+                            <h3 class="text-sm font-black text-slate-900 mb-3">Install Otomatis di HP</h3>
+
+                            <div class="w-40 h-40 mx-auto p-2 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center mb-3 shadow-inner">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https%3A%2F%2Fbudayakita.com%2Fdownload%2Fapp&bgcolor=ffffff&color=083344&margin=1"
+                                     alt="QR Code NitipDong Download"
+                                     class="w-full h-full object-contain rounded-xl">
+                            </div>
+
+                            <p class="text-[11px] text-slate-500 leading-snug">
+                                Arahkan kamera HP Anda ke kode QR untuk mengunduh APK versi terbaru secara instan.
+                            </p>
+
+                            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-center gap-1.5 text-[10.5px] font-bold text-emerald-700">
+                                <i class="fa-solid fa-shield-check text-xs"></i>
+                                <span>APK Resmi Terverifikasi</span>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-            <div class="step">
-                <div class="step-num">2</div>
-                <div>
-                    <h4>Gunakan Sideloadly / AltStore</h4>
-                    <p>Install <a href="https://sideloadly.io" target="_blank" rel="noopener">Sideloadly</a> atau <a href="https://altstore.io" target="_blank" rel="noopener">AltStore</a> (gratis) di komputer Anda, lalu sambungkan iPhone via kabel data.</p>
+        </section>
+
+        <!-- Stats Bar -->
+        <section class="bg-white border-b border-slate-200/80 py-6 shadow-2xs">
+            <div class="page-container">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center divide-x divide-slate-100">
+                    <div class="px-2">
+                        <span class="block text-2xl sm:text-3xl font-black text-cyan-700">100%</span>
+                        <span class="text-xs font-semibold text-slate-500 mt-0.5 block">Produk Original</span>
+                    </div>
+                    <div class="px-2">
+                        <span class="block text-2xl sm:text-3xl font-black text-cyan-700">Rp0</span>
+                        <span class="text-xs font-semibold text-slate-500 mt-0.5 block">Voucher Gratis Ongkir</span>
+                    </div>
+                    <div class="px-2">
+                        <span class="block text-2xl sm:text-3xl font-black text-cyan-700">Real-Time</span>
+                        <span class="text-xs font-semibold text-slate-500 mt-0.5 block">Pelacakan Resi Kurir</span>
+                    </div>
+                    <div class="px-2">
+                        <span class="block text-2xl sm:text-3xl font-black text-cyan-700">24/7</span>
+                        <span class="text-xs font-semibold text-slate-500 mt-0.5 block">Bantuan &amp; AI Assistant</span>
+                    </div>
                 </div>
             </div>
-            <div class="step">
-                <div class="step-num">3</div>
-                <div>
-                    <h4>Install IPA ke iPhone</h4>
-                    <p>Drag file `NitipDong-latest.ipa` ke aplikasi Sideloadly / AltStore dan klik Start untuk memasang aplikasi ke iPhone Anda!</p>
+        </section>
+
+        <!-- App Features Highlights -->
+        <section class="py-12 sm:py-16 page-container">
+            <div class="text-center max-w-xl mx-auto mb-10">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-cyan-600 block mb-1">Keunggulan Aplikasi</span>
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Kenapa Harus Pakai Aplikasi NitipDong?</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-2">Dibuat khusus untuk memberikan pengalaman belanja yang lebih lancar dan hemat.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-cyan-300 transition-all">
+                    <div class="w-11 h-11 rounded-xl bg-cyan-50 text-cyan-600 border border-cyan-100 flex items-center justify-center text-lg mb-4">
+                        <i class="fa-solid fa-truck-fast"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-900 mb-1.5">Update Resi Otomatis</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Pantau perjalanan paket dari toko ke rumah tanpa perlu cek resi manual berulang kali.</p>
                 </div>
+
+                <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-cyan-300 transition-all">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center text-lg mb-4">
+                        <i class="fa-solid fa-tags"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-900 mb-1.5">Voucher Khusus Aplikasi</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Klaim kupon diskon tambahan dan voucher gratis ongkir tanpa batas minimum belanja.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-cyan-300 transition-all">
+                    <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center text-lg mb-4">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-900 mb-1.5">Rekening Bersama Escrow</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Pembayaran Anda aman terjaga. Dana baru diteruskan ke seller setelah paket Anda terima.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-cyan-300 transition-all">
+                    <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center text-lg mb-4">
+                        <i class="fa-solid fa-comments"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-900 mb-1.5">Chat Toko &amp; AI Asisten</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Tanya ketersediaan stok produk dan konsultasi rekomendasi barang secara instan 24/7.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step-by-Step Installation Guide -->
+        <section class="py-12 sm:py-16 bg-white border-y border-slate-200/80">
+            <div class="page-container max-w-3xl">
+                <div class="text-center mb-8">
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-cyan-600 block mb-1">Panduan Pengguna</span>
+                    <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Cara Install Aplikasi</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Ikuti 3 langkah mudah berikut untuk memasang aplikasi di HP Anda</p>
+                </div>
+
+                <!-- Platform Tabs -->
+                <div class="flex items-center justify-center gap-2 mb-6">
+                    <button type="button" 
+                            @click="platform = 'android'"
+                            class="px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 cursor-pointer transition-all"
+                            :class="platform === 'android' ? 'bg-cyan-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+                        <i class="fa-brands fa-android text-sm"></i>
+                        <span>Panduan Android (APK)</span>
+                    </button>
+
+                    <button type="button" 
+                            @click="platform = 'ios'"
+                            class="px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 cursor-pointer transition-all"
+                            :class="platform === 'ios' ? 'bg-cyan-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+                        <i class="fa-brands fa-apple text-sm"></i>
+                        <span>Panduan iOS iPhone (IPA)</span>
+                    </button>
+                </div>
+
+                <!-- Android Steps -->
+                <div x-show="platform === 'android'" class="space-y-3.5">
+                    <div class="flex items-start gap-4 p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                        <div class="w-8 h-8 rounded-xl bg-cyan-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-2xs">
+                            1
+                        </div>
+                        <div>
+                            <h4 class="text-xs sm:text-sm font-bold text-slate-900">Download File APK</h4>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                                Klik tombol <strong>"Download APK"</strong> di atas atau <a href="{{ route('app.download.android') }}" class="text-cyan-700 font-bold underline hover:text-cyan-800">download langsung APK Android</a> (~28 MB).
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4 p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                        <div class="w-8 h-8 rounded-xl bg-cyan-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-2xs">
+                            2
+                        </div>
+                        <div>
+                            <h4 class="text-xs sm:text-sm font-bold text-slate-900">Izinkan Pemasangan APK (Sumber Tidak Dikenal)</h4>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                                Saat membuka file, jika muncul peringatan keamanan, pilih <strong>Pengaturan (Settings)</strong> → Aktifkan <strong>"Izinkan dari sumber ini (Allow from this source)"</strong>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4 p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                        <div class="w-8 h-8 rounded-xl bg-cyan-600 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-2xs">
+                            3
+                        </div>
+                        <div>
+                            <h4 class="text-xs sm:text-sm font-bold text-slate-900">Pasang &amp; Mulai Belanja</h4>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                                Tekan tombol <strong>"Install"</strong>. Tunggu beberapa detik hingga selesai, lalu buka aplikasi NitipDong untuk login dan mulai berbelanja! 🎉
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- iOS Steps -->
+                <div x-show="platform === 'ios'" x-cloak class="space-y-3.5">
+                    <div class="flex items-start gap-4 p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                        <div class="w-8 h-8 rounded-xl bg-slate-800 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-2xs">
+                            1
+                        </div>
+                        <div>
+                            <h4 class="text-xs sm:text-sm font-bold text-slate-900">Unduh Paket IPA iOS</h4>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                                Unduh file <a href="{{ route('app.download.ios') }}" class="text-cyan-700 font-bold underline hover:text-cyan-800">NitipDong-latest.ipa</a> ke komputer PC atau Mac Anda.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4 p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                        <div class="w-8 h-8 rounded-xl bg-slate-800 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-2xs">
+                            2
+                        </div>
+                        <div>
+                            <h4 class="text-xs sm:text-sm font-bold text-slate-900">Gunakan Sideloadly atau AltStore</h4>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                                Buka aplikasi <a href="https://sideloadly.io" target="_blank" rel="noopener" class="text-cyan-700 font-bold underline">Sideloadly</a> atau AltStore di PC/Mac, lalu sambungkan iPhone via kabel data USB.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-4 p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                        <div class="w-8 h-8 rounded-xl bg-slate-800 text-white font-black text-sm flex items-center justify-center shrink-0 shadow-2xs">
+                            3
+                        </div>
+                        <div>
+                            <h4 class="text-xs sm:text-sm font-bold text-slate-900">Tarik File &amp; Pasang ke iPhone</h4>
+                            <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+                                Masukkan file IPA ke Sideloadly, klik Start untuk proses instalasi langsung ke iPhone Anda.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Specs Details Card -->
+        <section class="py-10 page-container max-w-3xl">
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
+                <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-cyan-600"></i>
+                    <span>Informasi Teknis Rilis Aplikasi</span>
+                </h3>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+                    <div>
+                        <span class="text-slate-400 block text-[11px]">Versi Saat Ini</span>
+                        <span class="font-bold text-slate-900 text-sm mt-0.5 block">v{{ env('APP_MOBILE_LATEST_VERSION', '2.5.1') }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[11px]">Ukuran File APK</span>
+                        <span class="font-bold text-slate-900 text-sm mt-0.5 block">~28.4 MB</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[11px]">Sistem Operasi</span>
+                        <span class="font-bold text-slate-900 text-sm mt-0.5 block">Android 5.0+ / iOS 13+</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[11px]">Lisensi</span>
+                        <span class="font-bold text-emerald-600 text-sm mt-0.5 block">Gratis (Official)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Clean Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
+        <div class="page-container flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p>&copy; {{ date('Y') }} NitipDong Platform. Hak Cipta Dilindungi.</p>
+            <div class="flex items-center gap-4 text-xs font-semibold">
+                <a href="{{ url('/') }}" class="hover:text-cyan-700 transition-colors">Beranda</a>
+                <a href="{{ url('/products') }}" class="hover:text-cyan-700 transition-colors">Katalog Produk</a>
+                <a href="{{ route('store.register') }}" class="hover:text-cyan-700 transition-colors">Buka Toko</a>
             </div>
         </div>
-    </div>
-
-    <div class="bottom-cta">
-        <h2>Siap Mulai Belanja?</h2>
-        <p>Bergabung bersama ribuan pembeli yang sudah merasakan kemudahan belanja di NitipDong.</p>
-        <div class="cta-group">
-            <a href="{{ route('app.download.android') }}" class="btn-download-android">
-                <i class="fa-brands fa-android"></i>
-                <div>
-                    Download APK (Android)
-                </div>
-            </a>
-            <a href="{{ route('app.download.ios') }}" class="btn-download-ios">
-                <i class="fa-brands fa-apple"></i>
-                <div>
-                    Download IPA (iOS)
-                </div>
-            </a>
-        </div>
-    </div>
-
-    <footer>
-        <p>© {{ date('Y') }} NitipDong · <a href="{{ url('/') }}">budayakita.com</a> · Dibuat dengan ❤️ di Indonesia</p>
     </footer>
+
 </body>
 </html>
