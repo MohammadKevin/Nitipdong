@@ -245,6 +245,17 @@ Route::get('/toko/{store:slug}', [StoreFrontController::class, 'show'])->name('s
 // Authenticated Routes
 Route::middleware(['auth'])->group(function () {
 
+    Route::get('/dashboard', function () {
+        $user = Auth::user();
+        return match ($user?->role) {
+            'super_admin' => redirect()->route('super_admin.dashboard'),
+            'admin'       => redirect()->route('admin.dashboard'),
+            'seller'      => redirect()->route('seller.dashboard'),
+            'courier'     => redirect()->route('courier.dashboard'),
+            default       => redirect()->route('home'),
+        };
+    })->name('dashboard');
+
     Route::get('/store/register', [StoreRegistrationController::class, 'create'])->name('store.register');
     Route::post('/store/register', [StoreRegistrationController::class, 'store'])->name('store.store');
 

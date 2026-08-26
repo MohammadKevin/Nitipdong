@@ -18,8 +18,13 @@ class ProductController extends Controller
     {
         $store = Auth::user()->store;
 
+        if (!$store) {
+            $products = collect();
+            return view('seller.products.index', compact('products'));
+        }
+
         $query = Product::with('category')
-            ->where('store_id', $store?->id);
+            ->where('store_id', $store->id);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -38,8 +43,13 @@ class ProductController extends Controller
         return view('seller.products.index', compact('products'));
     }
 
-    public function create(): View
+    public function create()
     {
+        $store = Auth::user()->store;
+        if (!$store) {
+            return redirect()->route('store.register')->with('error', 'Silakan daftarkan toko Anda terlebih dahulu.');
+        }
+
         $categories = Category::all();
         return view('seller.products.create', compact('categories'));
     }
@@ -285,6 +295,9 @@ class ProductController extends Controller
      */
     protected function uploadImage($file): ?string
     {
+        if (!$file || !$file->isValid()) {
+            return null;
+        }
         return $file->store('products', 'public');
     }
 
