@@ -184,15 +184,18 @@ class AuthController extends Controller
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Akun tidak ditemukan.',
+                'message' => 'Akun dengan identitas tersebut tidak ditemukan.',
             ], 404);
         }
 
-        // Validate OTP Code
-        if ($user->otp_code !== $request->otp_code) {
+        // Validate OTP Code (clean spaces and format)
+        $enteredOtp = trim(str_replace(' ', '', (string) $request->otp_code));
+        $actualOtp = trim((string) $user->otp_code);
+
+        if ($actualOtp === '' || $actualOtp !== $enteredOtp) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kode OTP yang Anda masukkan salah. Silakan coba lagi.',
+                'message' => 'Kode OTP yang Anda masukkan salah atau tidak sesuai. Silakan coba lagi.',
             ], 422);
         }
 
@@ -200,7 +203,7 @@ class AuthController extends Controller
         if ($user->otp_expires_at && now()->isAfter($user->otp_expires_at)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kode OTP telah kedaluwarsa. Silakan kirim ulang kode baru.',
+                'message' => 'Kode OTP telah kedaluwarsa. Silakan minta kode baru.',
             ], 422);
         }
 
@@ -229,7 +232,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Resend fresh 6-digit OTP code with cooldown.
+     * Resend fresh 6-digit OTP code with 30-second cooldown.
      */
     public function resendOtp(Request $request): JsonResponse
     {
@@ -256,6 +259,21 @@ class AuthController extends Controller
             ], 404);
         }
 
+        // Cooldown enforcement: 30 seconds
+        $cacheKey = 'otp_resend_cooldown_' . $user->id;
+        if (\Illuminate\Support\Facades\Cache::has($cacheKey)) {
+            $remaining = (int) (\Illuminate\Support\Facades\Cache::get($cacheKey) - time());
+            if ($remaining > 0) {
+                return response()->json([
+                    'success'          => false,
+                    'message'          => "Mohon tunggu {$remaining} detik sebelum meminta kode OTP baru.",
+                    'cooldown_seconds' => $remaining,
+                ], 429);
+            }
+        }
+
+        \Illuminate\Support\Facades\Cache::put($cacheKey, time() + 30, 30);
+
         $otp = sprintf('%06d', mt_rand(100000, 999999));
         $user->update([
             'otp_code'       => $otp,
@@ -265,13 +283,13 @@ class AuthController extends Controller
         try {
             Mail::to($user->email)->send(new OtpMail($otp, 'resend', $user->name));
         } catch (\Throwable $e) {
-            Log::warning('Resend OTP email skipped/failed: ' . $e->getMessage());
+            Log::warning('Resend OTP email error: ' . $e->getMessage());
         }
 
         return response()->json([
             'success'          => true,
             'message'          => 'Kode OTP baru telah dikirimkan ke ' . $user->email,
-            'cooldown_seconds' => 60,
+            'cooldown_seconds' => 30,
             'otp_preview'      => app()->environment('local') ? $otp : null,
         ]);
     }

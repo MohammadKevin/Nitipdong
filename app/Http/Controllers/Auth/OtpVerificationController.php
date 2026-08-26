@@ -31,12 +31,15 @@ class OtpVerificationController extends Controller
 
         $user = $request->user();
 
-        if ($user->otp_code !== $request->otp) {
-            return back()->withErrors(['otp' => 'Kode OTP tidak valid atau salah.']);
+        $enteredOtp = trim(str_replace(' ', '', (string) $request->otp));
+        $actualOtp = trim((string) $user->otp_code);
+
+        if ($actualOtp === '' || $actualOtp !== $enteredOtp) {
+            return back()->withErrors(['otp' => 'Kode OTP tidak sesuai atau salah. Silakan periksa kembali email Anda.']);
         }
 
         if ($user->otp_expires_at && now()->greaterThan($user->otp_expires_at)) {
-            return back()->withErrors(['otp' => 'Kode OTP sudah kedaluwarsa. Silakan minta kode baru.']);
+            return back()->withErrors(['otp' => 'Kode OTP sudah kedaluwarsa. Silakan klik kirim ulang kode baru.']);
         }
 
         if (!empty($user->pending_email)) {
@@ -56,7 +59,7 @@ class OtpVerificationController extends Controller
             $user->otp_expires_at = null;
             $user->save();
 
-            return redirect()->route($this->getDashboardRoute($user))->with('success', 'Akun berhasil diverifikasi!');
+            return redirect()->route($this->getDashboardRoute($user))->with('success', 'Akun berhasil diverifikasi! Selamat datang di NitipDong.');
         }
 
         return redirect()->route($this->getDashboardRoute($user));
@@ -80,6 +83,17 @@ class OtpVerificationController extends Controller
             return redirect()->route($this->getDashboardRoute($user));
         }
 
+        // Cooldown enforcement: 30 seconds
+        $cacheKey = 'otp_resend_cooldown_web_' . $user->id;
+        if (\Illuminate\Support\Facades\Cache::has($cacheKey)) {
+            $remaining = (int) (\Illuminate\Support\Facades\Cache::get($cacheKey) - time());
+            if ($remaining > 0) {
+                return back()->withErrors(['otp' => "Mohon tunggu {$remaining} detik sebelum meminta kode OTP baru."]);
+            }
+        }
+
+        \Illuminate\Support\Facades\Cache::put($cacheKey, time() + 30, 30);
+
         $otp = sprintf('%06d', mt_rand(100000, 999999));
         
         $user->update([
@@ -90,8 +104,12 @@ class OtpVerificationController extends Controller
         $targetEmail = $user->pending_email ?: $user->email;
         $type = $user->pending_email ? 'change_email' : 'register';
 
-        \Illuminate\Support\Facades\Mail::to($targetEmail)->send(new \App\Mail\OtpMail($otp, $type, $user->name));
+        try {
+            \Illuminate\Support\Facades\Mail::to($targetEmail)->send(new \App\Mail\OtpMail($otp, $type, $user->name));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Web OTP resend error: ' . $e->getMessage());
+        }
 
-        return back()->with('status', 'Kode OTP baru telah dikirim ke email Anda.');
+        return back()->with('status', 'Kode OTP baru telah berhasil dikirim ke ' . $targetEmail . '. Silakan periksa kotak masuk atau folder spam Anda.');
     }
 }

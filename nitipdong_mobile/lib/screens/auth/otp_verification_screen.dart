@@ -27,7 +27,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final List<TextEditingController> _controllers = List.generate(_otpLength, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(_otpLength, (_) => FocusNode());
 
-  int _resendCooldown = 60;
+  int _resendCooldown = 30;
   Timer? _timer;
   int _failedAttempts = 0;
   bool _isVerifying = false;
@@ -36,7 +36,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   @override
   void initState() {
     super.initState();
-    _startCooldownTimer();
+    _startCooldownTimer(30);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNodes[0].requestFocus();
     });
@@ -54,7 +54,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     super.dispose();
   }
 
-  void _startCooldownTimer([int seconds = 60]) {
+  void _startCooldownTimer([int seconds = 30]) {
     _timer?.cancel();
     setState(() => _resendCooldown = seconds);
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -173,7 +173,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     if (!mounted) return;
 
     if (res['success'] == true) {
-      _startCooldownTimer(res['cooldown_seconds'] ?? 60);
+      _startCooldownTimer(res['cooldown_seconds'] ?? 30);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(res['message'] ?? 'Kode OTP baru telah dikirimkan! 📨'),
