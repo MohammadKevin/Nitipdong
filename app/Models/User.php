@@ -37,6 +37,7 @@ class User extends Authenticatable
         'address',
         'avatar',
         'google_id',
+        'email_verified_at',
         'biometric_enabled',
         'biometric_type',
         'otp_code',

@@ -5,27 +5,38 @@ import '../providers/auth_provider.dart';
 import '../screens/main_nav_screen.dart';
 
 class GoogleAuthService {
-  static final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: [
-      'email',
-      'profile',
-    ],
-    // Web / Backend OAuth Client ID from Google Cloud Console
-    serverClientId: '588650724388-u4d3h7e788q770hs7r6c250fg3k3p5n0.apps.googleusercontent.com',
-  );
+  static const String _webClientId =
+      '588650724388-u4d3h7e788q770hs7r6c250fg3k3p5n0.apps.googleusercontent.com';
+
+  static GoogleSignIn _createGoogleSignIn({bool useServerClientId = true}) {
+    return GoogleSignIn(
+      scopes: const [
+        'email',
+        'profile',
+      ],
+      serverClientId: useServerClientId ? _webClientId : null,
+    );
+  }
 
   /// Performs full Google Sign-In flow and links with NitipDong backend API.
   static Future<bool> signInWithGoogle(BuildContext context) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     try {
-      // Disconnect previous session if any to allow choosing account
-      try {
-        await _googleSignIn.signOut();
-      } catch (_) {}
+      GoogleSignInAccount? googleUser;
+      GoogleSignIn googleSignIn = _createGoogleSignIn(useServerClientId: true);
 
-      // Prompt user to select Google Account
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      try {
+        // Sign out any lingering session first
+        await googleSignIn.signOut().catchError((_) => null);
+        googleUser = await googleSignIn.signIn();
+      } catch (err) {
+        // If serverClientId caused a configuration exception (ApiException 10), fallback without serverClientId
+        debugPrint('[GoogleAuth] Primary sign-in attempt failed: $err. Retrying without serverClientId fallback...');
+        googleSignIn = _createGoogleSignIn(useServerClientId: false);
+        await googleSignIn.signOut().catchError((_) => null);
+        googleUser = await googleSignIn.signIn();
+      }
 
       if (googleUser == null) {
         // User cancelled the sign-in dialog
@@ -94,7 +105,7 @@ class GoogleAuthService {
   /// Sign out from Google Session
   static Future<void> signOut() async {
     try {
-      await _googleSignIn.signOut();
+      await _createGoogleSignIn().signOut();
     } catch (_) {}
   }
 }
