@@ -24,10 +24,10 @@
             </div>
         </div>
     @endif
-
     <section class="page-container py-3 sm:py-4">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
             
+            {{-- Left: Modern Promo Carousel with Real Product Artwork (8 Cols) --}}
             <div class="lg:col-span-8" x-data="{
                 currentSlide: 0,
                 totalSlides: 3,
@@ -41,7 +41,7 @@
                         if (!this.isPaused) {
                             this.nextSlide();
                         }
-                    }, 5000);
+                    }, 6000);
                 },
                 nextSlide() {
                     this.currentSlide = (this.currentSlide + 1) % this.totalSlides;
@@ -53,120 +53,233 @@
                     this.currentSlide = index;
                 }
             }" @mouseenter="isPaused = true" @mouseleave="isPaused = false">
-                <div class="relative rounded-2xl overflow-hidden bg-slate-950 border border-sky-100 shadow-sm h-full min-h-[300px] sm:min-h-[340px] flex flex-col justify-between">
+                <div class="relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-200/80 shadow-md h-full min-h-[340px] sm:min-h-[370px] lg:min-h-[390px] flex flex-col justify-between group">
                     
+                    {{-- ── SLIDE 0: FESTIVAL DISKON & GAJIAN SALE ── --}}
                     <div x-show="currentSlide === 0"
-                         x-transition:enter="transition ease-out duration-400"
-                         x-transition:enter-start="opacity-0 scale-99"
+                         x-transition:enter="transition ease-out duration-500"
+                         x-transition:enter-start="opacity-0 scale-98"
                          x-transition:enter-end="opacity-100 scale-100"
-                         class="absolute inset-0 flex flex-col justify-between p-6 sm:p-8 text-white z-10">
-                        <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-transparent z-10"></div>
-                        <img src="https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?q=80&w=1200&auto=format&fit=crop" 
-                             alt="Promo Belanja" 
-                             class="absolute inset-0 w-full h-full object-cover object-center opacity-40">
+                         class="absolute inset-0 bg-gradient-to-br from-[#062438] via-[#0b3c5d] to-[#041624] text-white p-5 sm:p-7 lg:p-9 flex flex-col justify-between overflow-hidden">
+                        
+                        {{-- Ambient Glows --}}
+                        <div class="absolute -top-24 -left-24 w-80 h-80 rounded-full bg-cyan-500/25 blur-3xl pointer-events-none"></div>
+                        <div class="absolute -bottom-24 right-10 w-96 h-96 rounded-full bg-sky-500/20 blur-3xl pointer-events-none"></div>
 
-                        <div class="relative z-20 max-w-md">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 mb-2.5 backdrop-blur-xs">
-                                <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                                Pesta Diskon &amp; Promo 2026
-                            </span>
-                            <h1 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight tracking-tight">
-                                Belanja Praktis &amp; Titip Beli dari Toko Terpercaya
-                            </h1>
-                            <p class="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
-                                Dapatkan produk 100% original, voucher gratis ongkir Rp0 ke seluruh Nusantara, dan promo kilat setiap hari.
-                            </p>
+                        <div class="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-center my-auto">
+                            {{-- Left Copy & CTA --}}
+                            <div class="md:col-span-7 space-y-3">
+                                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 backdrop-blur-md shadow-xs">
+                                    <i class="fa-solid fa-fire text-amber-400 text-xs animate-pulse"></i>
+                                    <span>FLASH SALE • DISKON S/D 70%</span>
+                                </div>
+                                <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight tracking-tight">
+                                    Promo Spesial Belanja &amp; Bebas Ongkir Rp0
+                                </h1>
+                                <p class="text-xs sm:text-sm text-sky-100/85 leading-relaxed max-w-md">
+                                    Dapatkan ribuan produk pilihan dari gadget, sneakers, fashion, hingga skincare dengan jaminan harga termurah se-Indonesia.
+                                </p>
+                                <div class="flex flex-wrap items-center gap-2.5 pt-2">
+                                    <a href="{{ url('/products') }}" 
+                                       class="h-10 px-5 bg-gradient-to-r from-cyan-500 to-sky-500 hover:from-cyan-400 hover:to-sky-400 text-white rounded-xl font-bold text-xs shadow-lg shadow-cyan-600/30 flex items-center gap-2 transition-all cursor-pointer">
+                                        <i class="fa-solid fa-bag-shopping text-xs"></i>
+                                        <span>Belanja Sekarang</span>
+                                    </a>
+                                    <a href="{{ url('/products?flash_sale=1') }}" 
+                                       class="h-10 px-4 bg-white/10 hover:bg-white/20 text-slate-100 hover:text-white border border-white/20 rounded-xl font-bold text-xs backdrop-blur-sm transition-all flex items-center gap-2 cursor-pointer">
+                                        <i class="fa-solid fa-bolt text-amber-400 text-xs"></i>
+                                        <span>Serbu Diskon Kilat</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            {{-- Right Visual Product Showcase Cards --}}
+                            <div class="md:col-span-5 hidden md:flex items-center justify-center relative">
+                                <div class="relative w-64 h-64 flex items-center justify-center">
+                                    {{-- Product Card 1: Smartphone --}}
+                                    <div class="absolute -left-2 top-2 w-36 bg-white/95 rounded-2xl p-2.5 shadow-2xl border border-white/40 transform -rotate-6 hover:rotate-0 transition-transform duration-300 z-20">
+                                        <div class="w-full aspect-square rounded-xl overflow-hidden bg-slate-100 relative mb-1.5">
+                                            <img src="{{ asset('img/iphone-15-pro-max.jpg') }}" alt="iPhone" class="w-full h-full object-cover">
+                                            <span class="absolute top-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-rose-600 text-white">-40%</span>
+                                        </div>
+                                        <p class="text-[10px] font-bold text-slate-800 truncate">iPhone 15 Pro Max</p>
+                                        <p class="text-[10px] font-extrabold text-cyan-600">Rp 18.999.000</p>
+                                    </div>
+
+                                    {{-- Product Card 2: Sneakers --}}
+                                    <div class="absolute right-0 bottom-2 w-36 bg-white/95 rounded-2xl p-2.5 shadow-2xl border border-white/40 transform rotate-6 hover:rotate-0 transition-transform duration-300 z-10">
+                                        <div class="w-full aspect-square rounded-xl overflow-hidden bg-slate-100 relative mb-1.5">
+                                            <img src="{{ asset('img/nike.jpg') }}" alt="Nike" class="w-full h-full object-cover">
+                                            <span class="absolute top-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-amber-500 text-slate-950">★ 4.9</span>
+                                        </div>
+                                        <p class="text-[10px] font-bold text-slate-800 truncate">Nike Air Jordan</p>
+                                        <p class="text-[10px] font-extrabold text-cyan-600">Rp 1.850.000</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="relative z-20 flex items-center gap-2.5 pt-4">
-                            <a href="{{ url('/products') }}" class="btn-primary h-9 px-4.5 bg-cyan-600 hover:bg-cyan-700 active:bg-cyan-800 text-white rounded-lg font-bold text-xs shadow-sm flex items-center gap-2 transition-colors">
-                                <i class="fa-solid fa-bag-shopping text-[11px]"></i>
-                                <span>Belanja Sekarang</span>
-                            </a>
-                            <a href="{{ url('/products?flash_sale=1') }}" class="h-9 px-3.5 bg-slate-900/90 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700 rounded-lg font-bold text-xs transition-colors flex items-center gap-1.5">
-                                <i class="fa-solid fa-bolt text-orange-400 text-[11px]"></i>
-                                <span>Flash Sale Kilat</span>
-                            </a>
-                        </div>
                     </div>
 
+                    {{-- ── SLIDE 1: OFFICIAL MALL & 100% ORIGINAL ── --}}
                     <div x-show="currentSlide === 1"
                          x-cloak
-                         x-transition:enter="transition ease-out duration-400"
-                         x-transition:enter-start="opacity-0 scale-99"
+                         x-transition:enter="transition ease-out duration-500"
+                         x-transition:enter-start="opacity-0 scale-98"
                          x-transition:enter-end="opacity-100 scale-100"
-                         class="absolute inset-0 flex flex-col justify-between p-6 sm:p-8 text-white z-10">
-                        <div class="absolute inset-0 bg-gradient-to-r from-sky-950 via-slate-950/90 to-transparent z-10"></div>
-                        <img src="https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?q=80&w=1200&auto=format&fit=crop" 
-                             alt="Official Store" 
-                             class="absolute inset-0 w-full h-full object-cover object-center opacity-40">
+                         class="absolute inset-0 bg-gradient-to-br from-[#0a192f] via-[#112240] to-[#0c4a6e] text-white p-5 sm:p-7 lg:p-9 flex flex-col justify-between overflow-hidden">
+                        
+                        {{-- Ambient Glows --}}
+                        <div class="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-blue-500/25 blur-3xl pointer-events-none"></div>
+                        <div class="absolute -bottom-24 left-10 w-96 h-96 rounded-full bg-cyan-500/20 blur-3xl pointer-events-none"></div>
 
-                        <div class="relative z-20 max-w-md">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-sky-500/20 text-sky-300 border border-sky-400/40 mb-2.5 backdrop-blur-xs">
-                                <i class="fa-solid fa-shield-check text-sky-400 text-[10px]"></i> 100% Original Brand
-                            </span>
-                            <h2 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight tracking-tight">
-                                NitipDong Official Mall &amp; Super Seller
-                            </h2>
-                            <p class="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
-                                Garansi pengembalian tanpa ribet, jaminan produk asli terverifikasi, dan pengiriman prioritas express.
-                            </p>
+                        <div class="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-center my-auto">
+                            {{-- Left Copy & CTA --}}
+                            <div class="md:col-span-7 space-y-3">
+                                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-sky-500/20 text-sky-300 border border-sky-400/40 backdrop-blur-md shadow-xs">
+                                    <i class="fa-solid fa-certificate text-sky-400 text-xs"></i>
+                                    <span>100% ORIGINAL • GARANSI RESMI</span>
+                                </div>
+                                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight tracking-tight">
+                                    NitipDong Official Mall &amp; Super Seller
+                                </h2>
+                                <p class="text-xs sm:text-sm text-sky-100/85 leading-relaxed max-w-md">
+                                    Jaminan produk asli langsung dari distributor resmi, garansi pengembalian tanpa ribet 7 hari, dan pengiriman prioritas express.
+                                </p>
+                                <div class="flex flex-wrap items-center gap-2.5 pt-2">
+                                    <a href="{{ url('/products') }}" 
+                                       class="h-10 px-5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white rounded-xl font-bold text-xs shadow-lg shadow-sky-600/30 flex items-center gap-2 transition-all cursor-pointer">
+                                        <i class="fa-solid fa-store text-xs"></i>
+                                        <span>Jelajahi Official Mall</span>
+                                    </a>
+                                    <a href="{{ route('store.register') }}" 
+                                       class="h-10 px-4 bg-white/10 hover:bg-white/20 text-slate-100 hover:text-white border border-white/20 rounded-xl font-bold text-xs backdrop-blur-sm transition-all flex items-center gap-2 cursor-pointer">
+                                        <i class="fa-solid fa-shield-check text-sky-400 text-xs"></i>
+                                        <span>Daftar Toko Resmi</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            {{-- Right Visual Showcase Cards --}}
+                            <div class="md:col-span-5 hidden md:flex items-center justify-center relative">
+                                <div class="relative w-64 h-64 flex items-center justify-center">
+                                    {{-- Card: Skincare --}}
+                                    <div class="absolute -left-2 top-2 w-36 bg-white/95 rounded-2xl p-2.5 shadow-2xl border border-white/40 transform -rotate-3 hover:rotate-0 transition-transform duration-300 z-20">
+                                        <div class="w-full aspect-square rounded-xl overflow-hidden bg-slate-100 relative mb-1.5">
+                                            <img src="{{ asset('img/skintific.jpg') }}" alt="Skintific" class="w-full h-full object-cover">
+                                            <span class="absolute top-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-cyan-600 text-white">Official</span>
+                                        </div>
+                                        <p class="text-[10px] font-bold text-slate-800 truncate">Skintific Moisturizer</p>
+                                        <p class="text-[10px] font-extrabold text-cyan-600">Rp 129.000</p>
+                                    </div>
+
+                                    {{-- Card: Gaming / Laptop --}}
+                                    <div class="absolute right-0 bottom-2 w-36 bg-white/95 rounded-2xl p-2.5 shadow-2xl border border-white/40 transform rotate-6 hover:rotate-0 transition-transform duration-300 z-10">
+                                        <div class="w-full aspect-square rounded-xl overflow-hidden bg-slate-100 relative mb-1.5">
+                                            <img src="{{ asset('img/ps5resmi.webp') }}" alt="PS5" class="w-full h-full object-cover">
+                                            <span class="absolute top-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-emerald-600 text-white">Garansi 2 Thn</span>
+                                        </div>
+                                        <p class="text-[10px] font-bold text-slate-800 truncate">PlayStation 5 Slim</p>
+                                        <p class="text-[10px] font-extrabold text-cyan-600">Rp 8.499.000</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="relative z-20 flex items-center gap-2.5 pt-4">
-                            <a href="{{ url('/products') }}" class="btn-primary h-9 px-4.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-bold text-xs shadow-sm flex items-center gap-2 transition-colors">
-                                <span>Jelajahi Official Mall</span>
-                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                            </a>
-                        </div>
                     </div>
 
+                    {{-- ── SLIDE 2: LAYANAN JASTIP & REKENING BERSAMA ── --}}
                     <div x-show="currentSlide === 2"
                          x-cloak
-                         x-transition:enter="transition ease-out duration-400"
-                         x-transition:enter-start="opacity-0 scale-99"
+                         x-transition:enter="transition ease-out duration-500"
+                         x-transition:enter-start="opacity-0 scale-98"
                          x-transition:enter-end="opacity-100 scale-100"
-                         class="absolute inset-0 flex flex-col justify-between p-6 sm:p-8 text-white z-10">
-                        <div class="absolute inset-0 bg-gradient-to-r from-teal-950 via-slate-950/90 to-transparent z-10"></div>
-                        <img src="https://images.unsplash.com/photo-1556742049-0a67e557b683?q=80&w=1200&auto=format&fit=crop" 
-                             alt="Seller Center" 
-                             class="absolute inset-0 w-full h-full object-cover object-center opacity-35">
+                         class="absolute inset-0 bg-gradient-to-br from-[#063327] via-[#0c4738] to-[#041c15] text-white p-5 sm:p-7 lg:p-9 flex flex-col justify-between overflow-hidden">
+                        
+                        {{-- Ambient Glows --}}
+                        <div class="absolute -top-24 -left-24 w-80 h-80 rounded-full bg-emerald-500/25 blur-3xl pointer-events-none"></div>
+                        <div class="absolute -bottom-24 right-10 w-96 h-96 rounded-full bg-teal-500/20 blur-3xl pointer-events-none"></div>
 
-                        <div class="relative z-20 max-w-md">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 mb-2.5 backdrop-blur-xs">
-                                <i class="fa-solid fa-store text-emerald-400 text-[10px]"></i> Buka Toko Gratis
-                            </span>
-                            <h2 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight tracking-tight">
-                                Mulai Jualan &amp; Buka Layanan Jastip
-                            </h2>
-                            <p class="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
-                                Jangkau pembeli di seluruh Indonesia, kelola pesanan otomatis, penarikan saldo instan ke rekening Anda.
-                            </p>
+                        <div class="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-center my-auto">
+                            {{-- Left Copy & CTA --}}
+                            <div class="md:col-span-7 space-y-3">
+                                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 backdrop-blur-md shadow-xs">
+                                    <i class="fa-solid fa-plane-departure text-emerald-400 text-xs"></i>
+                                    <span>JASTIP AMANAH • PROTEKSI ESCROW</span>
+                                </div>
+                                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight tracking-tight">
+                                    Titip Beli Barang Impian dari Mana Saja
+                                </h2>
+                                <p class="text-xs sm:text-sm text-emerald-100/85 leading-relaxed max-w-md">
+                                    Jangkau barang unik antar kota hingga mancanegara. Dana Anda tersimpan aman di rekening bersama hingga barang tiba di tangan.
+                                </p>
+                                <div class="flex flex-wrap items-center gap-2.5 pt-2">
+                                    <a href="{{ url('/products') }}" 
+                                       class="h-10 px-5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white rounded-xl font-bold text-xs shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition-all cursor-pointer">
+                                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                                        <span>Cari Jastip Populer</span>
+                                    </a>
+                                    <a href="{{ route('store.register') }}" 
+                                       class="h-10 px-4 bg-white/10 hover:bg-white/20 text-slate-100 hover:text-white border border-white/20 rounded-xl font-bold text-xs backdrop-blur-sm transition-all flex items-center gap-2 cursor-pointer">
+                                        <i class="fa-solid fa-handshake-simple text-emerald-400 text-xs"></i>
+                                        <span>Buka Jasa Titip</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            {{-- Right Visual Showcase Cards --}}
+                            <div class="md:col-span-5 hidden md:flex items-center justify-center relative">
+                                <div class="relative w-64 h-64 flex items-center justify-center">
+                                    {{-- Card: Gadget / Macbook --}}
+                                    <div class="absolute -left-2 top-2 w-36 bg-white/95 rounded-2xl p-2.5 shadow-2xl border border-white/40 transform -rotate-4 hover:rotate-0 transition-transform duration-300 z-20">
+                                        <div class="w-full aspect-square rounded-xl overflow-hidden bg-slate-100 relative mb-1.5">
+                                            <img src="{{ asset('img/macbookm3pro.jpg') }}" alt="Macbook" class="w-full h-full object-cover">
+                                            <span class="absolute top-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-emerald-600 text-white">Jastip Tokyo</span>
+                                        </div>
+                                        <p class="text-[10px] font-bold text-slate-800 truncate">MacBook Pro M3</p>
+                                        <p class="text-[10px] font-extrabold text-emerald-600">Rp 26.500.000</p>
+                                    </div>
+
+                                    {{-- Card: Skincare Ordinary --}}
+                                    <div class="absolute right-0 bottom-2 w-36 bg-white/95 rounded-2xl p-2.5 shadow-2xl border border-white/40 transform rotate-6 hover:rotate-0 transition-transform duration-300 z-10">
+                                        <div class="w-full aspect-square rounded-xl overflow-hidden bg-slate-100 relative mb-1.5">
+                                            <img src="{{ asset('img/ordinary.jpg') }}" alt="The Ordinary" class="w-full h-full object-cover">
+                                            <span class="absolute top-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-teal-600 text-white">Jastip Korea</span>
+                                        </div>
+                                        <p class="text-[10px] font-bold text-slate-800 truncate">The Ordinary Serum</p>
+                                        <p class="text-[10px] font-extrabold text-emerald-600">Rp 185.000</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="relative z-20 flex items-center gap-2.5 pt-4">
-                            <a href="{{ route('store.register') }}" class="btn-primary h-9 px-4.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs shadow-sm flex items-center gap-2 transition-colors">
-                                <i class="fa-solid fa-rocket text-[11px]"></i>
-                                <span>Daftar Toko Gratis</span>
-                            </a>
-                        </div>
                     </div>
 
-                    <div class="relative z-30 flex items-center justify-between p-4 bg-gradient-to-t from-slate-950/80 to-transparent">
-                        <div class="flex items-center gap-1.5">
-                            <button @click="prevSlide()" class="w-7 h-7 rounded-lg bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors text-xs cursor-pointer" aria-label="Slide sebelumnya">
-                                <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                    {{-- ── CAROUSEL CONTROLS (Bottom Bar) ── --}}
+                    <div class="relative z-30 flex items-center justify-between p-3.5 sm:p-4 bg-gradient-to-t from-slate-950/70 via-slate-950/30 to-transparent">
+                        {{-- Arrow Buttons --}}
+                        <div class="flex items-center gap-2">
+                            <button type="button" 
+                                    @click="prevSlide()" 
+                                    class="w-8 h-8 rounded-xl bg-white/15 hover:bg-white/30 text-white flex items-center justify-center backdrop-blur-md transition-all text-xs cursor-pointer border border-white/15 shadow-sm" 
+                                    aria-label="Slide sebelumnya">
+                                <i class="fa-solid fa-chevron-left text-[11px]"></i>
                             </button>
-                            <button @click="nextSlide()" class="w-7 h-7 rounded-lg bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors text-xs cursor-pointer" aria-label="Slide berikutnya">
-                                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                            <button type="button" 
+                                    @click="nextSlide()" 
+                                    class="w-8 h-8 rounded-xl bg-white/15 hover:bg-white/30 text-white flex items-center justify-center backdrop-blur-md transition-all text-xs cursor-pointer border border-white/15 shadow-sm" 
+                                    aria-label="Slide berikutnya">
+                                <i class="fa-solid fa-chevron-right text-[11px]"></i>
                             </button>
                         </div>
 
-                        <div class="flex items-center gap-1.5">
+                        {{-- Slide Pagination Indicator Pills --}}
+                        <div class="flex items-center gap-2">
                             <template x-for="i in totalSlides" :key="i">
-                                <button @click="goToSlide(i - 1)"
-                                        class="h-1.5 rounded-full transition-all duration-200"
-                                        :class="currentSlide === (i - 1) ? 'w-5 bg-cyan-400' : 'w-1.5 bg-white/40 hover:bg-white/70'">
+                                <button type="button" 
+                                        @click="goToSlide(i - 1)"
+                                        class="h-2 rounded-full transition-all duration-300 cursor-pointer"
+                                        :class="currentSlide === (i - 1) ? 'w-8 bg-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.6)]' : 'w-2 bg-white/35 hover:bg-white/60'">
                                 </button>
                             </template>
                         </div>
@@ -175,149 +288,78 @@
                 </div>
             </div>
 
-            {{-- Right: Unified Interactive Video Player Card --}}
-            <div class="lg:col-span-4 h-full" x-data="{
-                isPlaying: false,
-                isMuted: true,
-                currentTime: 0,
-                duration: 0,
-                progress: 0,
-                init() {
-                    const v = this.$refs.promoVideo;
-                    if (v) {
-                        v.addEventListener('timeupdate', () => {
-                            this.currentTime = v.currentTime;
-                            this.duration = v.duration || 0;
-                            this.progress = this.duration ? (this.currentTime / this.duration) * 100 : 0;
-                        });
-                    }
-                },
-                togglePlay() {
-                    const v = this.$refs.promoVideo;
-                    if (!v) return;
-                    if (v.paused) {
-                        v.play();
-                        this.isPlaying = true;
-                    } else {
-                        v.pause();
-                        this.isPlaying = false;
-                    }
-                },
-                toggleMute() {
-                    const v = this.$refs.promoVideo;
-                    if (!v) return;
-                    v.muted = !v.muted;
-                    this.isMuted = v.muted;
-                },
-                toggleFullscreen() {
-                    const v = this.$refs.promoVideo;
-                    if (!v) return;
-                    if (!document.fullscreenElement) {
-                        if (v.requestFullscreen) v.requestFullscreen();
-                        else if (v.webkitRequestFullscreen) v.webkitRequestFullscreen();
-                    } else {
-                        if (document.exitFullscreen) document.exitFullscreen();
-                    }
-                }
-            }">
-                <div class="rounded-2xl overflow-hidden bg-slate-950 border border-sky-100/80 shadow-sm h-full min-h-[300px] sm:min-h-[340px] relative group flex flex-col justify-between select-none">
-                    
-                    {{-- HTML5 Video Element --}}
-                    <video x-ref="promoVideo"
-                           class="absolute inset-0 w-full h-full object-cover z-10 transition-opacity duration-500 cursor-pointer"
-                           :class="isPlaying ? 'opacity-100' : 'opacity-65'"
-                           poster="https://images.unsplash.com/photo-1556742049-0a67e557b683?q=80&w=800&auto=format&fit=crop"
-                           playsinline
-                           preload="metadata"
-                           loop
-                           :muted="isMuted"
-                           @click="togglePlay()"
-                           @play="isPlaying = true"
-                           @pause="isPlaying = false"
-                           @ended="isPlaying = false">
-                        <source src="https://assets.mixkit.co/videos/preview/mixkit-shopping-with-a-smartphone-in-a-store-41584-large.mp4" type="video/mp4">
-                        Browser Anda tidak mendukung pemutaran video.
-                    </video>
+            {{-- ── Right: 2 Curated Promo & Feature Benefit Cards (4 Cols) ── --}}
+            <div class="lg:col-span-4 flex flex-col gap-3.5">
+                
+                {{-- Card 1: Voucher Bebas Ongkir XTRA --}}
+                <div class="flex-1 rounded-2xl p-4 sm:p-5 bg-gradient-to-br from-cyan-600 via-cyan-700 to-sky-800 text-white flex flex-col justify-between border border-cyan-400/30 shadow-sm relative overflow-hidden group">
+                    {{-- Ambient Light --}}
+                    <div class="absolute -top-10 -right-10 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
 
-                    {{-- High-Contrast Ambient Overlay --}}
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-slate-950/70 z-20 pointer-events-none transition-opacity duration-300"
-                         :class="isPlaying ? 'opacity-30 group-hover:opacity-80' : 'opacity-90'"></div>
-
-                    {{-- Top Header Pill & Controls --}}
-                    <div class="relative z-30 p-4 sm:p-5 flex items-center justify-between">
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-cyan-500/25 text-cyan-300 border border-cyan-400/40 backdrop-blur-md shadow-xs">
-                            <span class="w-2 h-2 rounded-full bg-cyan-400" :class="isPlaying ? 'animate-ping' : 'animate-pulse'"></span>
-                            <i class="fa-solid fa-clapperboard text-[9px]"></i>
-                            <span x-text="isPlaying ? 'Sedang Diputar' : 'Video Panduan'"></span>
-                        </span>
-
-                        <div class="flex items-center gap-1.5">
-                            <button type="button" 
-                                    @click.stop="toggleMute()" 
-                                    class="w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-md transition-all text-xs cursor-pointer border border-white/15 shadow-sm"
-                                    :title="isMuted ? 'Nyalakan Audio' : 'Matikan Audio'">
-                                <i :class="isMuted ? 'fa-solid fa-volume-xmark text-rose-400' : 'fa-solid fa-volume-high text-cyan-400'"></i>
-                            </button>
-
-                            <button type="button" 
-                                    @click.stop="toggleFullscreen()" 
-                                    class="w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-md transition-all text-xs cursor-pointer border border-white/15 shadow-sm"
-                                    title="Layar Penuh">
-                                <i class="fa-solid fa-expand text-slate-300 hover:text-white"></i>
-                            </button>
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between gap-2 mb-2.5">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-white/20 text-white border border-white/25 backdrop-blur-xs">
+                                <i class="fa-solid fa-truck-fast text-[10px]"></i> GRATIS ONGKIR XTRA
+                            </span>
+                            <span class="text-[10px] font-bold text-cyan-200 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                Kuota Terbatas
+                            </span>
                         </div>
-                    </div>
-
-                    {{-- Center Giant Play / Pause Action Button --}}
-                    <div class="relative z-30 my-auto flex flex-col items-center justify-center py-3">
-                        <button type="button" 
-                                @click.stop="togglePlay()"
-                                class="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-cyan-600 to-sky-400 hover:from-cyan-500 hover:to-sky-300 text-white flex items-center justify-center shadow-[0_0_35px_rgba(6,182,212,0.55)] hover:scale-110 active:scale-95 transition-all duration-300 cursor-pointer border-2 border-white/40 group/playbtn"
-                                :class="{ 'opacity-0 group-hover:opacity-100': isPlaying }"
-                                :title="isPlaying ? 'Jeda Video' : 'Putar Video'">
-                            <i :class="isPlaying ? 'fa-solid fa-pause text-xl' : 'fa-solid fa-play text-xl ml-1 group-hover/playbtn:scale-110 transition-transform'"></i>
-                        </button>
-                        <p x-show="!isPlaying" class="text-[11px] font-bold text-sky-200 uppercase tracking-widest mt-2.5 drop-shadow-md">
-                            Tonton Cara Belanja
+                        <h3 class="text-base sm:text-lg font-extrabold text-white leading-snug tracking-tight">
+                            Voucher Ekstra Ongkir Rp0 Seluruh Indonesia
+                        </h3>
+                        <p class="text-[11px] text-cyan-100/90 mt-1 leading-relaxed">
+                            Klaim kupon potongan ongkir instan tanpa minimum belanja saat checkout.
                         </p>
                     </div>
 
-                    {{-- Bottom Information & Quick Action --}}
-                    <div class="relative z-30 p-4 sm:p-5 pt-0 transition-opacity duration-300"
-                         :class="isPlaying ? 'opacity-80 group-hover:opacity-100' : 'opacity-100'">
-                        
-                        {{-- Video Progress Bar --}}
-                        <div x-show="isPlaying" class="w-full bg-white/20 rounded-full h-1 mb-3 overflow-hidden">
-                            <div class="bg-cyan-400 h-full rounded-full transition-all duration-150" :style="`width: ${progress}%`"></div>
-                        </div>
-
-                        <div class="space-y-1 mb-3">
-                            <h3 class="text-base font-extrabold text-white leading-tight drop-shadow-sm">
-                                Cara Belanja &amp; Jastip Aman di NitipDong
-                            </h3>
-                            <p class="text-[11px] text-slate-300 leading-snug line-clamp-2">
-                                Panduan transaksi rekening bersama escrow 100% aman, klaim kupon gratis ongkir Rp0, dan lacak pesanan real-time.
-                            </p>
-                        </div>
-
-                        <div class="flex items-center justify-between gap-2 pt-2.5 border-t border-white/15">
-                            <div class="flex items-center gap-1.5 flex-wrap">
-                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-cyan-300 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-700/50">
-                                    <i class="fa-solid fa-shield-check text-[9px]"></i> Garansi 100%
-                                </span>
-                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-700/50">
-                                    <i class="fa-solid fa-ticket text-[9px]"></i> Ongkir Rp0
-                                </span>
-                            </div>
-
-                            <a href="{{ route('customer.vouchers.index') }}" 
-                               class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900 bg-white hover:bg-cyan-50 px-3 py-1.5 rounded-lg shadow-xs transition-colors shrink-0">
-                                <span>Klaim Kupon</span>
-                                <i class="fa-solid fa-chevron-right text-[9px] text-cyan-600"></i>
-                            </a>
-                        </div>
+                    <div class="relative z-10 pt-3 flex items-center justify-between border-t border-white/15 mt-3">
+                        <a href="{{ route('customer.vouchers.index') }}" 
+                           class="inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-900 bg-white hover:bg-cyan-50 px-4 py-2 rounded-xl shadow-sm transition-all duration-200 group-hover:scale-[1.02] cursor-pointer">
+                            <span>Klaim Kupon</span>
+                            <i class="fa-solid fa-ticket text-cyan-600 text-[11px]"></i>
+                        </a>
+                        <span class="text-[10px] font-semibold text-cyan-200 flex items-center gap-1">
+                            <i class="fa-solid fa-tag text-[9px]"></i> Rp0 Bebas Syarat
+                        </span>
                     </div>
                 </div>
+
+                {{-- Card 2: Proteksi Belanja Rekening Bersama --}}
+                <div class="flex-1 rounded-2xl p-4 sm:p-5 bg-gradient-to-br from-[#0c172a] via-[#112240] to-[#0a192f] text-white flex flex-col justify-between border border-slate-800 shadow-sm relative overflow-hidden group">
+                    {{-- Ambient Light --}}
+                    <div class="absolute -bottom-10 -right-10 w-44 h-44 rounded-full bg-amber-500/10 blur-2xl pointer-events-none"></div>
+
+                    <div class="relative z-10">
+                        <div class="flex items-center justify-between gap-2 mb-2.5">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-amber-500/20 text-amber-300 border border-amber-400/30 backdrop-blur-xs">
+                                <i class="fa-solid fa-shield-halved text-[10px]"></i> GARANSI 100% AMAN
+                            </span>
+                            <span class="text-[10px] font-bold text-slate-400 flex items-center gap-1">
+                                <i class="fa-solid fa-lock text-emerald-400 text-[9px]"></i> Rekber Escrow
+                            </span>
+                        </div>
+                        <h3 class="text-base sm:text-lg font-extrabold text-white leading-snug tracking-tight">
+                            Proteksi Belanja &amp; Garansi Pengembalian
+                        </h3>
+                        <p class="text-[11px] text-slate-300 mt-1 leading-relaxed">
+                            Dana aman di sistem rekening bersama hingga paket tiba dan terkonfirmasi sesuai.
+                        </p>
+                    </div>
+
+                    <div class="relative z-10 pt-3 flex items-center justify-between border-t border-white/10 mt-3">
+                        <a href="{{ route('store.register') }}" 
+                           class="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3.5 py-2 rounded-xl shadow-xs transition-all duration-200 group-hover:scale-[1.02] cursor-pointer">
+                            <span>Mulai Jual di NitipDong</span>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-amber-400"></i>
+                        </a>
+                        <span class="text-[10px] font-semibold text-emerald-400 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-check text-[9px]"></i> Terverifikasi
+                        </span>
+                    </div>
+                </div>
+
             </div>
         </div>
 
