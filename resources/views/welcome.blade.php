@@ -818,12 +818,10 @@
 
     <section class="page-container mt-8 sm:mt-12 mb-8 sm:mb-12">
         <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#070E1E] via-[#0F172A] to-[#0A192F] text-white p-6 sm:p-8 lg:p-10 border border-slate-800 shadow-2xl">
-            <!-- Decorative Ambient Glow Circles -->
             <div class="absolute -top-24 -right-24 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
             <div class="absolute -bottom-24 -left-24 w-72 h-72 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
             <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                <!-- Left Content Area -->
                 <div class="lg:col-span-7 xl:col-span-8 space-y-4">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 text-xs font-bold tracking-wide">
                         <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
@@ -838,7 +836,6 @@
                         Nikmati kemudahan berbelanja online dan titip jastip langsung dari genggaman. Dapatkan promo gratis ongkir eksklusif, notifikasi pesanan real-time, dan transaksi aman.
                     </p>
 
-                    <!-- Feature Badges -->
                     <div class="flex flex-wrap gap-2 pt-1 text-xs">
                         <div class="inline-flex items-center gap-2 bg-slate-800/70 backdrop-blur-xs px-3 py-2 rounded-xl border border-slate-700/60 text-slate-200">
                             <i class="fa-solid fa-truck-fast text-cyan-400 text-xs"></i>
@@ -854,7 +851,6 @@
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
                     <div class="flex flex-wrap items-center gap-3 pt-3">
                         <a href="{{ route('app.download') }}" class="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-lg shadow-cyan-900/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
                             <i class="fa-brands fa-android text-base"></i>
@@ -867,7 +863,6 @@
                     </div>
                 </div>
 
-                <!-- Right QR Code & Showcase Card -->
                 <div class="lg:col-span-5 xl:col-span-4 flex justify-center lg:justify-end">
                     <div class="bg-white/95 backdrop-blur-md p-5 sm:p-6 rounded-2xl shadow-2xl text-slate-900 text-center max-w-[260px] w-full border border-white/20">
                         <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100 mb-3 inline-block shadow-inner">
