@@ -26,5 +26,10 @@ class DatabaseSeeder extends Seeder
 
         // Kategori Marketplace
         $this->call(CategorySeeder::class);
+
+        // Seeder Khusus Environment Local (1 Seller & 1 Sample Product)
+        if (app()->environment('local')) {
+            $this->call(SampleSellerAndProductSeeder::class);
+        }
     }
 }
