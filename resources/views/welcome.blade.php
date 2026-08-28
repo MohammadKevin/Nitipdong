@@ -53,7 +53,7 @@
                     this.currentSlide = index;
                 }
             }" @mouseenter="isPaused = true" @mouseleave="isPaused = false">
-                <div class="relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-200/80 shadow-md h-full min-h-[340px] sm:min-h-[370px] lg:min-h-[390px] flex flex-col justify-between group">
+                <div class="relative rounded-lg overflow-hidden bg-slate-900 border border-slate-200/80 shadow-md h-full min-h-[340px] sm:min-h-[370px] lg:min-h-[390px] flex flex-col justify-between group">
                     
                     {{-- ── SLIDE 0: FESTIVAL DISKON & GAJIAN SALE ── --}}
                     <div x-show="currentSlide === 0"
@@ -288,79 +288,71 @@
                 </div>
             </div>
 
-            {{-- ── Right: 2 Curated Promo & Feature Benefit Cards (4 Cols) ── --}}
             <div class="lg:col-span-4 flex flex-col gap-3.5">
-                
-                {{-- Card 1: Voucher Bebas Ongkir XTRA --}}
-                <div class="flex-1 rounded-2xl p-4 sm:p-5 bg-gradient-to-br from-cyan-600 via-cyan-700 to-sky-800 text-white flex flex-col justify-between border border-cyan-400/30 shadow-sm relative overflow-hidden group">
-                    {{-- Ambient Light --}}
-                    <div class="absolute -top-10 -right-10 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
 
-                    <div class="relative z-10">
-                        <div class="flex items-center justify-between gap-2 mb-2.5">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-white/20 text-white border border-white/25 backdrop-blur-xs">
-                                <i class="fa-solid fa-truck-fast text-[10px]"></i> GRATIS ONGKIR XTRA
-                            </span>
-                            <span class="text-[10px] font-bold text-cyan-200 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                Kuota Terbatas
-                            </span>
-                        </div>
-                        <h3 class="text-base sm:text-lg font-extrabold text-white leading-snug tracking-tight">
-                            Voucher Ekstra Ongkir Rp0 Seluruh Indonesia
-                        </h3>
-                        <p class="text-[11px] text-cyan-100/90 mt-1 leading-relaxed">
-                            Klaim kupon potongan ongkir instan tanpa minimum belanja saat checkout.
-                        </p>
-                    </div>
-
-                    <div class="relative z-10 pt-3 flex items-center justify-between border-t border-white/15 mt-3">
-                        <a href="{{ route('customer.vouchers.index') }}" 
-                           class="inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-900 bg-white hover:bg-cyan-50 px-4 py-2 rounded-xl shadow-sm transition-all duration-200 group-hover:scale-[1.02] cursor-pointer">
-                            <span>Klaim Kupon</span>
-                            <i class="fa-solid fa-ticket text-cyan-600 text-[11px]"></i>
-                        </a>
-                        <span class="text-[10px] font-semibold text-cyan-200 flex items-center gap-1">
-                            <i class="fa-solid fa-tag text-[9px]"></i> Rp0 Bebas Syarat
-                        </span>
-                    </div>
-                </div>
-
-                {{-- Card 2: Proteksi Belanja Rekening Bersama --}}
-                <div class="flex-1 rounded-2xl p-4 sm:p-5 bg-gradient-to-br from-[#0c172a] via-[#112240] to-[#0a192f] text-white flex flex-col justify-between border border-slate-800 shadow-sm relative overflow-hidden group">
-                    {{-- Ambient Light --}}
-                    <div class="absolute -bottom-10 -right-10 w-44 h-44 rounded-full bg-amber-500/10 blur-2xl pointer-events-none"></div>
-
-                    <div class="relative z-10">
-                        <div class="flex items-center justify-between gap-2 mb-2.5">
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-amber-500/20 text-amber-300 border border-amber-400/30 backdrop-blur-xs">
-                                <i class="fa-solid fa-shield-halved text-[10px]"></i> GARANSI 100% AMAN
-                            </span>
-                            <span class="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                                <i class="fa-solid fa-lock text-emerald-400 text-[9px]"></i> Rekber Escrow
-                            </span>
-                        </div>
-                        <h3 class="text-base sm:text-lg font-extrabold text-white leading-snug tracking-tight">
-                            Proteksi Belanja &amp; Garansi Pengembalian
-                        </h3>
-                        <p class="text-[11px] text-slate-300 mt-1 leading-relaxed">
-                            Dana aman di sistem rekening bersama hingga paket tiba dan terkonfirmasi sesuai.
-                        </p>
-                    </div>
-
-                    <div class="relative z-10 pt-3 flex items-center justify-between border-t border-white/10 mt-3">
-                        <a href="{{ route('store.register') }}" 
-                           class="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3.5 py-2 rounded-xl shadow-xs transition-all duration-200 group-hover:scale-[1.02] cursor-pointer">
-                            <span>Mulai Jual di NitipDong</span>
-                            <i class="fa-solid fa-chevron-right text-[10px] text-amber-400"></i>
-                        </a>
-                        <span class="text-[10px] font-semibold text-emerald-400 flex items-center gap-1">
-                            <i class="fa-solid fa-circle-check text-[9px]"></i> Terverifikasi
-                        </span>
-                    </div>
-                </div>
-
+    {{-- Card 1: Voucher — bentuk tiket --}}
+    <div class="flex-1 rounded-xl bg-[#0B4F4F] text-white shadow-sm relative overflow-hidden flex">
+        <div class="flex-1 p-4 sm:p-5 flex flex-col justify-between">
+            <div>
+                <span class="inline-block text-[10px] font-bold uppercase tracking-wider text-emerald-300 mb-2">
+                    Gratis Ongkir
+                </span>
+                <h3 class="text-lg font-extrabold leading-snug">
+                    Ongkir Rp0 ke Seluruh Indonesia
+                </h3>
+                <p class="text-[11px] text-emerald-100/80 mt-1.5 leading-relaxed max-w-[85%]">
+                    Potongan ongkir instan tanpa minimum belanja, langsung kepakai di checkout.
+                </p>
             </div>
+            <p class="text-[10px] text-emerald-200/70 mt-3 font-medium">
+                Kuota harian terbatas — klaim sebelum habis
+            </p>
+        </div>
+
+        <div class="relative w-0 border-l-2 border-dashed border-white/25">
+            <span class="absolute -top-2 -left-2 w-4 h-4 rounded-full bg-slate-50"></span>
+            <span class="absolute -bottom-2 -left-2 w-4 h-4 rounded-full bg-slate-50"></span>
+        </div>
+
+        <a href="{{ route('customer.vouchers.index') }}"
+           class="w-24 sm:w-28 flex flex-col items-center justify-center gap-1.5 px-2 py-4 hover:bg-white/5 transition-colors">
+            <i class="fa-solid fa-ticket text-lg text-emerald-300"></i>
+            <span class="text-[11px] font-bold text-center leading-tight">Klaim<br>Kupon</span>
+        </a>
+    </div>
+
+    {{-- Card 2: Proteksi Rekber — bentuk stempel --}}
+    <div class="flex-1 rounded-xl p-4 sm:p-5 bg-[#0A1930] text-white border border-white/10 shadow-sm relative overflow-hidden flex flex-col justify-between">
+        <div class="absolute inset-0 opacity-[0.05] pointer-events-none"
+             style="background-image: repeating-linear-gradient(135deg, #fff 0 2px, transparent 2px 14px);"></div>
+
+        <div class="relative z-10 flex items-start justify-between gap-3">
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-300">
+                    Proteksi Rekening Bersama
+                </span>
+                <h3 class="text-lg font-extrabold leading-snug mt-1.5">
+                    Dana Aman Sampai Barang Diterima
+                </h3>
+                <p class="text-[11px] text-slate-300 mt-1.5 leading-relaxed max-w-[90%]">
+                    Pembayaran ditahan sistem escrow dan baru diteruskan ke penjual setelah kamu konfirmasi pesanan sesuai.
+                </p>
+            </div>
+            <div class="shrink-0 w-14 h-14 rounded-full border-2 border-dashed border-amber-400/60 flex items-center justify-center -rotate-[8deg]">
+                <i class="fa-solid fa-shield-halved text-amber-300 text-lg"></i>
+            </div>
+        </div>
+
+        <div class="relative z-10 pt-3 mt-3 border-t border-white/10 flex items-center justify-between">
+            <a href="{{ route('store.register') }}"
+               class="text-xs font-bold text-[#0A1930] bg-amber-300 hover:bg-amber-200 px-4 py-2 rounded-lg transition-colors">
+                Mulai Jual di NitipDong
+            </a>
+            <span class="text-[10px] text-slate-400 font-medium">Terverifikasi &amp; diawasi sistem</span>
+        </div>
+    </div>
+
+</div>
         </div>
 
         <div class="mt-3.5 bg-white rounded-2xl border border-sky-100/90 p-4 shadow-xs" x-data="{

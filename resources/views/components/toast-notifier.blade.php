@@ -138,9 +138,22 @@
                 @endif
                 @if(isset($errors) && $errors->any())
                     @php
-                        $errorMessages = addslashes(implode('<br>• ', $errors->all()));
+                        $errorList = $errors->all();
+                        $firstError = $errorList[0] ?? '';
+                        $isSingle = count($errorList) === 1;
+                        
+                        $title = 'Validasi Gagal';
+                        if ($errors->has('email') && $isSingle) {
+                            $title = 'Gagal Masuk';
+                        } elseif ($isSingle) {
+                            $title = 'Pemberitahuan';
+                        }
+                        
+                        $formattedMessage = $isSingle 
+                            ? addslashes($firstError) 
+                            : '• ' . addslashes(implode('<br>• ', $errorList));
                     @endphp
-                    this.addToast('Validasi Gagal', '• {!! $errorMessages !!}', 'error', 6000);
+                    this.addToast('{{ $title }}', '{!! $formattedMessage !!}', 'error', 6000);
                 @endif
             },
             addToast(title, message, type = 'success', duration = 4500, action = null) {

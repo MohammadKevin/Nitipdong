@@ -24,6 +24,23 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
+        // Jika email belum diverifikasi, arahkan wajib ke halaman verifikasi OTP
+        if (!$user->hasVerifiedEmail()) {
+            if (empty($user->otp_code) || ($user->otp_expires_at && now()->greaterThan($user->otp_expires_at))) {
+                $otp = sprintf('%06d', mt_rand(100000, 999999));
+                $user->update([
+                    'otp_code'       => $otp,
+                    'otp_expires_at' => now()->addMinutes(15),
+                ]);
+                try {
+                    \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OtpMail($otp, 'register', $user->name));
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('Login unverified OTP mail failed: ' . $e->getMessage());
+                }
+            }
+            return redirect()->route('verification.notice')->with('warning', 'Email akun Anda belum diverifikasi. Silakan masukkan kode OTP yang telah dikirimkan ke email Anda untuk mengaktifkan akun.');
+        }
+
         return match ($user->role) {
             'super_admin' => redirect()->route('super_admin.dashboard'),
             'admin'       => redirect()->route('admin.dashboard'),

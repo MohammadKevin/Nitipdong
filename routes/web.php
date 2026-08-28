@@ -256,8 +256,8 @@ Route::middleware(['auth'])->group(function () {
         };
     })->name('dashboard');
 
-    Route::get('/store/register', [StoreRegistrationController::class, 'create'])->name('store.register');
-    Route::post('/store/register', [StoreRegistrationController::class, 'store'])->name('store.store');
+    Route::get('/store/register', [StoreRegistrationController::class, 'create'])->middleware('verified')->name('store.register');
+    Route::post('/store/register', [StoreRegistrationController::class, 'store'])->middleware('verified')->name('store.store');
 
     // In-App Notifications
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -302,7 +302,6 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('flash-sales', FlashSaleController::class)->names('flash_sales');
         Route::patch('/flash-sales/{flashSale}/toggle', [FlashSaleController::class, 'toggle'])->name('flash_sales.toggle');
         Route::post('/flash-sales/{flashSale}/items', [FlashSaleController::class, 'addItem'])->name('flash_sales.items.add');
-        Route::patch('/flash-sales/{flashSale}/items/{item}', [FlashSaleController::class, 'updateItem'])->name('flash_sales.items.update');
         Route::delete('/flash-sales/{flashSale}/items/{item}', [FlashSaleController::class, 'removeItem'])->name('flash_sales.items.remove');
 
         // Manage Operational Admins
@@ -345,37 +344,43 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/flash-sales/{flashSale}/items/{item}', [FlashSaleController::class, 'removeItem'])->name('flash_sales.items.remove');
     });
 
-    // Seller Routes
-    Route::middleware(['role:seller'])->prefix('seller')->name('seller.')->group(function () {
+    // Seller Routes (Strictly requires verified email)
+    Route::middleware(['role:seller', 'verified'])->prefix('seller')->name('seller.')->group(function () {
         Route::get('/dashboard', function () {
             $store = Auth::user()->store;
-            $products = Product::where('store_id', $store?->id)->latest()->get();
-            $categories = Category::all();
-            $orders = Order::where('store_id', $store?->id)->with(['user', 'orderItems.product'])->latest()->get();
-            return view('seller.dashboard', compact('store', 'products', 'categories', 'orders'));
+            if (!$store || $store->status !== 'approved') {
+                return redirect()->route('store.register');
+            }
+            $products = $store->products()->with('category')->latest()->get();
+            $recentOrders = $store->orders()->with(['user', 'orderItems.product'])->latest()->take(5)->get();
+            return view('seller.dashboard', compact('store', 'products', 'recentOrders'));
         })->name('dashboard');
 
-        Route::post('/products/bulk-action', [SellerProductController::class, 'bulkAction'])->name('products.bulk_action');
         Route::resource('products', SellerProductController::class);
 
-        Route::resource('vouchers', SellerVoucherController::class);
-        Route::patch('/vouchers/{voucher}/toggle', [SellerVoucherController::class, 'toggle'])->name('vouchers.toggle');
-
-        Route::get('/orders', [OrderManagementController::class, 'index'])->name('orders.index');
-        Route::patch('/orders/{order}/status', [OrderManagementController::class, 'updateStatus'])->name('orders.update_status');
-
-        Route::get('/reviews', [SellerReviewController::class, 'index'])->name('reviews.index');
-        Route::post('/reviews/{review}/reply', [SellerReviewController::class, 'reply'])->name('reviews.reply');
-
-        // Wallet & Withdrawals
-        Route::get('/wallet', [SellerWalletController::class, 'index'])->name('wallet.index');
-        Route::post('/wallet/withdraw', [SellerWalletController::class, 'withdraw'])->name('wallet.withdraw');
-
-        // Seller Store Profile & Shipping Address Settings
+        // Store Settings, Bank Account & Locations
         Route::get('/settings', [StoreSettingsController::class, 'edit'])->name('settings.edit');
         Route::put('/settings', [StoreSettingsController::class, 'update'])->name('settings.update');
 
-        // Complaints & Returns
+        // Vouchers Management
+        Route::resource('vouchers', SellerVoucherController::class)->names('vouchers');
+
+        // Seller Wallet & Income Withdrawals
+        Route::get('/wallet', [SellerWalletController::class, 'index'])->name('wallet.index');
+        Route::post('/wallet/withdraw', [SellerWalletController::class, 'withdraw'])->name('wallet.withdraw');
+
+        // Order Management & Fulfillment
+        Route::get('/orders', [OrderManagementController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}', [OrderManagementController::class, 'show'])->name('orders.show');
+        Route::post('/orders/{order}/process', [OrderManagementController::class, 'processOrder'])->name('orders.process');
+        Route::post('/orders/{order}/ship', [OrderManagementController::class, 'shipOrder'])->name('orders.ship');
+        Route::post('/orders/{order}/cancel', [OrderManagementController::class, 'cancelOrder'])->name('orders.cancel');
+
+        // Reviews Management
+        Route::get('/reviews', [SellerReviewController::class, 'index'])->name('reviews.index');
+        Route::post('/reviews/{review}/reply', [SellerReviewController::class, 'reply'])->name('reviews.reply');
+
+        // Complaints Handling
         Route::get('/complaints', [SellerComplaintController::class, 'index'])->name('complaints.index');
         Route::post('/complaints/{complaint}/respond', [SellerComplaintController::class, 'respond'])->name('complaints.respond');
 
@@ -389,8 +394,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/chat/admin/{conversation}', [ChatController::class, 'show'])->name('chat.admin.show');
     });
 
-    // Customer Specific Routes
-    Route::middleware(['role:customer'])->prefix('customer')->name('customer.')->group(function () {
+    // Customer Specific Routes (Strictly requires verified email)
+    Route::middleware(['role:customer', 'verified'])->prefix('customer')->name('customer.')->group(function () {
         Route::get('/dashboard', function () {
             $userStore = Auth::user()->store;
             $orders = Auth::user()->orders()->with(['store', 'orderItems.product.reviews', 'reviews', 'complaint'])->latest()->get();
@@ -411,8 +416,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/store/register', [StoreRegistrationController::class, 'store'])->name('store.store');
     });
 
-    // Cart, Checkout, Orders, Complaints, Reviews, Wishlist & Addresses
-    Route::prefix('customer')->name('customer.')->group(function () {
+    // Cart, Checkout, Orders, Complaints, Reviews, Wishlist & Addresses (Strictly requires verified email)
+    Route::middleware(['verified'])->prefix('customer')->name('customer.')->group(function () {
         Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
         Route::get('/cart/items', [CartController::class, 'getItems'])->name('cart.items');
         Route::post('/cart/add/{product}', [CartController::class, 'store'])->name('cart.store');

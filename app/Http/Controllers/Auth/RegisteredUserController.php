@@ -25,16 +25,17 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class, new \App\Rules\RealEmailDomain()],
+            'password' => ['required', 'confirmed', Rules\Password::min(8)->letters()->numbers()],
         ], [
-            'name.required' => 'Nama lengkap wajib diisi.',
-            'email.required' => 'Alamat email wajib diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email ini sudah terdaftar. Silakan masuk atau gunakan email lain.',
-            'password.required' => 'Kata sandi wajib diisi.',
+            'name.required'      => 'Nama lengkap wajib diisi.',
+            'email.required'     => 'Alamat email wajib diisi.',
+            'email.email'        => 'Format alamat email tidak valid.',
+            'email.unique'       => 'Email ini sudah terdaftar. Silakan masuk atau gunakan email lain.',
+            'password.required'  => 'Kata sandi wajib diisi.',
             'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+            'password.min'       => 'Kata sandi minimal 8 karakter.',
         ]);
 
         $otp = sprintf('%06d', mt_rand(100000, 999999));

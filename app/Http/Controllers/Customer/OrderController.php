@@ -23,6 +23,10 @@ class OrderController extends Controller
 {
     public function checkout(): View|RedirectResponse
     {
+        if (!Auth::user()->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice')->with('warning', 'Email akun Anda belum diverifikasi. Silakan masukkan kode OTP yang dikirimkan ke email untuk mulai berbelanja.');
+        }
+
         $carts = Cart::with(['product.store', 'product.category'])
             ->where('user_id', Auth::id())
             ->get();
@@ -176,6 +180,10 @@ class OrderController extends Controller
         ]);
 
         $user = Auth::user();
+
+        if (! $user->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice')->with('warning', 'Email akun Anda belum diverifikasi. Silakan verifikasi email terlebih dahulu sebelum melakukan transaksi pesanan.');
+        }
 
         if ($hasAddressId) {
             $address = UserAddress::where('id', $request->address_id)

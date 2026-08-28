@@ -113,6 +113,13 @@ class OrderController extends Controller
 
         $user = $request->user();
 
+        if (! $user->hasVerifiedEmail()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Anda belum diverifikasi. Silakan verifikasi email Anda terlebih dahulu sebelum melakukan transaksi pesanan.',
+            ], 403);
+        }
+
         $cartQuery = $user->carts()->with('product.store');
         if (!empty($request->cart_ids)) {
             $cartQuery->whereIn('id', $request->cart_ids);
