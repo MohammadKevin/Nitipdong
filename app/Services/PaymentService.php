@@ -52,13 +52,6 @@ class PaymentService
             'badge'    => 'Verifikasi Otomatis',
             'badge_bg' => 'bg-cyan-50 text-cyan-700 border-cyan-200',
         ],
-        'manual_transfer' => [
-            'name'     => 'Transfer Bank Manual (Struk)',
-            'icon'     => 'fa-solid fa-receipt',
-            'type'     => 'manual',
-            'badge'    => 'Verifikasi Struk',
-            'badge_bg' => 'bg-slate-100 text-slate-700 border-slate-200',
-        ],
     ];
 
     /**

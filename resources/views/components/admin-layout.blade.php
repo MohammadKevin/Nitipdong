@@ -195,6 +195,18 @@
                                 <span class="flex-1 truncate">Flash Sale Platform</span>
                                 <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">PROMO</span>
                             </a>
+
+                            @php $active = request()->routeIs('admin.vouchers.*') || request()->routeIs('super_admin.vouchers.*'); @endphp
+                            <a href="{{ auth()->user()->role === 'super_admin' ? route('super_admin.vouchers.index') : route('admin.vouchers.index') }}"
+                               class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
+                                @if($active)
+                                    <span class="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-blue-500"></span>
+                                @endif
+                                <svg class="w-4 h-4 shrink-0 {{ $active ? 'text-emerald-400' : 'text-slate-400 group-hover:text-emerald-400 transition-colors' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>
+                                </svg>
+                                <span class="flex-1 truncate">Voucher &amp; Promo</span>
+                            </a>
                         </nav>
                     </div>
 

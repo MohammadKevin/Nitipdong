@@ -304,6 +304,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/flash-sales/{flashSale}/items', [FlashSaleController::class, 'addItem'])->name('flash_sales.items.add');
         Route::delete('/flash-sales/{flashSale}/items/{item}', [FlashSaleController::class, 'removeItem'])->name('flash_sales.items.remove');
 
+        // Voucher Platform Management
+        Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->names('vouchers');
+        Route::patch('/vouchers/{voucher}/toggle', [\App\Http\Controllers\Admin\VoucherController::class, 'toggle'])->name('vouchers.toggle');
+
         // Manage Operational Admins
         Route::resource('admins', AdminManagementController::class)->names('admins');
 
@@ -342,6 +346,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/flash-sales/{flashSale}/items', [FlashSaleController::class, 'addItem'])->name('flash_sales.items.add');
         Route::patch('/flash-sales/{flashSale}/items/{item}', [FlashSaleController::class, 'updateItem'])->name('flash_sales.items.update');
         Route::delete('/flash-sales/{flashSale}/items/{item}', [FlashSaleController::class, 'removeItem'])->name('flash_sales.items.remove');
+
+        // Voucher Platform Management
+        Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->names('vouchers');
+        Route::patch('/vouchers/{voucher}/toggle', [\App\Http\Controllers\Admin\VoucherController::class, 'toggle'])->name('vouchers.toggle');
     });
 
     // Seller Routes (Strictly requires verified email)

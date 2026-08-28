@@ -73,7 +73,7 @@ class VoucherController extends Controller
             'expires_at'   => $validated['expires_at'] ?? null,
         ]);
 
-        return redirect()->route('admin.vouchers.index')->with('success', 'Voucher platform NitipDong berhasil dibuat!');
+        return redirect()->route($this->getIndexRoute())->with('success', 'Voucher platform NitipDong berhasil dibuat!');
     }
 
     public function edit(Voucher $voucher): View
@@ -113,14 +113,14 @@ class VoucherController extends Controller
             'expires_at'   => $validated['expires_at'] ?? null,
         ]);
 
-        return redirect()->route('admin.vouchers.index')->with('success', 'Voucher berhasil diperbarui!');
+        return redirect()->route($this->getIndexRoute())->with('success', 'Voucher berhasil diperbarui!');
     }
 
     public function destroy(Voucher $voucher): RedirectResponse
     {
         $voucher->delete();
 
-        return redirect()->route('admin.vouchers.index')->with('success', 'Voucher berhasil dihapus!');
+        return redirect()->route($this->getIndexRoute())->with('success', 'Voucher berhasil dihapus!');
     }
 
     public function toggle(Voucher $voucher): RedirectResponse
@@ -129,5 +129,10 @@ class VoucherController extends Controller
 
         $status = $voucher->is_active ? 'diaktifkan' : 'dinonaktifkan';
         return back()->with('success', "Voucher {$voucher->code} berhasil {$status}.");
+    }
+
+    private function getIndexRoute(): string
+    {
+        return auth()->user()->role === 'super_admin' ? 'super_admin.vouchers.index' : 'admin.vouchers.index';
     }
 }

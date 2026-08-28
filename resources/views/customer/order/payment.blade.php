@@ -378,18 +378,6 @@
                                 <i class="fa-solid fa-building-columns text-orange-600 text-lg"></i>
                             </label>
 
-                            <label class="flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all"
-                                   :class="newPaymentMethod === 'manual_transfer' ? 'border-cyan-600 bg-cyan-50/50' : 'border-slate-200 hover:border-slate-300'">
-                                <div class="flex items-center gap-3">
-                                    <input type="radio" name="payment_method" value="manual_transfer" x-model="newPaymentMethod" class="text-cyan-600 focus:ring-cyan-500">
-                                    <div>
-                                        <div class="text-xs font-bold text-slate-800">Transfer Bank Manual</div>
-                                        <div class="text-[11px] text-slate-500">Upload foto bukti transfer / struk</div>
-                                    </div>
-                                </div>
-                                <i class="fa-solid fa-receipt text-slate-600 text-lg"></i>
-                            </label>
-
                             <div class="pt-3">
                                 <button type="submit" class="w-full btn-primary h-10 text-xs font-bold">
                                     Simpan & Gunakan Metode Ini
