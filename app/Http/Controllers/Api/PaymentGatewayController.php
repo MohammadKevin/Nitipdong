@@ -172,6 +172,42 @@ class PaymentGatewayController extends Controller
 
         $isPaid = in_array($order->status, ['paid', 'processing', 'shipped', 'completed']);
 
+        // Jika status masih pending di DB, cek langsung ke Midtrans API apakah sudah terbayar
+        if (!$isPaid && $order->status === 'pending') {
+            $serverKey = config('services.midtrans.server_key', self::SERVER_KEY);
+            $refsToCheck = array_unique(array_filter([
+                $order->payment_reference,
+                $order->invoice_number,
+            ]));
+
+            foreach ($refsToCheck as $ref) {
+                try {
+                    $response = Http::withBasicAuth($serverKey, '')
+                        ->timeout(4)
+                        ->get("https://api.sandbox.midtrans.com/v2/{$ref}/status");
+
+                    if ($response->successful()) {
+                        $resData = $response->json();
+                        $trxStatus = $resData['transaction_status'] ?? null;
+                        $fraudStatus = $resData['fraud_status'] ?? null;
+
+                        if ($trxStatus === 'settlement' || ($trxStatus === 'capture' && $fraudStatus === 'accept')) {
+                            PaymentService::handlePaymentSuccess(
+                                $order,
+                                $resData['transaction_id'] ?? $ref,
+                                $resData['payment_type'] ?? ($order->payment_method ?: 'midtrans')
+                            );
+                            $order->refresh();
+                            $isPaid = true;
+                            break;
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // Ignore connection timeout during polling
+                }
+            }
+        }
+
         return response()->json([
             'success'        => true,
             'order_id'       => $order->id,

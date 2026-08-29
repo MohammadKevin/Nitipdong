@@ -71,7 +71,7 @@
     @endphp
 
     <div class="page-container py-6" x-data="{
-        activeTab: 'all',
+        activeTab: '{{ request('payment') === 'success' ? 'processing' : (request('tab') ?: 'all') }}',
         searchQuery: '',
         isReordering: null,
         isAddingRecommended: null,
@@ -494,6 +494,41 @@
 
             <div class="flex-1 min-w-0 w-full space-y-5">
                 
+                @if(request('payment') === 'success')
+                    <div class="p-4 bg-emerald-50 border border-emerald-200/80 rounded-2xl flex items-center justify-between gap-3 shadow-xs animate-fade-up">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 text-sm shadow-xs">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-emerald-900">Pembayaran Berhasil Diverifikasi!</h4>
+                                <p class="text-[11px] text-emerald-700 mt-0.5">Pesanan Anda telah diteruskan ke penjual dan sedang dalam proses pengemasan.</p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                @if(session('success'))
+                    <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-2xl text-xs font-semibold shadow-xs animate-fade-up flex items-center gap-2.5">
+                        <i class="fa-solid fa-circle-check text-emerald-600 text-sm shrink-0"></i>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                @endif
+
+                @if(session('info'))
+                    <div class="p-4 bg-cyan-50 border border-cyan-200 text-cyan-900 rounded-2xl text-xs font-semibold shadow-xs animate-fade-up flex items-center gap-2.5">
+                        <i class="fa-solid fa-circle-info text-cyan-600 text-sm shrink-0"></i>
+                        <span>{{ session('info') }}</span>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="p-4 bg-rose-50 border border-rose-200 text-rose-900 rounded-2xl text-xs font-semibold shadow-xs animate-fade-up flex items-center gap-2.5">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-600 text-sm shrink-0"></i>
+                        <span>{{ session('error') }}</span>
+                    </div>
+                @endif
+
                 @if($highlightOrder)
                     <div class="rounded-2xl p-5 bg-white border border-slate-200 shadow-xs relative overflow-hidden transition-all">
                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

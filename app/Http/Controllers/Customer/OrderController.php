@@ -380,15 +380,25 @@ class OrderController extends Controller
             ->with('success', 'Pesanan Anda berhasil dibuat! Silakan selesaikan pembayaran.');
     }
 
-    public function payment(Request $request, Order $order): View
+    public function payment(Request $request, Order $order): View|RedirectResponse
     {
         if ($order->user_id !== Auth::id()) {
             abort(403);
         }
 
+        if (in_array($order->status, ['processing', 'shipped', 'completed'])) {
+            return redirect()->route('customer.dashboard')->with('info', 'Pesanan ini sudah berhasil dibayar.');
+        }
+
+        if ($order->status === 'cancelled') {
+            return redirect()->route('customer.dashboard')->with('error', 'Pesanan ini telah dibatalkan.');
+        }
+
         if ($request->filled('method') && $request->method !== $order->payment_method) {
             $order->update(['payment_method' => $request->method]);
         }
+
+        $order->loadMissing(['store', 'items.product', 'user']);
 
         $paymentChannels = PaymentService::PAYMENT_CHANNELS;
         $charge = PaymentService::createPaymentCharge($order, $order->payment_method ?: 'qris');
