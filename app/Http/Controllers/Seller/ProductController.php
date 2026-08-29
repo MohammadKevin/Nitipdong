@@ -253,6 +253,13 @@ class ProductController extends Controller
             abort(403);
         }
 
+        // Check if product has historical order items
+        if ($product->orderItems()->exists()) {
+            $product->update(['is_active' => false]);
+            return redirect()->route('seller.products.index')
+                ->with('info', "Produk '{$product->name}' memiliki riwayat transaksi pembeli, sehingga dinonaktifkan dari etalase daripada dihapus permanen agar riwayat belanja tetap utuh.");
+        }
+
         $this->deleteImage($product->image);
 
         foreach ($product->images ?? [] as $extraImage) {
@@ -289,14 +296,27 @@ class ProductController extends Controller
 
         switch ($request->action) {
             case 'delete':
+                $deletedCount = 0;
+                $deactivatedCount = 0;
                 foreach ($products as $product) {
-                    $this->deleteImage($product->image);
-                    foreach ($product->images ?? [] as $extraImage) {
-                        $this->deleteImage($extraImage);
+                    if ($product->orderItems()->exists()) {
+                        $product->update(['is_active' => false]);
+                        $deactivatedCount++;
+                    } else {
+                        $this->deleteImage($product->image);
+                        foreach ($product->images ?? [] as $extraImage) {
+                            $this->deleteImage($extraImage);
+                        }
+                        $product->delete();
+                        $deletedCount++;
                     }
-                    $product->delete();
                 }
-                return redirect()->route('seller.products.index')->with('success', "Berhasil menghapus {$count} produk terpilih secara masal.");
+
+                $msg = "Aksi selesai: {$deletedCount} produk dihapus permanen";
+                if ($deactivatedCount > 0) {
+                    $msg .= ", {$deactivatedCount} produk dinonaktifkan karena memiliki riwayat transaksi.";
+                }
+                return redirect()->route('seller.products.index')->with('success', $msg);
 
             case 'activate':
                 Product::where('store_id', $store->id)

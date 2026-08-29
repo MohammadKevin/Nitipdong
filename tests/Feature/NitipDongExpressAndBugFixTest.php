@@ -272,4 +272,97 @@ class NitipDongExpressAndBugFixTest extends TestCase
         $this->assertNotNull($freshOrder->seller_credited_at);
         $this->assertEquals(51000, $this->store->fresh()->balance); // 85% of 60000 = 51000
     }
+
+    public function test_cart_accumulated_quantity_cannot_exceed_product_stock(): void
+    {
+        $this->product->update(['stock' => 5, 'max_order_quantity' => 10]);
+
+        // Add 4 units to cart (valid)
+        $response = $this->actingAs($this->customer)->postJson(route('customer.cart.store', $this->product), [
+            'quantity' => 4,
+        ]);
+        $response->assertStatus(200);
+
+        // Attempt to add 2 more units (total 6 > stock 5) -> must fail with 422
+        $response = $this->actingAs($this->customer)->postJson(route('customer.cart.store', $this->product), [
+            'quantity' => 2,
+        ]);
+        $response->assertStatus(422)
+            ->assertJsonStructure(['status', 'message']);
+    }
+
+    public function test_product_with_order_items_is_deactivated_instead_of_hard_deleted(): void
+    {
+        $order = Order::create([
+            'user_id' => $this->customer->id,
+            'store_id' => $this->store->id,
+            'invoice_number' => 'INV-HISTORICAL-01',
+            'total_amount' => 50000,
+            'status' => 'completed',
+            'shipping_status' => 'delivered',
+            'shipping_address' => "Penerima\n08123456\nJl. Raya No. 1, Surabaya",
+        ]);
+
+        OrderItem::create([
+            'order_id' => $order->id,
+            'product_id' => $this->product->id,
+            'quantity' => 1,
+            'price' => 50000,
+        ]);
+
+        // Seller attempts to delete product
+        $response = $this->actingAs($this->sellerUser)->delete(route('seller.products.destroy', $this->product));
+        $response->assertRedirect();
+
+        // Product should STILL exist in DB but marked as is_active = false
+        $this->assertDatabaseHas('products', ['id' => $this->product->id, 'is_active' => false]);
+        $this->assertDatabaseHas('order_items', ['product_id' => $this->product->id]);
+    }
+
+    public function test_complaint_approval_restores_product_stock_and_decrements_sold_count(): void
+    {
+        $this->product->update(['stock' => 10, 'sold_count' => 5]);
+
+        $order = Order::create([
+            'user_id' => $this->customer->id,
+            'store_id' => $this->store->id,
+            'invoice_number' => 'INV-COMPLAINT-TEST',
+            'total_amount' => 50000,
+            'status' => 'completed',
+            'shipping_status' => 'delivered',
+            'shipping_address' => "Penerima\n08123456\nJl. Raya No. 1, Surabaya",
+        ]);
+
+        OrderItem::create([
+            'order_id' => $order->id,
+            'product_id' => $this->product->id,
+            'quantity' => 2,
+            'price' => 25000,
+        ]);
+
+        $complaint = \App\Models\OrderComplaint::create([
+            'order_id' => $order->id,
+            'user_id' => $this->customer->id,
+            'store_id' => $this->store->id,
+            'reason' => 'Barang Rusak',
+            'description' => 'Kabel patah',
+            'status' => 'pending',
+        ]);
+
+        // Seller approves complaint
+        $response = $this->actingAs($this->sellerUser)->post(route('seller.complaints.respond', $complaint), [
+            'decision' => 'approve',
+            'seller_response' => 'Kami setujui pengembalian barang.',
+        ]);
+
+        $response->assertRedirect();
+        $this->assertEquals('cancelled', $order->fresh()->status);
+        $this->assertEquals('approved', $complaint->fresh()->status);
+
+        // Stock restored from 10 to 12
+        $this->assertEquals(12, $this->product->fresh()->stock);
+        // Dynamic sold count becomes 0 because the order is cancelled
+        $this->assertEquals(0, $this->product->fresh()->sold_count);
+    }
 }
+

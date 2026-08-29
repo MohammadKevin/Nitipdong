@@ -143,7 +143,8 @@ class CartController extends Controller
         $cart = $cartQuery->first();
 
         if ($cart) {
-            if (($cart->quantity + $quantity) > $maxQty) {
+            $totalQuantity = $cart->quantity + $quantity;
+            if ($totalQuantity > $maxQty) {
                 if ($request->wantsJson() || $request->ajax()) {
                     return response()->json([
                         'status'  => 'error',
@@ -152,6 +153,21 @@ class CartController extends Controller
                 }
                 return back()->with('error', "Total di keranjang melebihi batas maksimal ({$maxQty} item).");
             }
+
+            if ($totalQuantity > $product->stock) {
+                $availableToAdd = max(0, $product->stock - $cart->quantity);
+                $msg = $availableToAdd > 0
+                    ? "Stok tidak mencukupi. Anda sudah memiliki {$cart->quantity} unit di keranjang, hanya dapat menambah {$availableToAdd} unit lagi."
+                    : "Stok tidak mencukupi. Seluruh sisa stok ({$product->stock} unit) sudah berada di keranjang Anda.";
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => $msg,
+                    ], 422);
+                }
+                return back()->with('error', $msg);
+            }
+
             $cart->increment('quantity', $quantity);
         } else {
             Cart::create([

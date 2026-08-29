@@ -33,12 +33,13 @@ class ProductDiscussionController extends Controller
 
         // Kirim notifikasi ke Penjual jika pembeli yang bertanya
         if (!$isSeller && $product->store && $product->store->user_id) {
-            AppNotification::create([
-                'user_id' => $product->store->user_id,
-                'title'   => 'Pertanyaan Baru di Produk Anda',
-                'message' => "{$user->name} menanyakan: \"" . \Illuminate\Support\Str::limit($request->body, 60) . "\" pada produk {$product->name}",
-                'link'    => route('product.show', $product) . '#discussion-' . $discussion->id,
-            ]);
+            AppNotification::send(
+                $product->store->user_id,
+                'Pertanyaan Baru di Produk Anda',
+                "{$user->name} menanyakan: \"" . \Illuminate\Support\Str::limit($request->body, 60) . "\" pada produk {$product->name}",
+                'discussion',
+                route('product.show', $product) . '#discussion-' . $discussion->id
+            );
         }
 
         return back()->with('success', 'Pertanyaan Anda berhasil dikirim ke diskusi produk!');
@@ -69,12 +70,13 @@ class ProductDiscussionController extends Controller
 
         // Notifikasi ke penanya asli
         if ($discussion->user_id !== $user->id) {
-            AppNotification::create([
-                'user_id' => $discussion->user_id,
-                'title'   => $isSeller ? 'Penjual Membalas Pertanyaan Anda' : 'Ada Balasan di Diskusi Produk',
-                'message' => "{$user->name} membalas pertanyaan Anda pada produk {$product->name}",
-                'link'    => route('product.show', $product) . '#discussion-' . $parentId,
-            ]);
+            AppNotification::send(
+                $discussion->user_id,
+                $isSeller ? 'Penjual Membalas Pertanyaan Anda' : 'Ada Balasan di Diskusi Produk',
+                "{$user->name} membalas pertanyaan Anda pada produk {$product->name}",
+                'discussion',
+                route('product.show', $product) . '#discussion-' . $parentId
+            );
         }
 
         return back()->with('success', 'Balasan Anda berhasil dikirim!');

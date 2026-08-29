@@ -86,6 +86,25 @@ class ComplaintController extends Controller
                     $refundedAmount = $order->total_amount * 0.85;
                     $complaint->store->decrement('balance', min($complaint->store->balance, $refundedAmount));
                 }
+
+                // Restore stock and decrement sold count
+                foreach ($order->orderItems as $item) {
+                    if ($item->product) {
+                        $item->product->increment('stock', $item->quantity);
+                        if ($item->product->sold_count > 0) {
+                            $item->product->decrement('sold_count', min($item->product->sold_count, $item->quantity));
+                        }
+                    }
+                }
+
+                // Restore voucher quota if used
+                if (!empty($order->voucher_code)) {
+                    $voucher = \App\Models\Voucher::where('code', $order->voucher_code)->first();
+                    if ($voucher && $voucher->quota !== null) {
+                        $voucher->increment('quota');
+                    }
+                }
+
                 $order->update(['status' => 'cancelled']);
             }
 

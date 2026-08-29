@@ -87,7 +87,7 @@ class OrderController extends Controller
                 'origin_city'    => $firstStore?->effective_city ?? 'Jakarta Pusat',
                 'weight'         => $storeWeight,
                 'options'        => $options,
-                'selected_id'    => $defaultOption['id'] ?? 'JNE_REG',
+                'selected_id'    => $defaultOption['id'] ?? 'NDX_REG',
                 'selected_cost'  => $defaultOption['cost'],
                 'is_same_city'   => $defaultOption['is_same_city'] ?? false,
             ];
@@ -149,7 +149,7 @@ class OrderController extends Controller
                 'origin_city'    => $firstStore?->effective_city ?? 'Jakarta Pusat',
                 'weight'         => $storeWeight,
                 'options'        => $options,
-                'selected_id'    => $defaultOption['id'] ?? 'JNE_REG',
+                'selected_id'    => $defaultOption['id'] ?? 'NDX_REG',
                 'selected_cost'  => $defaultOption['cost'],
                 'is_same_city'   => $defaultOption['is_same_city'] ?? false,
             ];
@@ -290,10 +290,15 @@ class OrderController extends Controller
                     $storeWeight = $items->sum(fn ($it) => max(0.2, (float) ($it->product->weight ?? 0.5)) * $it->quantity);
 
                     // Ambil pilihan kurir untuk toko ini
-                    $courierKey = $courierInputs[$storeId] ?? 'JNE_REG';
-                    $parts = explode('_', $courierKey);
-                    $cCode = $parts[0] ?? 'JNE';
-                    $sCode = $parts[1] ?? 'REG';
+                    $courierKey = $courierInputs[$storeId] ?? 'NDX_REG';
+                    if (str_starts_with($courierKey, 'NDX_')) {
+                        $cCode = 'NDX';
+                        $sCode = substr($courierKey, 4); // 'REG', 'EXPRESS', or 'SAME_DAY'
+                    } else {
+                        $parts = explode('_', $courierKey, 2);
+                        $cCode = $parts[0] ?? 'NDX';
+                        $sCode = $parts[1] ?? 'REG';
+                    }
 
                     $firstStore = $items->first()->product->store ?? null;
                     $shippingRate = ShippingService::calculateRate($cCode, $sCode, $storeWeight, $destinationCity, null, $firstStore);
