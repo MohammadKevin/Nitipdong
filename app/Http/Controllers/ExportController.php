@@ -99,8 +99,9 @@ class ExportController extends Controller
         // Aggregated Metrics
         $totalOrdersCount = (clone $query)->count();
         $totalGrossRevenue = (float) (clone $query)->sum('total_amount');
-        $totalPlatformFee = round($totalGrossRevenue * 0.15);
-        $totalSellerEarnings = $totalGrossRevenue - $totalPlatformFee;
+        $completedGross = (float) (clone $query)->where('status', 'completed')->sum('total_amount');
+        $totalPlatformFee = round($completedGross * 0.15);
+        $totalSellerEarnings = $completedGross - $totalPlatformFee;
 
         // Paginated records for table view
         $orders = (clone $query)->with(['store', 'user', 'orderItems.product'])
@@ -160,8 +161,9 @@ class ExportController extends Controller
             : 'Semua Waktu Historis';
 
         $totalGMV = (float) $orders->sum('total_amount');
-        $totalPlatformFee = round($totalGMV * 0.15);
-        $totalSellerEarnings = $totalGMV - $totalPlatformFee;
+        $completedGMV = (float) $orders->where('status', 'completed')->sum('total_amount');
+        $totalPlatformFee = round($completedGMV * 0.15);
+        $totalSellerEarnings = $completedGMV - $totalPlatformFee;
 
         // 1. FORMAT: EXCEL SPREADSHEET (.xls) with multi-column styles & gridlines
         if ($format === 'excel' || $format === 'xls') {
@@ -284,8 +286,9 @@ class ExportController extends Controller
         $orders = $query->with(['store', 'user', 'orderItems.product'])->latest()->get();
 
         $totalGMV = (float) $orders->sum('total_amount');
-        $totalPlatformFee = round($totalGMV * 0.15);
-        $totalSellerEarnings = $totalGMV - $totalPlatformFee;
+        $completedGMV = (float) $orders->where('status', 'completed')->sum('total_amount');
+        $totalPlatformFee = round($completedGMV * 0.15);
+        $totalSellerEarnings = $completedGMV - $totalPlatformFee;
         $totalOrders = $orders->count();
 
         return view('super_admin.reports.print', compact(

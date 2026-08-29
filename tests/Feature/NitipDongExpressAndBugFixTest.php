@@ -423,6 +423,32 @@ class NitipDongExpressAndBugFixTest extends TestCase
             'type' => 'chat',
         ]);
     }
+
+    public function test_banned_user_is_force_logged_out_by_role_middleware(): void
+    {
+        $this->customer->update(['is_banned' => true]);
+
+        // Attempting to access customer dashboard while banned
+        $response = $this->actingAs($this->customer)->get(route('customer.dashboard'));
+
+        $response->assertRedirect(route('login'));
+        $this->assertGuest();
+    }
+
+    public function test_product_moderation_toggle_sends_notification_to_seller(): void
+    {
+        $response = $this->actingAs($this->admin)->post(route('admin.products.toggle_status', $this->product));
+        $response->assertRedirect();
+
+        $this->assertFalse($this->product->fresh()->is_active);
+
+        // Seller should receive takedown notification
+        $this->assertDatabaseHas('app_notifications', [
+            'user_id' => $this->sellerUser->id,
+            'type' => 'product',
+        ]);
+    }
 }
+
 
 

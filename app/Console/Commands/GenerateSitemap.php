@@ -49,7 +49,7 @@ class GenerateSitemap extends Command
                 'priority'   => '0.9',
             ],
             [
-                'url'        => $baseUrl . '/app-download',
+                'url'        => $baseUrl . '/apps',
                 'lastmod'    => now()->toAtomString(),
                 'changefreq' => 'monthly',
                 'priority'   => '0.5',

@@ -209,9 +209,27 @@ class SuperAdminController extends Controller
         if ($store->status === 'approved' || $store->status === 'pending') {
             $store->update(['status' => 'rejected']);
             $message = 'Toko berhasil diblokir/dinonaktifkan.';
+            if ($store->user_id) {
+                \App\Models\AppNotification::send(
+                    $store->user_id,
+                    'Toko Dinonaktifkan',
+                    "Toko '{$store->name}' Anda telah dinonaktifkan/diblokir oleh Super Administrator.",
+                    'store',
+                    route('customer.dashboard')
+                );
+            }
         } else {
             $store->update(['status' => 'approved']);
             $message = 'Toko berhasil diaktifkan kembali.';
+            if ($store->user_id) {
+                \App\Models\AppNotification::send(
+                    $store->user_id,
+                    'Toko Diaktifkan Kembali! 🎉',
+                    "Toko '{$store->name}' Anda telah diaktifkan kembali oleh Super Administrator. Anda dapat mengakses Seller Center kembali.",
+                    'store',
+                    route('seller.dashboard')
+                );
+            }
         }
 
         return back()->with('success', $message);

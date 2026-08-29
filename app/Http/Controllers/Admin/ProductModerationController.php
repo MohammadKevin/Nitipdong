@@ -54,6 +54,18 @@ class ProductModerationController extends Controller
 
         $status = $product->is_active ? 'diaktifkan kembali' : 'dinonaktifkan (takedown)';
 
+        if ($product->store && $product->store->user_id) {
+            \App\Models\AppNotification::send(
+                $product->store->user_id,
+                $product->is_active ? 'Produk Diaktifkan Kembali' : 'Pemberitahuan Takedown Produk',
+                $product->is_active 
+                    ? "Produk '{$product->name}' Anda telah diaktifkan kembali oleh Admin."
+                    : "Produk '{$product->name}' Anda dinonaktifkan (takedown) oleh Admin karena peninjauan kepatuhan.",
+                'product',
+                route('seller.products.index')
+            );
+        }
+
         return back()->with('success', "Produk '{$product->name}' berhasil {$status}.");
     }
 }

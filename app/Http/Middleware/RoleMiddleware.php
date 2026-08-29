@@ -17,6 +17,13 @@ class RoleMiddleware
 
         $user = Auth::user();
 
+        if ($user->is_banned) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('login')->with('error', 'Akun Anda telah dinonaktifkan/diblokir oleh Administrator.');
+        }
+
         if (!in_array($user->role, $roles)) {
             abort(403, 'Akses Ditolak: Anda tidak memiliki izin untuk mengakses halaman ini.');
         }
