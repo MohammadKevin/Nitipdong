@@ -23,7 +23,7 @@
         if ($completedCount >= 10 || $totalSpent >= 5000000) {
             $loyaltyTier = [
                 'name'        => 'Platinum VIP',
-                'badge'       => 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-purple-400',
+                'badge'       => 'bg-purple-600 text-white border-purple-500',
                 'icon'        => 'fa-crown text-amber-300',
                 'color'       => 'text-purple-600',
                 'next_label'  => 'Tier Tertinggi (Sultan)',
@@ -34,7 +34,7 @@
         } elseif ($completedCount >= 5 || $totalSpent >= 2000000) {
             $loyaltyTier = [
                 'name'        => 'Gold Member',
-                'badge'       => 'bg-gradient-to-r from-amber-500 to-amber-600 text-white border-amber-300',
+                'badge'       => 'bg-amber-500 text-white border-amber-400',
                 'icon'        => 'fa-medal text-amber-100',
                 'color'       => 'text-amber-600',
                 'next_label'  => (10 - $completedCount) . ' pesanan lagi menuju Platinum',
@@ -45,7 +45,7 @@
         } elseif ($completedCount >= 2 || $totalSpent >= 500000) {
             $loyaltyTier = [
                 'name'        => 'Silver Member',
-                'badge'       => 'bg-gradient-to-r from-slate-500 to-slate-700 text-white border-slate-400',
+                'badge'       => 'bg-slate-600 text-white border-slate-500',
                 'icon'        => 'fa-shield-halved text-slate-200',
                 'color'       => 'text-slate-700',
                 'next_label'  => (5 - $completedCount) . ' pesanan lagi menuju Gold',
@@ -56,7 +56,7 @@
         } else {
             $loyaltyTier = [
                 'name'        => 'Bronze Member',
-                'badge'       => 'bg-gradient-to-r from-amber-700 to-amber-900 text-white border-amber-600',
+                'badge'       => 'bg-amber-800 text-white border-amber-700',
                 'icon'        => 'fa-award text-amber-200',
                 'color'       => 'text-amber-800',
                 'next_label'  => (2 - $completedCount) . ' pesanan lagi menuju Silver',
@@ -207,7 +207,7 @@
                 <div class="flex items-center gap-3.5">
                     <div class="w-11 h-11 rounded-xl flex items-center justify-center text-lg shrink-0 {{ $highlightOrder->status === 'pending' ? 'bg-amber-500 text-white shadow-xs' : ($highlightOrder->status === 'shipped' ? 'bg-cyan-600 text-white shadow-xs' : 'bg-blue-600 text-white') }}">
                         @if($highlightOrder->status === 'pending')
-                            <i class="fa-solid fa-wallet animate-pulse"></i>
+                            <i class="fa-solid fa-wallet"></i>
                         @elseif($highlightOrder->status === 'shipped')
                             <i class="fa-solid fa-truck-fast"></i>
                         @else
@@ -264,7 +264,7 @@
                 <!-- User Profile & Loyalty Card -->
                 <div class="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs relative overflow-hidden">
                     <div class="flex items-center gap-3.5 pb-4 border-b border-slate-100">
-                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-600 to-cyan-400 text-white flex items-center justify-center font-bold text-lg shadow-sm shrink-0 uppercase">
+                        <div class="w-12 h-12 rounded-2xl bg-cyan-600 text-white flex items-center justify-center font-bold text-lg shadow-sm shrink-0 uppercase">
                             {{ substr(auth()->user()->name, 0, 2) }}
                         </div>
                         <div class="min-w-0 flex-1">
@@ -364,21 +364,36 @@
 
                 <!-- Seller Hub Promo Card -->
                 @if(!$userStore)
-                    <div class="rounded-2xl p-5 bg-gradient-to-br from-slate-900 to-slate-800 text-white relative overflow-hidden shadow-xs border border-slate-800">
-                        <div class="w-20 h-20 bg-cyan-500/20 rounded-full blur-2xl absolute -right-4 -bottom-4 pointer-events-none"></div>
+                    <div class="rounded-2xl p-5 bg-slate-900 text-white relative overflow-hidden shadow-xs border border-slate-800">
+
                         <div class="flex items-center gap-2 text-cyan-400 text-xs font-extrabold uppercase tracking-wider mb-2">
                             <i class="fa-solid fa-store"></i> Seller Center
                         </div>
+
                         <h3 class="font-extrabold text-sm text-white leading-snug">Punya Produk untuk Dijual?</h3>
-                        <p class="text-xs text-slate-300 mt-1 leading-relaxed">
-                            Buka toko gratis di NitipDong, jangkau pembeli di seluruh Indonesia, dan nikmati integrasi logistik NitipDongExpress.
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                            Buka toko gratis dan jangkau pembeli di seluruh Indonesia.
                         </p>
-                        <a href="{{ route('store.register') }}" class="mt-4 inline-flex items-center justify-center gap-1.5 w-full py-2.5 px-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl shadow-sm transition-colors cursor-pointer">
+
+                        <ul class="mt-3.5 space-y-1.5">
+                            <li class="flex items-center gap-2 text-[11px] text-slate-300">
+                                <i class="fa-solid fa-circle-check text-cyan-500 text-[10px]"></i> Gratis buka toko, tanpa biaya bulanan
+                            </li>
+                            <li class="flex items-center gap-2 text-[11px] text-slate-300">
+                                <i class="fa-solid fa-circle-check text-cyan-500 text-[10px]"></i> Terintegrasi NitipDongExpress
+                            </li>
+                            <li class="flex items-center gap-2 text-[11px] text-slate-300">
+                                <i class="fa-solid fa-circle-check text-cyan-500 text-[10px]"></i> Dana aman lewat rekening bersama
+                            </li>
+                        </ul>
+
+                        <a href="{{ route('store.register') }}"
+                           class="mt-4 inline-flex items-center justify-center gap-1.5 w-full py-2.5 px-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs rounded-xl shadow-sm transition-colors cursor-pointer">
                             <i class="fa-solid fa-rocket"></i> Buka Toko Gratis Sekarang
                         </a>
                     </div>
                 @else
-                    <div class="rounded-2xl p-4 bg-gradient-to-br from-cyan-900/40 to-slate-900 border border-cyan-800/40 text-white shadow-xs">
+                    <div class="rounded-2xl p-4 bg-slate-900 border border-cyan-900/50 text-white shadow-xs">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2.5">
                                 <div class="w-9 h-9 rounded-xl bg-cyan-600/30 border border-cyan-500/40 flex items-center justify-center text-cyan-300 font-bold text-sm">
@@ -438,7 +453,7 @@
                             <i class="fa-regular fa-clock text-[11px]"></i>
                             <span>Belum Bayar</span>
                             @if($pendingCount > 0)
-                                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white font-bold animate-pulse">
+                                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white font-bold">
                                     {{ $pendingCount }}
                                 </span>
                             @endif
