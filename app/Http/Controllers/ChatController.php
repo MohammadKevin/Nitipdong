@@ -135,7 +135,7 @@ class ChatController extends Controller
         return redirect()->route('chat.index', ['conv' => $conv->id]);
     }
 
-    public function sendMessage(Request $request, Conversation $conversation): RedirectResponse
+    public function sendMessage(Request $request, Conversation $conversation): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $request->validate([
             'message' => ['required', 'string', 'max:1000'],
@@ -155,6 +155,18 @@ class ChatController extends Controller
         ]);
 
         $conversation->touch();
+
+        $sender = Auth::user();
+        $receiverId = $conversation->user_one_id === $userId ? $conversation->user_two_id : $conversation->user_one_id;
+        $senderName = $sender->role === 'seller' && $sender->store ? $sender->store->name : $sender->name;
+
+        \App\Models\AppNotification::send(
+            $receiverId,
+            'Pesan Baru Masuk',
+            "{$senderName}: \"" . \Illuminate\Support\Str::limit($request->message, 50) . "\"",
+            'chat',
+            route('chat.show', $conversation)
+        );
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([

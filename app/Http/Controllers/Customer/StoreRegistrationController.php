@@ -41,7 +41,7 @@ class StoreRegistrationController extends Controller
             return redirect()->route('customer.dashboard')->with('error', 'Anda sudah memiliki pengajuan toko.');
         }
 
-        Store::create([
+        $store = Store::create([
             'user_id'     => $user->id,
             'name'        => $request->name,
             'slug'        => Str::slug($request->name),
@@ -53,6 +53,18 @@ class StoreRegistrationController extends Controller
             'postal_code' => $request->postal_code,
             'status'      => 'pending',
         ]);
+
+        // Notify Admins
+        $admins = \App\Models\User::whereIn('role', ['admin', 'super_admin'])->get();
+        foreach ($admins as $admin) {
+            \App\Models\AppNotification::send(
+                $admin->id,
+                'Pengajuan Buka Toko Baru',
+                "Pengguna {$user->name} mengajukan pembukaan toko baru: '{$store->name}'.",
+                'store',
+                route('admin.dashboard')
+            );
+        }
 
         return redirect()->route('customer.dashboard')->with('success', 'Pengajuan buka toko berhasil dikirim! Menunggu verifikasi admin.');
     }

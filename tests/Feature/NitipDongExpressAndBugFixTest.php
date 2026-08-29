@@ -364,5 +364,65 @@ class NitipDongExpressAndBugFixTest extends TestCase
         // Dynamic sold count becomes 0 because the order is cancelled
         $this->assertEquals(0, $this->product->fresh()->sold_count);
     }
+
+    public function test_store_registration_and_approval_dispatches_app_notifications(): void
+    {
+        $newCustomer = User::factory()->create([
+            'role' => 'customer',
+            'email_verified_at' => now(),
+        ]);
+
+        // Customer registers new store
+        $response = $this->actingAs($newCustomer)->post(route('customer.store.store'), [
+            'name' => 'Toko Gadget Baru',
+            'description' => 'Menjual aneka gadget original bergaransi resmi.',
+            'address' => 'Jl. Pemuda No. 88, Surabaya',
+            'city' => 'Surabaya',
+        ]);
+        $response->assertRedirect();
+
+        // Notification should be sent to admin
+        $this->assertDatabaseHas('app_notifications', [
+            'user_id' => $this->admin->id,
+            'type' => 'store',
+        ]);
+
+        $newStore = Store::where('name', 'Toko Gadget Baru')->first();
+        $this->assertNotNull($newStore);
+        $this->assertEquals('pending', $newStore->status);
+
+        // Admin approves store
+        $response = $this->actingAs($this->admin)->post(route('admin.stores.approve', $newStore));
+        $response->assertRedirect();
+
+        $this->assertEquals('approved', $newStore->fresh()->status);
+        $this->assertEquals('seller', $newCustomer->fresh()->role);
+
+        // Notification should be sent to customer
+        $this->assertDatabaseHas('app_notifications', [
+            'user_id' => $newCustomer->id,
+            'type' => 'store',
+        ]);
+    }
+
+    public function test_chat_send_message_dispatches_notification_to_receiver(): void
+    {
+        $conversation = \App\Models\Conversation::create([
+            'user_one_id' => $this->customer->id,
+            'user_two_id' => $this->sellerUser->id,
+        ]);
+
+        $response = $this->actingAs($this->customer)->postJson(route('chat.send', $conversation), [
+            'message' => 'Halo apakah produk ini ready stok?',
+        ]);
+        $response->assertStatus(200);
+
+        // Receiver (seller) should receive an in-app notification
+        $this->assertDatabaseHas('app_notifications', [
+            'user_id' => $this->sellerUser->id,
+            'type' => 'chat',
+        ]);
+    }
 }
+
 

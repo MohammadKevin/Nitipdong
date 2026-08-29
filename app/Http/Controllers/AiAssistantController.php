@@ -28,7 +28,7 @@ class AiAssistantController extends Controller
             try {
                 $categories = Category::pluck('name')->implode(', ');
                 $activeFlashSale = FlashSale::active()->first();
-                $flashSaleInfo = $activeFlashSale ? "Ada sesi Flash Sale aktif bernama '{$activeFlashSale->name}'." : "Saat ini belum ada sesi Flash Sale aktif.";
+                $flashSaleInfo = $activeFlashSale ? "Ada sesi Flash Sale aktif bernama '{$activeFlashSale->title}'." : "Saat ini belum ada sesi Flash Sale aktif.";
 
                 $systemPrompt = "Kamu adalah Asisten AI resmi yang ramah dan cerdas untuk platform marketplace e-commerce 'NitipDong' (Indonesia).
 Informasi Platform:
@@ -85,7 +85,7 @@ Jawablah dengan bahasa Indonesia yang sopan, ramah, ringkas, dan jelas dalam for
         if (Str::contains($lower, ['flash sale', 'flashsale', 'diskon kilat', 'promo kilat'])) {
             $active = FlashSale::active()->first();
             if ($active) {
-                return "⚡ **Flash Sale Sedang Berlangsung!**\n\nSesi aktif saat ini: **{$active->name}**.\nDapatkan diskon spesial dengan kuota terbatas langsung di halaman beranda atau etalase produk!";
+                return "⚡ **Flash Sale Sedang Berlangsung!**\n\nSesi aktif saat ini: **{$active->title}**.\nDapatkan diskon spesial dengan kuota terbatas langsung di halaman beranda atau etalase produk!";
             }
             return "⚡ Saat ini belum ada sesi Flash Sale yang aktif. Pantau terus halaman utama NitipDong untuk jadwal promo Flash Sale berikutnya!";
         }

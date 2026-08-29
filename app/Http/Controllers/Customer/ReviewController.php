@@ -57,7 +57,7 @@ class ReviewController extends Controller
         ]);
 
         // Update rating agregat produk
-        $orderItem->product->recalculateRating();
+        $orderItem->product?->recalculateRating();
 
         return back()->with('success', 'Terima kasih! Ulasan Anda berhasil dikirim.');
     }

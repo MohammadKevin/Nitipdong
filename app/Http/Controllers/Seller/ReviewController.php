@@ -42,6 +42,16 @@ class ReviewController extends Controller
             'seller_replied_at' => now(),
         ]);
 
+        if ($review->user_id) {
+            \App\Models\AppNotification::send(
+                $review->user_id,
+                'Penjual Membalas Ulasan Anda',
+                "Toko {$store->name} telah menanggapi ulasan Anda pada produk {$review->product->name}: \"" . \Illuminate\Support\Str::limit($request->seller_reply, 60) . "\"",
+                'review',
+                $review->product_id ? route('product.show', $review->product_id) : route('customer.dashboard')
+            );
+        }
+
         return back()->with('success', 'Balasan ulasan berhasil disimpan.');
     }
 }
