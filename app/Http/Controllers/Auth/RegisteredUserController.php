@@ -50,7 +50,7 @@ class RegisteredUserController extends Controller
         ]);
 
         try {
-            Mail::to($user->email)->queue(new OtpMail($otp, 'register', $user->name));
+            Mail::to($user->email)->send(new OtpMail($otp, 'register', $user->name));
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('OTP Mail failed: ' . $e->getMessage());
         }

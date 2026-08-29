@@ -52,7 +52,11 @@ class ProfileController extends Controller
             $user->otp_code = $otp;
             $user->otp_expires_at = now()->addMinutes(15);
             
-            Mail::to($newEmail)->queue(new OtpMail($otp, 'change_email', $user->name));
+            try {
+                Mail::to($newEmail)->send(new OtpMail($otp, 'change_email', $user->name));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Profile change email OTP mail failed: ' . $e->getMessage());
+            }
         }
 
         $user->fill($validated);

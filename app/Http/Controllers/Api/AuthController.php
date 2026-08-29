@@ -123,9 +123,9 @@ class AuthController extends Controller
                 'otp_expires_at' => now()->addMinutes(15),
             ]);
 
-            // Send OTP email in background / safely wrapped
+            // Send OTP email synchronously / safely wrapped
             try {
-                Mail::to($user->email)->queue(new OtpMail($otp, 'register', $user->name));
+                Mail::to($user->email)->send(new OtpMail($otp, 'register', $user->name));
             } catch (\Throwable $e) {
                 Log::warning('Registration OTP email skipped/failed: ' . $e->getMessage());
             }
@@ -281,7 +281,7 @@ class AuthController extends Controller
         ]);
 
         try {
-            Mail::to($user->email)->queue(new OtpMail($otp, 'resend', $user->name));
+            Mail::to($user->email)->send(new OtpMail($otp, 'resend', $user->name));
         } catch (\Throwable $e) {
             Log::warning('Resend OTP email error: ' . $e->getMessage());
         }
