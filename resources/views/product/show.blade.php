@@ -1,3 +1,9 @@
+@section('title', $product->name . ' — Beli di NitipDong')
+@section('og_title', $product->name . ' — NitipDong')
+@section('og_description', Str::limit(strip_tags($product->description), 160, '...'))
+@section('og_image', !empty($product->images[0]) ? (str_starts_with($product->images[0], 'http') ? $product->images[0] : asset('storage/' . $product->images[0])) : asset('icon-app-web-terbaru/nitipdong-icon-mark.svg'))
+@section('og_type', 'product')
+
 <x-app-layout>
     <div class="page-container py-5" x-data="{}">
         <nav class="flex text-xs text-slate-400 mb-4 items-center gap-1.5 flex-wrap" aria-label="Breadcrumb">

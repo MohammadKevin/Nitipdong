@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\Log;
 
 class PaymentGatewayController extends Controller
 {
-    private const SERVER_KEY = 'Mid-server-QRIG4umIOjT0Q4w1JDxzIc0c';
-    private const CLIENT_KEY = 'Mid-client-nNuy0AuFjI35ym6k';
     private const CHARGE_URL = 'https://api.sandbox.midtrans.com/v2/charge';
 
     /**
@@ -57,7 +55,7 @@ class PaymentGatewayController extends Controller
         $midtransOrderId = $orderNumber . '-' . time();
 
         $paymentMethod = strtolower($request->payment_method);
-        $serverKey = config('services.midtrans.server_key', self::SERVER_KEY);
+        $serverKey = config('services.midtrans.server_key');
 
         // Siapkan Payload dasar Midtrans Core API
         $payload = [
@@ -174,7 +172,7 @@ class PaymentGatewayController extends Controller
 
         // Jika status masih pending di DB, cek langsung ke Midtrans API apakah sudah terbayar
         if (!$isPaid && $order->status === 'pending') {
-            $serverKey = config('services.midtrans.server_key', self::SERVER_KEY);
+            $serverKey = config('services.midtrans.server_key');
             $refsToCheck = array_unique(array_filter([
                 $order->payment_reference,
                 $order->invoice_number,

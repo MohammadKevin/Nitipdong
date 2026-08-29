@@ -3,15 +3,31 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AppNotification;
 use App\Models\Order;
+use App\Models\Warehouse;
 use App\Services\PushNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class CourierDeliveryController extends Controller
 {
+    /**
+     * Daftar Gudang Hub DC NitipDongExpress (NDX) Aktif
+     */
+    public function warehouses(): JsonResponse
+    {
+        $warehouses = Warehouse::where('is_active', true)->latest()->get();
+
+        return response()->json([
+            'success' => true,
+            'data'    => $warehouses,
+        ]);
+    }
+
     /**
      * 1. Ambil Daftar Tugas Pengantaran (Aktif, Tersedia, & Riwayat Selesai)
      */
@@ -77,7 +93,7 @@ class CourierDeliveryController extends Controller
     public function acceptTask(Request $request, $id): JsonResponse
     {
         $courier = Auth::user();
-        $order = Order::find($id);
+        $order = Order::with(['store', 'user'])->find($id);
 
         if (!$order) {
             return response()->json(['success' => false, 'message' => 'Pesanan tidak ditemukan'], 404);
@@ -90,15 +106,27 @@ class CourierDeliveryController extends Controller
         $lat = $request->input('lat', -7.2575);
         $lng = $request->input('lng', 112.7521);
 
+        $nearestWarehouse = Warehouse::findNearestForCity($order->store?->city ?? $order->store?->address);
+
         $order->update([
             'courier_id'                  => $courier->id,
+            'warehouse_id'                => $order->warehouse_id ?: $nearestWarehouse?->id,
             'status'                      => 'shipped',
+            'shipping_status'             => 'picked_up',
             'courier_lat'                 => $lat,
             'courier_lng'                 => $lng,
             'courier_location_updated_at' => now(),
         ]);
 
-        // Kirim Push Notification ke Pembeli
+        // Kirim Notifikasi Dalam Aplikasi & Push Notification ke Pembeli
+        AppNotification::send(
+            $order->user_id,
+            'Paket Dijemput Kurir NDX',
+            "Kurir NDX ({$courier->name}) telah menjemput paket #{$order->invoice_number} dari toko dan sedang dalam perjalanan!",
+            'order',
+            route('customer.dashboard')
+        );
+
         PushNotificationService::sendOrderStatusNotification($order, 'shipped', "Kurir {$courier->name} sedang mengantar paket Anda ke alamat tujuan! 🚚");
 
         return response()->json([
@@ -148,7 +176,7 @@ class CourierDeliveryController extends Controller
     public function completeDelivery(Request $request, $id): JsonResponse
     {
         $courier = Auth::user();
-        $order = Order::where('id', $id)->where('courier_id', $courier->id)->first();
+        $order = Order::with('store')->where('id', $id)->where('courier_id', $courier->id)->first();
 
         if (!$order) {
             return response()->json(['success' => false, 'message' => 'Tugas pengantaran tidak ditemukan'], 404);
@@ -164,14 +192,45 @@ class CourierDeliveryController extends Controller
             $proofImagePath = 'deliveries/proofs/' . $fileName;
         }
 
-        $order->update([
-            'status'               => 'completed',
-            'completed_at'         => now(),
-            'delivery_proof_image' => $proofImagePath,
-            'delivery_notes'       => $request->input('notes', 'Paket telah diterima dengan baik oleh pembeli.'),
-        ]);
+        DB::transaction(function () use ($order, $proofImagePath, $request) {
+            $updates = [
+                'status'               => 'completed',
+                'shipping_status'      => 'delivered',
+                'completed_at'         => now(),
+                'delivery_proof_image' => $proofImagePath,
+                'delivery_notes'       => $request->input('notes', 'Paket telah diterima dengan baik oleh pembeli.'),
+            ];
 
-        // Kirim Push Notification ke Pembeli
+            // Auto-credit 85% balance to seller store if not credited yet
+            if (!$order->seller_credited_at) {
+                $sellerEarnings = round($order->total_amount * 0.85);
+                $order->store->increment('balance', $sellerEarnings);
+                $updates['seller_credited_at'] = now();
+
+                // Notify seller
+                if ($order->store && $order->store->user_id) {
+                    AppNotification::send(
+                        $order->store->user_id,
+                        'Pesanan Selesai & Dana Masuk',
+                        "Pesanan #{$order->invoice_number} telah diserahkan kurir ke pembeli! Dana sebesar Rp " . number_format($sellerEarnings, 0, ',', '.') . " telah masuk ke saldo dompet toko Anda.",
+                        'wallet',
+                        route('seller.wallet.index')
+                    );
+                }
+            }
+
+            $order->update($updates);
+        });
+
+        // Kirim Notifikasi ke Pembeli
+        AppNotification::send(
+            $order->user_id,
+            'Paket Telah Diterima',
+            "Paket #{$order->invoice_number} telah diterima. Jangan lupa konfirmasi & berikan ulasan 🌟",
+            'order',
+            route('customer.dashboard')
+        );
+
         PushNotificationService::sendOrderStatusNotification($order, 'completed', "Paket Anda telah diserahkan oleh kurir {$courier->name}. Terima kasih! 🎉");
 
         return response()->json([

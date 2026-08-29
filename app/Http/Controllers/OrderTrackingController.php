@@ -97,20 +97,19 @@ class OrderTrackingController extends Controller
             $hubLng = (float) $warehouse->lng;
         }
 
-        // Use real assigned courier if present, otherwise fallback to seed courier
+        // Use real assigned courier if present, otherwise fallback to NDX courier
         if ($order->courier) {
             $courier = [
                 'name'  => $order->courier->name,
                 'plate' => 'L 4242 NK',
                 'phone' => $order->courier->phone ?? '0812-3456-7890',
-                'exp'   => $order->shipping_courier ?? 'NitipDong Express (Mitra Kurir)',
+                'exp'   => 'NitipDongExpress (NDX)',
             ];
         } else {
             $courierDrivers = [
-                ['name' => 'Mas Kevin (Kurir Mitra)', 'plate' => 'L 4242 NK', 'phone' => '0812-3456-7890', 'exp' => 'NitipDong Express (Mitra Kurir)'],
-                ['name' => 'Budi Santoso', 'plate' => 'B 4821 KEV', 'phone' => '0812-8921-3829', 'exp' => 'NitipDong Express (Instant)'],
-                ['name' => 'Rian Pratama', 'plate' => 'B 6291 TRZ', 'phone' => '0857-1928-4721', 'exp' => 'NitipDong Express (Reguler)'],
-                ['name' => 'Ahmad Fauzi', 'plate' => 'B 3019 WQA', 'phone' => '0878-3921-8840', 'exp' => 'J&T Express Cargo'],
+                ['name' => 'Mas Kevin (Kurir NDX)', 'plate' => 'L 4242 NK', 'phone' => '0812-3456-7890', 'exp' => 'NitipDongExpress (NDX Reguler)'],
+                ['name' => 'Budi Santoso', 'plate' => 'B 4821 NDX', 'phone' => '0812-8921-3829', 'exp' => 'NitipDongExpress (NDX Same Day)'],
+                ['name' => 'Rian Pratama', 'plate' => 'B 6291 NDX', 'phone' => '0857-1928-4721', 'exp' => 'NitipDongExpress (NDX Express)'],
             ];
             $courier = $courierDrivers[$seed % count($courierDrivers)];
         }
@@ -118,7 +117,7 @@ class OrderTrackingController extends Controller
         // Generate detailed checkpoint logs
         $checkpoints = [];
 
-        if ($order->status === 'completed') {
+        if ($order->status === 'completed' || $order->shipping_status === 'delivered') {
             $checkpoints[] = [
                 'title'     => 'Pesanan Telah Diterima oleh Pembeli',
                 'location'  => $order->shipping_address ? explode("\n", $order->shipping_address)[0] : 'Alamat Tujuan',
@@ -131,25 +130,25 @@ class OrderTrackingController extends Controller
 
         if (in_array($order->status, ['shipped', 'completed'])) {
             $checkpoints[] = [
-                'title'     => 'Kurir ' . $courier['name'] . ' sedang membawa paket menuju alamat penerima',
-                'location'  => ($warehouse?->name ?? 'Gudang Hub DC') . ' - Menuju ' . ($order->user->name ?? 'Penerima'),
+                'title'     => 'Kurir NDX (' . $courier['name'] . ') sedang mengantar paket ke alamat penerima (Last-Mile)',
+                'location'  => ($warehouse?->name ?? 'Gudang NDX Regional') . ' → ' . ($order->user->name ?? 'Penerima'),
                 'time'      => now()->subMinutes(25)->format('d M Y, H:i'),
                 'icon'      => 'fa-motorcycle',
                 'status'    => 'done',
                 'is_current'=> $order->status === 'shipped',
             ];
             $checkpoints[] = [
-                'title'     => 'Paket telah tiba di Gudang Hub Transit Distribusi',
-                'location'  => $warehouse?->name ?? 'NitipDong Hub DC Regional',
+                'title'     => 'Paket telah tiba di ' . ($warehouse?->name ?? 'Gudang Hub DC NitipDongExpress') . ' dan telah disortir',
+                'location'  => $warehouse?->address ?? 'Hub Distribusi NDX',
                 'time'      => now()->subHours(2)->format('d M Y, H:i'),
                 'icon'      => 'fa-warehouse',
                 'status'    => 'done',
                 'is_current'=> false,
             ];
             $checkpoints[] = [
-                'title'     => 'Paket diserahkan oleh penjual ke kurir/gudang',
-                'location'  => $order->store->name ?? 'Gudang Toko',
-                'time'      => now()->subHours(5)->format('d M Y, H:i'),
+                'title'     => 'Kurir NDX berhasil menjemput paket dari toko penjual (Pick-up)',
+                'location'  => $order->store->name ?? 'Toko Penjual',
+                'time'      => now()->subHours(4)->format('d M Y, H:i'),
                 'icon'      => 'fa-box-open',
                 'status'    => 'done',
                 'is_current'=> false,
@@ -158,7 +157,7 @@ class OrderTrackingController extends Controller
 
         if (in_array($order->status, ['processing', 'shipped', 'completed'])) {
             $checkpoints[] = [
-                'title'     => 'Pesanan sedang disiapkan & dipacking oleh penjual',
+                'title'     => 'Pesanan sedang dikemas & dipacking oleh toko penjual',
                 'location'  => $order->store->name ?? 'Toko Official',
                 'time'      => $order->created_at->addMinutes(15)->format('d M Y, H:i'),
                 'icon'      => 'fa-boxes-packing',
@@ -180,7 +179,7 @@ class OrderTrackingController extends Controller
         $estimatedTime = match ($order->status) {
             'completed'  => 'Pesanan Selesai Diterima',
             'shipped'    => 'Hari ini, estimasi tiba pukul ' . now()->addMinutes(35)->format('H:i') . ' WIB',
-            'processing' => 'Estimasi tiba besok (1-2 hari kerja)',
+            'processing' => 'Estimasi tiba dalam 1-2 hari kerja (via NDX)',
             default      => 'Menunggu konfirmasi pembayaran',
         };
 

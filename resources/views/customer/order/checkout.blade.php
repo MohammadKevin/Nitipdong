@@ -274,7 +274,7 @@
         @endif
 
         <form action="{{ route('customer.order.store') }}" method="POST"
-              @submit="isSubmitting = true"
+              @submit="if(isSubmitting) { $event.preventDefault(); return false; } isSubmitting = true;"
               class="max-w-4xl mx-auto space-y-4">
             @csrf
 
@@ -450,37 +450,57 @@
                             @endforeach
                         </div>
 
-                        <div class="p-3.5 sm:p-4 bg-cyan-50/20 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                            <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-lg bg-cyan-100 text-cyan-800 flex items-center justify-center text-xs shrink-0">
-                                    <i class="fa-solid fa-truck-fast"></i>
-                                </div>
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-slate-800 text-xs">Pilih Opsi Kurir Ekspedisi:</span>
-                                        <span x-show="isRecalculatingShipping" x-cloak class="text-[10px] text-cyan-700 font-semibold flex items-center gap-1 animate-pulse">
-                                            <i class="fa-solid fa-circle-notch fa-spin text-[9px]"></i> Menghitung ulang tarif...
-                                        </span>
+                        <div class="p-4 bg-slate-50/70 border-t border-slate-100 space-y-3">
+                            <div class="flex items-center justify-between flex-wrap gap-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-7 h-7 rounded-lg bg-cyan-700 text-white flex items-center justify-center text-xs shrink-0 shadow-2xs">
+                                        <i class="fa-solid fa-truck-fast"></i>
                                     </div>
-                                    <span class="text-[10px] text-slate-400">Tarif dihitung otomatis sesuai berat dan lokasi asal toko & tujuan</span>
+                                    <div>
+                                        <span class="font-bold text-slate-900 text-xs">Pilihan Layanan NitipDongExpress (NDX):</span>
+                                        <p class="text-[10px] text-slate-500">Pengiriman terintegrasi langsung via Hub Gudang NDX terdekat</p>
+                                    </div>
                                 </div>
+                                <span x-show="isRecalculatingShipping" x-cloak class="text-[10px] text-cyan-700 font-semibold flex items-center gap-1 animate-pulse">
+                                    <i class="fa-solid fa-circle-notch fa-spin text-[9px]"></i> Menghitung ulang tarif...
+                                </span>
                             </div>
 
-                            <div class="sm:w-88">
-                                <select name="couriers[{{ $storeId }}]"
-                                        @change="
-                                            const opt = $event.target.selectedOptions[0];
-                                            updateCourierCost('{{ $storeId }}', opt.dataset.cost, opt.value);
-                                        "
-                                        class="w-full text-xs font-semibold text-slate-800 bg-white border border-slate-300 rounded-xl px-3 py-2.5 focus:border-cyan-600 focus:ring-1 focus:ring-cyan-500 shadow-2xs cursor-pointer">
-                                    <template x-for="cOpt in storeShippingOptions['{{ $storeId }}'] || []" :key="cOpt.id">
-                                        <option :value="cOpt.id"
-                                                :data-cost="cOpt.cost"
-                                                :selected="selectedCouriers['{{ $storeId }}'] === cOpt.id"
-                                                x-text="cOpt.courier_name + ' - ' + cOpt.service_name + ' (' + cOpt.etd + ') : ' + (cOpt.is_free_shipping ? 'Rp 0 (GRATIS ONGKIR 1 KOTA)' : cOpt.formatted_cost)">
-                                        </option>
-                                    </template>
-                                </select>
+                            {{-- NDX Courier Service Cards --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <template x-for="cOpt in storeShippingOptions['{{ $storeId }}'] || []" :key="cOpt.id">
+                                    <label class="border rounded-xl p-3 cursor-pointer flex flex-col justify-between gap-2 transition-all relative select-none"
+                                           :class="selectedCouriers['{{ $storeId }}'] === cOpt.id ? 'border-cyan-600 bg-cyan-50/50 ring-2 ring-cyan-600/30' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                                        <div class="flex items-start justify-between gap-2">
+                                            <div class="flex items-center gap-2">
+                                                <input type="radio" :name="'couriers[{{ $storeId }}]'" :value="cOpt.id"
+                                                       :checked="selectedCouriers['{{ $storeId }}'] === cOpt.id"
+                                                       @change="updateCourierCost('{{ $storeId }}', cOpt.cost, cOpt.id)"
+                                                       class="text-cyan-600 focus:ring-cyan-500">
+                                                <div>
+                                                    <span class="text-xs font-bold text-slate-900 block" x-text="cOpt.service_name"></span>
+                                                    <span class="text-[10px] text-slate-500 font-medium" x-text="'Estimasi: ' + cOpt.etd"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <p class="text-[10px] text-slate-400 leading-tight" x-text="cOpt.description"></p>
+
+                                        <div class="flex items-center justify-between pt-1 border-t border-slate-100 mt-1">
+                                            <template x-if="cOpt.badge">
+                                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold"
+                                                      :class="cOpt.is_free_shipping ? 'bg-emerald-100 text-emerald-800' : 'bg-cyan-100 text-cyan-800'"
+                                                      x-text="cOpt.badge"></span>
+                                            </template>
+                                            <template x-if="!cOpt.badge">
+                                                <span></span>
+                                            </template>
+                                            <span class="font-extrabold text-xs"
+                                                  :class="cOpt.is_free_shipping ? 'text-emerald-600' : 'text-slate-900'"
+                                                  x-text="cOpt.is_free_shipping ? 'GRATIS (Rp 0)' : cOpt.formatted_cost"></span>
+                                        </div>
+                                    </label>
+                                </template>
                             </div>
                         </div>
                     </div>

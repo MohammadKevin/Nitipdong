@@ -59,7 +59,7 @@ class PaymentService
      */
     public static function createPaymentCharge(Order $order, string $paymentMethod): array
     {
-        $serverKey = config('services.midtrans.server_key', 'Mid-server-QRIG4umIOjT0Q4w1JDxzIc0c');
+        $serverKey = config('services.midtrans.server_key');
         $chargeUrl = 'https://api.sandbox.midtrans.com/v2/charge';
 
         $method = strtolower($paymentMethod);

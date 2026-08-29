@@ -53,6 +53,9 @@ class Order extends Model
         'courier_location_updated_at',
         'delivery_proof_image',
         'delivery_notes',
+        'expires_at',
+        'seller_credited_at',
+        'shipping_status',
     ];
 
     protected $casts = [
@@ -63,6 +66,8 @@ class Order extends Model
         'courier_lat'     => 'float',
         'courier_lng'     => 'float',
         'completed_at'    => 'datetime',
+        'expires_at'      => 'datetime',
+        'seller_credited_at' => 'datetime',
         'courier_location_updated_at' => 'datetime',
     ];
 

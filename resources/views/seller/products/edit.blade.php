@@ -133,6 +133,21 @@
                         </div>
 
                         <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label for="max_order_quantity" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                                    Maks. Beli per Pesanan
+                                </label>
+                                <span class="text-[10px] text-slate-400 font-medium">Batas order</span>
+                            </div>
+                            <input type="number" id="max_order_quantity" name="max_order_quantity" value="{{ old('max_order_quantity', $product->max_order_quantity ?? 10) }}" min="1" max="1000"
+                                placeholder="10"
+                                class="input text-xs rounded-md">
+                            @error('max_order_quantity')
+                                <p class="text-xs text-rose-500 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
                             <label for="weight" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
                                 Berat (KG)
                             </label>

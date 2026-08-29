@@ -110,6 +110,17 @@ class CartController extends Controller
         $quantity = (int) $request->input('quantity', 1);
         $variant = $request->filled('variant') ? trim($request->input('variant')) : null;
 
+        $maxQty = $product->max_order_quantity ?? 10;
+        if ($quantity > $maxQty) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => "Maksimal pembelian {$maxQty} item per transaksi.",
+                ], 422);
+            }
+            return back()->with('error', "Maksimal pembelian {$maxQty} item per transaksi.");
+        }
+
         if ($product->stock < $quantity) {
             if ($request->wantsJson() || $request->ajax()) {
                 return response()->json([
@@ -132,6 +143,15 @@ class CartController extends Controller
         $cart = $cartQuery->first();
 
         if ($cart) {
+            if (($cart->quantity + $quantity) > $maxQty) {
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'status'  => 'error',
+                        'message' => "Total di keranjang melebihi batas maksimal ({$maxQty} item).",
+                    ], 422);
+                }
+                return back()->with('error', "Total di keranjang melebihi batas maksimal ({$maxQty} item).");
+            }
             $cart->increment('quantity', $quantity);
         } else {
             Cart::create([
@@ -216,6 +236,17 @@ class CartController extends Controller
         $request->validate([
             'quantity' => ['required', 'integer', 'min:1'],
         ]);
+
+        $maxQty = $cart->product?->max_order_quantity ?? 10;
+        if ($request->quantity > $maxQty) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => "Maksimal pembelian {$maxQty} item per transaksi.",
+                ], 422);
+            }
+            return back()->with('error', "Maksimal pembelian {$maxQty} item per transaksi.");
+        }
 
         if ($cart->product && $cart->product->stock < $request->quantity) {
             if ($request->wantsJson() || $request->ajax()) {

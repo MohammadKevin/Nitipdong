@@ -97,7 +97,9 @@
                     @forelse ($orders as $order)
                     <tr class="hover:bg-slate-50/80 transition-colors">
                         <td class="px-5 py-3.5">
-                            <span class="font-mono font-bold text-slate-900 text-xs block">#{{ $order->invoice_number }}</span>
+                            <a href="{{ route('seller.orders.show', $order) }}" class="font-mono font-bold text-cyan-700 hover:text-cyan-800 hover:underline text-xs block">
+                                #{{ $order->invoice_number }}
+                            </a>
                             <span class="text-[10px] text-slate-400 mt-0.5 block">{{ $order->created_at->translatedFormat('d M Y, H:i') }}</span>
                             @if($order->complaint)
                                 <a href="{{ route('seller.complaints.index') }}" class="inline-flex items-center gap-1 text-[9px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200 mt-1">

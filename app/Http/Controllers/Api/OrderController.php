@@ -371,10 +371,12 @@ class OrderController extends Controller
         // Cancel on Midtrans Sandbox
         if (!empty($order->payment_reference)) {
             try {
-                $serverKey = config('services.midtrans.server_key', 'Mid-server-QRIG4umIOjT0Q4w1JDxzIc0c');
-                \Illuminate\Support\Facades\Http::withBasicAuth($serverKey, '')
-                    ->timeout(5)
-                    ->post("https://api.sandbox.midtrans.com/v2/{$order->payment_reference}/cancel");
+                $serverKey = config('services.midtrans.server_key');
+                if ($serverKey) {
+                    \Illuminate\Support\Facades\Http::withBasicAuth($serverKey, '')
+                        ->timeout(5)
+                        ->post("https://api.sandbox.midtrans.com/v2/{$order->payment_reference}/cancel");
+                }
             } catch (\Exception $e) {}
         }
 

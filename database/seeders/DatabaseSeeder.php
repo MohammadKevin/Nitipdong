@@ -27,6 +27,9 @@ class DatabaseSeeder extends Seeder
         // Kategori Marketplace
         $this->call(CategorySeeder::class);
 
+        // Gudang Hub DC NitipDongExpress (NDX)
+        $this->call(WarehouseSeeder::class);
+
         // Seeder Khusus Environment Local (1 Seller & 1 Sample Product)
         if (app()->environment('local')) {
             $this->call(SampleSellerAndProductSeeder::class);

@@ -33,7 +33,7 @@ class AuthenticatedSessionController extends Controller
                     'otp_expires_at' => now()->addMinutes(15),
                 ]);
                 try {
-                    \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OtpMail($otp, 'register', $user->name));
+                    \Illuminate\Support\Facades\Mail::to($user->email)->queue(new \App\Mail\OtpMail($otp, 'register', $user->name));
                 } catch (\Throwable $e) {
                     \Illuminate\Support\Facades\Log::warning('Login unverified OTP mail failed: ' . $e->getMessage());
                 }

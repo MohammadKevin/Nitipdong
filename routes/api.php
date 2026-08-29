@@ -43,11 +43,13 @@ Route::prefix('v1')->group(function () {
     Route::get('/regions/reverse-geocode', [RegionController::class, 'reverseGeocode']);
 
     // 1. Authentication & OTP Verification
-    Route::post('/auth/login', [AuthController::class, 'login']);
-    Route::post('/auth/register', [AuthController::class, 'register']);
-    Route::post('/auth/google', [\App\Http\Controllers\Auth\GoogleAuthController::class, 'handleApiGoogleLogin']);
-    Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp']);
-    Route::post('/auth/resend-otp', [AuthController::class, 'resendOtp']);
+    Route::middleware('throttle:api-auth')->group(function () {
+        Route::post('/auth/login', [AuthController::class, 'login']);
+        Route::post('/auth/register', [AuthController::class, 'register']);
+        Route::post('/auth/google', [\App\Http\Controllers\Auth\GoogleAuthController::class, 'handleApiGoogleLogin']);
+        Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp']);
+        Route::post('/auth/resend-otp', [AuthController::class, 'resendOtp']);
+    });
 
     // 2. Banners & Categories & Vouchers
     Route::get('/banners', [BannerController::class, 'index']);
@@ -102,6 +104,7 @@ Route::prefix('v1')->group(function () {
         // Courier Delivery Partner Endpoints
         Route::prefix('courier')->group(function () {
             Route::post('/register', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'registerCourier']);
+            Route::get('/warehouses', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'warehouses']);
             Route::get('/deliveries', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'index']);
             Route::get('/deliveries/{id}', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'show']);
             Route::post('/deliveries/{id}/accept', [\App\Http\Controllers\Api\CourierDeliveryController::class, 'acceptTask']);
@@ -164,7 +167,5 @@ Route::prefix('v1')->group(function () {
 
     // Public Polling & Live Map Tracking Fallback
     Route::get('/orders/{id}/live-tracking', [\App\Http\Controllers\Api\LiveTrackingController::class, 'getLiveTracking']);
-    Route::get('/orders/{id}/payment-status', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'status']);
-    Route::post('/orders/{id}/simulate-paid', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'simulatePaid']);
-    Route::post('/payment/midtrans/charge', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'charge']);
+    Route::get('/orders/{id}/payment-status', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'status'])->middleware('throttle:payment-polling');
 });

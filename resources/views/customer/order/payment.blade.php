@@ -41,6 +41,13 @@
     if ($itemsSubtotal <= 0) {
         $itemsSubtotal = $order->total_amount - ($order->shipping_cost ?? 0) + ($order->discount_amount ?? 0);
     }
+
+    $expiresAt = $order->expires_at ?? ($order->created_at ? $order->created_at->copy()->addHours(24) : now()->addHours(24));
+    $remainingSeconds = max(0, (int) now()->diffInSeconds($expiresAt, false));
+    $initialH = str_pad((string) floor($remainingSeconds / 3600), 2, '0', STR_PAD_LEFT);
+    $initialM = str_pad((string) floor(($remainingSeconds % 3600) / 60), 2, '0', STR_PAD_LEFT);
+    $initialS = str_pad((string) ($remainingSeconds % 60), 2, '0', STR_PAD_LEFT);
+    $initialFormattedTimer = "{$initialH}:{$initialM}:{$initialS}";
 @endphp
 
 @push('head')
@@ -88,8 +95,8 @@
             isChangeModalOpen: false,
             guideTab: 'mbanking',
             newPaymentMethod: '{{ $order->payment_method ?: 'qris' }}',
-            remainingSeconds: 86400,
-            formattedTimer: '23:59:59',
+            remainingSeconds: {{ $remainingSeconds }},
+            formattedTimer: '{{ $initialFormattedTimer }}',
             pollInterval: null,
             init() {
                 // Countdown timer 24 Jam

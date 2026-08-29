@@ -1,3 +1,8 @@
+@section('title', $store->name . ' — Official Store NitipDong')
+@section('og_title', $store->name . ' — Toko Online Terpercaya di NitipDong')
+@section('og_description', Str::limit(strip_tags($store->description ?? 'Kunjungi toko resmi ' . $store->name . ' di NitipDong.'), 160, '...'))
+@section('og_image', $store->logo ? (str_starts_with($store->logo, 'http') ? $store->logo : asset('storage/' . $store->logo)) : asset('icon-app-web-terbaru/nitipdong-icon-mark.svg'))
+
 <x-app-layout>
     <div class="page-container py-6" x-data="{
         activeTab: 'products',

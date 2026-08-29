@@ -1,3 +1,7 @@
+@section('title', 'NitipDong — Marketplace & Jastip Terpercaya di Indonesia')
+@section('og_title', 'NitipDong — Belanja Online Mudah, Cepat & Aman')
+@section('og_description', 'Belanja jutaan produk original, flash sale kilat diskon hingga 80%, voucher gratis ongkir Rp0, dan perlindungan transaksi 100% aman di NitipDong.')
+
 <x-app-layout>
     @if(session('success') || request('is_from_login'))
         <div class="page-container mt-3">

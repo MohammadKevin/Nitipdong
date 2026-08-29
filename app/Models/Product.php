@@ -32,6 +32,7 @@ class Product extends Model
         'badge',
         'rating',
         'sold_count',
+        'max_order_quantity',
         'is_active',
     ];
 
@@ -47,6 +48,7 @@ class Product extends Model
     protected $casts = [
         'discount_percentage' => 'integer',
         'stock'               => 'integer',
+        'max_order_quantity'  => 'integer',
         'is_active'           => 'boolean',
         'is_featured'         => 'boolean',
         'images'              => 'array',

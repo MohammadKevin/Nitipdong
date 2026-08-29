@@ -5,8 +5,21 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'NitipDong') }} — Belanja Online Mudah, Cepat & Aman</title>
-        <meta name="description" content="NitipDong — Marketplace terpercaya di Indonesia. Belanja jutaan produk original, flash sale kilat diskon hingga 70%, dan voucher gratis ongkir Rp0 ke seluruh Indonesia.">
+        <title>@yield('title', config('app.name', 'NitipDong') . ' — Belanja Online Mudah, Cepat & Aman')</title>
+        <meta name="description" content="@yield('og_description', 'NitipDong — Marketplace terpercaya di Indonesia. Belanja jutaan produk original, flash sale kilat diskon hingga 70%, dan voucher gratis ongkir Rp0 ke seluruh Indonesia.')">
+
+        <!-- Open Graph / Facebook / WhatsApp -->
+        <meta property="og:title" content="@yield('og_title', config('app.name') . ' — Belanja Online Mudah, Cepat & Aman')">
+        <meta property="og:description" content="@yield('og_description', 'NitipDong — Marketplace terpercaya di Indonesia. Belanja jutaan produk original, flash sale kilat diskon hingga 70%, dan voucher gratis ongkir Rp0 ke seluruh Indonesia.')">
+        <meta property="og:image" content="@yield('og_image', asset('icon-app-web-terbaru/nitipdong-icon-mark.svg'))">
+        <meta property="og:type" content="@yield('og_type', 'website')">
+        <meta property="og:url" content="{{ url()->current() }}">
+
+        <!-- Twitter Meta -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="@yield('og_title', config('app.name'))">
+        <meta name="twitter:description" content="@yield('og_description', 'NitipDong — Marketplace terpercaya di Indonesia.')">
+        <meta name="twitter:image" content="@yield('og_image', asset('icon-app-web-terbaru/nitipdong-icon-mark.svg'))">
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

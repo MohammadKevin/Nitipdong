@@ -105,7 +105,7 @@ class OtpVerificationController extends Controller
         $type = $user->pending_email ? 'change_email' : 'register';
 
         try {
-            \Illuminate\Support\Facades\Mail::to($targetEmail)->send(new \App\Mail\OtpMail($otp, $type, $user->name));
+            \Illuminate\Support\Facades\Mail::to($targetEmail)->queue(new \App\Mail\OtpMail($otp, $type, $user->name));
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('Web OTP resend error: ' . $e->getMessage());
         }

@@ -256,6 +256,18 @@ class OrderController extends Controller
         $courierInputs = $request->input('couriers', []);
         $paymentMethod = $request->input('payment_method', 'qris');
 
+        // Proteksi Duplikasi Checkout (Idempotency Guard)
+        $recentOrder = Order::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->where('created_at', '>=', now()->subSeconds(30))
+            ->latest()
+            ->first();
+
+        if ($recentOrder) {
+            return redirect()->route('customer.order.payment', $recentOrder)
+                ->with('info', 'Pesanan Anda sudah dibuat sebelumnya. Silakan selesaikan pembayaran.');
+        }
+
         $firstOrderId = null;
 
         try {
@@ -321,6 +333,7 @@ class OrderController extends Controller
                         'total_weight'     => $storeWeight,
                         'payment_method'   => $paymentMethod,
                         'status'           => 'pending',
+                        'expires_at'       => now()->addHours(24),
                         'shipping_address' => $shippingAddress,
                     ]);
 
@@ -466,25 +479,31 @@ class OrderController extends Controller
         }
 
         DB::transaction(function () use ($order) {
-            $order->update([
-                'status'       => 'completed',
-                'completed_at' => now(),
-            ]);
+            $updates = [
+                'status'          => 'completed',
+                'shipping_status' => 'delivered',
+                'completed_at'    => now(),
+            ];
 
-            // Auto-credit 85% balance to seller store (15% platform commission kept)
-            $sellerEarnings = round($order->total_amount * 0.85);
-            $order->store->increment('balance', $sellerEarnings);
+            // Auto-credit 85% balance to seller store if not credited yet
+            if (!$order->seller_credited_at) {
+                $sellerEarnings = round($order->total_amount * 0.85);
+                $order->store->increment('balance', $sellerEarnings);
+                $updates['seller_credited_at'] = now();
 
-            // Notify seller
-            if ($order->store && $order->store->user_id) {
-                AppNotification::send(
-                    $order->store->user_id,
-                    'Pesanan Selesai & Dana Masuk',
-                    "Pesanan #{$order->invoice_number} telah diterima pembeli! Dana sebesar Rp " . number_format($sellerEarnings, 0, ',', '.') . " telah masuk ke saldo dompet toko Anda.",
-                    'wallet',
-                    route('seller.wallet.index')
-                );
+                // Notify seller
+                if ($order->store && $order->store->user_id) {
+                    AppNotification::send(
+                        $order->store->user_id,
+                        'Pesanan Selesai & Dana Masuk',
+                        "Pesanan #{$order->invoice_number} telah diterima pembeli! Dana sebesar Rp " . number_format($sellerEarnings, 0, ',', '.') . " telah masuk ke saldo dompet toko Anda.",
+                        'wallet',
+                        route('seller.wallet.index')
+                    );
+                }
             }
+
+            $order->update($updates);
         });
 
         return redirect()->route('customer.dashboard')->with('success', 'Pesanan berhasil diselesaikan! Silakan berikan ulasan untuk produk yang telah Anda terima.');
@@ -506,7 +525,7 @@ class OrderController extends Controller
             return redirect()->route('customer.dashboard')->with('error', 'Pesanan yang sudah dikirim atau selesai tidak dapat dibatalkan.');
         }
 
-        $reason = $request->input('reason', 'Dibatalkan oleh pembeli.');
+        $reason = Str::limit(trim($request->input('reason', 'Dibatalkan oleh pembeli.')), 500);
 
         DB::transaction(function () use ($order, $reason) {
             $order->update([
@@ -553,10 +572,12 @@ class OrderController extends Controller
         // Cancel on Midtrans Sandbox if active reference exists
         if (!empty($order->payment_reference)) {
             try {
-                $serverKey = config('services.midtrans.server_key', 'Mid-server-QRIG4umIOjT0Q4w1JDxzIc0c');
-                \Illuminate\Support\Facades\Http::withBasicAuth($serverKey, '')
-                    ->timeout(5)
-                    ->post("https://api.sandbox.midtrans.com/v2/{$order->payment_reference}/cancel");
+                $serverKey = config('services.midtrans.server_key');
+                if ($serverKey) {
+                    \Illuminate\Support\Facades\Http::withBasicAuth($serverKey, '')
+                        ->timeout(5)
+                        ->post("https://api.sandbox.midtrans.com/v2/{$order->payment_reference}/cancel");
+                }
             } catch (\Exception $e) {}
         }
 

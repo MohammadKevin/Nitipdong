@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\FlashSaleController;
 use App\Http\Controllers\Admin\OrderMonitoringController as AdminOrderMonitoringController;
 use App\Http\Controllers\Admin\ProductModerationController;
 use App\Http\Controllers\Admin\StoreApprovalController;
+use App\Http\Controllers\Admin\WarehouseController;
 use App\Http\Controllers\AiAssistantController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\Customer\AddressController;
@@ -173,10 +174,6 @@ Route::get('/apps', function () {
 
 // Public Home
 Route::get('/', function () {
-    if (Auth::check() && !request()->has('is_from_login') && empty(request()->query())) {
-        return redirect('/?is_from_login=true');
-    }
-
     $products = Product::with(['store', 'category'])
         ->where('is_active', true)
         ->whereHas('store', function ($q) {
@@ -308,6 +305,10 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->names('vouchers');
         Route::patch('/vouchers/{voucher}/toggle', [\App\Http\Controllers\Admin\VoucherController::class, 'toggle'])->name('vouchers.toggle');
 
+        // NDX Warehouses Logistics Management
+        Route::resource('warehouses', WarehouseController::class)->names('warehouses');
+        Route::patch('/warehouses/{warehouse}/toggle', [WarehouseController::class, 'toggle'])->name('warehouses.toggle');
+
         // Manage Operational Admins
         Route::resource('admins', AdminManagementController::class)->names('admins');
 
@@ -350,6 +351,10 @@ Route::middleware(['auth'])->group(function () {
         // Voucher Platform Management
         Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->names('vouchers');
         Route::patch('/vouchers/{voucher}/toggle', [\App\Http\Controllers\Admin\VoucherController::class, 'toggle'])->name('vouchers.toggle');
+
+        // NDX Warehouses Logistics Management
+        Route::resource('warehouses', WarehouseController::class)->names('warehouses');
+        Route::patch('/warehouses/{warehouse}/toggle', [WarehouseController::class, 'toggle'])->name('warehouses.toggle');
     });
 
     // Seller Routes (Strictly requires verified email)
@@ -383,6 +388,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/orders/{order}/process', [OrderManagementController::class, 'processOrder'])->name('orders.process');
         Route::post('/orders/{order}/ship', [OrderManagementController::class, 'shipOrder'])->name('orders.ship');
         Route::post('/orders/{order}/cancel', [OrderManagementController::class, 'cancelOrder'])->name('orders.cancel');
+        Route::post('/orders/{order}/update-status', [OrderManagementController::class, 'updateStatus'])->name('orders.update_status');
 
         // Reviews Management
         Route::get('/reviews', [SellerReviewController::class, 'index'])->name('reviews.index');
@@ -425,7 +431,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Cart, Checkout, Orders, Complaints, Reviews, Wishlist & Addresses (Strictly requires verified email)
-    Route::middleware(['verified'])->prefix('customer')->name('customer.')->group(function () {
+    Route::middleware(['verified', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
         Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
         Route::get('/cart/items', [CartController::class, 'getItems'])->name('cart.items');
         Route::post('/cart/add/{product}', [CartController::class, 'store'])->name('cart.store');

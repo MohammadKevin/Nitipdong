@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppNotification;
 use App\Models\Order;
+use App\Models\Voucher;
 use App\Services\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class MidtransPaymentController extends Controller
 {
-    private const SERVER_KEY = 'Mid-server-QRIG4umIOjT0Q4w1JDxzIc0c';
-    private const CLIENT_KEY = 'Mid-client-nNuy0AuFjI35ym6k';
-    private const SNAP_URL   = 'https://app.sandbox.midtrans.com/snap/v1/transactions';
+    private const SNAP_URL = 'https://app.sandbox.midtrans.com/snap/v1/transactions';
 
     /**
      * Generate Midtrans Snap Token via direct HTTP (tanpa SDK agar tidak terkena bug config cache).
@@ -36,6 +37,8 @@ class MidtransPaymentController extends Controller
         $grossAmount = (int) round($order->total_amount);
 
         $user = auth()->user();
+        $serverKey = config('services.midtrans.server_key');
+        $clientKey = config('services.midtrans.client_key');
 
         $payload = [
             'transaction_details' => [
@@ -50,7 +53,7 @@ class MidtransPaymentController extends Controller
         ];
 
         // Direct HTTP call ke Midtrans Snap Sandbox — tanpa pakai SDK agar konfigurasi pasti benar
-        $response = Http::withBasicAuth(self::SERVER_KEY, '')
+        $response = Http::withBasicAuth($serverKey, '')
             ->withHeaders([
                 'Accept'       => 'application/json',
                 'Content-Type' => 'application/json',
@@ -73,7 +76,7 @@ class MidtransPaymentController extends Controller
             return response()->json([
                 'status'     => 'success',
                 'snap_token' => $snapToken,
-                'client_key' => self::CLIENT_KEY,
+                'client_key' => $clientKey,
                 'order_id'   => $orderId,
             ]);
         }
@@ -110,19 +113,21 @@ class MidtransPaymentController extends Controller
             $signatureKey      = $request->input('signature_key');
             $statusCode        = $request->input('status_code');
             $grossAmount       = $request->input('gross_amount');
+            $serverKey         = config('services.midtrans.server_key');
 
             if (empty($orderId)) {
                 return response()->json(['status' => 'error', 'message' => 'Order ID is missing.'], 400);
             }
 
             // Validasi Signature Key: SHA512(order_id + status_code + gross_amount + ServerKey)
-            if (!empty($signatureKey) && !empty($statusCode) && !empty($grossAmount)) {
-                $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . self::SERVER_KEY);
+            if (!empty($signatureKey) && !empty($statusCode) && !empty($grossAmount) && !empty($serverKey)) {
+                $expectedSignature = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
                 if ($signatureKey !== $expectedSignature) {
                     Log::warning('Midtrans Invalid Signature Key', [
                         'received' => $signatureKey,
                         'expected' => $expectedSignature,
                     ]);
+                    return response()->json(['message' => 'Unauthorized'], 403);
                 }
             }
 
@@ -152,8 +157,48 @@ class MidtransPaymentController extends Controller
                 $order->update(['status' => 'pending']);
                 Log::info("Midtrans: Order #{$orderId} PENDING.");
             } elseif (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
-                $order->update(['status' => 'cancelled']);
-                Log::info("Midtrans: Order #{$orderId} {$transactionStatus}.");
+                if ($order->status !== 'cancelled') {
+                    DB::transaction(function () use ($order, $transactionStatus) {
+                        $order->update(['status' => 'cancelled']);
+
+                        // Restore stok produk
+                        foreach ($order->orderItems as $item) {
+                            if ($item->product) {
+                                $item->product->increment('stock', $item->quantity);
+                                $item->product->decrement('sold_count', min($item->product->sold_count, $item->quantity));
+                            }
+                        }
+
+                        // Restore quota voucher jika ada
+                        if ($order->voucher_code) {
+                            $voucher = Voucher::where('code', $order->voucher_code)->first();
+                            if ($voucher) {
+                                $voucher->increment('quota');
+                            }
+                        }
+
+                        // Kirim notifikasi ke pembeli
+                        AppNotification::send(
+                            $order->user_id,
+                            'Pesanan Dibatalkan (Pembayaran Gagal/Kedaluwarsa)',
+                            "Pesanan #{$order->invoice_number} telah dibatalkan karena pembayaran {$transactionStatus}. Stok produk telah dikembalikan.",
+                            'order',
+                            route('customer.dashboard')
+                        );
+
+                        // Kirim notifikasi ke penjual
+                        if ($order->store && $order->store->user_id) {
+                            AppNotification::send(
+                                $order->store->user_id,
+                                'Pesanan Dibatalkan Sistem',
+                                "Pesanan #{$order->invoice_number} dibatalkan otomatis oleh gateway pembayaran ({$transactionStatus}). Stok produk telah dipulihkan.",
+                                'order',
+                                route('seller.orders.index')
+                            );
+                        }
+                    });
+                }
+                Log::info("Midtrans: Order #{$orderId} {$transactionStatus} and stock restored.");
             }
 
             return response()->json(['status' => 'success'], 200);
@@ -164,3 +209,4 @@ class MidtransPaymentController extends Controller
         }
     }
 }
+

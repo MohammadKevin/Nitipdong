@@ -207,6 +207,17 @@
                                 </svg>
                                 <span class="flex-1 truncate">Voucher &amp; Promo</span>
                             </a>
+
+                            @php $active = request()->routeIs('admin.warehouses.*') || request()->routeIs('super_admin.warehouses.*'); @endphp
+                            <a href="{{ auth()->user()->role === 'super_admin' ? route('super_admin.warehouses.index') : route('admin.warehouses.index') }}"
+                               class="relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors group {{ $active ? 'bg-slate-800/80 text-white font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium' }}">
+                                @if($active)
+                                    <span class="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-blue-500"></span>
+                                @endif
+                                <i class="fa-solid fa-warehouse w-4 text-center text-xs shrink-0 {{ $active ? 'text-cyan-400' : 'text-slate-400 group-hover:text-cyan-400 transition-colors' }}"></i>
+                                <span class="flex-1 truncate">Gudang Hub NDX</span>
+                                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300">NDX</span>
+                            </a>
                         </nav>
                     </div>
 
