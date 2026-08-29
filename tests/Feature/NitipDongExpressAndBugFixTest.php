@@ -448,7 +448,17 @@ class NitipDongExpressAndBugFixTest extends TestCase
             'type' => 'product',
         ]);
     }
+
+    public function test_customer_dashboard_renders_successfully(): void
+    {
+        $response = $this->actingAs($this->customer)->get(route('customer.dashboard'));
+
+        $response->assertStatus(200);
+        $response->assertSee('Riwayat Pesanan Saya');
+        $response->assertSee('Buku Alamat Pengiriman');
+    }
 }
+
 
 
 

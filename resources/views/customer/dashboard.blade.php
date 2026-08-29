@@ -318,7 +318,7 @@
                             </span>
                         </a>
 
-                        <a href="{{ route('customer.address.index') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-cyan-700 transition-colors">
+                        <a href="{{ route('customer.addresses.index') }}" class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-cyan-700 transition-colors">
                             <span class="flex items-center gap-2.5">
                                 <i class="fa-solid fa-map-location-dot text-slate-400 text-sm w-4 text-center"></i>
                                 Buku Alamat Pengiriman
