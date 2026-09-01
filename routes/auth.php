@@ -54,6 +54,9 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:6,1')
         ->name('verification.send.otp');
 
+    Route::post('verify-email/cancel', [\App\Http\Controllers\Auth\OtpVerificationController::class, 'cancelChangeEmail'])
+        ->name('verification.cancel.change');
+
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
         ->name('password.confirm');
 

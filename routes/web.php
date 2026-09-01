@@ -388,7 +388,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/orders/{order}/process', [OrderManagementController::class, 'processOrder'])->name('orders.process');
         Route::post('/orders/{order}/ship', [OrderManagementController::class, 'shipOrder'])->name('orders.ship');
         Route::post('/orders/{order}/cancel', [OrderManagementController::class, 'cancelOrder'])->name('orders.cancel');
-        Route::post('/orders/{order}/update-status', [OrderManagementController::class, 'updateStatus'])->name('orders.update_status');
+        Route::match(['get', 'post', 'patch'], '/orders/{order}/update-status', [OrderManagementController::class, 'updateStatus'])->name('orders.update_status');
 
         // Reviews Management
         Route::get('/reviews', [SellerReviewController::class, 'index'])->name('reviews.index');

@@ -25,13 +25,19 @@ class OtpVerificationController extends Controller
 
     public function verify(Request $request)
     {
+        // Bersihkan spasi, tanda hubung, dan karakter non-digit dari input
+        $cleanedOtp = preg_replace('/\D/', '', (string) $request->otp);
+        $request->merge(['otp' => $cleanedOtp]);
+
         $request->validate([
-            'otp' => ['required', 'string', 'size:6'],
+            'otp' => ['required', 'digits:6'],
+        ], [
+            'otp.required' => 'Kode OTP 6 digit wajib diisi.',
+            'otp.digits'   => 'Kode OTP harus terdiri dari 6 angka.',
         ]);
 
         $user = $request->user();
-
-        $enteredOtp = trim(str_replace(' ', '', (string) $request->otp));
+        $enteredOtp = $cleanedOtp;
         $actualOtp = trim((string) $user->otp_code);
 
         if ($actualOtp === '' || $actualOtp !== $enteredOtp) {
@@ -63,6 +69,19 @@ class OtpVerificationController extends Controller
         }
 
         return redirect()->route($this->getDashboardRoute($user));
+    }
+
+    public function cancelChangeEmail(Request $request)
+    {
+        $user = $request->user();
+        if (!empty($user->pending_email)) {
+            $user->pending_email = null;
+            $user->otp_code = null;
+            $user->otp_expires_at = null;
+            $user->save();
+        }
+
+        return redirect()->route('profile.edit')->with('status', 'Perubahan email telah dibatalkan.');
     }
 
     private function getDashboardRoute($user)

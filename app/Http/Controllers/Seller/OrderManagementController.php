@@ -152,6 +152,10 @@ class OrderManagementController extends Controller
             abort(403, 'Akses tidak sah.');
         }
 
+        if ($request->isMethod('get')) {
+            return redirect()->route('seller.orders.show', $order);
+        }
+
         $request->validate([
             'status'          => ['required', 'in:pending,processing,shipped,completed,cancelled'],
             'tracking_number' => ['nullable', 'string', 'max:100'],

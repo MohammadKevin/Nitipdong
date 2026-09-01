@@ -160,13 +160,22 @@ class AuthController extends Controller
      */
     public function verifyOtp(Request $request): JsonResponse
     {
+        // Sanitize OTP and identifier before validation
+        $cleanedOtp = preg_replace('/\D/', '', (string) $request->otp_code);
+        $identifier = trim((string) $request->identifier);
+
+        $request->merge([
+            'otp_code'   => $cleanedOtp,
+            'identifier' => $identifier,
+        ]);
+
         $validator = Validator::make($request->all(), [
             'identifier' => ['required', 'string'],
-            'otp_code'   => ['required', 'string', 'size:6'],
+            'otp_code'   => ['required', 'digits:6'],
         ], [
             'identifier.required' => 'Identitas akun (email atau nomor HP) wajib disertakan.',
             'otp_code.required'   => 'Kode OTP 6 digit wajib diisi.',
-            'otp_code.size'       => 'Kode OTP harus terdiri dari 6 angka.',
+            'otp_code.digits'     => 'Kode OTP harus terdiri dari 6 angka.',
         ]);
 
         if ($validator->fails()) {
@@ -176,7 +185,6 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $identifier = trim($request->identifier);
         $user = User::where('email', strtolower($identifier))
                     ->orWhere('phone', $identifier)
                     ->first();
@@ -188,8 +196,8 @@ class AuthController extends Controller
             ], 404);
         }
 
-        // Validate OTP Code (clean spaces and format)
-        $enteredOtp = trim(str_replace(' ', '', (string) $request->otp_code));
+        // Validate OTP Code
+        $enteredOtp = $cleanedOtp;
         $actualOtp = trim((string) $user->otp_code);
 
         if ($actualOtp === '' || $actualOtp !== $enteredOtp) {

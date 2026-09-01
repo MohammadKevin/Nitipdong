@@ -40,6 +40,7 @@ class OtpMail extends Mailable
     {
         return new Content(
             view: 'emails.otp',
+            text: 'emails.otp_text',
         );
     }
 
