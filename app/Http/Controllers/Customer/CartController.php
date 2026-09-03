@@ -20,11 +20,11 @@ class CartController extends Controller
             ->get();
 
         $itemsTotal = $carts->sum(function ($item) {
-            return $item->product->customer_base_price * $item->quantity;
+            return ($item->product?->customer_base_price ?? 0) * $item->quantity;
         });
 
         $subtotal = $carts->sum(function ($item) {
-            return $item->product->final_price * $item->quantity;
+            return ($item->product?->final_price ?? 0) * $item->quantity;
         });
 
         $productSavings = $itemsTotal - $subtotal;
@@ -218,18 +218,18 @@ class CartController extends Controller
             'obfuscated_id'   => $c->obfuscated_id,
             'product_id'      => $c->product_id,
             'name'            => $c->product?->name ?? 'Produk',
-            'price'           => $c->product ? $c->product->final_price : 0,
-            'formatted_price' => 'Rp ' . number_format($c->product ? $c->product->final_price : 0, 0, ',', '.'),
+            'price'           => $c->product?->final_price ?? 0,
+            'formatted_price' => 'Rp ' . number_format($c->product?->final_price ?? 0, 0, ',', '.'),
             'image_url'       => $c->product?->image_url ?? asset('img/saksershop-logo.png'),
             'product_url'     => $c->product ? route('product.show', $c->product) : '#',
             'quantity'        => $c->quantity,
             'stock'           => $c->product?->stock ?? 99,
             'variant'         => $c->variant,
             'store_name'      => $c->product?->store?->name ?? 'NitipDong',
-            'subtotal'        => ($c->product ? $c->product->final_price : 0) * $c->quantity,
-            'formatted_subtotal' => 'Rp ' . number_format(($c->product ? $c->product->final_price : 0) * $c->quantity, 0, ',', '.'),
-            'update_url'      => route('customer.cart.update', $c),
-            'delete_url'      => route('customer.cart.destroy', $c),
+            'subtotal'        => ($c->product?->final_price ?? 0) * $c->quantity,
+            'formatted_subtotal' => 'Rp ' . number_format(($c->product?->final_price ?? 0) * $c->quantity, 0, ',', '.'),
+            'update_url'      => $c->product ? route('customer.cart.update', $c) : '#',
+            'delete_url'      => $c->product ? route('customer.cart.destroy', $c) : '#',
         ]);
 
         $subtotal = $items->sum('subtotal');

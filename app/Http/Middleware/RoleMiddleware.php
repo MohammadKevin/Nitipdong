@@ -24,7 +24,7 @@ class RoleMiddleware
             return redirect()->route('login')->with('error', 'Akun Anda telah dinonaktifkan/diblokir oleh Administrator.');
         }
 
-        if (!in_array($user->role, $roles)) {
+        if (empty($user->role) || !in_array($user->role, $roles)) {
             abort(403, 'Akses Ditolak: Anda tidak memiliki izin untuk mengakses halaman ini.');
         }
 

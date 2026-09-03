@@ -124,9 +124,18 @@ class OtpVerificationController extends Controller
         $type = $user->pending_email ? 'change_email' : 'register';
 
         try {
+            if (config('mail.default') === 'log') {
+                Log::warning('Web OTP resend skipped: mailer is set to "log". Configure MAIL_MAILER in .env for production use. OTP: ' . $otp);
+            }
             \Illuminate\Support\Facades\Mail::to($targetEmail)->send(new \App\Mail\OtpMail($otp, $type, $user->name));
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('Web OTP resend error: ' . $e->getMessage());
+            // Reset OTP state kalau email gagal dikirim
+            $user->update([
+                'otp_code'       => null,
+                'otp_expires_at' => null,
+            ]);
+            return back()->with('error', 'Gagal mengirim kode OTP baru. Silakan coba lagi beberapa saat kemudian.');
         }
 
         return back()->with('status', 'Kode OTP baru telah berhasil dikirim ke ' . $targetEmail . '. Silakan periksa kotak masuk atau folder spam Anda.');

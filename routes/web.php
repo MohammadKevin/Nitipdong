@@ -239,19 +239,23 @@ Route::get('/api/regions/reverse-geocode', [App\Http\Controllers\Api\RegionContr
 // Public Storefront (Etalase Toko)
 Route::get('/toko/{store:slug}', [StoreFrontController::class, 'show'])->name('store.show');
 
+// Dashboard Redirector (Global — available untuk semua konteks)
+Route::get('/dashboard', function () {
+    $user = Auth::user();
+    if (!$user) {
+        return redirect()->route('login');
+    }
+    return match ($user->role) {
+        'super_admin' => redirect()->route('super_admin.dashboard'),
+        'admin'       => redirect()->route('admin.dashboard'),
+        'seller'      => redirect()->route('seller.dashboard'),
+        'courier'     => redirect()->route('courier.dashboard'),
+        default       => redirect()->route('home'),
+    };
+})->name('dashboard');
+
 // Authenticated Routes
 Route::middleware(['auth'])->group(function () {
-
-    Route::get('/dashboard', function () {
-        $user = Auth::user();
-        return match ($user?->role) {
-            'super_admin' => redirect()->route('super_admin.dashboard'),
-            'admin'       => redirect()->route('admin.dashboard'),
-            'seller'      => redirect()->route('seller.dashboard'),
-            'courier'     => redirect()->route('courier.dashboard'),
-            default       => redirect()->route('home'),
-        };
-    })->name('dashboard');
 
     Route::get('/store/register', [StoreRegistrationController::class, 'create'])->middleware('verified')->name('store.register');
     Route::post('/store/register', [StoreRegistrationController::class, 'store'])->middleware('verified')->name('store.store');

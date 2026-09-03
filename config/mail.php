@@ -12,6 +12,11 @@ return [
     | the message. All additional mailers can be configured within the
     | "mailers" array. Examples of each type of mailer are provided.
     |
+    | IMPORTANT: In production, set MAIL_MAILER=smtp (or resend/postmark)
+    | and configure MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD,
+    | MAIL_ENCRYPTION in .env. Default 'log' only writes to laravel.log
+    | and will NOT send real emails to users.
+    |
     */
 
     'default' => env('MAIL_MAILER', 'log'),

@@ -77,13 +77,18 @@ class OrderController extends Controller
         $totalInitialShipping = 0;
 
         foreach ($groupedByStore as $storeId => $items) {
-            $firstStore = $items->first()->product->store ?? null;
-            $storeWeight = $items->sum(fn ($it) => max(0.2, (float) ($it->product->weight ?? 0.5)) * $it->quantity);
+            $firstStore = $items->first()->product?->store ?? null;
+            $storeWeight = $items->sum(fn ($it) => max(0.2, (float) ($it->product?->weight ?? 0.5)) * $it->quantity);
             $options = ShippingService::getAvailableOptions($storeWeight, $defaultAddress?->city, null, $firstStore);
             $defaultOption = $options[0] ?? ShippingService::getDefaultOption($storeWeight, $defaultAddress?->city, null, $firstStore);
 
+            // Jika tidak ada store, skip обработка
+            if (!$firstStore) {
+                continue;
+            }
+
             $storeShippingData[$storeId] = [
-                'store_name'     => $firstStore->name ?? 'Official Store',
+                'store_name'     => $firstStore?->name ?? 'Official Store',
                 'origin_city'    => $firstStore?->effective_city ?? 'Jakarta Pusat',
                 'weight'         => $storeWeight,
                 'options'        => $options,
@@ -139,13 +144,18 @@ class OrderController extends Controller
         $totalShipping = 0;
 
         foreach ($groupedByStore as $storeId => $items) {
-            $firstStore = $items->first()->product->store ?? null;
-            $storeWeight = $items->sum(fn ($it) => max(0.2, (float) ($it->product->weight ?? 0.5)) * $it->quantity);
+            $firstStore = $items->first()->product?->store ?? null;
+            $storeWeight = $items->sum(fn ($it) => max(0.2, (float) ($it->product?->weight ?? 0.5)) * $it->quantity);
             $options = ShippingService::getAvailableOptions($storeWeight, $city, null, $firstStore);
             $defaultOption = $options[0] ?? ShippingService::getDefaultOption($storeWeight, $city, null, $firstStore);
 
+            // Skip jika produk tidak punya toko
+            if (!$firstStore) {
+                continue;
+            }
+
             $storeShippingData[$storeId] = [
-                'store_name'     => $firstStore->name ?? 'Official Store',
+                'store_name'     => $firstStore?->name ?? 'Official Store',
                 'origin_city'    => $firstStore?->effective_city ?? 'Jakarta Pusat',
                 'weight'         => $storeWeight,
                 'options'        => $options,

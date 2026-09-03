@@ -125,9 +125,25 @@ class AuthController extends Controller
 
             // Send OTP email synchronously / safely wrapped
             try {
+                if (config('mail.default') === 'log') {
+                    Log::warning('OTP email skipped: mailer is set to "log". Configure MAIL_MAILER in .env for production use. OTP: ' . $otp);
+                    // Di local, tetap lanjutkan biar testing bisa jalan
+                    if (!app()->environment('local')) {
+                        throw new \Exception('Mailer is set to log, cannot send email in non-local environment.');
+                    }
+                }
                 Mail::to($user->email)->send(new OtpMail($otp, 'register', $user->name));
             } catch (\Throwable $e) {
                 Log::warning('Registration OTP email skipped/failed: ' . $e->getMessage());
+                // Reset OTP state kalau email gagal
+                $user->update([
+                    'otp_code'       => null,
+                    'otp_expires_at' => null,
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengirim OTP: ' . $e->getMessage(),
+                ], 500);
             }
 
             $token = $user->createToken('nitipdong-mobile-app')->plainTextToken;
@@ -289,9 +305,24 @@ class AuthController extends Controller
         ]);
 
         try {
+            if (config('mail.default') === 'log') {
+                Log::warning('Resend OTP email skipped: mailer is set to "log". Configure MAIL_MAILER in .env for production use. OTP: ' . $otp);
+                if (!app()->environment('local')) {
+                    throw new \Exception('Mailer is set to log, cannot send email in non-local environment.');
+                }
+            }
             Mail::to($user->email)->send(new OtpMail($otp, 'resend', $user->name));
         } catch (\Throwable $e) {
             Log::warning('Resend OTP email error: ' . $e->getMessage());
+            // Reset OTP state kalau email gagal
+            $user->update([
+                'otp_code'       => null,
+                'otp_expires_at' => null,
+            ]);
+            return response()->json([
+                'success'          => false,
+                'message'          => 'Gagal mengirim OTP: ' . $e->getMessage(),
+            ], 500);
         }
 
         return response()->json([

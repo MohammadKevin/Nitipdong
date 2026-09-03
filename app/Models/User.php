@@ -76,8 +76,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=0891b2&color=fff&size=200&bold=true';
     }
 
-    public function sendEmailVerificationNotification()
+    public function sendEmailVerificationNotification(): void
     {
+        // NitipDong menggunakan sistem OTP custom via SMS/email, bukan Laravel default.
+        // Method ini ada karena trait MustVerifyEmail yang diimplementasikan.
+        // Jika Anda memang ingin Laravel mengirim verification email default, 
+        // uncomment kode di bawah ini dan pastikan MAIL_MAILER sudah dikonfigurasi:
+        //
+        // $this->notify(new \Illuminate\Auth\Notifications\VerifyEmail);
     }
 
     public function isSuperAdmin(): bool

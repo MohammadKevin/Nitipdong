@@ -390,14 +390,18 @@
 
                     <div class="relative" @click.outside="userOpen = false">
                         <button @click="userOpen = !userOpen" class="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-slate-100 transition-colors">
-                            <img src="{{ Auth::user()->avatar_url }}"
-                                 class="w-6 h-6 rounded-full border border-cyan-200 object-cover" alt="{{ Auth::user()->name }}">
-                            <div class="hidden sm:block text-left max-w-[110px]">
-                                <p class="text-xs font-semibold text-slate-800 leading-tight truncate">
-                                    {{ Auth::user()->name }}
-                                </p>
-                            </div>
-                            <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 hidden sm:block transition-transform" :class="userOpen ? 'rotate-180' : ''"></i>
+                            @if(Auth::check())
+                                <img src="{{ Auth::user()->avatar_url }}"
+                                     class="w-6 h-6 rounded-full border border-cyan-200 object-cover" alt="{{ Auth::user()->name }}">
+                                <div class="hidden sm:block text-left max-w-[110px]">
+                                    <p class="text-xs font-semibold text-slate-800 leading-tight truncate">
+                                        {{ Auth::user()->name }}
+                                    </p>
+                                </div>
+                                <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 hidden sm:block transition-transform" :class="userOpen ? 'rotate-180' : ''"></i>
+                            @else
+                                <i class="fa-solid fa-user text-slate-500"></i>
+                            @endif
                         </button>
 
                         <div x-show="userOpen" x-cloak
