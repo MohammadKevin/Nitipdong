@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 class OtpVerificationController extends Controller
 {
@@ -40,21 +41,35 @@ class OtpVerificationController extends Controller
         $enteredOtp = $cleanedOtp;
         $actualOtp = trim((string) $user->otp_code);
 
+        // Periksa kedaluwarsa OTP SEBELUM validasi OTP
+        if ($user->otp_expires_at && now()->greaterThan($user->otp_expires_at)) {
+            return back()->withErrors([
+                'otp' => 'Kode OTP sudah kedaluwarsa (15 menit). Silakan kirim ulang kode baru.'
+            ]);
+        }
+
         if ($actualOtp === '' || $actualOtp !== $enteredOtp) {
             return back()->withErrors(['otp' => 'Kode OTP tidak sesuai atau salah. Silakan periksa kembali email Anda.']);
         }
 
-        if ($user->otp_expires_at && now()->greaterThan($user->otp_expires_at)) {
-            return back()->withErrors(['otp' => 'Kode OTP sudah kedaluwarsa. Silakan klik kirim ulang kode baru.']);
-        }
-
         if (!empty($user->pending_email)) {
-            $user->email = $user->pending_email;
-            $user->pending_email = null;
-            $user->email_verified_at = now();
-            $user->otp_code = null;
-            $user->otp_expires_at = null;
-            $user->save();
+            // Cek apakah email tujuan sudah dipakai user lain
+            $existingUser = User::where('email', $user->pending_email)
+                ->where('id', '!=', $user->id)
+                ->first();
+
+            if ($existingUser) {
+                return back()->withErrors(['otp' => 'Email tujuan sudah terdaftar oleh pengguna lain.']);
+            }
+
+            DB::transaction(function () use ($user) {
+                $user->email = $user->pending_email;
+                $user->pending_email = null;
+                $user->email_verified_at = now();
+                $user->otp_code = null;
+                $user->otp_expires_at = null;
+                $user->save();
+            });
 
             return redirect()->route('profile.edit')->with('status', 'email-updated-successfully');
         }
