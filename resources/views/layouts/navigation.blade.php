@@ -268,7 +268,6 @@
                             </template>
                         </div>
                     </div>
-                    @endif
 
                     <div class="relative" @click.outside="cartOpen = false">
                         <button type="button" id="nav-cart-btn" @click="cartOpen = !cartOpen" aria-label="Keranjang Belanja"
@@ -379,6 +378,7 @@
                             </template>
                         </div>
                     </div>
+                    @endif
 
                     <button type="button" @click="$dispatch('open-chat')" aria-label="Pesan Chat" class="btn-icon relative cursor-pointer" title="Pesan & Chat">
                         <i class="fa-regular fa-comment-dots text-sm text-slate-600"></i>

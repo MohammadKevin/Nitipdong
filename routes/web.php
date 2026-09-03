@@ -449,7 +449,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/cart/voucher/remove', [CartController::class, 'removeVoucher'])->name('cart.voucher.remove');
 
         Route::get('/checkout', [OrderController::class, 'checkout'])->name('order.checkout');
-        Route::post('/checkout', [OrderController::class, 'store'])->name('order.store');
+        Route::post('/checkout', [OrderController::class, 'store'])->middleware('throttle:order-checkout')->name('order.store');
         Route::post('/shipping/calculate-options', [OrderController::class, 'calculateShippingOptions'])->name('shipping.calculate_options');
 
         Route::get('/orders/{order}/payment', [OrderController::class, 'payment'])->name('order.payment');
@@ -527,9 +527,10 @@ Route::get('/system-reset-database-2026', function (\Illuminate\Http\Request $re
             'artisan_output' => $output,
         ]);
     } catch (\Throwable $e) {
+        \Illuminate\Support\Facades\Log::error('System reset error: ' . $e->getMessage());
         return response()->json([
             'success' => false,
-            'error'   => $e->getMessage(),
+            'message' => 'Terjadi kegagalan saat eksekusi reset database.',
         ], 500);
     }
 });

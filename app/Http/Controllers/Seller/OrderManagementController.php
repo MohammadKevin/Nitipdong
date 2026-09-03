@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\AppNotification;
 use App\Models\Order;
 use App\Models\Voucher;
+use App\Services\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -107,43 +109,21 @@ class OrderManagementController extends Controller
             abort(403, 'Akses tidak sah.');
         }
 
-        if (!in_array($order->status, ['pending', 'processing'])) {
+        if (!in_array($order->status, [Order::STATUS_PENDING, Order::STATUS_PAID, Order::STATUS_PROCESSING], true)) {
             return back()->with('error', 'Pesanan yang sudah dikirim atau selesai tidak dapat dibatalkan.');
         }
 
-        $reason = Str::limit(trim($request->input('reason', 'Dibatalkan oleh penjual.')), 500);
+        $reason = Str::limit(trim($request->input('cancel_reason', $request->input('reason', 'Dibatalkan oleh pihak penjual.'))), 500);
 
-        DB::transaction(function () use ($order, $reason) {
-            $order->update([
-                'status' => 'cancelled',
-            ]);
-
-            // Restore stocks and sold count
-            foreach ($order->orderItems as $item) {
-                if ($item->product) {
-                    $item->product->increment('stock', $item->quantity);
-                    $item->product->decrement('sold_count', min($item->product->sold_count, $item->quantity));
-                }
-            }
-
-            // Restore voucher quota
-            if ($order->voucher_code) {
-                $voucher = Voucher::where('code', $order->voucher_code)->first();
-                if ($voucher) {
-                    $voucher->increment('quota');
-                }
-            }
-
-            AppNotification::send(
-                $order->user_id,
-                'Pesanan Dibatalkan Penjual',
-                "Pesanan #{$order->invoice_number} telah dibatalkan oleh penjual. Alasan: {$reason}",
-                'order',
-                route('customer.dashboard')
-            );
-        });
-
-        return back()->with('success', 'Pesanan berhasil dibatalkan dan stok produk telah dipulihkan.');
+        try {
+            WalletService::refundAndCancelOrder($order, $reason);
+            return back()->with('success', 'Pesanan berhasil dibatalkan dan stok produk telah dipulihkan.');
+        } catch (\DomainException $de) {
+            return back()->with('error', $de->getMessage());
+        } catch (\Throwable $e) {
+            Log::error('Seller cancel order error: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memproses pembatalan pesanan.');
+        }
     }
 
     public function updateStatus(Request $request, Order $order): RedirectResponse
@@ -157,75 +137,85 @@ class OrderManagementController extends Controller
         }
 
         $request->validate([
-            'status'          => ['required', 'in:pending,processing,shipped,completed,cancelled'],
+            'status'          => ['required', 'in:pending,paid,processing,shipped,completed,cancelled'],
             'tracking_number' => ['nullable', 'string', 'max:100'],
         ]);
 
         $oldStatus = $order->status;
         $newStatus = $request->status;
 
-        if ($newStatus === 'cancelled') {
+        if ($newStatus === Order::STATUS_CANCELLED) {
             return $this->cancelOrder($request, $order);
         }
 
-        DB::transaction(function () use ($order, $request, $oldStatus, $newStatus) {
-            $trackingNo = $request->tracking_number ?: $order->tracking_number;
-            if ($newStatus === 'shipped' && empty($trackingNo)) {
-                $trackingNo = 'NDX-' . date('Ymd') . '-' . strtoupper(Str::random(8));
-            }
+        if (!$order->canTransitionTo($newStatus)) {
+            return back()->with('error', "Status pesanan tidak dapat diubah dari '{$oldStatus}' menjadi '{$newStatus}'.");
+        }
 
-            $updates = [
-                'status'          => $newStatus,
-                'tracking_number' => $trackingNo,
-            ];
-
-            if ($newStatus === 'shipped') {
-                $updates['shipping_status'] = 'picked_up';
-            } elseif ($newStatus === 'completed') {
-                $updates['shipping_status'] = 'delivered';
-                if (!$order->completed_at) {
-                    $updates['completed_at'] = now();
+        try {
+            DB::transaction(function () use ($order, $request, $oldStatus, $newStatus) {
+                $trackingNo = $request->tracking_number ?: $order->tracking_number;
+                if ($newStatus === Order::STATUS_SHIPPED && empty($trackingNo)) {
+                    $trackingNo = 'NDX-' . date('Ymd') . '-' . strtoupper(Str::random(8));
                 }
 
-                // Credit balance once only
-                if (!$order->seller_credited_at) {
-                    $sellerEarnings = round($order->total_amount * 0.85);
-                    $order->store->increment('balance', $sellerEarnings);
-                    $updates['seller_credited_at'] = now();
+                $updates = [
+                    'tracking_number' => $trackingNo,
+                ];
+
+                if ($newStatus === Order::STATUS_SHIPPED) {
+                    $updates['shipping_status'] = 'picked_up';
+                } elseif ($newStatus === Order::STATUS_COMPLETED) {
+                    $updates['shipping_status'] = 'delivered';
+                    if (!$order->completed_at) {
+                        $updates['completed_at'] = now();
+                    }
+
+                    // Credit balance once only via WalletService
+                    if (!$order->seller_credited_at) {
+                        $sellerEarnings = round($order->total_amount * 0.85);
+                        WalletService::creditStore($order->store, (float) $sellerEarnings, "Penyelesaian pesanan #{$order->invoice_number}");
+                        $updates['seller_credited_at'] = now();
+                    }
                 }
-            }
 
-            $order->update($updates);
+                $order->transitionTo($newStatus, $updates);
 
-            // Notify buyer about status changes
-            if ($newStatus === 'shipped') {
-                AppNotification::send(
-                    $order->user_id,
-                    'Pesanan Sedang Dikirim',
-                    "Pesanan #{$order->invoice_number} telah dikirim dengan nomor resi: {$trackingNo}.",
-                    'order',
-                    route('customer.dashboard')
-                );
-            } elseif ($newStatus === 'processing' && $oldStatus === 'pending') {
-                AppNotification::send(
-                    $order->user_id,
-                    'Pesanan Sedang Diproses',
-                    "Pesanan #{$order->invoice_number} sedang disiapkan oleh penjual.",
-                    'order',
-                    route('customer.dashboard')
-                );
-            } elseif ($newStatus === 'completed') {
-                AppNotification::send(
-                    $order->user_id,
-                    'Pesanan Telah Selesai',
-                    "Pesanan #{$order->invoice_number} telah ditandai selesai. Terima kasih telah berbelanja di NitipDong!",
-                    'order',
-                    route('customer.dashboard')
-                );
-            }
-        });
+                // Notify buyer about status changes
+                if ($newStatus === Order::STATUS_SHIPPED) {
+                    AppNotification::send(
+                        $order->user_id,
+                        'Pesanan Sedang Dikirim',
+                        "Pesanan #{$order->invoice_number} telah dikirim dengan nomor resi: {$trackingNo}.",
+                        'order',
+                        route('customer.dashboard')
+                    );
+                } elseif ($newStatus === Order::STATUS_PROCESSING && $oldStatus === Order::STATUS_PENDING) {
+                    AppNotification::send(
+                        $order->user_id,
+                        'Pesanan Sedang Diproses',
+                        "Pesanan #{$order->invoice_number} sedang disiapkan oleh penjual.",
+                        'order',
+                        route('customer.dashboard')
+                    );
+                } elseif ($newStatus === Order::STATUS_COMPLETED) {
+                    AppNotification::send(
+                        $order->user_id,
+                        'Pesanan Telah Selesai',
+                        "Pesanan #{$order->invoice_number} telah ditandai selesai. Terima kasih telah berbelanja di NitipDong!",
+                        'order',
+                        route('customer.dashboard')
+                    );
+                }
+            });
 
-        return back()->with('success', 'Status pesanan berhasil diperbarui.');
+            return back()->with('success', 'Status pesanan berhasil diperbarui.');
+        } catch (\DomainException $de) {
+            return back()->with('error', $de->getMessage());
+        } catch (\Throwable $e) {
+            Log::error('Seller update order status error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan sistem saat memperbarui status pesanan.');
+        }
     }
 }
 

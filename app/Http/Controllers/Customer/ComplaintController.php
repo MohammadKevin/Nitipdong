@@ -35,7 +35,7 @@ class ComplaintController extends Controller
         $request->validate([
             'reason'      => ['required', 'string', 'max:100'],
             'description' => ['required', 'string', 'max:1000'],
-            'photo'       => ['nullable', 'image', 'max:3072'],
+            'photo'       => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ], [
             'reason.required'      => 'Pilih alasan komplain pesanan.',
             'description.required' => 'Jelaskan detail kendala atau kerusakan produk.',

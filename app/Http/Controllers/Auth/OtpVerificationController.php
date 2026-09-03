@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class OtpVerificationController extends Controller
 {
@@ -117,16 +121,16 @@ class OtpVerificationController extends Controller
             return redirect()->route($this->getDashboardRoute($user));
         }
 
-        // Cooldown enforcement: 30 seconds
+        // Cooldown enforcement: minimal 60 detik
         $cacheKey = 'otp_resend_cooldown_web_' . $user->id;
-        if (\Illuminate\Support\Facades\Cache::has($cacheKey)) {
-            $remaining = (int) (\Illuminate\Support\Facades\Cache::get($cacheKey) - time());
+        if (Cache::has($cacheKey)) {
+            $remaining = (int) (Cache::get($cacheKey) - time());
             if ($remaining > 0) {
                 return back()->withErrors(['otp' => "Mohon tunggu {$remaining} detik sebelum meminta kode OTP baru."]);
             }
         }
 
-        \Illuminate\Support\Facades\Cache::put($cacheKey, time() + 30, 30);
+        Cache::put($cacheKey, time() + 60, 60);
 
         $otp = sprintf('%06d', mt_rand(100000, 999999));
         

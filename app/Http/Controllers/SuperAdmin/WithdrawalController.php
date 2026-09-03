@@ -46,7 +46,7 @@ class WithdrawalController extends Controller
 
         $request->validate([
             'admin_note' => ['nullable', 'string', 'max:500'],
-            'proof'      => ['nullable', 'image', 'max:2048'],
+            'proof'      => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
         $proofUrl = $withdrawal->proof_url;

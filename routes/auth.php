@@ -15,12 +15,14 @@ Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
-    Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::post('register', [RegisteredUserController::class, 'store'])
+        ->middleware('throttle:5,1');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 
-    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    Route::post('login', [AuthenticatedSessionController::class, 'store'])
+        ->middleware('throttle:5,1');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
@@ -51,7 +53,7 @@ Route::middleware('auth')->group(function () {
         ->name('verification.verify.otp');
 
     Route::post('verify-email/resend', [\App\Http\Controllers\Auth\OtpVerificationController::class, 'resend'])
-        ->middleware('throttle:6,1')
+        ->middleware('throttle:otp-resend')
         ->name('verification.send.otp');
 
     Route::post('verify-email/cancel', [\App\Http\Controllers\Auth\OtpVerificationController::class, 'cancelChangeEmail'])
@@ -65,7 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 });
 
-// Logout dapat diakses via POST maupun GET, baik saat login aktif maupun sesi sudah kedaluwarsa
-Route::match(['get', 'post'], 'logout', [AuthenticatedSessionController::class, 'destroy'])
+// Logout harus melalui POST dengan verifikasi CSRF aktif
+Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
     ->name('logout');
 

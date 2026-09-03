@@ -74,7 +74,7 @@ class PaymentService
             ],
             'customer_details' => [
                 'first_name' => $user->name ?? 'Customer',
-                'email'      => $user->email ?? 'customer@budayakita.com',
+                'email'      => $user->email ?? 'customer@nitipdong.com',
                 'phone'      => preg_replace('/[^0-9]/', '', $user->phone ?? '081234567890') ?: '081234567890',
             ],
         ];

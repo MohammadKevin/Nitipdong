@@ -362,6 +362,10 @@
                                       :disabled="useSaved"
                                       class="input text-xs rounded-md"
                                       placeholder="Nama penerima, no. HP, dan alamat lengkap tujuan...">{{ old('shipping_address', auth()->user()->address) }}</textarea>
+                            <div class="mt-2 p-2.5 bg-amber-50/80 rounded-xl border border-amber-200 text-[11px] text-amber-900 flex items-start gap-2">
+                                <i class="fa-solid fa-circle-info text-amber-600 mt-0.5 shrink-0"></i>
+                                <span><strong>Tips Ongkir Akurat:</strong> Disarankan memilih dari <strong>"Alamat Tersimpan"</strong> atau klik <strong>"+ Alamat Baru"</strong> dengan memilih Kota &amp; Pinpoint GPS agar tarif pengiriman NitipDongExpress (NDX) dihitung 100% akurat ke lokasi Anda.</span>
+                            </div>
                         </div>
                     </div>
                 </div>

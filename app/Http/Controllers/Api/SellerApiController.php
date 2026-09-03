@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\Store;
+use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class SellerApiController extends Controller
@@ -234,24 +236,74 @@ class SellerApiController extends Controller
     public function updateOrderStatus(Request $request, $id): JsonResponse
     {
         $request->validate([
-            'status' => 'required|string|in:processing,shipped,cancelled',
+            'status'          => 'required|string|in:processing,shipped,cancelled',
+            'tracking_number' => 'nullable|string|max:100',
+            'cancel_reason'   => 'nullable|string|max:500',
         ]);
 
         $user = Auth::user();
         $store = Store::where('user_id', $user->id)->first();
+        if (!$store) {
+            return response()->json(['success' => false, 'message' => 'Toko tidak ditemukan atau belum disetujui.'], 403);
+        }
 
-        $order = Order::where('id', $id)->where('store_id', $store->id)->first();
+        $order = Order::where(function ($q) use ($id) {
+            $q->where('id', $id)->orWhere('uuid', $id);
+        })->where('store_id', $store->id)->first();
+
         if (!$order) {
             return response()->json(['success' => false, 'message' => 'Pesanan tidak ditemukan.'], 404);
         }
 
-        $order->status = $request->status;
-        $order->save();
+        $newStatus = $request->status;
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Status pesanan berhasil diperbarui.',
-            'status'  => $order->status,
-        ]);
+        if ($newStatus === Order::STATUS_CANCELLED) {
+            $reason = Str::limit(trim($request->input('cancel_reason', 'Dibatalkan oleh penjual via API.')), 500);
+            try {
+                WalletService::refundAndCancelOrder($order, $reason);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Pesanan berhasil dibatalkan dan stok produk dipulihkan.',
+                    'status'  => Order::STATUS_CANCELLED,
+                ]);
+            } catch (\DomainException $de) {
+                return response()->json(['success' => false, 'message' => $de->getMessage()], 422);
+            } catch (\Throwable $e) {
+                Log::error('API Seller cancel order error: ' . $e->getMessage());
+                return response()->json(['success' => false, 'message' => 'Gagal memproses pembatalan pesanan.'], 500);
+            }
+        }
+
+        if (!$order->canTransitionTo($newStatus)) {
+            return response()->json([
+                'success' => false,
+                'message' => "Transisi status pesanan dari '{$order->status}' menjadi '{$newStatus}' tidak diizinkan.",
+            ], 422);
+        }
+
+        try {
+            $extra = [];
+            if ($newStatus === Order::STATUS_SHIPPED) {
+                $extra['shipping_status'] = 'picked_up';
+                if ($request->filled('tracking_number')) {
+                    $extra['tracking_number'] = $request->tracking_number;
+                } elseif (empty($order->tracking_number)) {
+                    $extra['tracking_number'] = 'NDX-' . date('Ymd') . '-' . strtoupper(Str::random(8));
+                }
+            }
+
+            $order->transitionTo($newStatus, $extra);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Status pesanan berhasil diperbarui.',
+                'status'  => $order->status,
+            ]);
+        } catch (\DomainException $de) {
+            return response()->json(['success' => false, 'message' => $de->getMessage()], 422);
+        } catch (\Throwable $e) {
+            Log::error('API Seller update order status error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal memperbarui status pesanan.'], 500);
+        }
     }
 }

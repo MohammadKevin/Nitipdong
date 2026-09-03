@@ -23,8 +23,8 @@ class LiveTrackingController extends Controller
 
         // Pastikan hanya pemilik pesanan, admin, atau kurir yang bisa melihat
         $user = Auth::user();
-        if ($user && $order->user_id !== $user->id && $order->courier_id !== $user->id && !in_array($user->role, ['admin', 'super_admin'])) {
-            return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
+        if (!$user || ($order->user_id !== $user->id && $order->courier_id !== $user->id && !in_array($user->role, ['admin', 'super_admin']))) {
+            return response()->json(['success' => false, 'message' => 'Akses ditolak.'], 403);
         }
 
         $courier = $order->courier;

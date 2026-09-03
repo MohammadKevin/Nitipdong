@@ -26,6 +26,7 @@ class ReviewController extends Controller
             'order_item_id' => ['required', 'exists:order_items,id'],
             'rating'        => ['required', 'integer', 'between:1,5'],
             'comment'       => ['nullable', 'string', 'max:2000'],
+            'images'        => ['nullable', 'array', 'max:5'],
             'images.*'      => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'is_anonymous'  => ['nullable', 'boolean'],
         ]);

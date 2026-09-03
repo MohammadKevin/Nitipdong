@@ -136,11 +136,11 @@
             this.hoverRating = 5;
             this.showReviewModal = true;
         },
-        openComplaint(order, actionUrl) {
+        openComplaint(orderId, invoiceNumber, storeName, actionUrl) {
             this.complaintData = {
-                orderId: order.id,
-                invoiceNumber: order.invoice_number,
-                storeName: order.store ? order.store.name : 'Toko',
+                orderId: orderId,
+                invoiceNumber: invoiceNumber,
+                storeName: storeName || 'Toko',
                 reason: 'Barang Rusak / Cacat',
                 description: '',
                 actionUrl: actionUrl
@@ -530,7 +530,7 @@
                                      (activeTab === 'processing' && '{{ $order->status }}' === 'processing') || 
                                      (activeTab === 'shipped' && '{{ $order->status }}' === 'shipped') || 
                                      (activeTab === 'completed' && '{{ $order->status }}' === 'completed') || 
-                                     (activeTab === 'cancelled' && in_array('{{ $order->status }}', ['cancelled', 'rejected'])) || 
+                                     (activeTab === 'cancelled' && ['cancelled', 'rejected'].includes('{{ $order->status }}')) || 
                                      (activeTab === 'complaint' && '{{ $order->complaint ? 'true' : 'false' }}' === 'true')) &&
                                      ('{{ strtolower(addslashes($itemsSearchText)) }}'.includes(searchQuery.toLowerCase().trim()))"
                              x-transition:enter="transition ease-out duration-200"
@@ -696,11 +696,22 @@
                                                 <i class="fa-solid fa-file-invoice"></i> Invoice
                                             </a>
                                             
+                                            @php
+                                                $orderHasReview = $orderItems->contains(fn($item) => $item->review !== null);
+                                            @endphp
+
                                             @if(!$order->complaint)
-                                                <button type="button" @click="openComplaint({{ $order }}, '{{ route('customer.complaints.store', $order) }}')"
-                                                        class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-purple-700 hover:bg-purple-50 border border-slate-200 transition-colors cursor-pointer">
-                                                    Komplain
-                                                </button>
+                                                @if(!$orderHasReview)
+                                                    <button type="button" @click="openComplaint({{ $order->id }}, '{{ $order->invoice_number }}', '{{ addslashes($order->store->name ?? 'Toko') }}', '{{ route('customer.complaints.store', $order) }}')"
+                                                            class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-purple-700 hover:bg-purple-50 border border-slate-200 transition-colors cursor-pointer"
+                                                            title="Ajukan komplain jika ada kerusakan atau kekurangan barang sebelum memberikan ulasan">
+                                                        <i class="fa-solid fa-triangle-exclamation text-purple-600 text-[10px]"></i> Komplain
+                                                    </button>
+                                                @else
+                                                    <span class="px-2.5 py-1.5 rounded-xl text-[11px] font-medium text-slate-400 bg-slate-50 border border-slate-200" title="Pesanan yang telah diulas tidak dapat diajukan komplain">
+                                                        <i class="fa-solid fa-circle-info text-[9px]"></i> Sudah Diulas
+                                                    </span>
+                                                @endif
                                             @endif
 
                                             @if($orderItems->first() && $orderItems->first()->product)
@@ -902,6 +913,7 @@
 
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Alasan Pembatalan</label>
+                        <input type="hidden" name="reason" :value="cancelData.reason">
                         <select name="cancel_reason" x-model="cancelData.reason" class="w-full text-xs rounded-xl border border-slate-200 p-2.5 focus:border-rose-600 focus:ring-1 focus:ring-rose-600">
                             <option value="Ingin mengubah metode pembayaran / salah pesan">Ingin mengubah metode pembayaran / salah pesan</option>
                             <option value="Ingin mengubah alamat pengiriman">Ingin mengubah alamat pengiriman</option>

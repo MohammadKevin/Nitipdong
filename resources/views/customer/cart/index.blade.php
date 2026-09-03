@@ -135,9 +135,15 @@
                         </div>
                         @endif
 
-                        <div class="flex items-center justify-between text-slate-500">
-                            <span>Ekstra Bebas Ongkir</span>
-                            <span class="font-semibold text-cyan-700">Rp 0 (Gratis)</span>
+                        <div class="flex items-start justify-between text-slate-500 text-xs">
+                            <div>
+                                <span class="block text-slate-700 font-medium">Ongkos Kirim</span>
+                                <span class="text-[10px] text-cyan-700 font-bold bg-cyan-50 px-1.5 py-0.5 rounded border border-cyan-200">NDX Express</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="font-semibold text-slate-800 block">Dihitung saat checkout</span>
+                                <span class="text-[10px] text-emerald-600 font-semibold block">Gratis ongkir dalam kota</span>
+                            </div>
                         </div>
                         <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
                             <span class="font-bold text-xs sm:text-sm text-slate-900">Total Pembayaran</span>

@@ -48,7 +48,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/auth/register', [AuthController::class, 'register']);
         Route::post('/auth/google', [\App\Http\Controllers\Auth\GoogleAuthController::class, 'handleApiGoogleLogin']);
         Route::post('/auth/verify-otp', [AuthController::class, 'verifyOtp']);
-        Route::post('/auth/resend-otp', [AuthController::class, 'resendOtp']);
+        Route::post('/auth/resend-otp', [AuthController::class, 'resendOtp'])->middleware('throttle:otp-resend');
     });
 
     // 2. Banners & Categories & Vouchers
@@ -92,7 +92,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/orders', [OrderController::class, 'index']);
         Route::get('/orders/{id}', [OrderController::class, 'show']);
         Route::get('/orders/{id}/tracking', [OrderController::class, 'tracking']);
-        Route::post('/orders/checkout', [OrderController::class, 'checkout']);
+        Route::post('/orders/checkout', [OrderController::class, 'checkout'])->middleware('throttle:order-checkout');
         Route::post('/orders/{id}/pay', [OrderController::class, 'pay']);
         Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel']);
         Route::post('/orders/{id}/confirm', [OrderController::class, 'confirmReceived']);

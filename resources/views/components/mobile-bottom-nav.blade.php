@@ -6,10 +6,12 @@
         mobileCartCount: {{ (int) $bottomCartCount }},
         init() {
             window.addEventListener('cart-updated', () => {
-                fetch('/api/cart/count', { headers: { 'Accept': 'application/json' } })
+                @if(auth()->check() && auth()->user()->role === 'customer')
+                fetch('{{ route('customer.cart.items') }}', { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
                     .then(res => res.json())
                     .then(data => { if (data.count !== undefined) this.mobileCartCount = data.count; })
                     .catch(() => {});
+                @endif
             });
         }
      }"

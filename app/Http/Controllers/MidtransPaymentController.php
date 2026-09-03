@@ -47,7 +47,7 @@ class MidtransPaymentController extends Controller
             ],
             'customer_details' => [
                 'first_name' => $user->name ?? 'Customer',
-                'email'      => $user->email ?? 'customer@budayakita.com',
+                'email'      => $user->email ?? 'customer@nitipdong.com',
                 'phone'      => preg_replace('/[^0-9]/', '', $user->phone ?? '081234567890') ?: '081234567890',
             ],
         ];
@@ -204,8 +204,8 @@ class MidtransPaymentController extends Controller
             return response()->json(['status' => 'success'], 200);
 
         } catch (\Exception $e) {
-            Log::error('Midtrans Notification Exception:', ['message' => $e->getMessage()]);
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            Log::error('Midtrans Notification Exception:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['status' => 'error', 'message' => 'Terjadi kendala saat memproses notifikasi webhook.'], 500);
         }
     }
 }

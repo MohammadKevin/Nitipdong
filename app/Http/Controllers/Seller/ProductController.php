@@ -67,6 +67,7 @@ class ProductController extends Controller
             'weight'              => ['nullable', 'numeric', 'min:0'],
             'condition'           => ['nullable', 'in:new,used,baru,bekas,second'],
             'image'               => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'images'              => ['nullable', 'array', 'max:5'],
             'images.*'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ], [
             'stock.max' => 'Jumlah stok tidak boleh melebihi batas maksimal 10.000 unit.',
@@ -183,6 +184,7 @@ class ProductController extends Controller
             'weight'              => ['nullable', 'numeric', 'min:0'],
             'condition'           => ['nullable', 'in:new,used,baru,bekas,second'],
             'image'               => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'images'              => ['nullable', 'array', 'max:5'],
             'images.*'            => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'delete_images'       => ['nullable', 'array'],
             'delete_images.*'     => ['nullable', 'string'],
@@ -215,6 +217,38 @@ class ProductController extends Controller
             }
         }
 
+        // Build specifications array
+        $specifications = [];
+        if ($request->has('spec_keys') && $request->has('spec_values')) {
+            $keys = $request->input('spec_keys', []);
+            $values = $request->input('spec_values', []);
+            foreach ($keys as $index => $key) {
+                if (!empty($key) && !empty($values[$index])) {
+                    $specifications[$key] = $values[$index];
+                }
+            }
+        }
+
+        // Build variants array
+        $variants = [];
+        if ($request->has('variant_names')) {
+            $variantNames = $request->input('variant_names', []);
+            foreach ($variantNames as $vIndex => $variantName) {
+                if (!empty($variantName)) {
+                    $optionsKey = "variant_{$vIndex}_options";
+                    $options = $request->input($optionsKey, []);
+                    $filteredOptions = array_filter($options, fn($opt) => !empty($opt));
+
+                    if (count($filteredOptions) > 0) {
+                        $variants[] = [
+                            'name' => $variantName,
+                            'options' => array_values($filteredOptions)
+                        ];
+                    }
+                }
+            }
+        }
+
         $rawPrice = $request->input('price');
         $price = is_numeric($rawPrice) ? (float) $rawPrice : (float) preg_replace('/[^0-9.]/', '', (string) $rawPrice);
 
@@ -228,6 +262,8 @@ class ProductController extends Controller
             'category_id'         => $request->category_id,
             'name'                => $request->name,
             'description'         => $request->description,
+            'specifications'      => count($specifications) ? $specifications : null,
+            'variants'            => count($variants) ? $variants : null,
             'price'               => $price,
             'discount_percentage' => (int) $request->input('discount_percentage', 0),
             'stock'               => (int) $request->stock,

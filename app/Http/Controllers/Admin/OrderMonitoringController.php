@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AppNotification;
 use App\Models\Order;
+use App\Services\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class OrderMonitoringController extends Controller
@@ -74,44 +76,25 @@ class OrderMonitoringController extends Controller
             'reason.required' => 'Wajib mengisi alasan pembatalan pesanan.',
         ]);
 
-        if ($order->status === 'cancelled') {
+        if ($order->status === Order::STATUS_CANCELLED) {
             return back()->with('error', 'Pesanan ini sudah dibatalkan sebelumnya.');
         }
 
-        DB::transaction(function () use ($request, $order) {
-            $order->update([
-                'status' => 'cancelled',
-                'notes'  => ($order->notes ? $order->notes . ' | ' : '') . 'Dibatalkan Admin: ' . $request->reason,
-            ]);
+        if ($order->status === Order::STATUS_COMPLETED) {
+            return back()->with('error', 'Pesanan yang sudah selesai tidak dapat dibatalkan.');
+        }
 
-            // Restore stock
-            foreach ($order->orderItems as $item) {
-                if ($item->product) {
-                    $item->product->increment('stock', $item->quantity);
-                }
-            }
+        $reason = 'Dibatalkan Admin: ' . $request->reason;
 
-            // Notify buyer
-            AppNotification::send(
-                $order->user_id,
-                'Pesanan Dibatalkan oleh Admin',
-                "Pesanan #{$order->invoice_number} telah dibatalkan oleh Admin Operasional. Alasan: {$request->reason}",
-                'order',
-                route('customer.dashboard')
-            );
+        try {
+            WalletService::refundAndCancelOrder($order, $reason);
 
-            // Notify seller if applicable
-            if ($order->store && $order->store->user_id) {
-                AppNotification::send(
-                    $order->store->user_id,
-                    'Pesanan Dibatalkan oleh Admin',
-                    "Pesanan #{$order->invoice_number} pada toko Anda telah dibatalkan oleh Admin Operasional. Alasan: {$request->reason}",
-                    'order',
-                    route('seller.orders.index')
-                );
-            }
-        });
-
-        return back()->with('success', "Pesanan #{$order->invoice_number} berhasil dibatalkan oleh admin.");
+            return back()->with('success', "Pesanan #{$order->invoice_number} berhasil dibatalkan oleh admin dan dana/stok telah diproses.");
+        } catch (\DomainException $de) {
+            return back()->with('error', $de->getMessage());
+        } catch (\Throwable $e) {
+            Log::error('Admin cancel order error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat membatalkan pesanan.');
+        }
     }
 }

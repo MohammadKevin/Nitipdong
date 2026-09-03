@@ -42,6 +42,9 @@ class Product extends Model
             if (empty($model->uuid)) {
                 $model->uuid = (string) \Illuminate\Support\Str::uuid();
             }
+            if ($model->sold_count === null) {
+                $model->sold_count = 0;
+            }
         });
     }
 
@@ -75,7 +78,7 @@ class Product extends Model
     public function getImageUrlAttribute(): ?string
     {
         if (! $this->image) {
-            return asset('img/saksershop-logo.png');
+            return asset('img/nitipdong-logo.png');
         }
 
         // Direct Cloudinary or external URL
@@ -89,7 +92,7 @@ class Product extends Model
             if (file_exists($fullPath)) {
                 return asset($this->image);
             }
-            return asset('img/saksershop-logo.png');
+            return asset('img/nitipdong-logo.png');
         }
 
         // Local storage folder
@@ -98,7 +101,7 @@ class Product extends Model
             return asset('storage/' . $this->image);
         }
 
-        return asset('img/saksershop-logo.png');
+        return asset('img/nitipdong-logo.png');
     }
 
     public function getImagesUrlsAttribute(): array

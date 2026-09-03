@@ -72,44 +72,51 @@ class WalletController extends Controller
             'account_holder.required' => 'Nama pemilik rekening wajib diisi.',
         ]);
 
-        DB::transaction(function () use ($request, $store) {
-            $lockedStore = \App\Models\Store::where('id', $store->id)->lockForUpdate()->first();
-            if (!$lockedStore || $lockedStore->balance < $request->amount) {
-                throw new \Exception('Saldo dompet tidak mencukupi untuk penarikan ini.');
-            }
+        try {
+            DB::transaction(function () use ($request, $store) {
+                $lockedStore = \App\Models\Store::where('id', $store->id)->lockForUpdate()->first();
+                if (!$lockedStore || $lockedStore->balance < $request->amount) {
+                    throw new \DomainException('Saldo dompet tidak mencukupi untuk penarikan ini.');
+                }
 
-            // Deduct store balance
-            $lockedStore->decrement('balance', $request->amount);
+                // Deduct store balance
+                $lockedStore->decrement('balance', $request->amount);
 
-            // Update default bank info on store
-            $lockedStore->update([
-                'bank_name'           => $request->bank_name,
-                'bank_account_number' => $request->account_number,
-                'bank_account_holder' => $request->account_holder,
-            ]);
+                // Update default bank info on store
+                $lockedStore->update([
+                    'bank_name'           => $request->bank_name,
+                    'bank_account_number' => $request->account_number,
+                    'bank_account_holder' => $request->account_holder,
+                ]);
 
-            // Create withdrawal record
-            $withdrawal = Withdrawal::create([
-                'store_id'       => $store->id,
-                'amount'         => $request->amount,
-                'bank_name'      => $request->bank_name,
-                'account_number' => $request->account_number,
-                'account_holder' => $request->account_holder,
-                'status'         => 'pending',
-            ]);
+                // Create withdrawal record
+                Withdrawal::create([
+                    'store_id'       => $store->id,
+                    'amount'         => $request->amount,
+                    'bank_name'      => $request->bank_name,
+                    'account_number' => $request->account_number,
+                    'account_holder' => $request->account_holder,
+                    'status'         => 'pending',
+                ]);
 
-            // Notify Super Admin
-            $superAdmins = User::where('role', 'super_admin')->get();
-            foreach ($superAdmins as $admin) {
-                AppNotification::send(
-                    $admin->id,
-                    'Permohonan Penarikan Dana Baru',
-                    "Toko {$store->name} mengajukan penarikan saldo sebesar Rp " . number_format($request->amount, 0, ',', '.'),
-                    'wallet',
-                    route('super_admin.withdrawals.index')
-                );
-            }
-        });
+                // Notify Super Admin
+                $superAdmins = User::where('role', 'super_admin')->get();
+                foreach ($superAdmins as $admin) {
+                    AppNotification::send(
+                        $admin->id,
+                        'Permohonan Penarikan Dana Baru',
+                        "Toko {$store->name} mengajukan penarikan saldo sebesar Rp " . number_format($request->amount, 0, ',', '.'),
+                        'wallet',
+                        route('super_admin.withdrawals.index')
+                    );
+                }
+            });
+        } catch (\DomainException $de) {
+            return back()->with('error', $de->getMessage());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Withdrawal error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan sistem saat memproses permohonan penarikan dana.');
+        }
 
         return back()->with('success', 'Permohonan penarikan dana berhasil dikirim! Admin akan segera memproses payout ke rekening Anda.');
     }

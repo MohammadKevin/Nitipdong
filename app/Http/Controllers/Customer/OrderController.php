@@ -12,10 +12,12 @@ use App\Models\UserAddress;
 use App\Models\Voucher;
 use App\Services\PaymentService;
 use App\Services\ShippingService;
+use App\Services\WalletService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -285,32 +287,49 @@ class OrderController extends Controller
                 $remainingVoucherDiscount = $totalVoucherDiscount;
                 $processedStores = 0;
 
-                // Validate stock availability BEFORE creating any orders
+                // Step 1: Pessimistic Concurrency Lock & Pre-validation of all items in cart
+                $lockedStoreItems = [];
                 foreach ($groupedByStore as $storeId => $items) {
+                    $lockedStoreItems[$storeId] = [];
                     foreach ($items as $cartItem) {
-                        if ($cartItem->product->stock < $cartItem->quantity) {
-                            throw new \Exception("Stok produk {$cartItem->product->name} tidak mencukupi. Stok tersedia: {$cartItem->product->stock}");
+                        $product = Product::where('id', $cartItem->product_id)->lockForUpdate()->first();
+
+                        if (! $product || ! $product->is_active) {
+                            throw new \DomainException("Produk '{$cartItem->product?->name}' sudah tidak aktif atau tidak tersedia.");
                         }
+
+                        if ($product->stock < $cartItem->quantity) {
+                            throw new \DomainException("Stok produk '{$product->name}' tidak mencukupi (sisa stok: {$product->stock} unit).");
+                        }
+
+                        $lockedStoreItems[$storeId][] = [
+                            'cartItem' => $cartItem,
+                            'product'  => $product,
+                            'price'    => (float) $product->final_price,
+                            'quantity' => (int) $cartItem->quantity,
+                            'variant'  => $cartItem->variant,
+                        ];
                     }
                 }
 
-                foreach ($groupedByStore as $storeId => $items) {
+                // Step 2: Create Order per Store
+                foreach ($lockedStoreItems as $storeId => $lockedItems) {
                     $processedStores++;
-                    $storeSubtotal = $items->sum(fn ($i) => $i->product->final_price * $i->quantity);
-                    $storeWeight = $items->sum(fn ($it) => max(0.2, (float) ($it->product->weight ?? 0.5)) * $it->quantity);
+                    $storeSubtotal = collect($lockedItems)->sum(fn ($i) => $i['price'] * $i['quantity']);
+                    $storeWeight = collect($lockedItems)->sum(fn ($it) => max(0.2, (float) ($it['product']->weight ?? 0.5)) * $it['quantity']);
 
                     // Ambil pilihan kurir untuk toko ini
                     $courierKey = $courierInputs[$storeId] ?? 'NDX_REG';
                     if (str_starts_with($courierKey, 'NDX_')) {
                         $cCode = 'NDX';
-                        $sCode = substr($courierKey, 4); // 'REG', 'EXPRESS', or 'SAME_DAY'
+                        $sCode = substr($courierKey, 4);
                     } else {
                         $parts = explode('_', $courierKey, 2);
                         $cCode = $parts[0] ?? 'NDX';
                         $sCode = $parts[1] ?? 'REG';
                     }
 
-                    $firstStore = $items->first()->product->store ?? null;
+                    $firstStore = $lockedItems[0]['product']->store ?? null;
                     $shippingRate = ShippingService::calculateRate($cCode, $sCode, $storeWeight, $destinationCity, null, $firstStore);
 
                     $storeDiscount = 0;
@@ -327,7 +346,7 @@ class OrderController extends Controller
                             if ($processedStores === $storeCount) {
                                 $storeDiscount = $remainingVoucherDiscount;
                             } else {
-                                $storeDiscount = round(($storeSubtotal / $totalSubtotal) * $totalVoucherDiscount);
+                                $storeDiscount = round(($storeSubtotal / max(1, $totalSubtotal)) * $totalVoucherDiscount);
                                 $remainingVoucherDiscount -= $storeDiscount;
                             }
                         }
@@ -347,7 +366,7 @@ class OrderController extends Controller
                         'shipping_cost'    => $shippingRate['cost'],
                         'total_weight'     => $storeWeight,
                         'payment_method'   => $paymentMethod,
-                        'status'           => 'pending',
+                        'status'           => Order::STATUS_PENDING,
                         'expires_at'       => now()->addHours(24),
                         'shipping_address' => $shippingAddress,
                     ]);
@@ -356,28 +375,17 @@ class OrderController extends Controller
                         $firstOrderId = $order->id;
                     }
 
-                    foreach ($items as $item) {
-                        // Atomic Concurrency Lock: Lock produk untuk memastikan stok tidak overselling
-                        $product = Product::where('id', $item->product_id)->lockForUpdate()->first();
-
-                        if (! $product || ! $product->is_active) {
-                            throw new \Exception("Produk '{$item->product->name}' tidak lagi aktif atau tersedia.");
-                        }
-
-                        if ($product->stock < $item->quantity) {
-                            throw new \Exception("Stok untuk produk '{$product->name}' tidak mencukupi. Sisa stok: {$product->stock}");
-                        }
-
+                    foreach ($lockedItems as $item) {
                         OrderItem::create([
                             'order_id'   => $order->id,
-                            'product_id' => $item->product_id,
-                            'quantity'   => $item->quantity,
-                            'price'      => $item->product->final_price,
-                            'variant'    => $item->variant,
+                            'product_id' => $item['product']->id,
+                            'quantity'   => $item['quantity'],
+                            'price'      => $item['price'],
+                            'variant'    => $item['variant'],
                         ]);
 
-                        $product->decrement('stock', $item->quantity);
-                        $product->increment('sold_count', $item->quantity);
+                        $item['product']->decrement('stock', $item['quantity']);
+                        $item['product']->increment('sold_count', $item['quantity']);
                     }
 
                     // Notifikasi ke seller
@@ -399,8 +407,11 @@ class OrderController extends Controller
 
                 Cart::where('user_id', $user->id)->delete();
             });
-        } catch (\Exception $e) {
-            return redirect()->route('customer.cart.index')->with('error', $e->getMessage());
+        } catch (\DomainException $de) {
+            return redirect()->route('customer.cart.index')->with('error', $de->getMessage());
+        } catch (\Throwable $e) {
+            Log::error('Web Store Order Error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return redirect()->route('customer.cart.index')->with('error', 'Terjadi kendala sistem saat memproses pesanan Anda. Silakan coba beberapa saat lagi.');
         }
 
         $firstOrder = Order::find($firstOrderId);
@@ -428,10 +439,17 @@ class OrderController extends Controller
 
         $order->loadMissing(['store', 'items.product', 'user']);
 
+        $otherPendingOrders = Order::where('user_id', Auth::id())
+            ->where('id', '!=', $order->id)
+            ->where('status', Order::STATUS_PENDING)
+            ->where('created_at', '>=', now()->subHours(24))
+            ->with('store')
+            ->get();
+
         $paymentChannels = PaymentService::PAYMENT_CHANNELS;
         $charge = PaymentService::createPaymentCharge($order, $order->payment_method ?: 'qris');
 
-        return view('customer.order.payment', compact('order', 'paymentChannels', 'charge'));
+        return view('customer.order.payment', compact('order', 'paymentChannels', 'charge', 'otherPendingOrders'));
     }
 
     public function changePaymentMethod(Request $request, Order $order): RedirectResponse
@@ -459,7 +477,7 @@ class OrderController extends Controller
         }
 
         $request->validate([
-            'payment_proof' => ['required', 'image', 'max:2048'],
+            'payment_proof' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
 
         $path = $request->file('payment_proof')->store('payments', 'public');
@@ -489,37 +507,42 @@ class OrderController extends Controller
             abort(403, 'Akses tidak sah.');
         }
 
-        if ($order->status !== 'shipped') {
+        if ($order->status === Order::STATUS_COMPLETED) {
+            return redirect()->route('customer.dashboard')->with('info', 'Pesanan sudah berstatus selesai.');
+        }
+
+        if (! in_array($order->status, [Order::STATUS_SHIPPED, Order::STATUS_DELIVERED], true)) {
             return redirect()->route('customer.dashboard')->with('error', 'Hanya pesanan yang sedang dalam pengiriman yang dapat diselesaikan.');
         }
 
-        DB::transaction(function () use ($order) {
-            $updates = [
-                'status'          => 'completed',
-                'shipping_status' => 'delivered',
-                'completed_at'    => now(),
-            ];
+        try {
+            DB::transaction(function () use ($order) {
+                $order->transitionTo(Order::STATUS_COMPLETED, [
+                    'shipping_status' => 'delivered',
+                ]);
 
-            // Auto-credit 85% balance to seller store if not credited yet
-            if (!$order->seller_credited_at) {
-                $sellerEarnings = round($order->total_amount * 0.85);
-                $order->store->increment('balance', $sellerEarnings);
-                $updates['seller_credited_at'] = now();
+                // Auto-credit 85% balance to seller store if not credited yet
+                if (!$order->seller_credited_at && $order->store) {
+                    $sellerEarnings = round($order->total_amount * 0.85);
+                    WalletService::creditStore($order->store, (float) $sellerEarnings, "Penyelesaian pesanan #{$order->invoice_number}");
+                    $order->update(['seller_credited_at' => now()]);
 
-                // Notify seller
-                if ($order->store && $order->store->user_id) {
-                    AppNotification::send(
-                        $order->store->user_id,
-                        'Pesanan Selesai & Dana Masuk',
-                        "Pesanan #{$order->invoice_number} telah diterima pembeli! Dana sebesar Rp " . number_format($sellerEarnings, 0, ',', '.') . " telah masuk ke saldo dompet toko Anda.",
-                        'wallet',
-                        route('seller.wallet.index')
-                    );
+                    // Notify seller
+                    if ($order->store && $order->store->user_id) {
+                        AppNotification::send(
+                            $order->store->user_id,
+                            'Pesanan Selesai & Dana Masuk',
+                            "Pesanan #{$order->invoice_number} telah diterima pembeli! Dana sebesar Rp " . number_format($sellerEarnings, 0, ',', '.') . " telah masuk ke saldo dompet toko Anda.",
+                            'wallet',
+                            route('seller.wallet.index')
+                        );
+                    }
                 }
-            }
-
-            $order->update($updates);
-        });
+            });
+        } catch (\Throwable $e) {
+            Log::error('Customer confirmReceived error: ' . $e->getMessage());
+            return redirect()->route('customer.dashboard')->with('error', 'Gagal mengonfirmasi pesanan selesai. Silakan coba lagi.');
+        }
 
         return redirect()->route('customer.dashboard')->with('success', 'Pesanan berhasil diselesaikan! Silakan berikan ulasan untuk produk yang telah Anda terima.');
     }
@@ -533,77 +556,38 @@ class OrderController extends Controller
             abort(403, 'Akses tidak sah.');
         }
 
-        if (! in_array($order->status, ['pending', 'processing'])) {
+        if (! in_array($order->status, [Order::STATUS_PENDING, Order::STATUS_PAID, Order::STATUS_PROCESSING], true)) {
             if ($request->expectsJson()) {
                 return response()->json(['success' => false, 'message' => 'Pesanan yang sudah dikirim atau selesai tidak dapat dibatalkan.'], 422);
             }
             return redirect()->route('customer.dashboard')->with('error', 'Pesanan yang sudah dikirim atau selesai tidak dapat dibatalkan.');
         }
 
-        $reason = Str::limit(trim($request->input('reason', 'Dibatalkan oleh pembeli.')), 500);
+        $reason = Str::limit(trim($request->input('cancel_reason', $request->input('reason', 'Dibatalkan oleh pembeli.'))), 500);
 
-        DB::transaction(function () use ($order, $reason) {
-            $order->update([
-                'status' => 'cancelled',
-            ]);
+        try {
+            WalletService::refundAndCancelOrder($order, $reason);
 
-            // Restore stocks and adjust sold counts
-            foreach ($order->orderItems as $item) {
-                if ($item->product) {
-                    $item->product->increment('stock', $item->quantity);
-                    $item->product->decrement('sold_count', min($item->product->sold_count, $item->quantity));
-                }
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Pesanan #{$order->invoice_number} berhasil dibatalkan. Stok produk telah dipulihkan.",
+                    'status'  => Order::STATUS_CANCELLED,
+                ]);
             }
 
-            // Restore voucher quota if used
-            if ($order->voucher_code) {
-                $voucher = Voucher::where('code', $order->voucher_code)->first();
-                if ($voucher) {
-                    $voucher->increment('quota');
-                }
+            return redirect()->route('customer.dashboard')->with('success', "Pesanan #{$order->invoice_number} berhasil dibatalkan. Stok produk telah dipulihkan.");
+        } catch (\DomainException $de) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $de->getMessage()], 422);
             }
-
-            // Send notification to buyer
-            AppNotification::send(
-                $order->user_id,
-                'Pesanan Dibatalkan',
-                "Pesanan #{$order->invoice_number} telah berhasil dibatalkan. Alasan: {$reason}",
-                'order',
-                route('customer.dashboard')
-            );
-
-            // Send notification to seller
-            if ($order->store && $order->store->user_id) {
-                AppNotification::send(
-                    $order->store->user_id,
-                    'Pesanan Dibatalkan Pembeli',
-                    "Pesanan #{$order->invoice_number} dibatalkan oleh pembeli. Alasan: {$reason}",
-                    'order',
-                    route('seller.orders.index')
-                );
+            return redirect()->route('customer.dashboard')->with('error', $de->getMessage());
+        } catch (\Throwable $e) {
+            Log::error('Cancel order error: ' . $e->getMessage());
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Gagal memproses pembatalan pesanan.'], 500);
             }
-        });
-
-        // Cancel on Midtrans Sandbox if active reference exists
-        if (!empty($order->payment_reference)) {
-            try {
-                $serverKey = config('services.midtrans.server_key');
-                if ($serverKey) {
-                    \Illuminate\Support\Facades\Http::withBasicAuth($serverKey, '')
-                        ->timeout(5)
-                        ->post("https://api.sandbox.midtrans.com/v2/{$order->payment_reference}/cancel");
-                }
-            } catch (\Exception $e) {}
+            return redirect()->route('customer.dashboard')->with('error', 'Gagal memproses pembatalan pesanan.');
         }
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => "Pesanan #{$order->invoice_number} berhasil dibatalkan. Stok produk telah dipulihkan.",
-                'status'  => 'cancelled'
-            ]);
-        }
-
-        return redirect()->route('customer.dashboard')->with('success', "Pesanan #{$order->invoice_number} berhasil dibatalkan. Stok produk telah dipulihkan.");
     }
 }

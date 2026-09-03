@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -119,7 +120,8 @@ class GoogleAuthController extends Controller
             return redirect()->intended('/?is_from_login=true')->with('success', 'Berhasil masuk dengan Akun Google! Selamat berbelanja di NitipDong.');
 
         } catch (\Exception $e) {
-            return redirect()->route('login')->with('error', 'Terjadi kendala saat login dengan Google: ' . $e->getMessage());
+            Log::error('Google OAuth callback error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return redirect()->route('login')->with('error', 'Terjadi kendala saat login dengan Google. Silakan coba beberapa saat lagi.');
         }
     }
 
@@ -214,9 +216,10 @@ class GoogleAuthController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Google API OAuth error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal memproses login Google: ' . $e->getMessage(),
+                'message' => 'Gagal memproses login Google. Silakan coba kembali.',
             ], 500);
         }
     }

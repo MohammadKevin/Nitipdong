@@ -31,9 +31,27 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(30)->by($request->user()?->id ?: $request->ip());
         });
 
-        // Rate Limiter untuk autentikasi API
+        // Rate Limiter untuk autentikasi API (Login & Register: maksimal 5 attempt / menit)
         RateLimiter::for('api-auth', function (Request $request) {
-            return Limit::perMinute(10)->by($request->ip());
+            return Limit::perMinute(5)->by($request->ip());
+        });
+
+        RateLimiter::for('auth-login', function (Request $request) {
+            $email = (string) $request->input('email', '');
+            return Limit::perMinute(5)->by($email . '|' . $request->ip());
+        });
+
+        RateLimiter::for('auth-register', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip());
+        });
+
+        RateLimiter::for('otp-resend', function (Request $request) {
+            return Limit::perMinute(3)->by($request->user()?->id ?: $request->ip());
+        });
+
+        // Rate Limiter untuk checkout & pembuatan order (cegah spamming pesanan)
+        RateLimiter::for('order-checkout', function (Request $request) {
+            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
         });
     }
 }

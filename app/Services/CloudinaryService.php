@@ -53,7 +53,7 @@ class CloudinaryService
                 $response = $client->attach(
                     'file',
                     file_get_contents($file->getRealPath()),
-                    $file->getClientOriginalName()
+                    $file->hashName()
                 )->post($endpoint, [
                     'api_key'   => $this->apiKey,
                     'timestamp' => $timestamp,

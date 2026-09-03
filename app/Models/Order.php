@@ -14,6 +14,94 @@ class Order extends Model
 {
     use HasFactory, HasObfuscatedId;
 
+    public const STATUS_PENDING    = 'pending';
+    public const STATUS_PAID       = 'paid';
+    public const STATUS_PROCESSING = 'processing';
+    public const STATUS_SHIPPED    = 'shipped';
+    public const STATUS_DELIVERED  = 'delivered';
+    public const STATUS_COMPLETED  = 'completed';
+    public const STATUS_CANCELLED  = 'cancelled';
+
+    /**
+     * Allowed State Transitions for Finite State Machine (FSM).
+     */
+    public const ALLOWED_TRANSITIONS = [
+        self::STATUS_PENDING => [
+            self::STATUS_PAID,
+            self::STATUS_PROCESSING,
+            self::STATUS_CANCELLED,
+        ],
+        self::STATUS_PAID => [
+            self::STATUS_PROCESSING,
+            self::STATUS_CANCELLED,
+        ],
+        self::STATUS_PROCESSING => [
+            self::STATUS_SHIPPED,
+            self::STATUS_CANCELLED,
+        ],
+        self::STATUS_SHIPPED => [
+            self::STATUS_DELIVERED,
+            self::STATUS_COMPLETED,
+            self::STATUS_CANCELLED,
+        ],
+        self::STATUS_DELIVERED => [
+            self::STATUS_COMPLETED,
+            self::STATUS_CANCELLED,
+        ],
+        self::STATUS_COMPLETED => [], // Terminal state
+        self::STATUS_CANCELLED => [], // Terminal state
+    ];
+
+    /**
+     * Check whether an order can transition from current status to a target status.
+     */
+    public function canTransitionTo(string $targetStatus): bool
+    {
+        if ($this->status === $targetStatus) {
+            return true;
+        }
+
+        $allowed = self::ALLOWED_TRANSITIONS[$this->status] ?? [];
+        return in_array($targetStatus, $allowed, true);
+    }
+
+    /**
+     * Check if order is in a terminal state (completed or cancelled).
+     */
+    public function isTerminal(): bool
+    {
+        return in_array($this->status, [self::STATUS_COMPLETED, self::STATUS_CANCELLED], true);
+    }
+
+    /**
+     * Transition order status with strict FSM validation.
+     */
+    public function transitionTo(string $targetStatus, array $extraAttributes = []): bool
+    {
+        if ($this->status === $targetStatus) {
+            if (!empty($extraAttributes)) {
+                return $this->update($extraAttributes);
+            }
+            return true;
+        }
+
+        if ($this->isTerminal()) {
+            throw new \DomainException("Pesanan #{$this->invoice_number} sudah berada pada status final '{$this->status}' dan tidak dapat diubah lagi.");
+        }
+
+        if (!$this->canTransitionTo($targetStatus)) {
+            throw new \DomainException("Transisi status pesanan dari '{$this->status}' menuju '{$targetStatus}' tidak valid.");
+        }
+
+        $attributes = array_merge(['status' => $targetStatus], $extraAttributes);
+
+        if ($targetStatus === self::STATUS_COMPLETED && empty($this->completed_at)) {
+            $attributes['completed_at'] = now();
+        }
+
+        return $this->update($attributes);
+    }
+
     protected static function booted(): void
     {
         static::creating(function ($order) {

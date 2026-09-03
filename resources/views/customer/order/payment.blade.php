@@ -267,6 +267,52 @@
                 </div>
             @endif
 
+            @if(isset($otherPendingOrders) && $otherPendingOrders->isNotEmpty())
+                <div class="mb-6 p-4 rounded-2xl bg-amber-50/90 border border-amber-200 text-xs shadow-xs animate-fade-up">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 text-sm shadow-xs mt-0.5">
+                            <i class="fa-solid fa-store"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="font-extrabold text-slate-900 text-sm">Pesanan Multi-Toko Berhasil Dibuat</h3>
+                                <span class="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 font-bold text-[10px]">
+                                    {{ $otherPendingOrders->count() + 1 }} Toko Berbeda
+                                </span>
+                            </div>
+                            <p class="text-slate-600 mt-1 leading-relaxed">
+                                Karena keranjang Anda berisi produk dari toko berbeda, sistem membuat invoice terpisah untuk masing-masing penjual. Selesaikan pembayaran pesanan ini, kemudian lanjutkan untuk pesanan toko lainnya:
+                            </p>
+                            <div class="mt-3 space-y-2">
+                                <div class="p-2.5 rounded-xl bg-white border border-cyan-200 flex items-center justify-between gap-3 shadow-2xs">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <span class="w-2 h-2 rounded-full bg-cyan-600 shrink-0"></span>
+                                        <span class="font-mono font-bold text-slate-900">#{{ $order->invoice_number }}</span>
+                                        <span class="text-slate-500 truncate">({{ $order->store->name ?? 'Toko' }})</span>
+                                    </div>
+                                    <span class="font-extrabold text-cyan-700 whitespace-nowrap">Rp {{ number_format($order->total_amount, 0, ',', '.') }} <span class="font-normal text-[10px] text-cyan-600">(Sedang Dibayar)</span></span>
+                                </div>
+                                @foreach($otherPendingOrders as $other)
+                                    <div class="p-2.5 rounded-xl bg-white/80 border border-slate-200 flex items-center justify-between gap-3 hover:border-amber-300 transition-colors">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <span class="w-2 h-2 rounded-full bg-amber-500 shrink-0"></span>
+                                            <span class="font-mono font-bold text-slate-900">#{{ $other->invoice_number }}</span>
+                                            <span class="text-slate-500 truncate">({{ $other->store->name ?? 'Toko' }})</span>
+                                        </div>
+                                        <div class="flex items-center gap-2.5 shrink-0">
+                                            <span class="font-bold text-slate-800">Rp {{ number_format($other->total_amount, 0, ',', '.') }}</span>
+                                            <a href="{{ route('customer.order.payment', $other) }}" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold rounded-lg text-[11px] transition-colors shadow-2xs">
+                                                Bayar &rarr;
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Main Layout Grid: 7 Cols Left (Payment details) + 5 Cols Right (Order Summary & Security) -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 

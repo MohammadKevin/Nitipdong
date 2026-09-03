@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class OrderController extends Controller
@@ -65,7 +67,17 @@ class OrderController extends Controller
     {
         $order = $request->user()->orders()
             ->with(['orderItems.product.store', 'store'])
-            ->findOrFail($id);
+            ->where(function ($q) use ($id) {
+                $q->where('id', $id)->orWhere('uuid', $id);
+            })
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pesanan tidak ditemukan.',
+            ], 404);
+        }
 
         return response()->json([
             'success' => true,
@@ -133,108 +145,132 @@ class OrderController extends Controller
             ], 422);
         }
 
-        DB::beginTransaction();
         try {
-            $totalAmount = 0;
-            $firstStoreId = $carts->first()->product?->store_id ?? 1;
+            $createdOrder = DB::transaction(function () use ($user, $carts, $request) {
+                $totalAmount = 0;
+                $lockedProducts = [];
+                $firstStoreId = null;
 
-            // Calculate total
-            foreach ($carts as $cart) {
-                $totalAmount += ($cart->product->final_price * $cart->quantity);
-            }
+                // 1. Pessimistic concurrency locking & stock check on each product
+                foreach ($carts as $cart) {
+                    $product = Product::where('id', $cart->product_id)->lockForUpdate()->first();
 
-            // Apply Voucher
-            $discountAmount = 0;
-            $appliedVoucher = null;
-            if ($request->filled('voucher_code')) {
-                $appliedVoucher = \App\Models\Voucher::active()->where('code', $request->voucher_code)->first();
-                if (!$appliedVoucher) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Voucher tidak valid atau sudah kadaluarsa.',
-                    ], 422);
+                    if (!$product || !$product->is_active) {
+                        throw new \DomainException("Produk '{$cart->product?->name}' saat ini tidak aktif atau tidak tersedia.");
+                    }
+
+                    if ($product->stock < $cart->quantity) {
+                        throw new \DomainException("Stok untuk produk '{$product->name}' tidak mencukupi (tersedia: {$product->stock} unit).");
+                    }
+
+                    if (!$firstStoreId) {
+                        $firstStoreId = $product->store_id;
+                    }
+
+                    $price = (float) $product->final_price;
+                    $totalAmount += ($price * $cart->quantity);
+
+                    $lockedProducts[] = [
+                        'cart'     => $cart,
+                        'product'  => $product,
+                        'price'    => $price,
+                        'quantity' => $cart->quantity,
+                        'variant'  => $cart->variant,
+                    ];
                 }
 
-                if ($appliedVoucher->is_store_voucher) {
-                    $applicableCarts = $carts->filter(fn($c) => $c->product->store_id == $appliedVoucher->store_id);
-                } else {
-                    $applicableCarts = $carts;
+                // 2. Validate Voucher
+                $discountAmount = 0;
+                $appliedVoucher = null;
+                if ($request->filled('voucher_code')) {
+                    $appliedVoucher = \App\Models\Voucher::active()->where('code', $request->voucher_code)->first();
+                    if (!$appliedVoucher) {
+                        throw new \DomainException('Voucher tidak valid atau sudah kedaluwarsa.');
+                    }
+
+                    if ($appliedVoucher->is_store_voucher) {
+                        $applicableSubtotal = collect($lockedProducts)
+                            ->filter(fn($i) => $i['product']->store_id == $appliedVoucher->store_id)
+                            ->sum(fn($i) => $i['price'] * $i['quantity']);
+                    } else {
+                        $applicableSubtotal = $totalAmount;
+                    }
+
+                    $validation = $appliedVoucher->validateForSubtotal($applicableSubtotal);
+                    if (!$validation['valid']) {
+                        throw new \DomainException($validation['message']);
+                    }
+
+                    $discountAmount = $appliedVoucher->calculateDiscount($applicableSubtotal);
                 }
 
-                $applicableSubtotal = 0;
-                foreach ($applicableCarts as $c) {
-                    $applicableSubtotal += ($c->product->final_price * $c->quantity);
-                }
+                $finalAmount = max(0, $totalAmount - $discountAmount);
+                $invoiceNumber = 'INV-' . strtoupper(Str::random(10));
 
-                $validation = $appliedVoucher->validateForSubtotal($applicableSubtotal);
-                if (!$validation['valid']) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => $validation['message'],
-                    ], 422);
-                }
-
-                $discountAmount = $appliedVoucher->calculateDiscount($applicableSubtotal);
-            }
-
-            $finalAmount = max(0, $totalAmount - $discountAmount);
-            $invoiceNumber = 'INV-' . strtoupper(Str::random(10));
-
-            // Create Order
-            $order = Order::create([
-                'invoice_number'   => $invoiceNumber,
-                'user_id'          => $user->id,
-                'store_id'         => $firstStoreId,
-                'total_amount'     => $finalAmount,
-                'voucher_code'     => $appliedVoucher ? $appliedVoucher->code : null,
-                'discount_amount'  => $discountAmount,
-                'status'           => 'pending',
-                'payment_method'   => $request->payment_method ?? 'QRIS Instant',
-                'shipping_address' => $request->shipping_address,
-                'shipping_courier' => $request->get('courier', 'J&T Express'),
-                'shipping_service' => 'REG',
-                'shipping_cost'    => 0,
-                'total_weight'     => 1.0,
-            ]);
-
-            // Create Order Items & Decrement Stock
-            foreach ($carts as $cart) {
-                OrderItem::create([
-                    'order_id'   => $order->id,
-                    'product_id' => $cart->product_id,
-                    'quantity'   => $cart->quantity,
-                    'price'      => $cart->product->final_price,
-                    'variant'    => $cart->variant,
+                // 3. Create Order
+                $order = Order::create([
+                    'invoice_number'   => $invoiceNumber,
+                    'user_id'          => $user->id,
+                    'store_id'         => $firstStoreId ?: 1,
+                    'total_amount'     => $finalAmount,
+                    'voucher_code'     => $appliedVoucher ? $appliedVoucher->code : null,
+                    'discount_amount'  => $discountAmount,
+                    'status'           => Order::STATUS_PENDING,
+                    'payment_method'   => $request->payment_method ?? 'QRIS Instant',
+                    'shipping_address' => $request->shipping_address,
+                    'shipping_courier' => $request->get('courier', 'J&T Express'),
+                    'shipping_service' => 'REG',
+                    'shipping_cost'    => 0,
+                    'total_weight'     => 1.0,
+                    'expires_at'       => now()->addHours(24),
                 ]);
 
-                // Reduce stock
-                $cart->product->decrement('stock', $cart->quantity);
-                $cart->product->increment('sold_count', $cart->quantity);
-            }
+                // 4. Create Order Items and atomic stock decrement
+                foreach ($lockedProducts as $itemData) {
+                    OrderItem::create([
+                        'order_id'   => $order->id,
+                        'product_id' => $itemData['product']->id,
+                        'quantity'   => $itemData['quantity'],
+                        'price'      => $itemData['price'],
+                        'variant'    => $itemData['variant'],
+                    ]);
 
-            // Clear checked-out cart items
-            $carts->each->delete();
+                    Product::where('id', $itemData['product']->id)->decrement('stock', $itemData['quantity']);
+                    Product::where('id', $itemData['product']->id)->increment('sold_count', $itemData['quantity']);
+                }
 
-            if ($appliedVoucher) {
-                $appliedVoucher->decrement('quota');
-            }
+                // 5. Decrement voucher quota
+                if ($appliedVoucher) {
+                    $appliedVoucher->decrement('quota');
+                }
 
-            DB::commit();
+                // 6. Delete checked-out cart items
+                $carts->each->delete();
+
+                return $order;
+            });
 
             return response()->json([
                 'success'        => true,
                 'message'        => 'Pesanan berhasil dibuat!',
-                'order_id'       => $order->id,
-                'order_number'   => $invoiceNumber,
-                'invoice_number' => $invoiceNumber,
-                'total_amount'   => (float) $finalAmount,
+                'order_id'       => $createdOrder->id,
+                'order_number'   => $createdOrder->invoice_number,
+                'invoice_number' => $createdOrder->invoice_number,
+                'total_amount'   => (float) $createdOrder->total_amount,
             ], 201);
 
-        } catch (\Exception $e) {
-            DB::rollBack();
+        } catch (\DomainException $de) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat memproses pesanan: ' . $e->getMessage(),
+                'message' => $de->getMessage(),
+            ], 422);
+        } catch (\Throwable $e) {
+            Log::error('API Checkout Exception: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem saat memproses pesanan. Silakan coba lagi.',
             ], 500);
         }
     }
@@ -244,16 +280,22 @@ class OrderController extends Controller
      */
     public function pay(Request $request, $id): JsonResponse
     {
-        $order = $request->user()->orders()->findOrFail($id);
-        if ($order->status === 'pending') {
-            $order->update([
-                'status' => 'processing',
-            ]);
+        $order = $request->user()->orders()->where(function ($q) use ($id) {
+            $q->where('id', $id)->orWhere('uuid', $id);
+        })->first();
+
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'Pesanan tidak ditemukan.'], 404);
+        }
+
+        if ($order->status === Order::STATUS_PENDING) {
+            $order->transitionTo(Order::STATUS_PROCESSING);
             return response()->json([
                 'success' => true,
-                'message' => 'Pembayaran berhasil disimulasikan!',
+                'message' => 'Pembayaran berhasil diverifikasi!',
             ]);
         }
+
         return response()->json([
             'success' => false,
             'message' => 'Pesanan tidak dalam status menunggu pembayaran.',
@@ -319,11 +361,14 @@ class OrderController extends Controller
     }
 
     /**
-     * Cancel an active pending or processing order.
+     * Cancel an active pending or processing order with automated refund & stock recovery.
      */
     public function cancel(Request $request, $id): JsonResponse
     {
-        $order = $request->user()->orders()->where('id', $id)->orWhere('uuid', $id)->first();
+        $order = $request->user()->orders()->where(function ($q) use ($id) {
+            $q->where('id', $id)->orWhere('uuid', $id);
+        })->first();
+
         if (!$order) {
             return response()->json([
                 'success' => false,
@@ -331,60 +376,35 @@ class OrderController extends Controller
             ], 404);
         }
 
-        if (!in_array($order->status, ['pending', 'processing'])) {
+        if (!in_array($order->status, [Order::STATUS_PENDING, Order::STATUS_PAID, Order::STATUS_PROCESSING], true)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Hanya pesanan menunggu pembayaran atau sedang diproses yang dapat dibatalkan.',
             ], 422);
         }
 
-        $reason = $request->input('reason', 'Dibatalkan oleh pembeli via aplikasi.');
+        $reason = Str::limit(trim($request->input('reason', 'Dibatalkan oleh pembeli via aplikasi.')), 500);
 
-        DB::transaction(function () use ($order, $reason) {
-            $order->update(['status' => 'cancelled']);
+        try {
+            WalletService::refundAndCancelOrder($order, $reason);
 
-            // Restore stock
-            foreach ($order->orderItems as $item) {
-                if ($item->product) {
-                    $item->product->increment('stock', $item->quantity);
-                    $item->product->decrement('sold_count', min($item->product->sold_count, $item->quantity));
-                }
-            }
-
-            // Restore voucher quota
-            if ($order->voucher_code) {
-                $voucher = \App\Models\Voucher::where('code', $order->voucher_code)->first();
-                if ($voucher) {
-                    $voucher->increment('quota');
-                }
-            }
-
-            \App\Models\AppNotification::send(
-                $order->user_id,
-                'Pesanan Dibatalkan',
-                "Pesanan #{$order->invoice_number} telah berhasil dibatalkan.",
-                'order',
-                route('customer.dashboard')
-            );
-        });
-
-        // Cancel on Midtrans Sandbox
-        if (!empty($order->payment_reference)) {
-            try {
-                $serverKey = config('services.midtrans.server_key');
-                if ($serverKey) {
-                    \Illuminate\Support\Facades\Http::withBasicAuth($serverKey, '')
-                        ->timeout(5)
-                        ->post("https://api.sandbox.midtrans.com/v2/{$order->payment_reference}/cancel");
-                }
-            } catch (\Exception $e) {}
+            return response()->json([
+                'success' => true,
+                'message' => "Pesanan #{$order->invoice_number} berhasil dibatalkan. Stok barang telah dipulihkan.",
+                'status'  => Order::STATUS_CANCELLED,
+            ]);
+        } catch (\DomainException $de) {
+            return response()->json([
+                'success' => false,
+                'message' => $de->getMessage(),
+            ], 422);
+        } catch (\Throwable $e) {
+            Log::error('API Order Cancel Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memproses pembatalan pesanan.',
+            ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => "Pesanan #{$order->invoice_number} berhasil dibatalkan. Stok barang telah dipulihkan.",
-            'status'  => 'cancelled',
-        ]);
     }
 
     /**
@@ -392,7 +412,10 @@ class OrderController extends Controller
      */
     public function confirmReceived(Request $request, $id): JsonResponse
     {
-        $order = $request->user()->orders()->where('id', $id)->orWhere('uuid', $id)->first();
+        $order = $request->user()->orders()->where(function ($q) use ($id) {
+            $q->where('id', $id)->orWhere('uuid', $id);
+        })->first();
+
         if (!$order) {
             return response()->json([
                 'success' => false,
@@ -400,31 +423,54 @@ class OrderController extends Controller
             ], 404);
         }
 
-        if ($order->status === 'completed') {
+        if ($order->status === Order::STATUS_COMPLETED) {
             return response()->json([
                 'success' => true,
                 'message' => 'Pesanan sudah selesai.',
-                'status'  => 'completed',
+                'status'  => Order::STATUS_COMPLETED,
             ]);
         }
 
-        $order->update([
-            'status'       => 'completed',
-            'completed_at' => now(),
-        ]);
+        if (!in_array($order->status, [Order::STATUS_SHIPPED, Order::STATUS_DELIVERED], true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya pesanan yang sedang dalam pengiriman yang dapat diselesaikan.',
+            ], 422);
+        }
 
-        \App\Models\AppNotification::create([
-            'user_id' => $order->user_id,
-            'title'   => 'Pesanan Selesai 🎉',
-            'message' => "Terima kasih! Pesanan #{$order->invoice_number} telah Anda konfirmasi selesai. Berikan ulasan untuk membantu penjual.",
-            'link'    => route('customer.dashboard'),
-        ]);
+        try {
+            DB::transaction(function () use ($order) {
+                $order->transitionTo(Order::STATUS_COMPLETED, [
+                    'shipping_status' => 'delivered',
+                ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => "Pesanan #{$order->invoice_number} telah berhasil diselesaikan!",
-            'status'  => 'completed',
-        ]);
+                // Auto-credit 85% balance to seller store if not credited yet
+                if (!$order->seller_credited_at && $order->store) {
+                    $sellerEarnings = round($order->total_amount * 0.85);
+                    WalletService::creditStore($order->store, (float) $sellerEarnings, "Penyelesaian pesanan #{$order->invoice_number}");
+                    $order->update(['seller_credited_at' => now()]);
+                }
+            });
+
+            \App\Models\AppNotification::create([
+                'user_id' => $order->user_id,
+                'title'   => 'Pesanan Selesai 🎉',
+                'message' => "Terima kasih! Pesanan #{$order->invoice_number} telah Anda konfirmasi selesai. Berikan ulasan untuk membantu penjual.",
+                'link'    => route('customer.dashboard'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Pesanan #{$order->invoice_number} telah berhasil diselesaikan!",
+                'status'  => Order::STATUS_COMPLETED,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('API Confirm Received Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengonfirmasi penyelesaian pesanan.',
+            ], 500);
+        }
     }
 
     /**
@@ -432,7 +478,10 @@ class OrderController extends Controller
      */
     public function tracking(Request $request, $id): JsonResponse
     {
-        $order = $request->user()->orders()->where('id', $id)->orWhere('uuid', $id)->first();
+        $order = $request->user()->orders()->where(function ($q) use ($id) {
+            $q->where('id', $id)->orWhere('uuid', $id);
+        })->first();
+
         if (!$order) {
             return response()->json([
                 'success' => false,
@@ -453,27 +502,27 @@ class OrderController extends Controller
             ],
             [
                 'title'       => 'Pembayaran Terkonfirmasi',
-                'description' => in_array($order->status, ['processing', 'shipped', 'completed']) 
+                'description' => in_array($order->status, [Order::STATUS_PROCESSING, Order::STATUS_SHIPPED, Order::STATUS_COMPLETED]) 
                                  ? 'Pembayaran berhasil diverifikasi. Penjual sedang menyiapkan barang.' 
                                  : 'Menunggu proses pembayaran oleh pembeli.',
-                'time'        => in_array($order->status, ['processing', 'shipped', 'completed']) ? $createdAt->addMinutes(5)->format('d M Y, H:i') : '-',
-                'is_completed'=> in_array($order->status, ['processing', 'shipped', 'completed']),
+                'time'        => in_array($order->status, [Order::STATUS_PROCESSING, Order::STATUS_SHIPPED, Order::STATUS_COMPLETED]) ? $createdAt->addMinutes(5)->format('d M Y, H:i') : '-',
+                'is_completed'=> in_array($order->status, [Order::STATUS_PROCESSING, Order::STATUS_SHIPPED, Order::STATUS_COMPLETED]),
             ],
             [
                 'title'       => 'Paket Diserahkan ke Kurir',
-                'description' => in_array($order->status, ['shipped', 'completed']) 
+                'description' => in_array($order->status, [Order::STATUS_SHIPPED, Order::STATUS_COMPLETED]) 
                                  ? "Paket telah di-pickup oleh kurir {$courier} (No. Resi: {$trackingNo})." 
                                  : 'Menunggu paket diserahkan ke jasa kirim.',
-                'time'        => in_array($order->status, ['shipped', 'completed']) ? $createdAt->addHours(4)->format('d M Y, H:i') : '-',
-                'is_completed'=> in_array($order->status, ['shipped', 'completed']),
+                'time'        => in_array($order->status, [Order::STATUS_SHIPPED, Order::STATUS_COMPLETED]) ? $createdAt->addHours(4)->format('d M Y, H:i') : '-',
+                'is_completed'=> in_array($order->status, [Order::STATUS_SHIPPED, Order::STATUS_COMPLETED]),
             ],
             [
                 'title'       => 'Paket Tiba di Tujuan',
-                'description' => $order->status === 'completed' 
+                'description' => $order->status === Order::STATUS_COMPLETED 
                                  ? 'Paket telah diterima dengan baik oleh penerima.' 
                                  : 'Paket dalam perjalanan menuju alamat tujuan.',
-                'time'        => $order->status === 'completed' ? ($order->completed_at ? $order->completed_at->format('d M Y, H:i') : 'Selesai') : '-',
-                'is_completed'=> $order->status === 'completed',
+                'time'        => $order->status === Order::STATUS_COMPLETED ? ($order->completed_at ? $order->completed_at->format('d M Y, H:i') : 'Selesai') : '-',
+                'is_completed'=> $order->status === Order::STATUS_COMPLETED,
             ],
         ];
 
@@ -503,12 +552,22 @@ class OrderController extends Controller
             'comment'    => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $order = $request->user()->orders()->where('id', $id)->orWhere('uuid', $id)->first();
+        $order = $request->user()->orders()->where(function ($q) use ($id) {
+            $q->where('id', $id)->orWhere('uuid', $id);
+        })->first();
+
         if (!$order) {
             return response()->json([
                 'success' => false,
                 'message' => 'Pesanan tidak ditemukan.',
             ], 404);
+        }
+
+        if ($order->status !== Order::STATUS_COMPLETED) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ulasan hanya dapat diberikan untuk pesanan yang telah selesai.',
+            ], 422);
         }
 
         $user = $request->user();
@@ -530,7 +589,7 @@ class OrderController extends Controller
         );
 
         // Recalculate product rating
-        $product = \App\Models\Product::find($productId);
+        $product = Product::find($productId);
         if ($product) {
             $product->recalculateRating();
         }

@@ -142,7 +142,7 @@ class AuthController extends Controller
                 ]);
                 return response()->json([
                     'success' => false,
-                    'message' => 'Gagal mengirim OTP: ' . $e->getMessage(),
+                    'message' => 'Gagal mengirim kode verifikasi OTP. Silakan coba lagi beberapa saat kemudian.',
                 ], 500);
             }
 
@@ -166,7 +166,7 @@ class AuthController extends Controller
             Log::error('API Registration error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal mendaftar: ' . $e->getMessage(),
+                'message' => 'Terjadi kesalahan sistem saat memproses pendaftaran akun. Silakan coba lagi.',
             ], 500);
         }
     }
@@ -283,7 +283,7 @@ class AuthController extends Controller
             ], 404);
         }
 
-        // Cooldown enforcement: 30 seconds
+        // Cooldown enforcement: 60 seconds
         $cacheKey = 'otp_resend_cooldown_' . $user->id;
         if (\Illuminate\Support\Facades\Cache::has($cacheKey)) {
             $remaining = (int) (\Illuminate\Support\Facades\Cache::get($cacheKey) - time());
@@ -296,7 +296,7 @@ class AuthController extends Controller
             }
         }
 
-        \Illuminate\Support\Facades\Cache::put($cacheKey, time() + 30, 30);
+        \Illuminate\Support\Facades\Cache::put($cacheKey, time() + 60, 60);
 
         $otp = sprintf('%06d', mt_rand(100000, 999999));
         $user->update([
@@ -321,14 +321,14 @@ class AuthController extends Controller
             ]);
             return response()->json([
                 'success'          => false,
-                'message'          => 'Gagal mengirim OTP: ' . $e->getMessage(),
+                'message'          => 'Gagal mengirim kode verifikasi OTP baru. Silakan coba lagi nanti.',
             ], 500);
         }
 
         return response()->json([
             'success'          => true,
             'message'          => 'Kode OTP baru telah dikirimkan ke ' . $user->email,
-            'cooldown_seconds' => 30,
+            'cooldown_seconds' => 60,
             'otp_preview'      => app()->environment('local') ? $otp : null,
         ]);
     }

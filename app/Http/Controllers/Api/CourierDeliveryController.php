@@ -182,6 +182,11 @@ class CourierDeliveryController extends Controller
             return response()->json(['success' => false, 'message' => 'Tugas pengantaran tidak ditemukan'], 404);
         }
 
+        $request->validate([
+            'proof_image'        => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+            'proof_image_base64' => ['nullable', 'string'],
+        ]);
+
         $proofImagePath = null;
         if ($request->hasFile('proof_image')) {
             $proofImagePath = $request->file('proof_image')->store('deliveries/proofs', 'public');

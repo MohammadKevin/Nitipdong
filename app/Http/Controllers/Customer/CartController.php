@@ -220,7 +220,7 @@ class CartController extends Controller
             'name'            => $c->product?->name ?? 'Produk',
             'price'           => $c->product?->final_price ?? 0,
             'formatted_price' => 'Rp ' . number_format($c->product?->final_price ?? 0, 0, ',', '.'),
-            'image_url'       => $c->product?->image_url ?? asset('img/saksershop-logo.png'),
+            'image_url'       => $c->product?->image_url ?? asset('img/nitipdong-logo.png'),
             'product_url'     => $c->product ? route('product.show', $c->product) : '#',
             'quantity'        => $c->quantity,
             'stock'           => $c->product?->stock ?? 99,

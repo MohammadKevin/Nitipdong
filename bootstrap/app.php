@@ -29,8 +29,11 @@ return Application::configure(basePath: dirname(__DIR__))
             '/api/payment/notification',
             '/api/midtrans/notification',
             '/api/midtrans/callback',
-            'logout',
-            '/logout',
+            '/api/v1/payment/notification',
+            '/api/v1/midtrans/notification',
+            'api/payment/notification',
+            'api/midtrans/notification',
+            'api/midtrans/callback',
         ]);
 
         $middleware->append(CheckWebMaintenanceMode::class);
