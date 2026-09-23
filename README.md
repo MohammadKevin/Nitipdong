@@ -12,19 +12,19 @@
 
 ---
 
-## 📌 Overview
+## Overview
 A cross-region shopping assistance (jastip) web platform built with Laravel Blade and Android APK build integration to handle item requests and delivery tracking.
 
 ---
 
-## ✨ Key Features
+## Key Features
 - Customer shopping request posting with budget estimations
 - Traveler trip registration and accepted item list
 - Automated Android APK build workflow via GitHub Actions
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 - **Framework**: Laravel (PHP)
 - **View**: Blade Templating, Tailwind CSS
 - **Database**: MySQL
@@ -32,7 +32,7 @@ A cross-region shopping assistance (jastip) web platform built with Laravel Blad
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 ```text
 Nitipdong/
 ├── app/                # Laravel Controllers & Models
@@ -43,7 +43,7 @@ Nitipdong/
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 Make sure you have the required runtimes and tools installed on your machine:
@@ -62,7 +62,7 @@ php artisan serve
 
 ---
 
-## 👤 Author
+## Author
 **Mohammad Kevin Arif Rudianto**
 - **GitHub:** [@MohammadKevin](https://github.com/MohammadKevin)
 - **Portfolio:** [portfolio-mohammadkevin.vercel.app](https://portfolio-mohammadkevin.vercel.app)
@@ -71,9 +71,9 @@ php artisan serve
 
 ---
 
-## 📄 License
+## License
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 <div align="center">
-⭐️ If you found this repository useful, please consider giving it a star!
+If you found this repository useful, please consider giving it a star!
 </div>
