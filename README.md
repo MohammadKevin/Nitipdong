@@ -18,9 +18,9 @@ A cross-region shopping assistance (jastip) web platform built with Laravel Blad
 ---
 
 ## ✨ Key Features
-- ⚡ **Customer shopping request posting with budget estimations**: Customer shopping request posting with budget estimations
-- ⚡ **Traveler trip registration and accepted item list**: Traveler trip registration and accepted item list
-- ⚡ **Automated Android APK build workflow via GitHub Actions**: Automated Android APK build workflow via GitHub Actions
+- Customer shopping request posting with budget estimations
+- Traveler trip registration and accepted item list
+- Automated Android APK build workflow via GitHub Actions
 
 ---
 
